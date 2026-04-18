@@ -12,7 +12,6 @@ export default function Rankings() {
   const navigate = useNavigate();
 
   const isOverall = category === 'overall';
-  const catObj = CATEGORIES.find(c => c.id === category) || CATEGORIES[0];
 
   const sorted = [...PLAYERS].sort((a, b) => b.points - a.points);
 
