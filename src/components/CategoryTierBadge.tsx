@@ -1,12 +1,12 @@
 import type { TierLevel } from '../data/players';
 import { CATEGORIES } from '../data/players';
 
-const TIER_STYLES: Record<string, { border: string; glow: string; text: string }> = {
-  T1: { border: '#1565c0', glow: 'rgba(21,101,192,0.4)',  text: '#5ba4f5' },
-  T2: { border: '#2e7d32', glow: 'rgba(46,125,50,0.4)',   text: '#4cc768' },
-  T3: { border: '#6a1b9a', glow: 'rgba(106,27,154,0.4)',  text: '#c07ef5' },
-  T4: { border: '#b8860b', glow: 'rgba(184,134,11,0.35)', text: '#d4a017' },
-  T5: { border: '#424242', glow: 'rgba(66,66,66,0.2)',    text: '#888' },
+const TIER_STYLES: Record<string, { border: string; glow: string; text: string; bg: string }> = {
+  T1: { border: '#c8a020', glow: 'rgba(212,160,23,0.55)',   text: '#f0c040', bg: 'rgba(212,160,23,0.12)' },
+  T2: { border: '#5ba4f5', glow: 'rgba(91,164,245,0.45)',   text: '#7ab8ff', bg: 'rgba(91,164,245,0.10)' },
+  T3: { border: '#4cc768', glow: 'rgba(76,199,104,0.40)',   text: '#5ddb78', bg: 'rgba(76,199,104,0.09)' },
+  T4: { border: '#c07ef5', glow: 'rgba(192,126,245,0.35)',  text: '#cf97f8', bg: 'rgba(192,126,245,0.09)' },
+  T5: { border: '#555',    glow: 'rgba(120,120,120,0.15)',  text: '#888',    bg: 'rgba(80,80,80,0.08)' },
 };
 
 interface CategoryTierBadgeProps {
@@ -22,9 +22,9 @@ export default function CategoryTierBadge({ categoryId, tier }: CategoryTierBadg
     return (
       <div className="cat-tier-badge cat-tier-badge-empty">
         <div className="cat-tier-circle cat-tier-circle-empty">
-          {icon && <img src={icon} alt={categoryId} width={16} height={16} />}
+          {icon && <img src={icon} alt={categoryId} width={16} height={16} style={{ opacity: 0.3 }} />}
         </div>
-        <span className="cat-tier-text" style={{ color: '#444' }}>-</span>
+        <span className="cat-tier-text" style={{ color: '#3a3a4a' }}>-</span>
       </div>
     );
   }
@@ -35,7 +35,11 @@ export default function CategoryTierBadge({ categoryId, tier }: CategoryTierBadg
     <div className="cat-tier-badge">
       <div
         className="cat-tier-circle"
-        style={{ borderColor: s.border, boxShadow: `0 0 6px ${s.glow}` }}
+        style={{
+          borderColor: s.border,
+          boxShadow: `0 0 7px ${s.glow}, inset 0 0 6px ${s.bg}`,
+          background: s.bg,
+        }}
       >
         {icon && <img src={icon} alt={categoryId} width={16} height={16} />}
       </div>
