@@ -214,7 +214,7 @@ export default function Rankings() {
                         </span>
                       </div>
                       <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65 }}>
-                        {cfg.subText} · {players.length} {players.length === 1 ? 'player' : 'players'}
+                        {players.length} {players.length === 1 ? 'player' : 'players'}
                       </span>
                     </div>
                     <div className="tier-column-players">
