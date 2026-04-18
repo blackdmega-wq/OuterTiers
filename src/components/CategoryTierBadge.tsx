@@ -1,28 +1,12 @@
 import type { TierLevel } from '../data/players';
 import { CATEGORIES } from '../data/players';
 
-const TIER_BORDER: Record<string, string> = {
-  HT1: '#1565c0',
-  HT2: '#2e7d32',
-  HT3: '#6a1b9a',
-  HT4: '#e65100',
-  LT1: '#283593',
-  LT2: '#388e3c',
-  LT3: '#00695c',
-  LT4: '#b71c1c',
-  LT5: '#424242',
-};
-
-const TIER_GLOW: Record<string, string> = {
-  HT1: 'rgba(21,101,192,0.35)',
-  HT2: 'rgba(46,125,50,0.35)',
-  HT3: 'rgba(106,27,154,0.35)',
-  HT4: 'rgba(230,81,0,0.35)',
-  LT1: 'rgba(40,53,147,0.35)',
-  LT2: 'rgba(56,142,60,0.35)',
-  LT3: 'rgba(0,105,92,0.35)',
-  LT4: 'rgba(183,28,28,0.35)',
-  LT5: 'rgba(66,66,66,0.20)',
+const TIER_STYLES: Record<string, { border: string; glow: string; text: string }> = {
+  T1: { border: '#1565c0', glow: 'rgba(21,101,192,0.4)',  text: '#5ba4f5' },
+  T2: { border: '#2e7d32', glow: 'rgba(46,125,50,0.4)',   text: '#4cc768' },
+  T3: { border: '#6a1b9a', glow: 'rgba(106,27,154,0.4)',  text: '#c07ef5' },
+  T4: { border: '#b8860b', glow: 'rgba(184,134,11,0.35)', text: '#d4a017' },
+  T5: { border: '#424242', glow: 'rgba(66,66,66,0.2)',    text: '#888' },
 };
 
 interface CategoryTierBadgeProps {
@@ -40,23 +24,22 @@ export default function CategoryTierBadge({ categoryId, tier }: CategoryTierBadg
         <div className="cat-tier-circle cat-tier-circle-empty">
           {icon && <img src={icon} alt={categoryId} width={16} height={16} />}
         </div>
-        <span className="cat-tier-text">-</span>
+        <span className="cat-tier-text" style={{ color: '#444' }}>-</span>
       </div>
     );
   }
 
-  const border = TIER_BORDER[tier] ?? '#424242';
-  const glow = TIER_GLOW[tier] ?? 'transparent';
+  const s = TIER_STYLES[tier] ?? TIER_STYLES['T5'];
 
   return (
     <div className="cat-tier-badge">
       <div
         className="cat-tier-circle"
-        style={{ borderColor: border, boxShadow: `0 0 6px ${glow}` }}
+        style={{ borderColor: s.border, boxShadow: `0 0 6px ${s.glow}` }}
       >
         {icon && <img src={icon} alt={categoryId} width={16} height={16} />}
       </div>
-      <span className="cat-tier-text" style={{ color: border }}>{tier}</span>
+      <span className="cat-tier-text" style={{ color: s.text }}>{tier}</span>
     </div>
   );
 }

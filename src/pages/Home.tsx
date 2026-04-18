@@ -4,7 +4,7 @@ import { PLAYERS, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 
 export default function Home() {
-  const top3 = [...PLAYERS].sort((a, b) => b.points - a.points).slice(0, 3);
+  const top100 = [...PLAYERS].sort((a, b) => b.points - a.points).slice(0, 100);
 
   return (
     <div className="home-page">
@@ -30,20 +30,59 @@ export default function Home() {
         <Link to="/rankings/overall" className="hero-btn">View Rankings</Link>
       </div>
 
-      <div className="home-top3">
-        <h2 className="section-title">Top Players</h2>
-        <div className="top3-grid">
-          {top3.map((player, i) => (
-            <Link key={player.id} to={`/player/${player.username}`} className={`top3-card rank-card-${i + 1}`}>
-              <div className="top3-rank">#{i + 1}</div>
-              <PlayerAvatar username={player.username} size={64} className="top3-avatar" />
-              <div className="top3-name">{player.username}</div>
-              <div className="top3-title">{getTitle(player.points)}</div>
-              <div className="top3-points">{player.points} pts</div>
-              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-            </Link>
-          ))}
-        </div>
+      <div className="home-top100">
+        <h2 className="section-title">Top 100 Players</h2>
+        {top100.length === 0 ? (
+          <div className="empty-state">
+            <p>No players ranked yet. Rankings will appear here once players are added.</p>
+          </div>
+        ) : (
+          <div className="top100-table-wrapper">
+            <table className="rankings-table">
+              <thead>
+                <tr>
+                  <th className="col-rank">#</th>
+                  <th className="col-player">PLAYER</th>
+                  <th className="col-region">REGION</th>
+                  <th className="col-points">POINTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top100.map((player, i) => {
+                  const rank = i + 1;
+                  const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
+                  return (
+                    <tr key={player.id} className={`player-row ${rankClass ? 'player-row-top' : ''}`}>
+                      <td className="col-rank">
+                        <span className={`rank-number ${rankClass}`}>{rank}.</span>
+                      </td>
+                      <td className="col-player">
+                        <Link to={`/player/${player.username}`} className="player-cell">
+                          <div className={`player-avatar-wrapper ${rankClass}`}>
+                            <PlayerAvatar username={player.username} size={36} />
+                          </div>
+                          <div className="player-info">
+                            <span className="player-name">{player.username}</span>
+                            <span className="player-title">
+                              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.7 }} />
+                              {getTitle(player.points)}
+                            </span>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="col-region">
+                        <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                      </td>
+                      <td className="col-points">
+                        <span className="points-value">{player.points}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
