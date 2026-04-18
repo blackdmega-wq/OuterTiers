@@ -25,10 +25,12 @@ export interface Player {
 
 export function getTitle(points: number): string {
   if (points >= 400) return 'Combat Grandmaster';
-  if (points >= 280) return 'Combat Master';
-  if (points >= 180) return 'Combat Ace';
-  if (points >= 100) return 'Combat Expert';
-  return 'Combat Rookie';
+  if (points >= 250) return 'Combat Master';
+  if (points >= 100) return 'Combat Ace';
+  if (points >= 50)  return 'Combat Specialist';
+  if (points >= 20)  return 'Combat Cadet';
+  if (points >= 10)  return 'Combat Novice';
+  return 'Rookie';
 }
 
 export const CATEGORIES = [
