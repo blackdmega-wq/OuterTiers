@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Trophy, MessageCircle, BookOpen, Search, ChevronDown, X } from 'lucide-react';
+import { Search, ChevronDown, X } from 'lucide-react';
 
 export default function Navbar() {
   const [discordsOpen, setDiscordsOpen] = useState(false);
@@ -34,16 +34,16 @@ export default function Navbar() {
           </Link>
           <div className="navbar-links">
             <Link to="/" className="nav-link">
-              <Home size={16} />
+              <img src="/nav_icons/home-muted.svg" alt="Home" width={16} height={16} className="nav-icon" />
               <span>Home</span>
             </Link>
             <Link to="/rankings/overall" className="nav-link">
-              <Trophy size={16} />
+              <img src="/nav_icons/rankings.svg" alt="Rankings" width={16} height={16} className="nav-icon" />
               <span>Rankings</span>
             </Link>
             <div className="nav-dropdown" ref={dropdownRef}>
               <button className="nav-link nav-dropdown-trigger" onClick={() => setDiscordsOpen(!discordsOpen)}>
-                <MessageCircle size={16} />
+                <img src="/nav_icons/discord.svg" alt="Discords" width={16} height={16} className="nav-icon" />
                 <span>Discords</span>
                 <ChevronDown size={14} className={discordsOpen ? 'rotated' : ''} />
               </button>
@@ -56,13 +56,13 @@ export default function Navbar() {
               )}
             </div>
             <Link to="/api-docs" className="nav-link">
-              <BookOpen size={16} />
+              <img src="/nav_icons/file_code.svg" alt="API Docs" width={16} height={16} className="nav-icon" />
               <span>API Docs</span>
             </Link>
           </div>
         </div>
         <div className="navbar-search">
-          <Search size={15} className="search-icon" />
+          <Search size={14} className="search-icon" />
           <input
             type="text"
             placeholder="Search player..."
@@ -73,7 +73,7 @@ export default function Navbar() {
           />
           {searchValue && (
             <button className="search-clear" onClick={() => setSearchValue('')}>
-              <X size={13} />
+              <X size={12} />
             </button>
           )}
           <span className="search-shortcut">/</span>

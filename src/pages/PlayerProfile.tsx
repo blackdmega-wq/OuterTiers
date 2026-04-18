@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { PLAYERS, CATEGORIES, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
-import TierBadge from '../components/TierBadge';
+import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
 import { ArrowLeft } from 'lucide-react';
 
@@ -15,7 +15,7 @@ export default function PlayerProfile() {
         <h1>PAGE NOT FOUND</h1>
         <p>The page you were looking for does not exist.</p>
         <Link to="/" className="go-home-btn">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           Go Home
         </Link>
       </div>
@@ -23,12 +23,13 @@ export default function PlayerProfile() {
   }
 
   const rank = [...PLAYERS].sort((a, b) => b.points - a.points).findIndex(p => p.id === player.id) + 1;
+  const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
 
   return (
     <div className="profile-page">
       <div className="profile-container">
         <Link to="/rankings/overall" className="back-link">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={14} />
           Back to Rankings
         </Link>
 
@@ -39,7 +40,7 @@ export default function PlayerProfile() {
           <div className="profile-header-info">
             <h1 className="profile-username">{player.username}</h1>
             <div className="profile-title">
-              <span className="title-diamond">◆</span>
+              <img src="/tier_icons/overall.svg" alt="" width={14} height={14} style={{ opacity: 0.7 }} />
               {getTitle(player.points)}
             </div>
             <div className="profile-meta">
@@ -53,13 +54,16 @@ export default function PlayerProfile() {
         <div className="profile-tiers-section">
           <h2 className="profile-section-title">Tier Rankings</h2>
           <div className="profile-tiers-grid">
-            {CATEGORIES.filter(c => c.id !== 'overall').map(cat => (
+            {modeCats.map(cat => (
               <div key={cat.id} className="profile-tier-card">
                 <div className="profile-tier-mode">
-                  <span>{cat.emoji}</span>
+                  <img src={cat.icon} alt={cat.label} width={24} height={24} />
                   <span>{cat.label}</span>
                 </div>
-                <TierBadge tier={player.tiers[cat.id as keyof PlayerTiers]} size="md" />
+                <CategoryTierBadge
+                  categoryId={cat.id}
+                  tier={player.tiers[cat.id as keyof PlayerTiers]}
+                />
               </div>
             ))}
           </div>

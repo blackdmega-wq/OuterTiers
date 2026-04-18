@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Trophy, Users, Globe } from 'lucide-react';
+import { Users, Globe } from 'lucide-react';
 import { PLAYERS, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
-import TierBadge from '../components/TierBadge';
 
 export default function Home() {
   const top3 = [...PLAYERS].sort((a, b) => b.points - a.points).slice(0, 3);
@@ -16,16 +15,16 @@ export default function Home() {
         <p className="hero-subtitle">The definitive Minecraft PvP ranking platform</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <Users size={20} />
+            <Users size={16} />
             <span><strong>{PLAYERS.length}</strong> Ranked Players</span>
           </div>
           <div className="hero-stat">
-            <Globe size={20} />
+            <Globe size={16} />
             <span><strong>3</strong> Regions</span>
           </div>
           <div className="hero-stat">
-            <Trophy size={20} />
-            <span><strong>8</strong> Game Modes</span>
+            <img src="/tier_icons/overall.svg" alt="" width={16} height={16} />
+            <span><strong>9</strong> Game Modes</span>
           </div>
         </div>
         <Link to="/rankings/overall" className="hero-btn">View Rankings</Link>
@@ -41,12 +40,7 @@ export default function Home() {
               <div className="top3-name">{player.username}</div>
               <div className="top3-title">{getTitle(player.points)}</div>
               <div className="top3-points">{player.points} pts</div>
-              <div className="top3-region">
-                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-              </div>
-              <div className="top3-tier">
-                <TierBadge tier={player.tiers.overall} size="md" />
-              </div>
+              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
             </Link>
           ))}
         </div>
