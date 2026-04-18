@@ -7,12 +7,86 @@ import PlayerAvatar from '../components/PlayerAvatar';
 import InfoModal from '../components/InfoModal';
 import { Info } from 'lucide-react';
 
-const TIER_HEADER_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  T1: { bg: 'rgba(180,130,0,0.15)',   border: '#b8860b', text: '#f0c040' },
-  T2: { bg: 'rgba(100,100,100,0.15)', border: '#6e6e6e', text: '#c0c0c0' },
-  T3: { bg: 'rgba(120,60,20,0.15)',   border: '#7c4a2a', text: '#cd7f32' },
-  T4: { bg: 'rgba(50,50,50,0.12)',    border: '#444',    text: '#aaa' },
-  T5: { bg: 'rgba(30,30,30,0.10)',    border: '#333',    text: '#888' },
+function TrophyIcon({ color, shadowColor }: { color: string; shadowColor: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ filter: `drop-shadow(0 1px 3px ${shadowColor})` }}>
+      <path d="M6 3h12v7a6 6 0 01-12 0V3z" fill={color} opacity="0.9"/>
+      <path d="M3 5h3v5a6 6 0 01-.5 2.4A4 4 0 013 9V5z" fill={color} opacity="0.7"/>
+      <path d="M21 5h-3v5a6 6 0 00.5 2.4A4 4 0 0021 9V5z" fill={color} opacity="0.7"/>
+      <path d="M9 16.5A6 6 0 0012 17a6 6 0 003-.5V18H9v-1.5z" fill={color} opacity="0.85"/>
+      <rect x="9" y="18" width="6" height="2" rx="0.5" fill={color} opacity="0.9"/>
+      <rect x="7" y="20" width="10" height="1.5" rx="0.5" fill={color} opacity="0.95"/>
+      <path d="M8 6h8v4a4 4 0 01-8 0V6z" fill="white" opacity="0.12"/>
+    </svg>
+  );
+}
+
+const TIER_CONFIG: Record<string, {
+  label: string;
+  gradient: string;
+  border: string;
+  glow: string;
+  textColor: string;
+  subText: string;
+  trophyColor: string;
+  trophyShadow: string;
+  hasTrophy: boolean;
+}> = {
+  T1: {
+    label: 'Tier 1',
+    gradient: 'linear-gradient(135deg, rgba(212,160,23,0.22) 0%, rgba(255,200,40,0.10) 100%)',
+    border: 'rgba(212,160,23,0.7)',
+    glow: 'rgba(212,160,23,0.25)',
+    textColor: '#f0c040',
+    subText: 'Elite',
+    trophyColor: '#f0c040',
+    trophyShadow: 'rgba(240,192,64,0.6)',
+    hasTrophy: true,
+  },
+  T2: {
+    label: 'Tier 2',
+    gradient: 'linear-gradient(135deg, rgba(150,160,175,0.18) 0%, rgba(180,190,200,0.08) 100%)',
+    border: 'rgba(170,180,195,0.55)',
+    glow: 'rgba(160,170,185,0.18)',
+    textColor: '#c8d0da',
+    subText: 'High',
+    trophyColor: '#b8c8d8',
+    trophyShadow: 'rgba(160,180,200,0.5)',
+    hasTrophy: true,
+  },
+  T3: {
+    label: 'Tier 3',
+    gradient: 'linear-gradient(135deg, rgba(160,90,30,0.20) 0%, rgba(200,120,40,0.09) 100%)',
+    border: 'rgba(185,110,45,0.55)',
+    glow: 'rgba(175,100,35,0.18)',
+    textColor: '#d4884a',
+    subText: 'Mid-High',
+    trophyColor: '#c87840',
+    trophyShadow: 'rgba(180,100,40,0.5)',
+    hasTrophy: true,
+  },
+  T4: {
+    label: 'Tier 4',
+    gradient: 'linear-gradient(135deg, rgba(40,50,80,0.30) 0%, rgba(30,35,55,0.15) 100%)',
+    border: 'rgba(60,75,110,0.45)',
+    glow: 'rgba(50,65,100,0.10)',
+    textColor: '#8899bb',
+    subText: 'Mid',
+    trophyColor: '',
+    trophyShadow: '',
+    hasTrophy: false,
+  },
+  T5: {
+    label: 'Tier 5',
+    gradient: 'linear-gradient(135deg, rgba(28,30,42,0.35) 0%, rgba(20,22,32,0.15) 100%)',
+    border: 'rgba(50,52,68,0.40)',
+    glow: 'rgba(40,42,58,0.08)',
+    textColor: '#666880',
+    subText: 'Entry',
+    trophyColor: '',
+    trophyShadow: '',
+    hasTrophy: false,
+  },
 };
 
 export default function Rankings() {
@@ -31,7 +105,6 @@ export default function Rankings() {
       {infoOpen && <InfoModal onClose={() => setInfoOpen(false)} />}
 
       <div className="rankings-container">
-        {/* Category Tabs */}
         <div className="category-tabs">
           {CATEGORIES.map(cat => (
             <button
@@ -45,7 +118,6 @@ export default function Rankings() {
           ))}
         </div>
 
-        {/* Info bar */}
         <div className="rankings-info-bar">
           <button className="info-btn" onClick={() => setInfoOpen(true)}>
             <Info size={13} />
@@ -53,7 +125,6 @@ export default function Rankings() {
           </button>
         </div>
 
-        {/* Overall Rankings Table */}
         {isOverall ? (
           <div className="rankings-table-wrapper">
             <table className="rankings-table">
@@ -89,7 +160,7 @@ export default function Rankings() {
                               <span className="player-title">
                                 <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.8 }} />
                                 {getTitle(player.points)}
-                                <span className="player-points">({player.points} points)</span>
+                                <span className="player-points">({player.points} pts)</span>
                               </span>
                             </div>
                           </Link>
@@ -118,33 +189,47 @@ export default function Rankings() {
             </table>
           </div>
         ) : (
-          /* Category Tier Columns — always show 5 columns */
           <div className="tier-columns-wrapper">
             <div className="tier-columns">
-              {(['T1','T2','T3','T4','T5'] as const).map((tier, i) => {
+              {(['T1','T2','T3','T4','T5'] as const).map((tier) => {
                 const col = tierColumns.find(c => c.tier === tier);
                 const players = col?.players ?? [];
-                const colors = TIER_HEADER_COLORS[tier];
+                const cfg = TIER_CONFIG[tier];
                 return (
-                  <div key={tier} className="tier-column">
+                  <div key={tier} className="tier-column" style={{ '--tier-glow': cfg.glow } as React.CSSProperties}>
                     <div
                       className="tier-column-header"
-                      style={{ background: colors.bg, borderBottom: `1px solid ${colors.border}` }}
+                      style={{
+                        background: cfg.gradient,
+                        borderBottom: `1px solid ${cfg.border}`,
+                        boxShadow: `0 2px 16px ${cfg.glow}`,
+                      }}
                     >
-                      <span style={{ color: colors.text }}>🏆</span>
-                      <span style={{ color: colors.text }}>Tier {i + 1}</span>
+                      <div className="tier-header-top">
+                        {cfg.hasTrophy && (
+                          <TrophyIcon color={cfg.trophyColor} shadowColor={cfg.trophyShadow} />
+                        )}
+                        <span className="tier-header-label" style={{ color: cfg.textColor }}>
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65 }}>
+                        {cfg.subText} · {players.length} {players.length === 1 ? 'player' : 'players'}
+                      </span>
                     </div>
                     <div className="tier-column-players">
                       {players.length === 0 ? (
-                        <div className="tier-column-empty">—</div>
+                        <div className="tier-column-empty">
+                          <span>No players</span>
+                        </div>
                       ) : (
-                        players.map(player => (
+                        players.map((player, i) => (
                           <Link key={player.id} to={`/player/${player.username}`} className="tier-player-row">
-                            <PlayerAvatar username={player.username} size={20} />
+                            <span className="tier-player-index">{i + 1}</span>
+                            <PlayerAvatar username={player.username} size={22} />
                             <span className="tier-player-name">{player.username}</span>
-                            <svg className="tier-player-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                              <polyline points="18 15 12 9 6 15" />
-                              <polyline points="18 21 12 15 6 21" />
+                            <svg className="tier-player-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <polyline points="9 18 15 12 9 6" />
                             </svg>
                           </Link>
                         ))
