@@ -12,7 +12,9 @@ export default function Home() {
         <h1 className="hero-title">
           <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
         </h1>
-        <p className="hero-subtitle">The definitive Minecraft PvP ranking platform</p>
+        <p className="hero-tagline">Minecraft PvP Rankings</p>
+        <div className="hero-divider" />
+        <p className="hero-subtitle">The definitive competitive ranking platform</p>
         <div className="hero-stats">
           <div className="hero-stat">
             <Users size={16} />
@@ -24,7 +26,7 @@ export default function Home() {
           </div>
           <div className="hero-stat">
             <img src="/tier_icons/overall.svg" alt="" width={16} height={16} />
-            <span><strong>9</strong> Game Modes</span>
+            <span><strong>10</strong> Game Modes</span>
           </div>
         </div>
         <Link to="/rankings/overall" className="hero-btn">View Rankings</Link>
