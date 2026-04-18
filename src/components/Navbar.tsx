@@ -49,9 +49,14 @@ export default function Navbar() {
               </button>
               {discordsOpen && (
                 <div className="dropdown-menu">
-                  <a href="#" className="dropdown-item">OuterTiers Official</a>
-                  <a href="#" className="dropdown-item">NA Community</a>
-                  <a href="#" className="dropdown-item">EU Community</a>
+                  <a href="https://discord.gg/6eAaPqg4up" target="_blank" rel="noopener noreferrer" className="dropdown-item">
+                    <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
+                    OuterTiers Official
+                  </a>
+                  <a href="https://discord.gg/teAFSB5EvF" target="_blank" rel="noopener noreferrer" className="dropdown-item">
+                    <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
+                    OuterTiers Community
+                  </a>
                 </div>
               )}
             </div>
