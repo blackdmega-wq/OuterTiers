@@ -1,8 +1,64 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PLAYERS, getTitle, CATEGORIES } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 import DiscordJoinModal from '../components/DiscordJoinModal';
+
+const GITHUB_REPO = 'blackdmega-wq/OuterTiers';
+const PLAYERS_FILE = 'src/data/players.ts';
+
+function useLivePlayerCount(fallback: number) {
+  const [count, setCount] = useState<number>(fallback);
+  const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${PLAYERS_FILE}`, {
+      headers: { Accept: 'application/vnd.github.v3+json' },
+      cache: 'no-store',
+    })
+      .then(r => r.json())
+      .then((data: { content?: string }) => {
+        if (cancelled || !data.content) return;
+        const decoded = atob(data.content.replace(/\n/g, ''));
+        const match = decoded.match(/export const PLAYERS[^=]+=\s*\[([^]*)\]/);
+        if (!match) return;
+        const body = match[1];
+        const entries = body.match(/\{[^{}]*username:/g);
+        const n = entries ? entries.length : 0;
+        setCount(n);
+        setLive(true);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  return { count, live };
+}
+
+function useCountUp(target: number, duration = 900) {
+  const [display, setDisplay] = useState(0);
+  const prev = useRef(0);
+
+  useEffect(() => {
+    const start = prev.current;
+    const diff = target - start;
+    if (diff === 0) return;
+    const startTime = performance.now();
+    let raf: number;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      const ease = 1 - Math.pow(1 - t, 3);
+      setDisplay(Math.round(start + diff * ease));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else prev.current = target;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return display;
+}
 
 const DISCORD_SVG = (size = 22) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -13,12 +69,15 @@ const DISCORD_SVG = (size = 22) => (
 const LIVE_TEST_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
 const HIGH_TIER_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
 
-function StatCard({ value, label, icon, wide }: { value: string | number; label: string; icon: React.ReactNode; wide?: boolean }) {
+function StatCard({ value, label, icon, wide, liveIndicator }: { value: string | number; label: string; icon: React.ReactNode; wide?: boolean; liveIndicator?: boolean }) {
   return (
     <div className={`stat-card ripple-card${wide ? ' stat-card-wide' : ''}`}>
       <div className="stat-card-icon">{icon}</div>
       <div className="stat-card-value">{value}</div>
-      <div className="stat-card-label">{label}</div>
+      <div className="stat-card-label">
+        {label}
+        {liveIndicator && <span className="stat-live-dot" title="Live from GitHub" />}
+      </div>
     </div>
   );
 }
@@ -60,6 +119,8 @@ function FeedItem({ username, category, tier, region }: { username: string; cate
 export default function Home() {
   const top100 = [...PLAYERS].sort((a, b) => b.points - a.points).slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
+  const { count: liveCount, live } = useLivePlayerCount(PLAYERS.length);
+  const displayCount = useCountUp(liveCount, 1100);
 
   return (
     <div className="home-page">
@@ -89,8 +150,9 @@ export default function Home() {
 
         <div className="hero-stats-row animate-fade-up" style={{ animationDelay: '0.35s' }}>
           <StatCard
-            value={PLAYERS.length}
+            value={displayCount}
             label="Ranked Players"
+            liveIndicator={live}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
