@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import SiteFooter from './components/SiteFooter';
+import ParticleBackground from './components/ParticleBackground';
+import GlobalGlow from './components/GlobalGlow';
 import Home from './pages/Home';
 import Rankings from './pages/Rankings';
 import PlayerProfile from './pages/PlayerProfile';
@@ -18,6 +21,8 @@ function NotFound() {
 export default function App() {
   return (
     <BrowserRouter>
+      <GlobalGlow />
+      <ParticleBackground />
       <div className="app">
         <Navbar />
         <main className="main-content">
@@ -30,6 +35,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <SiteFooter />
       </div>
     </BrowserRouter>
   );
