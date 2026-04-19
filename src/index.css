@@ -109,23 +109,38 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 /* ===== RIPPLE EFFECT ===== */
 @keyframes rippleAnim {
-  0%   { transform: scale(0); opacity: 1; }
-  80%  { opacity: 0.3; }
+  0%   { transform: scale(0); opacity: 0.9; }
+  60%  { opacity: 0.25; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes rippleGlowAnim {
+  0%   { transform: scale(0); opacity: 0.55; }
+  50%  { opacity: 0.18; }
   100% { transform: scale(1); opacity: 0; }
 }
 .ripple-effect {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.07) 55%, transparent 100%);
+  background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(91,164,245,0.12) 45%, transparent 100%);
   transform: scale(0);
-  animation: rippleAnim 0.65s cubic-bezier(0.4,0,0.2,1) forwards;
+  animation: rippleAnim 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   pointer-events: none;
   z-index: 9999;
 }
+.ripple-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(91,164,245,0.35) 0%, rgba(37,99,235,0.10) 55%, transparent 100%);
+  transform: scale(0);
+  animation: rippleGlowAnim 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+  z-index: 9998;
+  filter: blur(6px);
+}
 .tap-burst {
   position: fixed;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   left: 0;
   top: 0;
   transform: translate(-50%, -50%);
@@ -137,41 +152,43 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(91,164,245,0.44) 45%, transparent 72%);
-  box-shadow: 0 0 20px rgba(91,164,245,0.55), 0 0 34px rgba(240,192,64,0.22);
-  animation: tapBurstCore 0.58s cubic-bezier(0.22,1,0.36,1) forwards;
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(91,164,245,0.55) 40%, transparent 72%);
+  box-shadow: 0 0 24px rgba(91,164,245,0.7), 0 0 42px rgba(240,192,64,0.28);
+  animation: tapBurstCore 0.62s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 .tap-burst::after {
   content: '';
   position: absolute;
-  inset: -12px;
+  inset: -14px;
   border-radius: 50%;
-  border: 1px solid rgba(91,164,245,0.55);
-  animation: tapBurstRing 0.58s cubic-bezier(0.22,1,0.36,1) forwards;
+  border: 1.5px solid rgba(91,164,245,0.6);
+  animation: tapBurstRing 0.65s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 .tap-spark {
   position: absolute;
-  left: 7px;
-  top: 7px;
+  left: 9px;
+  top: 9px;
   width: 2px;
-  height: 11px;
+  height: var(--spark-len, 10px);
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,192,64,0));
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(91,164,245,0.6) 50%, rgba(240,192,64,0) 100%);
   transform: rotate(var(--angle)) translateY(-5px);
   transform-origin: 1px 1px;
-  animation: tapSpark 0.52s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation: tapSpark 0.58s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 @keyframes tapBurstCore {
-  0% { transform: scale(0.25); opacity: 0.98; }
-  100% { transform: scale(1.45); opacity: 0; }
+  0% { transform: scale(0.2); opacity: 1; }
+  70% { opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
 @keyframes tapBurstRing {
-  0% { transform: scale(0.25); opacity: 0.9; }
-  100% { transform: scale(2.8); opacity: 0; }
+  0% { transform: scale(0.2); opacity: 0.95; }
+  100% { transform: scale(3.2); opacity: 0; }
 }
 @keyframes tapSpark {
-  0% { opacity: 0.95; transform: rotate(var(--angle)) translateY(-4px) scaleY(0.3); }
-  100% { opacity: 0; transform: rotate(var(--angle)) translateY(-26px) scaleY(1); }
+  0%   { opacity: 1;   transform: rotate(var(--angle)) translateY(-4px) scaleY(0.25); }
+  40%  { opacity: 0.9; }
+  100% { opacity: 0;   transform: rotate(var(--angle)) translateY(calc(-1 * var(--spark-dist, 26px))) scaleY(1); }
 }
 
 /* ===== SCROLL REVEAL ===== */
@@ -1827,6 +1844,90 @@ a.player-cell,
 }
 
 /* ===== GAME MODES GRID (Home page) ===== */
+/* ===== T5 FULL WIDTH ===== */
+.tier-column-t5-full {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tier-column-t5-full:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 4px 24px var(--tier-glow, rgba(0,0,0,0.2));
+}
+.tier-t5-players-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 4px 0;
+}
+.tier-player-row-t5 {
+  width: calc(25%);
+  min-width: 165px;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+@media (max-width: 900px) {
+  .tier-player-row-t5 { width: calc(50%); }
+}
+@media (max-width: 500px) {
+  .tier-player-row-t5 { width: 100%; }
+}
+
+/* ===== GAME MODE FULL CARDS (bottom) ===== */
+.game-modes-full-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+.game-mode-full-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 10px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dim); font-size: 0.84rem; font-weight: 600;
+  position: relative; overflow: hidden;
+}
+.game-mode-full-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  opacity: 0; transition: opacity 0.22s;
+}
+.game-mode-full-card:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(91,164,245,0.22);
+  color: var(--text);
+}
+.game-mode-full-card:hover::before { opacity: 1; }
+.game-mode-full-icon {
+  width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;
+  filter: saturate(0.55) brightness(0.8);
+  transition: filter 0.2s;
+}
+.game-mode-full-card:hover .game-mode-full-icon { filter: saturate(1) brightness(1.05); }
+.game-mode-full-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.game-mode-full-label { font-weight: 700; font-size: 0.85rem; }
+.game-mode-full-sub { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+.game-mode-full-arrow {
+  color: var(--text-muted); opacity: 0.3; flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+.game-mode-full-card:hover .game-mode-full-arrow { opacity: 0.7; transform: translateX(3px); }
+
+/* ===== SECTION SUB TEXT ===== */
+.section-sub {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  max-width: 640px;
+  margin-top: 6px;
+}
+
 .game-modes-section {
   padding: 52px 0 48px;
   border-top: 1px solid var(--border);
