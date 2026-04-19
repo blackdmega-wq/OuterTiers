@@ -57,29 +57,28 @@ function ClickLayer() {
       document.body.appendChild(dot);
       setTimeout(() => dot.remove(), 650);
 
-      // ── 3 expanding rings with staggered timing ──
-      for (let i = 0; i < 3; i++) {
+      // ── 2 expanding rings with staggered timing ──
+      for (let i = 0; i < 2; i++) {
         const ring = document.createElement('span');
         ring.className = 'click-ring';
         ring.style.left = `${x}px`;
         ring.style.top = `${y}px`;
-        ring.style.animationDelay = `${i * 75}ms`;
-        // Alternate blue/gold
-        if (i === 1) ring.style.borderColor = 'rgba(240,192,64,0.8)';
+        ring.style.animationDelay = `${i * 80}ms`;
+        if (i === 1) ring.style.borderColor = 'rgba(240,192,64,0.75)';
         document.body.appendChild(ring);
-        setTimeout(() => ring.remove(), 700 + i * 75);
+        setTimeout(() => ring.remove(), 600 + i * 80);
       }
 
-      // ── 8 sparks ──
+      // ── 6 sparks ──
       const SPARK_COLORS = [
         'rgba(255,255,255,1)',
         'rgba(150,210,255,0.95)',
         'rgba(240,192,64,0.9)',
         'rgba(91,164,245,1)',
       ];
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
-        const dist = 32 + Math.random() * 28;
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+        const dist = 20 + Math.random() * 20;
         const spark = document.createElement('span');
         spark.className = 'click-spark';
         spark.style.left = `${x}px`;
@@ -87,9 +86,9 @@ function ClickLayer() {
         spark.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
         spark.style.setProperty('--sy', `${Math.sin(angle) * dist}px`);
         spark.style.background = SPARK_COLORS[i % SPARK_COLORS.length];
-        spark.style.animationDelay = `${Math.random() * 30}ms`;
+        spark.style.animationDelay = `${Math.random() * 25}ms`;
         document.body.appendChild(spark);
-        setTimeout(() => spark.remove(), 540);
+        setTimeout(() => spark.remove(), 480);
       }
     }
 
@@ -244,25 +243,50 @@ function TouchTrail() {
 }
 
 // ─────────────────────────────────────────────
-//  SCROLL REVEAL
+//  SCROLL REVEAL  — batched stagger, no jank
 // ─────────────────────────────────────────────
 function ScrollReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal');
+    const els = document.querySelectorAll<HTMLElement>('.reveal');
     if (!els.length) return;
+
+    let batchTimer = 0;
+    let batchQueue: HTMLElement[] = [];
+
+    const flushBatch = () => {
+      batchTimer = 0;
+      // Sort by vertical position so stagger goes top→bottom
+      batchQueue.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+      batchQueue.forEach((el, i) => {
+        const delay = i * 50;
+        el.style.transitionDelay = `${delay}ms`;
+        el.classList.add('revealed');
+        setTimeout(() => { el.style.transitionDelay = ''; }, 520 + delay);
+      });
+      batchQueue = [];
+    };
+
     const io = new IntersectionObserver(
       (entries) => {
+        let hadIntersecting = false;
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
+            batchQueue.push(entry.target as HTMLElement);
             io.unobserve(entry.target);
+            hadIntersecting = true;
           }
         });
+        if (hadIntersecting) {
+          clearTimeout(batchTimer);
+          // Flush after one frame so simultaneous entries all land in the same batch
+          batchTimer = window.setTimeout(flushBatch, 16);
+        }
       },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
     );
+
     els.forEach(el => io.observe(el));
-    return () => io.disconnect();
+    return () => { io.disconnect(); clearTimeout(batchTimer); };
   }, []);
   return null;
 }
