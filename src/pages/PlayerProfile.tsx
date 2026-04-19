@@ -12,9 +12,16 @@ export default function PlayerProfile() {
   if (!player) {
     return (
       <div className="not-found-page">
-        <h1>PAGE NOT FOUND</h1>
-        <p>The page you were looking for does not exist.</p>
-        <Link to="/" className="go-home-btn">
+        <div className="not-found-glow" />
+        <div className="not-found-icon">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h1>Player Not Found</h1>
+        <p>No player named <strong style={{ color: 'var(--text-dim)' }}>"{username}"</strong> exists in the system.</p>
+        <Link to="/" className="go-home-btn btn-press">
           <ArrowLeft size={15} />
           Go Home
         </Link>
@@ -22,20 +29,28 @@ export default function PlayerProfile() {
     );
   }
 
-  const rank = [...PLAYERS].sort((a, b) => b.points - a.points).findIndex(p => p.id === player.id) + 1;
+  const sorted = [...PLAYERS].sort((a, b) => b.points - a.points);
+  const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
+
+  const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
 
   return (
     <div className="profile-page">
-      <div className="profile-container">
-        <Link to="/rankings/overall" className="back-link">
-          <ArrowLeft size={14} />
-          Back to Rankings
-        </Link>
+      <div className="profile-page-hero">
+        <div className="profile-page-glow" />
+        <div className="profile-page-hero-inner">
+          <Link to="/rankings/overall" className="back-link btn-press">
+            <ArrowLeft size={14} />
+            Back to Rankings
+          </Link>
+        </div>
+      </div>
 
-        <div className="profile-header">
-          <div className="profile-avatar-large">
-            <PlayerAvatar username={player.username} size={96} />
+      <div className="profile-container">
+        <div className={`profile-header-card ${rankClass ? `profile-header-card--${rankClass}` : ''}`}>
+          <div className={`profile-avatar-ring ${rankClass}`}>
+            <PlayerAvatar username={player.username} size={88} />
           </div>
           <div className="profile-header-info">
             <h1 className="profile-username">{player.username}</h1>
@@ -45,19 +60,29 @@ export default function PlayerProfile() {
             </div>
             <div className="profile-meta">
               <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-              <span className="profile-points">{player.points} points</span>
-              <span className="profile-rank">Rank #{rank}</span>
+              <span className="profile-points-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                {player.points} pts
+              </span>
+              <span className="profile-rank-badge">
+                #{rank}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="profile-tiers-section">
-          <h2 className="profile-section-title">Tier Rankings</h2>
+          <div className="profile-section-header">
+            <div className="section-label">Performance</div>
+            <h2 className="section-heading" style={{ fontSize: '1.1rem' }}>Tier Rankings by Category</h2>
+          </div>
           <div className="profile-tiers-grid">
             {modeCats.map(cat => (
-              <div key={cat.id} className="profile-tier-card">
+              <div key={cat.id} className="profile-tier-card ripple-card">
                 <div className="profile-tier-mode">
-                  <img src={cat.icon} alt={cat.label} width={24} height={24} />
+                  <img src={cat.icon} alt={cat.label} width={26} height={26} />
                   <span>{cat.label}</span>
                 </div>
                 <CategoryTierBadge

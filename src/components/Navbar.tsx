@@ -55,7 +55,7 @@ export default function Navbar() {
                   </a>
                   <a href="https://discord.gg/teAFSB5EvF" target="_blank" rel="noopener noreferrer" className="dropdown-item">
                     <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
-                    OuterTiers Community
+                    Outer Community
                   </a>
                 </div>
               )}

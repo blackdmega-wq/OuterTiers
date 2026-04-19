@@ -4,8 +4,9 @@ export default function GlobalGlow() {
       <div className="gg-top-center" />
       <div className="gg-top-left" />
       <div className="gg-top-right" />
-      <div className="gg-bottom-left" />
-      <div className="gg-bottom-right" />
+      <div className="gg-mid-left" />
+      <div className="gg-mid-right" />
+      <div className="gg-bottom-center" />
     </div>
   );
 }
