@@ -115,6 +115,56 @@ function RippleLayer() {
   return null;
 }
 
+function ScrollTrail() {
+  useEffect(() => {
+    let lastY = 0;
+    let lastX = 0;
+    let ticking = false;
+
+    function spawnScrollTrail(x: number, y: number, dy: number) {
+      const trail = document.createElement('span');
+      trail.className = 'scroll-trail';
+      trail.style.left = `${x}px`;
+      trail.style.top = `${y}px`;
+      trail.style.setProperty('--scroll-dy', `${dy > 0 ? -1 : 1}`);
+      document.body.appendChild(trail);
+      setTimeout(() => trail.remove(), 600);
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const touch = e.touches[0];
+          if (!touch) { ticking = false; return; }
+          const dx = touch.clientX - lastX;
+          const dy = touch.clientY - lastY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 6) {
+            spawnScrollTrail(touch.clientX, touch.clientY, dy);
+            lastX = touch.clientX;
+            lastY = touch.clientY;
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (touch) { lastX = touch.clientX; lastY = touch.clientY; }
+    };
+
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
+  return null;
+}
+
 function ScrollReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
@@ -143,6 +193,7 @@ export default function App() {
       <GlobalGlow />
       <ParticleBackground />
       <RippleLayer />
+      <ScrollTrail />
       <div className="app">
         <Navbar />
         <main className="main-content">
