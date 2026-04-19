@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, ChevronDown, X } from 'lucide-react';
 import { CATEGORIES } from '../data/players';
@@ -8,18 +10,49 @@ export default function Navbar() {
   const [rankingsOpen, setRankingsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [rankingsMenuPos, setRankingsMenuPos] = useState({ top: 0, left: 0, minWidth: 210 });
+  const [discordMenuPos, setDiscordMenuPos] = useState({ top: 0, left: 0, minWidth: 210 });
   const navigate = useNavigate();
   const location = useLocation();
   const discordRef  = useRef<HTMLDivElement>(null);
   const rankingsRef = useRef<HTMLDivElement>(null);
+  const rankingsButtonRef = useRef<HTMLButtonElement>(null);
+  const discordButtonRef = useRef<HTMLButtonElement>(null);
+  const rankingsMenuRef = useRef<HTMLDivElement>(null);
+  const discordMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const updateMenuPosition = (
+    button: HTMLButtonElement | null,
+    setter: Dispatch<SetStateAction<{ top: number; left: number; minWidth: number }>>,
+    menuWidth = 210
+  ) => {
+    if (!button) return;
+    const rect = button.getBoundingClientRect();
+    const padding = 10;
+    const maxLeft = window.innerWidth - menuWidth - padding;
+    setter({
+      top: Math.round(rect.bottom + 8),
+      left: Math.round(Math.max(padding, Math.min(rect.left, maxLeft))),
+      minWidth: Math.max(menuWidth, Math.round(rect.width)),
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (discordRef.current && !discordRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        discordRef.current &&
+        !discordRef.current.contains(target) &&
+        !discordMenuRef.current?.contains(target)
+      ) {
         setDiscordsOpen(false);
       }
-      if (rankingsRef.current && !rankingsRef.current.contains(e.target as Node)) {
+      if (
+        rankingsRef.current &&
+        !rankingsRef.current.contains(target) &&
+        !rankingsMenuRef.current?.contains(target)
+      ) {
         setRankingsOpen(false);
       }
     }
@@ -32,6 +65,21 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      if (rankingsOpen) updateMenuPosition(rankingsButtonRef.current, setRankingsMenuPos, 260);
+      if (discordsOpen) updateMenuPosition(discordButtonRef.current, setDiscordMenuPos, 220);
+    };
+
+    sync();
+    window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('scroll', sync, { passive: true });
+    return () => {
+      window.removeEventListener('resize', sync);
+      window.removeEventListener('scroll', sync);
+    };
+  }, [rankingsOpen, discordsOpen]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -62,9 +110,41 @@ export default function Navbar() {
     return location.pathname.startsWith(path);
   };
 
+  const rankingsMenu = rankingsOpen ? createPortal(
+    <div ref={rankingsMenuRef} className="dropdown-menu dropdown-menu-wide animate-fade-down" style={rankingsMenuPos}>
+      {CATEGORIES.map(cat => (
+        <Link
+          key={cat.id}
+          to={`/rankings/${cat.id}`}
+          className={`dropdown-item${location.pathname === `/rankings/${cat.id}` ? ' dropdown-item-active' : ''}`}
+          onClick={() => setRankingsOpen(false)}
+        >
+          <img src={cat.icon} alt={cat.label} width={14} height={14} style={{ opacity: 0.75, flexShrink: 0 }} />
+          {cat.label}
+        </Link>
+      ))}
+    </div>,
+    document.body
+  ) : null;
+
+  const discordMenu = discordsOpen ? createPortal(
+    <div ref={discordMenuRef} className="dropdown-menu animate-fade-down" style={discordMenuPos}>
+      <a href="https://discord.gg/6eAaPqg4up" target="_blank" rel="noopener noreferrer" className="dropdown-item">
+        <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
+        OuterTiers Official
+      </a>
+      <a href="https://discord.gg/teAFSB5EvF" target="_blank" rel="noopener noreferrer" className="dropdown-item">
+        <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
+        Outer Community
+      </a>
+    </div>,
+    document.body
+  ) : null;
+
   return (
-    <nav className={`navbar${scrolled ? ' navbar-scrolled' : ''}`}>
-      <div className="navbar-inner">
+    <>
+      <nav className={`navbar${scrolled ? ' navbar-scrolled' : ''}`}>
+        <div className="navbar-inner">
 
         <div className="navbar-left">
           <Link to="/" className="navbar-logo">
@@ -79,6 +159,7 @@ export default function Navbar() {
             {/* Rankings dropdown */}
             <div className="nav-dropdown" ref={rankingsRef}>
               <button
+                ref={rankingsButtonRef}
                 className={`nav-link nav-dropdown-trigger${isActive('/rankings') || rankingsOpen ? ' nav-link-active' : ''}`}
                 onClick={() => { setRankingsOpen(o => !o); setDiscordsOpen(false); }}
               >
@@ -86,26 +167,12 @@ export default function Navbar() {
                 <span>Rankings</span>
                 <ChevronDown size={14} className={rankingsOpen ? 'rotated' : ''} style={{ transition: 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)', flexShrink: 0 }} />
               </button>
-              {rankingsOpen && (
-                <div className="dropdown-menu dropdown-menu-wide animate-fade-down">
-                  {CATEGORIES.map(cat => (
-                    <Link
-                      key={cat.id}
-                      to={`/rankings/${cat.id}`}
-                      className={`dropdown-item${location.pathname === `/rankings/${cat.id}` ? ' dropdown-item-active' : ''}`}
-                      onClick={() => setRankingsOpen(false)}
-                    >
-                      <img src={cat.icon} alt={cat.label} width={14} height={14} style={{ opacity: 0.75, flexShrink: 0 }} />
-                      {cat.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Discords dropdown */}
             <div className="nav-dropdown" ref={discordRef}>
               <button
+                ref={discordButtonRef}
                 className={`nav-link nav-dropdown-trigger${discordsOpen ? ' nav-link-active' : ''}`}
                 onClick={() => { setDiscordsOpen(o => !o); setRankingsOpen(false); }}
               >
@@ -113,18 +180,6 @@ export default function Navbar() {
                 <span>Discords</span>
                 <ChevronDown size={14} className={discordsOpen ? 'rotated' : ''} style={{ transition: 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)', flexShrink: 0 }} />
               </button>
-              {discordsOpen && (
-                <div className="dropdown-menu animate-fade-down">
-                  <a href="https://discord.gg/6eAaPqg4up" target="_blank" rel="noopener noreferrer" className="dropdown-item">
-                    <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
-                    OuterTiers Official
-                  </a>
-                  <a href="https://discord.gg/teAFSB5EvF" target="_blank" rel="noopener noreferrer" className="dropdown-item">
-                    <img src="/nav_icons/discord.svg" alt="" width={13} height={13} style={{ opacity: 0.7 }} />
-                    Outer Community
-                  </a>
-                </div>
-              )}
             </div>
 
             <span className="nav-sep" aria-hidden="true" />
@@ -158,7 +213,10 @@ export default function Navbar() {
           </div>
         </div>
 
-      </div>
-    </nav>
+        </div>
+      </nav>
+      {rankingsMenu}
+      {discordMenu}
+    </>
   );
 }

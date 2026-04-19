@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TermsModal from './TermsModal';
 import PrivacyModal from './PrivacyModal';
-
-const DISCORD_OFFICIAL  = 'https://discord.gg/6eAaPqg4up';
-const DISCORD_COMMUNITY = 'https://discord.gg/teAFSB5EvF';
+import DiscordJoinModal from './DiscordJoinModal';
 
 const DISCORD_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -27,6 +25,7 @@ const YOUTUBE_ICON = (
 export default function SiteFooter() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showDiscord, setShowDiscord] = useState(false);
 
   return (
     <>
@@ -43,9 +42,9 @@ export default function SiteFooter() {
               Every tier. Every category. Every player.
             </p>
             <div className="footer-social-row">
-              <a href={DISCORD_OFFICIAL} target="_blank" rel="noopener noreferrer" className="footer-social-btn" title="OuterTiers Official Discord">
+              <button className="footer-social-btn" title="Discord servers" aria-label="Discord servers" onClick={() => setShowDiscord(true)}>
                 {DISCORD_ICON}
-              </a>
+              </button>
               <a href="https://www.tiktok.com/@0utversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn" title="TikTok">
                 {TIKTOK_ICON}
               </a>
@@ -74,8 +73,7 @@ export default function SiteFooter() {
             </div>
             <div className="footer-col">
               <div className="footer-col-title">Community</div>
-              <a href={DISCORD_OFFICIAL} target="_blank" rel="noopener noreferrer" className="footer-col-link">OuterTiers Discord</a>
-              <a href={DISCORD_COMMUNITY} target="_blank" rel="noopener noreferrer" className="footer-col-link">Community Discord</a>
+              <button className="footer-col-link footer-col-btn" onClick={() => setShowDiscord(true)}>Discord Servers</button>
               <button className="footer-col-link footer-col-btn" onClick={() => setShowTerms(true)}>Terms of Service</button>
               <button className="footer-col-link footer-col-btn" onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
             </div>
@@ -91,6 +89,7 @@ export default function SiteFooter() {
 
       {showTerms   && <TermsModal   onClose={() => setShowTerms(false)} />}
       {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
+      {showDiscord && <DiscordJoinModal onClose={() => setShowDiscord(false)} />}
     </>
   );
 }
