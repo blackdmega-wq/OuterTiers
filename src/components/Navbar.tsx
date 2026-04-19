@@ -98,10 +98,21 @@ export default function Navbar() {
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
 
+  // Only allow valid Minecraft username characters (a-z, A-Z, 0-9, _) max 16 chars
+  const sanitizeUsername = (raw: string) =>
+    raw.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 16);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(sanitizeUsername(e.target.value));
+  };
+
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      navigate(`/player/${searchValue.trim()}`);
-      setSearchValue('');
+    if (e.key === 'Enter') {
+      const clean = sanitizeUsername(searchValue.trim());
+      if (clean) {
+        navigate(`/player/${encodeURIComponent(clean)}`);
+        setSearchValue('');
+      }
     }
   };
 
@@ -200,7 +211,8 @@ export default function Navbar() {
               type="text"
               placeholder="Search player..."
               value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
+              onChange={handleSearchChange}
+            maxLength={16}
               onKeyDown={handleSearch}
               className="search-input"
             />
