@@ -1808,15 +1808,16 @@ a.player-cell,
   box-shadow: 0 8px 30px rgba(200,120,50,0.55);
 }
 
-.game-modes-bottom {
-  padding: 28px 0 58px;
-  border-top: 1px solid rgba(255,255,255,0.07);
-}
-.game-modes-chip-grid {
+.hero-game-modes {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 22px;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .game-mode-chip {
   display: inline-flex;
@@ -2124,8 +2125,8 @@ a.player-cell,
   .hero-title { font-size: 2.2rem; letter-spacing: 2px; }
   .discord-btns-row { grid-template-columns: 1fr; }
   .game-modes-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .game-modes-chip-grid { gap: 8px; }
-  .game-mode-chip { width: 100%; justify-content: center; }
+  .hero-game-modes { gap: 6px; }
+  .game-mode-chip { font-size: 0.75rem; padding: 7px 11px; }
   .footer-cols { flex-direction: column; gap: 24px; }
   .footer-inner { padding: 36px 20px 24px; }
 }
