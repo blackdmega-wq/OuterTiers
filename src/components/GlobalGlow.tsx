@@ -15,6 +15,7 @@ export default function GlobalGlow() {
       <div className="gg-edge-right" />
       <div className="gg-grid" />
       <div className="gg-scanline" />
+      <div className="gg-arena-spotlight" />
     </div>
   );
 }
