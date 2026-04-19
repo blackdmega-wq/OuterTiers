@@ -194,25 +194,17 @@ export default function Home() {
         )}
       </div>
 
-      {/* ===== GAME MODES GRID ===== */}
-      <div className="game-modes-section animate-fade-up">
+      {/* ===== ALL GAME MODES (under Top 100) ===== */}
+      <div className="game-modes-bottom animate-fade-up" style={{ borderTop: 'none', paddingTop: 0, paddingBottom: 32 }}>
         <div className="section-header">
-          <div className="section-label">Categories</div>
-          <h2 className="section-heading">Browse by Game Mode</h2>
+          <div className="section-label">All Game Modes</div>
+          <h2 className="section-heading">Every Mode on OuterTiers</h2>
         </div>
-        <div className="game-modes-grid">
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat, i) => (
-            <Link
-              key={cat.id}
-              to={`/rankings/${cat.id}`}
-              className="game-mode-card ripple-card animate-fade-up"
-              style={{ animationDelay: `${i * 0.04}s` }}
-            >
-              <img src={cat.icon} alt={cat.label} className="game-mode-icon" />
-              <span className="game-mode-label">{cat.label}</span>
-              <svg className="game-mode-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+        <div className="game-modes-chip-grid">
+          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
+            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
+              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
+              <span>{cat.label}</span>
             </Link>
           ))}
         </div>
@@ -271,12 +263,17 @@ export default function Home() {
         <div className="section-header animate-fade-up">
           <div className="section-label">Why OuterTiers?</div>
           <h2 className="section-heading">The best Minecraft PvP ranking system</h2>
+          <p className="section-sub animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            OuterTiers sets the standard for competitive Minecraft PvP ranking. Built by players who understand the scene at the highest level, our platform provides the most accurate, transparent and detailed skill evaluation available anywhere.
+          </p>
         </div>
         <div className="features-grid">
-          <FeatureCard delay="0s"    icon="⚔️"  title="10 Categories"   desc="From UHC to Mace — every PvP category has its own detailed ranking with precise skill evaluation." />
-          <FeatureCard delay="0.07s" icon="🏆"  title="5-Tier System"   desc="A clear and fair tier system from T1 to T5, pinpointing each player's exact skill level." />
-          <FeatureCard delay="0.14s" icon="📊"  title="Points & Titles" desc="Earn ranking points and climb from Rookie all the way up to Combat Grandmaster." />
-          <FeatureCard delay="0.21s" icon="🔍"  title="Player Profiles" desc="Detailed profiles showing all categories, tiers, titles and points at a glance." />
+          <FeatureCard delay="0s"    icon="⚔️"  title="10 Unique Categories"   desc="From OG Vanilla and UHC to Mace and Speed — every major PvP discipline has its own dedicated leaderboard with category-specific tier placements, ensuring your real strengths are always recognised." />
+          <FeatureCard delay="0.07s" icon="🏆"  title="Transparent 5-Tier System"   desc="Our T1 through T5 ranking structure is crystal clear and rigorously maintained. No vague labels — just precise tier placements that the entire community trusts, updated regularly by experienced judges." />
+          <FeatureCard delay="0.14s" icon="📊"  title="Points, Ranks & Titles" desc="Every game mode you excel in rewards you with ranking points. Stack them across categories to climb from Rookie all the way to Combat Grandmaster and earn a title that reflects your true overall mastery." />
+          <FeatureCard delay="0.21s" icon="🔍"  title="Detailed Player Profiles" desc="Each player gets a full profile page — region, overall rank, title, total points, and their individual tier in every category at a glance. The most complete player card in the Minecraft PvP community." />
+          <FeatureCard delay="0.28s" icon="🌍"  title="Global Region Support" desc="Players from NA, EU, AS and OC all compete on the same platform. Regional badges let you identify where the best competition is coming from, no matter where in the world you play." />
+          <FeatureCard delay="0.35s" icon="🚀"  title="Built for the Community" desc="OuterTiers was created by competitive players for competitive players. Every design decision — from the tier definitions to the point system — was made with fairness, accuracy and community input at its core." />
         </div>
       </div>
 
@@ -306,14 +303,26 @@ export default function Home() {
 
       <div className="game-modes-bottom animate-fade-up">
         <div className="section-header">
-          <div className="section-label">All Game Modes</div>
-          <h2 className="section-heading">Every mode on OuterTiers</h2>
+          <div className="section-label">Game Modes</div>
+          <h2 className="section-heading">Every Mode on OuterTiers</h2>
+          <p className="section-sub" style={{ marginTop: 8 }}>All competitive categories tracked and ranked on OuterTiers.</p>
         </div>
-        <div className="game-modes-chip-grid">
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
-            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
-              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
-              <span>{cat.label}</span>
+        <div className="game-modes-full-grid">
+          {CATEGORIES.filter(c => c.id !== 'overall').map((cat, i) => (
+            <Link
+              key={cat.id}
+              to={`/rankings/${cat.id}`}
+              className="game-mode-full-card ripple-card animate-fade-up btn-press"
+              style={{ animationDelay: `${i * 0.045}s` }}
+            >
+              <img src={cat.icon} alt={cat.label} className="game-mode-full-icon" />
+              <div className="game-mode-full-info">
+                <span className="game-mode-full-label">{cat.label}</span>
+                <span className="game-mode-full-sub">View Rankings</span>
+              </div>
+              <svg className="game-mode-full-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </Link>
           ))}
         </div>
