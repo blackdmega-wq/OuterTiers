@@ -212,6 +212,8 @@ function ScrollReveal() {
 export default function App() {
   return (
     <BrowserRouter>
+      <div className="page-bg" aria-hidden="true" />
+      <div className="page-bg-grid" aria-hidden="true" />
       <GlobalGlow />
       <ParticleBackground />
       <ClickLayer />
