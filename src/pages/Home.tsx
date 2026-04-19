@@ -194,6 +194,15 @@ export default function Home() {
             API Docs
           </Link>
         </div>
+
+        <div className="hero-game-modes animate-fade-up" style={{ animationDelay: '0.55s' }}>
+          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
+            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
+              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
+              <span>{cat.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* ===== TOP 100 ===== */}
@@ -345,21 +354,6 @@ export default function Home() {
               Outer Community
             </button>
           </div>
-        </div>
-      </div>
-
-      <div className="game-modes-bottom animate-fade-up">
-        <div className="section-header">
-          <div className="section-label">Game Modes</div>
-          <h2 className="section-heading">Every Mode on OuterTiers</h2>
-        </div>
-        <div className="game-modes-chip-grid">
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
-            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
-              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
-              <span>{cat.label}</span>
-            </Link>
-          ))}
         </div>
       </div>
 
