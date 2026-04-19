@@ -63,15 +63,6 @@ export default function SiteFooter() {
               <Link to="/api-docs" className="footer-col-link">API Docs</Link>
             </div>
             <div className="footer-col">
-              <div className="footer-col-title">Game Modes</div>
-              <Link to="/rankings/ogvanilla" className="footer-col-link">OG Vanilla</Link>
-              <Link to="/rankings/vanilla" className="footer-col-link">Vanilla</Link>
-              <Link to="/rankings/uhc" className="footer-col-link">UHC</Link>
-              <Link to="/rankings/pot" className="footer-col-link">Pot</Link>
-              <Link to="/rankings/sword" className="footer-col-link">Sword</Link>
-              <Link to="/rankings/axe" className="footer-col-link">Axe</Link>
-            </div>
-            <div className="footer-col">
               <div className="footer-col-title">Community</div>
               <button className="footer-col-link footer-col-btn" onClick={() => setShowDiscord(true)}>Discord Servers</button>
               <button className="footer-col-link footer-col-btn" onClick={() => setShowTerms(true)}>Terms of Service</button>
