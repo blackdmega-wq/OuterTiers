@@ -159,6 +159,91 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ===== TOP 100 ===== */}
+      <div className="home-top100">
+        <div className="section-header animate-fade-up">
+          <div className="section-label">Leaderboard</div>
+          <h2 className="section-heading">Top 100 Players</h2>
+        </div>
+        {top100.length === 0 ? (
+          <div className="empty-state animate-fade-up">
+            <div className="empty-state-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <p className="empty-state-title">No players ranked yet</p>
+            <p className="empty-state-sub">Rankings will appear here once players are added to the system.</p>
+          </div>
+        ) : (
+          <div className="top100-table-wrapper animate-fade-up">
+            <table className="rankings-table">
+              <thead>
+                <tr>
+                  <th className="col-rank">#</th>
+                  <th className="col-player">PLAYER</th>
+                  <th className="col-points">POINTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top100.map((player, i) => {
+                  const rank = i + 1;
+                  const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
+                  return (
+                    <tr key={player.id} className={`player-row ${rankClass ? 'player-row-top' : ''}`}>
+                      <td className="col-rank">
+                        <span className={`rank-number ${rankClass}`}>{rank}.</span>
+                      </td>
+                      <td className="col-player">
+                        <Link to={`/player/${player.username}`} className="player-cell">
+                          <div className={`player-avatar-wrapper ${rankClass}`}>
+                            <PlayerAvatar username={player.username} size={36} />
+                          </div>
+                          <div className="player-info">
+                            <span className="player-name">{player.username}</span>
+                            <span className="player-title">
+                              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.7 }} />
+                              {getTitle(player.points)}
+                            </span>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="col-points">
+                        <span className="points-value">{player.points}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ===== GAME MODES GRID ===== */}
+      <div className="game-modes-section animate-fade-up">
+        <div className="section-header">
+          <div className="section-label">Categories</div>
+          <h2 className="section-heading">Browse by Game Mode</h2>
+        </div>
+        <div className="game-modes-grid">
+          {CATEGORIES.filter(c => c.id !== 'overall').map((cat, i) => (
+            <Link
+              key={cat.id}
+              to={`/rankings/${cat.id}`}
+              className="game-mode-card ripple-card animate-fade-up"
+              style={{ animationDelay: `${i * 0.04}s` }}
+            >
+              <img src={cat.icon} alt={cat.label} className="game-mode-icon" />
+              <span className="game-mode-label">{cat.label}</span>
+              <svg className="game-mode-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* ===== ABOUT / DESCRIPTION ===== */}
       <div className="about-section animate-fade-up">
         <div className="about-inner">
@@ -259,67 +344,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* ===== TOP 100 ===== */}
-      <div className="home-top100">
-        <div className="section-header animate-fade-up">
-          <div className="section-label">Leaderboard</div>
-          <h2 className="section-heading">Top 100 Players</h2>
-        </div>
-        {top100.length === 0 ? (
-          <div className="empty-state animate-fade-up">
-            <div className="empty-state-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <p className="empty-state-title">No players ranked yet</p>
-            <p className="empty-state-sub">Rankings will appear here once players are added to the system.</p>
-          </div>
-        ) : (
-          <div className="top100-table-wrapper animate-fade-up">
-            <table className="rankings-table">
-              <thead>
-                <tr>
-                  <th className="col-rank">#</th>
-                  <th className="col-player">PLAYER</th>
-                  <th className="col-points">POINTS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {top100.map((player, i) => {
-                  const rank = i + 1;
-                  const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
-                  return (
-                    <tr key={player.id} className={`player-row ${rankClass ? 'player-row-top' : ''}`}>
-                      <td className="col-rank">
-                        <span className={`rank-number ${rankClass}`}>{rank}.</span>
-                      </td>
-                      <td className="col-player">
-                        <Link to={`/player/${player.username}`} className="player-cell">
-                          <div className={`player-avatar-wrapper ${rankClass}`}>
-                            <PlayerAvatar username={player.username} size={36} />
-                          </div>
-                          <div className="player-info">
-                            <span className="player-name">{player.username}</span>
-                            <span className="player-title">
-                              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.7 }} />
-                              {getTitle(player.points)}
-                            </span>
-                          </div>
-                        </Link>
-                      </td>
-                      <td className="col-points">
-                        <span className="points-value">{player.points}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       {/* ===== SOCIAL MEDIA ===== */}

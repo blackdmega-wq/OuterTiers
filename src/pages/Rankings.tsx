@@ -100,9 +100,32 @@ export default function Rankings() {
     ? getCategoryTiers(category as keyof PlayerTiers)
     : [];
 
+  const currentCat = CATEGORIES.find(c => c.id === category);
+
   return (
     <div className="rankings-page">
       {infoOpen && <InfoModal onClose={() => setInfoOpen(false)} />}
+
+      {/* Page header */}
+      <div className="rankings-page-header">
+        <div className="rankings-page-header-glow" />
+        <div className="rankings-header-inner">
+          <div className="rankings-header-eyebrow">
+            {currentCat && (
+              <img src={currentCat.icon} alt={currentCat.label} width={14} height={14} style={{ opacity: 0.75 }} />
+            )}
+            <span>Leaderboard</span>
+          </div>
+          <h1 className="rankings-header-title">
+            {isOverall ? 'Overall Rankings' : `${currentCat?.label ?? ''} Rankings`}
+          </h1>
+          <p className="rankings-header-sub">
+            {isOverall
+              ? 'Top players ranked by total points across all categories.'
+              : `Tier rankings for the ${currentCat?.label ?? ''} game mode.`}
+          </p>
+        </div>
+      </div>
 
       <div className="rankings-container">
         <div className="category-tabs">

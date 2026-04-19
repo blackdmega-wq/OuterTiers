@@ -32,9 +32,9 @@ export default function ParticleBackground() {
     const TARGET_FPS = 30;
     const FRAME_MS  = 1000 / TARGET_FPS;
 
-    const DOT_COUNT = 32;
-    const ORB_COUNT = 5;
-    const MAX_DIST  = 100;
+    const DOT_COUNT = 22;
+    const ORB_COUNT = 3;
+    const MAX_DIST  = 90;
     const particles: Particle[] = [];
 
     function resize() {
