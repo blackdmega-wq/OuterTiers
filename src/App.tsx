@@ -54,31 +54,61 @@ function RippleLayer() {
     };
 
     function spawnTapBurst(e: PointerEvent) {
+      const cx = e.clientX;
+      const cy = e.clientY;
+
+      // ── Main burst container (core glow + first ring via ::before / ::after)
       const burst = document.createElement('span');
       burst.className = 'tap-burst';
-      burst.style.left = `${e.clientX}px`;
-      burst.style.top = `${e.clientY}px`;
+      burst.style.left = `${cx}px`;
+      burst.style.top = `${cy}px`;
 
-      const SPARK_COUNT = 10;
+      // ── Outer shockwave ring (expands further, delayed)
+      const shockwave = document.createElement('span');
+      shockwave.className = 'tap-shockwave';
+      shockwave.style.left = `${cx}px`;
+      shockwave.style.top = `${cy}px`;
+
+      // ── Long sparks (angled streaks)
+      const SPARK_COUNT = 14;
       for (let i = 0; i < SPARK_COUNT; i++) {
         const spark = document.createElement('span');
         spark.className = 'tap-spark';
-        const angle = (i / SPARK_COUNT) * 360;
-        const jitter = (Math.random() - 0.5) * 28;
-        spark.style.setProperty('--angle', `${angle + jitter}deg`);
-        spark.style.setProperty('--spark-len', `${8 + Math.random() * 8}px`);
-        spark.style.setProperty('--spark-dist', `${18 + Math.random() * 16}px`);
-        spark.style.animationDelay = `${Math.random() * 0.06}s`;
+        const baseAngle = (i / SPARK_COUNT) * 360;
+        const jitter = (Math.random() - 0.5) * 22;
+        const isGold = i % 3 === 0;
+        spark.style.setProperty('--angle', `${baseAngle + jitter}deg`);
+        spark.style.setProperty('--spark-len', `${9 + Math.random() * 10}px`);
+        spark.style.setProperty('--spark-dist', `${22 + Math.random() * 22}px`);
+        spark.style.setProperty('--spark-color', isGold ? 'rgba(240,192,64,0.95)' : 'rgba(255,255,255,0.95)');
+        spark.style.animationDelay = `${Math.random() * 0.05}s`;
         burst.appendChild(spark);
       }
 
+      // ── Small debris dots scattered in all directions
+      const DEBRIS_COUNT = 10;
+      for (let i = 0; i < DEBRIS_COUNT; i++) {
+        const debris = document.createElement('span');
+        debris.className = 'tap-debris';
+        const angle = Math.random() * 360;
+        const dist = 20 + Math.random() * 32;
+        const isBlue = i % 2 === 0;
+        debris.style.setProperty('--debris-angle', `${angle}deg`);
+        debris.style.setProperty('--debris-dist', `${dist}px`);
+        debris.style.setProperty('--debris-color', isBlue ? 'rgba(91,164,245,0.9)' : 'rgba(240,192,64,0.85)');
+        debris.style.setProperty('--debris-size', `${2 + Math.random() * 3}px`);
+        debris.style.animationDelay = `${Math.random() * 0.04}s`;
+        burst.appendChild(debris);
+      }
+
       document.body.appendChild(burst);
-      setTimeout(() => burst.remove(), 700);
+      document.body.appendChild(shockwave);
+      setTimeout(() => { burst.remove(); shockwave.remove(); }, 850);
     }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height) * 2.6;
+      const size = Math.max(rect.width, rect.height) * 2.8;
       const x = e.clientX - rect.left - size / 2;
       const y = e.clientY - rect.top - size / 2;
 
@@ -88,7 +118,7 @@ function RippleLayer() {
 
       const glow = document.createElement('span');
       glow.className = 'ripple-glow';
-      glow.style.cssText = `width:${size * 0.55}px;height:${size * 0.55}px;left:${x + size * 0.225}px;top:${y + size * 0.225}px`;
+      glow.style.cssText = `width:${size * 0.6}px;height:${size * 0.6}px;left:${x + size * 0.2}px;top:${y + size * 0.2}px`;
 
       const computed = getComputedStyle(target);
       const hadRelative = computed.position !== 'static';
@@ -105,7 +135,7 @@ function RippleLayer() {
         glow.remove();
         if (!hadRelative) target.style.position = '';
         if (!hadOverflow) target.style.overflow = '';
-      }, 800);
+      }, 900);
     }
 
     document.addEventListener('pointerdown', handlePointerDown);
