@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CATEGORIES, PLAYERS, TIER_COLS, getCategoryTiers, getTitle } from '../data/players';
+import { CATEGORIES, TIER_COLS, getCategoryTiers, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
+import { usePlayers } from '../hooks/usePlayers';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
 import InfoModal from '../components/InfoModal';
@@ -93,11 +94,12 @@ export default function Rankings() {
   const { category = 'overall' } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [infoOpen, setInfoOpen] = useState(false);
+  const { players, loading } = usePlayers();
 
   const isOverall = category === 'overall';
-  const sorted = [...PLAYERS].sort((a, b) => b.points - a.points);
+  const sorted = [...players].sort((a, b) => b.points - a.points);
   const tierColumns = !isOverall
-    ? getCategoryTiers(category as keyof PlayerTiers)
+    ? getCategoryTiers(category as keyof PlayerTiers, players)
     : [];
 
   const currentCat = CATEGORIES.find(c => c.id === category);
