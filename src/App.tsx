@@ -59,26 +59,36 @@ function RippleLayer() {
       burst.style.left = `${e.clientX}px`;
       burst.style.top = `${e.clientY}px`;
 
-      for (let i = 0; i < 6; i++) {
+      const SPARK_COUNT = 10;
+      for (let i = 0; i < SPARK_COUNT; i++) {
         const spark = document.createElement('span');
         spark.className = 'tap-spark';
-        spark.style.setProperty('--angle', `${i * 60}deg`);
+        const angle = (i / SPARK_COUNT) * 360;
+        const jitter = (Math.random() - 0.5) * 28;
+        spark.style.setProperty('--angle', `${angle + jitter}deg`);
+        spark.style.setProperty('--spark-len', `${8 + Math.random() * 8}px`);
+        spark.style.setProperty('--spark-dist', `${18 + Math.random() * 16}px`);
+        spark.style.animationDelay = `${Math.random() * 0.06}s`;
         burst.appendChild(spark);
       }
 
       document.body.appendChild(burst);
-      setTimeout(() => burst.remove(), 620);
+      setTimeout(() => burst.remove(), 700);
     }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height) * 2.4;
+      const size = Math.max(rect.width, rect.height) * 2.6;
       const x = e.clientX - rect.left - size / 2;
       const y = e.clientY - rect.top - size / 2;
 
       const ripple = document.createElement('span');
       ripple.className = 'ripple-effect';
       ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+
+      const glow = document.createElement('span');
+      glow.className = 'ripple-glow';
+      glow.style.cssText = `width:${size * 0.55}px;height:${size * 0.55}px;left:${x + size * 0.225}px;top:${y + size * 0.225}px`;
 
       const computed = getComputedStyle(target);
       const hadRelative = computed.position !== 'static';
@@ -87,13 +97,15 @@ function RippleLayer() {
       if (!hadRelative) target.style.position = 'relative';
       if (!hadOverflow) target.style.overflow = 'hidden';
 
+      target.appendChild(glow);
       target.appendChild(ripple);
 
       setTimeout(() => {
         ripple.remove();
+        glow.remove();
         if (!hadRelative) target.style.position = '';
         if (!hadOverflow) target.style.overflow = '';
-      }, 700);
+      }, 800);
     }
 
     document.addEventListener('pointerdown', handlePointerDown);
