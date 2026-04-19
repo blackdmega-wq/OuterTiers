@@ -181,7 +181,7 @@ export default function Home() {
             </div>
             <div className="feed-list">
               {HIGH_TIER_RESULTS.length === 0 ? (
-                <div className="feed-empty">Keine Ergebnisse vorhanden.</div>
+                <div className="feed-empty">No results available yet.</div>
               ) : (
                 HIGH_TIER_RESULTS.map((r, i) => <FeedItem key={i} {...r} />)
               )}
@@ -199,7 +199,7 @@ export default function Home() {
           </div>
           <div className="feed-list">
             {LIVE_TEST_RESULTS.length === 0 ? (
-              <div className="feed-empty">Keine Ergebnisse vorhanden.</div>
+              <div className="feed-empty">No results available yet.</div>
             ) : (
               LIVE_TEST_RESULTS.map((r, i) => <FeedItem key={i} {...r} />)
             )}

@@ -23,8 +23,8 @@ export default function DiscordJoinModal({ onClose }: Props) {
           <DiscordIcon />
         </div>
 
-        <h2 className="dj-title">Willst du joinen?</h2>
-        <p className="dj-sub">Wähle den Discord-Server, dem du beitreten möchtest.</p>
+        <h2 className="dj-title">Want to join?</h2>
+        <p className="dj-sub">Choose the Discord server you want to join.</p>
 
         <div className="dj-choices">
           <a
@@ -37,7 +37,7 @@ export default function DiscordJoinModal({ onClose }: Props) {
             <div className="dj-choice-icon"><DiscordIcon /></div>
             <div className="dj-choice-text">
               <span className="dj-choice-label">OuterTiers</span>
-              <span className="dj-choice-desc">Offizieller Server</span>
+              <span className="dj-choice-desc">Official Server</span>
             </div>
             <svg className="dj-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="9 18 15 12 9 6"/>
