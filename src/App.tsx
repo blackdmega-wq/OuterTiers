@@ -40,8 +40,17 @@ function RippleLayer() {
       '.feature-card',
     ].join(',');
 
+    let downX = 0;
+    let downY = 0;
+    let hasMoved = false;
+    let pendingBurst: PointerEvent | null = null;
+
     const handlePointerDown = (e: PointerEvent) => {
-      spawnTapBurst(e);
+      downX = e.clientX;
+      downY = e.clientY;
+      hasMoved = false;
+      pendingBurst = e;
+
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
       if (target.closest('.dropdown-menu')) {
@@ -51,6 +60,19 @@ function RippleLayer() {
         return;
       }
       spawnRipple(target, e);
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!pendingBurst) return;
+      const dx = e.clientX - downX;
+      const dy = e.clientY - downY;
+      if (Math.sqrt(dx * dx + dy * dy) > 7) hasMoved = true;
+    };
+
+    const handlePointerUp = (e: PointerEvent) => {
+      if (pendingBurst && !hasMoved) spawnTapBurst(e);
+      pendingBurst = null;
+      hasMoved = false;
     };
 
     function spawnTapBurst(e: PointerEvent) {
@@ -139,7 +161,13 @@ function RippleLayer() {
     }
 
     document.addEventListener('pointerdown', handlePointerDown);
-    return () => document.removeEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
+    };
   }, []);
 
   return null;
