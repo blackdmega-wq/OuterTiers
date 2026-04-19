@@ -19,7 +19,7 @@ function NotFound() {
   );
 }
 
-function RippleLayer() {
+function ClickLayer() {
   useEffect(() => {
     const SELECTOR = [
       'button',
@@ -40,7 +40,9 @@ function RippleLayer() {
       '.feature-card',
     ].join(',');
 
-    const handlePointerDown = (e: PointerEvent) => {
+    const onPointerDown = (e: PointerEvent) => {
+      spawnClickDot(e.clientX, e.clientY);
+
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
 
@@ -53,9 +55,21 @@ function RippleLayer() {
       el.classList.remove('click-bounce');
       void el.offsetWidth;
       el.classList.add('click-bounce');
-      const onEnd = () => { el.classList.remove('click-bounce'); el.removeEventListener('animationend', onEnd); };
+      const onEnd = () => {
+        el.classList.remove('click-bounce');
+        el.removeEventListener('animationend', onEnd);
+      };
       el.addEventListener('animationend', onEnd);
     };
+
+    function spawnClickDot(x: number, y: number) {
+      const dot = document.createElement('span');
+      dot.className = 'click-dot';
+      dot.style.left = `${x}px`;
+      dot.style.top = `${y}px`;
+      document.body.appendChild(dot);
+      setTimeout(() => dot.remove(), 600);
+    }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
@@ -83,15 +97,95 @@ function RippleLayer() {
       }, 700);
     }
 
-    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointerdown', onPointerDown);
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('pointerdown', onPointerDown);
     };
   }, []);
 
   return null;
 }
 
+function TouchTrail() {
+  useEffect(() => {
+    const TRAIL_COUNT = 7;
+    const dots: HTMLSpanElement[] = [];
+    const history: { x: number; y: number }[] = [];
+    let rafId = 0;
+    let currentX = -200;
+    let currentY = -200;
+    let isActive = false;
+
+    for (let i = 0; i < TRAIL_COUNT; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'touch-trail-dot';
+      dot.style.opacity = '0';
+      document.body.appendChild(dot);
+      dots.push(dot);
+    }
+
+    const tick = () => {
+      rafId = 0;
+      if (!isActive) return;
+
+      history.unshift({ x: currentX, y: currentY });
+      if (history.length > TRAIL_COUNT * 4) history.length = TRAIL_COUNT * 4;
+
+      dots.forEach((dot, i) => {
+        const pos = history[i * 2] ?? history[history.length - 1];
+        if (!pos) return;
+        const size = Math.max(4, 14 - i * 1.5);
+        const opacity = Math.max(0, 0.92 - i * 0.12);
+        dot.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
+        dot.style.width = `${size}px`;
+        dot.style.height = `${size}px`;
+        dot.style.opacity = String(opacity);
+      });
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      isActive = true;
+      currentX = t.clientX;
+      currentY = t.clientY;
+      history.length = 0;
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) {
+        currentX = t.clientX;
+        currentY = t.clientY;
+      }
+    };
+
+    const hide = () => {
+      isActive = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      dots.forEach(dot => { dot.style.opacity = '0'; });
+    };
+
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: true });
+    document.addEventListener('touchend', hide, { passive: true });
+    document.addEventListener('touchcancel', hide, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', hide);
+      document.removeEventListener('touchcancel', hide);
+      dots.forEach(d => d.remove());
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return null;
+}
 
 function ScrollReveal() {
   useEffect(() => {
@@ -120,7 +214,8 @@ export default function App() {
     <BrowserRouter>
       <GlobalGlow />
       <ParticleBackground />
-      <RippleLayer />
+      <ClickLayer />
+      <TouchTrail />
       <div className="app">
         <Navbar />
         <main className="main-content">
