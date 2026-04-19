@@ -19,25 +19,16 @@ function NotFound() {
   );
 }
 
+// ─────────────────────────────────────────────
+//  CLICK LAYER
+// ─────────────────────────────────────────────
 function ClickLayer() {
   useEffect(() => {
     const SELECTOR = [
-      'button',
-      'a',
-      '.nav-link',
-      '.nav-dropdown-trigger',
-      '.hero-btn',
-      '.discord-btn',
-      '.category-tab',
-      '.tier-player-row',
-      '.player-row',
-      '.apidocs-endpoint-card',
-      '.dj-choice',
-      '.info-btn',
-      '.modal-tab-btn',
-      '.modal-close',
-      '.stat-card',
-      '.feature-card',
+      'button', 'a', '.nav-link', '.nav-dropdown-trigger',
+      '.hero-btn', '.discord-btn', '.category-tab', '.tier-player-row',
+      '.player-row', '.apidocs-endpoint-card', '.dj-choice', '.info-btn',
+      '.modal-tab-btn', '.modal-close', '.stat-card', '.feature-card',
     ].join(',');
 
     const onPointerDown = (e: PointerEvent) => {
@@ -45,74 +36,74 @@ function ClickLayer() {
 
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
-
       const el = target.closest('.dropdown-menu')
         ? ((e.target as Element).closest('.dropdown-item') as HTMLElement | null) ?? target
         : target;
 
       spawnRipple(el, e);
-
       el.classList.remove('click-bounce');
       void el.offsetWidth;
       el.classList.add('click-bounce');
-      const onEnd = () => {
-        el.classList.remove('click-bounce');
-        el.removeEventListener('animationend', onEnd);
-      };
+      const onEnd = () => { el.classList.remove('click-bounce'); el.removeEventListener('animationend', onEnd); };
       el.addEventListener('animationend', onEnd);
     };
 
     function spawnClickEffect(x: number, y: number) {
+      // ── Central dot ──
       const dot = document.createElement('span');
       dot.className = 'click-dot';
       dot.style.left = `${x}px`;
       dot.style.top = `${y}px`;
       document.body.appendChild(dot);
-      setTimeout(() => dot.remove(), 700);
+      setTimeout(() => dot.remove(), 650);
 
-      for (let i = 0; i < 2; i++) {
+      // ── 3 expanding rings with staggered timing ──
+      for (let i = 0; i < 3; i++) {
         const ring = document.createElement('span');
         ring.className = 'click-ring';
         ring.style.left = `${x}px`;
         ring.style.top = `${y}px`;
-        ring.style.animationDelay = `${i * 90}ms`;
+        ring.style.animationDelay = `${i * 75}ms`;
+        // Alternate blue/gold
+        if (i === 1) ring.style.borderColor = 'rgba(240,192,64,0.8)';
         document.body.appendChild(ring);
-        setTimeout(() => ring.remove(), 750 + i * 90);
+        setTimeout(() => ring.remove(), 700 + i * 75);
       }
 
-      const SPARK_COUNT = 6;
-      for (let i = 0; i < SPARK_COUNT; i++) {
-        const angle = (i / SPARK_COUNT) * Math.PI * 2 + Math.random() * 0.5;
-        const dist = 30 + Math.random() * 24;
+      // ── 8 sparks ──
+      const SPARK_COLORS = [
+        'rgba(255,255,255,1)',
+        'rgba(150,210,255,0.95)',
+        'rgba(240,192,64,0.9)',
+        'rgba(91,164,245,1)',
+      ];
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+        const dist = 32 + Math.random() * 28;
         const spark = document.createElement('span');
         spark.className = 'click-spark';
         spark.style.left = `${x}px`;
         spark.style.top = `${y}px`;
         spark.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
         spark.style.setProperty('--sy', `${Math.sin(angle) * dist}px`);
-        spark.style.animationDelay = `${Math.random() * 40}ms`;
+        spark.style.background = SPARK_COLORS[i % SPARK_COLORS.length];
+        spark.style.animationDelay = `${Math.random() * 30}ms`;
         document.body.appendChild(spark);
-        setTimeout(() => spark.remove(), 520);
+        setTimeout(() => spark.remove(), 540);
       }
     }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height) * 2.8;
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-
       const ripple = document.createElement('span');
       ripple.className = 'ripple-effect';
-      ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
-
+      ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
       const computed = getComputedStyle(target);
       const hadRelative = computed.position !== 'static';
       const hadOverflow = computed.overflow === 'hidden' || computed.overflow === 'clip';
-
       if (!hadRelative) target.style.position = 'relative';
       if (!hadOverflow) target.style.overflow = 'hidden';
-
       target.appendChild(ripple);
       setTimeout(() => {
         ripple.remove();
@@ -122,107 +113,139 @@ function ClickLayer() {
     }
 
     document.addEventListener('pointerdown', onPointerDown);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-    };
+    return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
 
   return null;
 }
 
+// ─────────────────────────────────────────────
+//  TOUCH TRAIL — canvas-based, zero DOM overhead
+// ─────────────────────────────────────────────
 function TouchTrail() {
   useEffect(() => {
-    const TRAIL_COUNT = 9;
-    const MAX_HISTORY = 120;
-    const dots: HTMLSpanElement[] = [];
+    // Create a dedicated full-screen canvas overlay
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText =
+      'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645;';
+    document.body.appendChild(canvas);
 
-    // All touch positions are pushed here on EVERY touchmove event (not once per frame).
-    // This is the key fix: we capture the full path, not just the last known position.
-    const posLog: { x: number; y: number }[] = [];
+    const ctx = canvas.getContext('2d')!;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      canvas.style.width = `${W}px`;
+      canvas.style.height = `${H}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    // Ring buffer: newest position is at index 0
+    // We store { x, y, t } where t = performance.now()
+    const MAX_PTS = 100;
+    const TRAIL_LIFE_MS = 380; // how long a point stays visible after being recorded
+    const pts: { x: number; y: number; t: number }[] = [];
+
     let rafId = 0;
     let isActive = false;
-    let hideTimer = 0;
 
-    for (let i = 0; i < TRAIL_COUNT; i++) {
-      const dot = document.createElement('span');
-      dot.className = 'touch-trail-dot';
-      dot.style.opacity = '0';
-      document.body.appendChild(dot);
-      dots.push(dot);
-    }
-
-    const tick = () => {
+    function draw(now: number) {
       rafId = 0;
-      const len = posLog.length;
-      if (len === 0) return;
+      ctx.clearRect(0, 0, W, H);
 
-      dots.forEach((dot, i) => {
-        // Spread dots evenly over the full position history.
-        // i=0 → newest position, i=TRAIL_COUNT-1 → oldest captured position.
-        const t = TRAIL_COUNT > 1 ? i / (TRAIL_COUNT - 1) : 0;
-        const idx = Math.min(Math.round(t * (len - 1)), len - 1);
-        const pos = posLog[idx];
-        const size = Math.max(4, 14 - i * 1.1);
-        const opacity = isActive ? Math.max(0, 1 - i * 0.11) : 0;
-        dot.style.transform = `translate(${pos.x}px,${pos.y}px) translate(-50%,-50%)`;
-        dot.style.width = `${size}px`;
-        dot.style.height = `${size}px`;
-        dot.style.opacity = String(opacity);
-      });
+      // Prune old points
+      const cutoff = now - TRAIL_LIFE_MS;
+      while (pts.length > 0 && pts[pts.length - 1].t < cutoff) pts.pop();
 
-      if (posLog.length > MAX_HISTORY) posLog.length = MAX_HISTORY;
+      if (pts.length > 1) {
+        // Draw each point as a glowing circle.
+        // i=0 → newest (largest, most opaque), i=len-1 → oldest (tiny, transparent)
+        ctx.save();
 
-      if (isActive) rafId = requestAnimationFrame(tick);
-    };
+        for (let i = 0; i < pts.length; i++) {
+          const ageFrac = (now - pts[i].t) / TRAIL_LIFE_MS; // 0=fresh, 1=dying
+          const idxFrac = i / (pts.length - 1);             // 0=newest, 1=oldest
+          const fade = Math.max(0, 1 - ageFrac);
+          const alpha = fade * (1 - idxFrac * 0.55) * 0.92;
+          const radius = Math.max(1.5, 8.5 * (1 - idxFrac * 0.72) * fade);
+
+          if (alpha < 0.01) continue;
+
+          // Alternate core color: blue/white on newest, slightly gold on mid
+          const isMid = idxFrac > 0.3 && idxFrac < 0.7;
+          const r = isMid ? 230 : 180;
+          const g = isMid ? 195 : 225;
+          const b = 255;
+
+          ctx.globalAlpha = alpha;
+          ctx.shadowColor = `rgba(91,164,245,${alpha * 0.9})`;
+          ctx.shadowBlur = radius * 2.4;
+          ctx.beginPath();
+          ctx.arc(pts[i].x, pts[i].y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      if (isActive || pts.length > 0) {
+        rafId = requestAnimationFrame(draw);
+      }
+    }
 
     const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!t) return;
       isActive = true;
-      clearTimeout(hideTimer);
-      posLog.length = 0;
-      posLog.push({ x: t.clientX, y: t.clientY });
-      if (!rafId) rafId = requestAnimationFrame(tick);
+      pts.length = 0;
+      pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() });
+      if (!rafId) rafId = requestAnimationFrame(draw);
     };
 
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!t) return;
-      // Prepend so index 0 = newest
-      posLog.unshift({ x: t.clientX, y: t.clientY });
-      if (posLog.length > MAX_HISTORY) posLog.length = MAX_HISTORY;
-      // Kick off a new frame if none is scheduled
-      if (!rafId) rafId = requestAnimationFrame(tick);
+      // Push EVERY event immediately — this is what makes it lag-free
+      pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() });
+      if (pts.length > MAX_PTS) pts.length = MAX_PTS;
+      if (!rafId) rafId = requestAnimationFrame(draw);
     };
 
-    const hide = () => {
+    const onTouchEnd = () => {
       isActive = false;
-      // Fade out dots gracefully over next few frames
-      hideTimer = window.setTimeout(() => {
-        dots.forEach(dot => { dot.style.opacity = '0'; });
-        posLog.length = 0;
-      }, 120);
+      // Let the RAF loop drain the remaining points naturally
     };
 
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchmove', onTouchMove, { passive: true });
-    document.addEventListener('touchend', hide, { passive: true });
-    document.addEventListener('touchcancel', hide, { passive: true });
+    document.addEventListener('touchend', onTouchEnd, { passive: true });
+    document.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
     return () => {
       document.removeEventListener('touchstart', onTouchStart);
       document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', hide);
-      document.removeEventListener('touchcancel', hide);
-      dots.forEach(d => d.remove());
+      document.removeEventListener('touchend', onTouchEnd);
+      document.removeEventListener('touchcancel', onTouchEnd);
+      window.removeEventListener('resize', resize);
       if (rafId) cancelAnimationFrame(rafId);
-      clearTimeout(hideTimer);
+      canvas.remove();
     };
   }, []);
 
   return null;
 }
 
+// ─────────────────────────────────────────────
+//  SCROLL REVEAL
+// ─────────────────────────────────────────────
 function ScrollReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
@@ -241,7 +264,6 @@ function ScrollReveal() {
     els.forEach(el => io.observe(el));
     return () => io.disconnect();
   }, []);
-
   return null;
 }
 
