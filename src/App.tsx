@@ -41,7 +41,7 @@ function ClickLayer() {
     ].join(',');
 
     const onPointerDown = (e: PointerEvent) => {
-      spawnClickDot(e.clientX, e.clientY);
+      spawnClickEffect(e.clientX, e.clientY);
 
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
@@ -62,13 +62,38 @@ function ClickLayer() {
       el.addEventListener('animationend', onEnd);
     };
 
-    function spawnClickDot(x: number, y: number) {
+    function spawnClickEffect(x: number, y: number) {
       const dot = document.createElement('span');
       dot.className = 'click-dot';
       dot.style.left = `${x}px`;
       dot.style.top = `${y}px`;
       document.body.appendChild(dot);
-      setTimeout(() => dot.remove(), 600);
+      setTimeout(() => dot.remove(), 700);
+
+      for (let i = 0; i < 2; i++) {
+        const ring = document.createElement('span');
+        ring.className = 'click-ring';
+        ring.style.left = `${x}px`;
+        ring.style.top = `${y}px`;
+        ring.style.animationDelay = `${i * 90}ms`;
+        document.body.appendChild(ring);
+        setTimeout(() => ring.remove(), 750 + i * 90);
+      }
+
+      const SPARK_COUNT = 6;
+      for (let i = 0; i < SPARK_COUNT; i++) {
+        const angle = (i / SPARK_COUNT) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = 30 + Math.random() * 24;
+        const spark = document.createElement('span');
+        spark.className = 'click-spark';
+        spark.style.left = `${x}px`;
+        spark.style.top = `${y}px`;
+        spark.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
+        spark.style.setProperty('--sy', `${Math.sin(angle) * dist}px`);
+        spark.style.animationDelay = `${Math.random() * 40}ms`;
+        document.body.appendChild(spark);
+        setTimeout(() => spark.remove(), 520);
+      }
     }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
@@ -89,7 +114,6 @@ function ClickLayer() {
       if (!hadOverflow) target.style.overflow = 'hidden';
 
       target.appendChild(ripple);
-
       setTimeout(() => {
         ripple.remove();
         if (!hadRelative) target.style.position = '';
@@ -108,13 +132,16 @@ function ClickLayer() {
 
 function TouchTrail() {
   useEffect(() => {
-    const TRAIL_COUNT = 7;
+    const TRAIL_COUNT = 9;
+    const MAX_HISTORY = 120;
     const dots: HTMLSpanElement[] = [];
-    const history: { x: number; y: number }[] = [];
+
+    // All touch positions are pushed here on EVERY touchmove event (not once per frame).
+    // This is the key fix: we capture the full path, not just the last known position.
+    const posLog: { x: number; y: number }[] = [];
     let rafId = 0;
-    let currentX = -200;
-    let currentY = -200;
     let isActive = false;
+    let hideTimer = 0;
 
     for (let i = 0; i < TRAIL_COUNT; i++) {
       const dot = document.createElement('span');
@@ -126,47 +153,55 @@ function TouchTrail() {
 
     const tick = () => {
       rafId = 0;
-      if (!isActive) return;
-
-      history.unshift({ x: currentX, y: currentY });
-      if (history.length > TRAIL_COUNT * 4) history.length = TRAIL_COUNT * 4;
+      const len = posLog.length;
+      if (len === 0) return;
 
       dots.forEach((dot, i) => {
-        const pos = history[i * 2] ?? history[history.length - 1];
-        if (!pos) return;
-        const size = Math.max(4, 14 - i * 1.5);
-        const opacity = Math.max(0, 0.92 - i * 0.12);
-        dot.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
+        // Spread dots evenly over the full position history.
+        // i=0 → newest position, i=TRAIL_COUNT-1 → oldest captured position.
+        const t = TRAIL_COUNT > 1 ? i / (TRAIL_COUNT - 1) : 0;
+        const idx = Math.min(Math.round(t * (len - 1)), len - 1);
+        const pos = posLog[idx];
+        const size = Math.max(4, 14 - i * 1.1);
+        const opacity = isActive ? Math.max(0, 1 - i * 0.11) : 0;
+        dot.style.transform = `translate(${pos.x}px,${pos.y}px) translate(-50%,-50%)`;
         dot.style.width = `${size}px`;
         dot.style.height = `${size}px`;
         dot.style.opacity = String(opacity);
       });
 
-      rafId = requestAnimationFrame(tick);
+      if (posLog.length > MAX_HISTORY) posLog.length = MAX_HISTORY;
+
+      if (isActive) rafId = requestAnimationFrame(tick);
     };
 
     const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
       if (!t) return;
       isActive = true;
-      currentX = t.clientX;
-      currentY = t.clientY;
-      history.length = 0;
+      clearTimeout(hideTimer);
+      posLog.length = 0;
+      posLog.push({ x: t.clientX, y: t.clientY });
       if (!rafId) rafId = requestAnimationFrame(tick);
     };
 
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (t) {
-        currentX = t.clientX;
-        currentY = t.clientY;
-      }
+      if (!t) return;
+      // Prepend so index 0 = newest
+      posLog.unshift({ x: t.clientX, y: t.clientY });
+      if (posLog.length > MAX_HISTORY) posLog.length = MAX_HISTORY;
+      // Kick off a new frame if none is scheduled
+      if (!rafId) rafId = requestAnimationFrame(tick);
     };
 
     const hide = () => {
       isActive = false;
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-      dots.forEach(dot => { dot.style.opacity = '0'; });
+      // Fade out dots gracefully over next few frames
+      hideTimer = window.setTimeout(() => {
+        dots.forEach(dot => { dot.style.opacity = '0'; });
+        posLog.length = 0;
+      }, 120);
     };
 
     document.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -181,6 +216,7 @@ function TouchTrail() {
       document.removeEventListener('touchcancel', hide);
       dots.forEach(d => d.remove());
       if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(hideTimer);
     };
   }, []);
 
