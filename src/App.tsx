@@ -40,93 +40,22 @@ function RippleLayer() {
       '.feature-card',
     ].join(',');
 
-    let downX = 0;
-    let downY = 0;
-    let hasMoved = false;
-    let pendingBurst: PointerEvent | null = null;
-
     const handlePointerDown = (e: PointerEvent) => {
-      downX = e.clientX;
-      downY = e.clientY;
-      hasMoved = false;
-      pendingBurst = e;
-
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
-      if (target.closest('.dropdown-menu')) {
-        const item = (e.target as Element).closest('.dropdown-item') as HTMLElement | null;
-        if (!item) return;
-        spawnRipple(item, e);
-        return;
-      }
-      spawnRipple(target, e);
+
+      const el = target.closest('.dropdown-menu')
+        ? ((e.target as Element).closest('.dropdown-item') as HTMLElement | null) ?? target
+        : target;
+
+      spawnRipple(el, e);
+
+      el.classList.remove('click-bounce');
+      void el.offsetWidth;
+      el.classList.add('click-bounce');
+      const onEnd = () => { el.classList.remove('click-bounce'); el.removeEventListener('animationend', onEnd); };
+      el.addEventListener('animationend', onEnd);
     };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!pendingBurst) return;
-      const dx = e.clientX - downX;
-      const dy = e.clientY - downY;
-      if (Math.sqrt(dx * dx + dy * dy) > 7) hasMoved = true;
-    };
-
-    const handlePointerUp = (e: PointerEvent) => {
-      if (pendingBurst && !hasMoved) spawnTapBurst(e);
-      pendingBurst = null;
-      hasMoved = false;
-    };
-
-    function spawnTapBurst(e: PointerEvent) {
-      const cx = e.clientX;
-      const cy = e.clientY;
-
-      // ── Main burst container (core glow + first ring via ::before / ::after)
-      const burst = document.createElement('span');
-      burst.className = 'tap-burst';
-      burst.style.left = `${cx}px`;
-      burst.style.top = `${cy}px`;
-
-      // ── Outer shockwave ring (expands further, delayed)
-      const shockwave = document.createElement('span');
-      shockwave.className = 'tap-shockwave';
-      shockwave.style.left = `${cx}px`;
-      shockwave.style.top = `${cy}px`;
-
-      // ── Long sparks (angled streaks)
-      const SPARK_COUNT = 14;
-      for (let i = 0; i < SPARK_COUNT; i++) {
-        const spark = document.createElement('span');
-        spark.className = 'tap-spark';
-        const baseAngle = (i / SPARK_COUNT) * 360;
-        const jitter = (Math.random() - 0.5) * 22;
-        const isGold = i % 3 === 0;
-        spark.style.setProperty('--angle', `${baseAngle + jitter}deg`);
-        spark.style.setProperty('--spark-len', `${9 + Math.random() * 10}px`);
-        spark.style.setProperty('--spark-dist', `${22 + Math.random() * 22}px`);
-        spark.style.setProperty('--spark-color', isGold ? 'rgba(240,192,64,0.95)' : 'rgba(255,255,255,0.95)');
-        spark.style.animationDelay = `${Math.random() * 0.05}s`;
-        burst.appendChild(spark);
-      }
-
-      // ── Small debris dots scattered in all directions
-      const DEBRIS_COUNT = 10;
-      for (let i = 0; i < DEBRIS_COUNT; i++) {
-        const debris = document.createElement('span');
-        debris.className = 'tap-debris';
-        const angle = Math.random() * 360;
-        const dist = 20 + Math.random() * 32;
-        const isBlue = i % 2 === 0;
-        debris.style.setProperty('--debris-angle', `${angle}deg`);
-        debris.style.setProperty('--debris-dist', `${dist}px`);
-        debris.style.setProperty('--debris-color', isBlue ? 'rgba(91,164,245,0.9)' : 'rgba(240,192,64,0.85)');
-        debris.style.setProperty('--debris-size', `${2 + Math.random() * 3}px`);
-        debris.style.animationDelay = `${Math.random() * 0.04}s`;
-        burst.appendChild(debris);
-      }
-
-      document.body.appendChild(burst);
-      document.body.appendChild(shockwave);
-      setTimeout(() => { burst.remove(); shockwave.remove(); }, 850);
-    }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
@@ -138,10 +67,6 @@ function RippleLayer() {
       ripple.className = 'ripple-effect';
       ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
 
-      const glow = document.createElement('span');
-      glow.className = 'ripple-glow';
-      glow.style.cssText = `width:${size * 0.6}px;height:${size * 0.6}px;left:${x + size * 0.2}px;top:${y + size * 0.2}px`;
-
       const computed = getComputedStyle(target);
       const hadRelative = computed.position !== 'static';
       const hadOverflow = computed.overflow === 'hidden' || computed.overflow === 'clip';
@@ -149,79 +74,24 @@ function RippleLayer() {
       if (!hadRelative) target.style.position = 'relative';
       if (!hadOverflow) target.style.overflow = 'hidden';
 
-      target.appendChild(glow);
       target.appendChild(ripple);
 
       setTimeout(() => {
         ripple.remove();
-        glow.remove();
         if (!hadRelative) target.style.position = '';
         if (!hadOverflow) target.style.overflow = '';
-      }, 900);
+      }, 700);
     }
 
     document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
     };
   }, []);
 
   return null;
 }
 
-function ScrollTrail() {
-  useEffect(() => {
-    let lastY = 0;
-    let lastX = 0;
-    let ticking = false;
-
-    function spawnScrollTrail(x: number, y: number, dy: number) {
-      const trail = document.createElement('span');
-      trail.className = 'scroll-trail';
-      trail.style.left = `${x}px`;
-      trail.style.top = `${y}px`;
-      trail.style.setProperty('--scroll-dy', `${dy > 0 ? -1 : 1}`);
-      document.body.appendChild(trail);
-      setTimeout(() => trail.remove(), 600);
-    }
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const touch = e.touches[0];
-          if (!touch) { ticking = false; return; }
-          const dx = touch.clientX - lastX;
-          const dy = touch.clientY - lastY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > 6) {
-            spawnScrollTrail(touch.clientX, touch.clientY, dy);
-            lastX = touch.clientX;
-            lastY = touch.clientY;
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (touch) { lastX = touch.clientX; lastY = touch.clientY; }
-    };
-
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchmove', onTouchMove, { passive: true });
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchmove', onTouchMove);
-    };
-  }, []);
-  return null;
-}
 
 function ScrollReveal() {
   useEffect(() => {
@@ -251,7 +121,6 @@ export default function App() {
       <GlobalGlow />
       <ParticleBackground />
       <RippleLayer />
-      <ScrollTrail />
       <div className="app">
         <Navbar />
         <main className="main-content">
