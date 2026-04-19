@@ -49,6 +49,8 @@ html, body {
     linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+  background-position: 0% 0%, 100% 100%, 0% 60%, 70% 10%, 0 0, 0 0;
+  animation: bgShift 22s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
@@ -57,8 +59,11 @@ html, body {
 }
 
 @keyframes bgShift {
-  0%, 100% { background-position: 0% 0%, 100% 100%, 0% 60%, 70% 10%, 0 0, 0 0; }
-  50%       { background-position: 0% 0%, 95% 90%, 5% 55%, 72% 8%, 0 0, 0 0; }
+  0%   { background-position: 0% 0%,   100% 100%, 0%  60%, 70% 10%, 0 0, 0 0; }
+  25%  { background-position: 2% 0%,   96%  92%, 4%  57%, 72%  8%, 0 0, 0 0; }
+  50%  { background-position: 0% 0%,   95%  90%, 5%  55%, 72%  8%, 0 0, 0 0; }
+  75%  { background-position: -2% 0%,  98%  94%, 2%  58%, 68% 11%, 0 0, 0 0; }
+  100% { background-position: 0% 0%,   100% 100%, 0%  60%, 70% 10%, 0 0, 0 0; }
 }
 
 body { overflow-x: hidden; }
@@ -189,6 +194,37 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   0%   { opacity: 1;   transform: rotate(var(--angle)) translateY(-4px) scaleY(0.25); }
   40%  { opacity: 0.9; }
   100% { opacity: 0;   transform: rotate(var(--angle)) translateY(calc(-1 * var(--spark-dist, 26px))) scaleY(1); }
+}
+
+/* ===== SCROLL TRAIL ===== */
+@keyframes scrollTrailAnim {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  60%  { opacity: 0.3; }
+  100% { transform: translate(-50%, calc(-50% + calc(var(--scroll-dy, -1) * 32px))) scale(0.3); opacity: 0; }
+}
+@keyframes scrollTrailRing {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+.scroll-trail {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2147483646;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(91,164,245,0.85) 0%, rgba(37,99,235,0.35) 50%, transparent 100%);
+  box-shadow: 0 0 14px rgba(91,164,245,0.6), 0 0 28px rgba(37,99,235,0.25);
+  animation: scrollTrailAnim 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.scroll-trail::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(91,164,245,0.5);
+  animation: scrollTrailRing 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 
 /* ===== SCROLL REVEAL ===== */
@@ -731,6 +767,7 @@ img { display: block; }
 }
 .stat-card:nth-child(2) { animation-delay: 1.5s; }
 .stat-card:nth-child(3) { animation-delay: 3s; }
+.stat-card-wide { min-width: 180px; padding: 22px 52px; }
 .stat-card:hover {
   border-color: rgba(255,255,255,0.20); background: rgba(255,255,255,0.06);
   transform: translateY(-4px);
