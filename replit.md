@@ -39,6 +39,7 @@ src/
 ## Development
 - Run: `pnpm run dev` (starts on port 5000)
 - Build: `pnpm run build`
+- Performance: animated background now uses a capped-DPR canvas particle layer plus lightweight GPU-transformed glow/grid effects.
 
 ## Deployment
 - Target: Static site
@@ -51,6 +52,7 @@ src/
 - Player ranks with gold/silver/bronze highlighting for top 3
 - Region badges: NA (blue), EU (green), AS (red), OC (purple)
 - Player heads fetched from mc-heads.net
+- Navbar dropdowns render above the sticky header without clipping and use high-contrast glass styling.
 
 ## Secrets
 - `GITHUB_TOKEN` — GitHub Personal Access Token (available via env)

@@ -13,6 +13,8 @@ export default function GlobalGlow() {
       <div className="gg-bottom-center" />
       <div className="gg-edge-left" />
       <div className="gg-edge-right" />
+      <div className="gg-grid" />
+      <div className="gg-scanline" />
     </div>
   );
 }
