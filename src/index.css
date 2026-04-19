@@ -122,6 +122,57 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   pointer-events: none;
   z-index: 9999;
 }
+.tap-burst {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2147483647;
+}
+.tap-burst::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(91,164,245,0.44) 45%, transparent 72%);
+  box-shadow: 0 0 20px rgba(91,164,245,0.55), 0 0 34px rgba(240,192,64,0.22);
+  animation: tapBurstCore 0.58s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.tap-burst::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(91,164,245,0.55);
+  animation: tapBurstRing 0.58s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.tap-spark {
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  width: 2px;
+  height: 11px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,192,64,0));
+  transform: rotate(var(--angle)) translateY(-5px);
+  transform-origin: 1px 1px;
+  animation: tapSpark 0.52s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes tapBurstCore {
+  0% { transform: scale(0.25); opacity: 0.98; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+@keyframes tapBurstRing {
+  0% { transform: scale(0.25); opacity: 0.9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+@keyframes tapSpark {
+  0% { opacity: 0.95; transform: rotate(var(--angle)) translateY(-4px) scaleY(0.3); }
+  100% { opacity: 0; transform: rotate(var(--angle)) translateY(-26px) scaleY(1); }
+}
 
 /* ===== SCROLL REVEAL ===== */
 .reveal {
@@ -1295,7 +1346,6 @@ img { display: block; }
 .info-btn,
 .discord-btn,
 .dj-choice,
-.social-icon-btn,
 .category-tab,
 .tier-player-row,
 .modal-tab-btn,
@@ -1317,8 +1367,7 @@ a.player-cell,
 .nav-dropdown-trigger:hover,
 .go-home-btn:hover,
 .back-link:hover,
-.info-btn:hover,
-.social-icon-btn:hover {
+.info-btn:hover {
   transform: translateY(-2px) scale(1.03);
 }
 
@@ -1328,7 +1377,6 @@ a.player-cell,
 .hero-btn:active,
 .go-home-btn:active,
 .discord-btn:active,
-.social-icon-btn:active,
 .modal-tab-btn:active,
 .modal-close:active,
 .dj-close:active,
@@ -1562,21 +1610,18 @@ a.player-cell,
 
 /* ===== DISCORD SECTION ===== */
 .discord-section {
-  padding: 48px 0 52px;
+  padding: 44px 0 44px;
   border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 52px;
+  margin-bottom: 34px;
   display: flex;
-  gap: 32px;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 .discord-card {
   background: rgba(12,14,22,0.85);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   padding: 28px 32px;
-  flex: 1; min-width: 260px;
+  width: min(100%, 520px);
   text-align: center;
   backdrop-filter: blur(12px);
   position: relative; overflow: hidden;
@@ -1588,10 +1633,19 @@ a.player-cell,
 }
 .discord-title {
   font-size: 1.25rem; font-weight: 800; color: var(--text);
-  margin-bottom: 20px; line-height: 1.3;
+  margin-bottom: 8px; line-height: 1.3;
+}
+.discord-subtitle {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 .discord-btns-row {
-  display: flex; flex-direction: column; gap: 10px; align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
 .discord-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -1616,83 +1670,46 @@ a.player-cell,
   box-shadow: 0 8px 30px rgba(200,120,50,0.55);
 }
 
-.discord-stats { margin-top: 4px; }
-.discord-stat-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 0;
-  border-top: 1px solid rgba(255,255,255,0.06);
+.game-modes-bottom {
+  padding: 28px 0 58px;
+  border-top: 1px solid rgba(255,255,255,0.07);
 }
-.discord-stat-label {
-  font-size: 0.78rem; color: var(--text-muted);
+.game-modes-chip-grid {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-.discord-stat-value {
-  font-size: 0.92rem; font-weight: 700; color: var(--text);
-}
-
-.community-stats-grid {
-  flex: 1; min-width: 260px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-.community-stat-card {
-  background: rgba(12,14,22,0.85);
+.game-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px; padding: 20px 24px;
-  backdrop-filter: blur(12px);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s, color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.community-stat-title {
-  font-size: 1rem; font-weight: 700; color: var(--text);
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+.game-mode-chip:hover {
+  color: var(--text);
+  background: rgba(91,164,245,0.08);
+  border-color: rgba(91,164,245,0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.28), 0 0 22px rgba(37,99,235,0.12);
 }
-.community-member-avatars {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+.game-mode-chip-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: saturate(0.65) brightness(0.85);
 }
-.community-avatar-ring {
-  border-radius: 6px; overflow: hidden;
-  border: 2px solid rgba(255,255,255,0.1);
+.game-mode-chip:hover .game-mode-chip-icon {
+  filter: saturate(1) brightness(1.05);
 }
-.community-avatar-more {
-  font-size: 0.78rem; color: var(--text-muted); margin-left: 4px;
-}
-.community-tester-row {
-  display: flex; align-items: center; gap: 16px;
-}
-.community-tester-stat {
-  display: flex; flex-direction: column; gap: 4px;
-}
-
-/* ===== SOCIAL SECTION ===== */
-.social-section {
-  padding: 48px 0 60px;
-  display: flex; justify-content: center;
-}
-.social-icons-row {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
-}
-.social-icon-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 58px; height: 58px; border-radius: 12px;
-  background: rgba(14,16,26,0.9);
-  border: 1px solid rgba(255,255,255,0.09);
-  color: rgba(255,255,255,0.75);
-  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative; overflow: hidden;
-}
-.social-icon-btn::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent);
-  opacity: 0; transition: opacity 0.2s;
-}
-.social-icon-btn:hover {
-  color: #fff;
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(25,27,42,0.95);
-  transform: translateY(-3px) scale(1.06);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.12);
-}
-.social-icon-btn:hover::before { opacity: 1; }
 
 /* ===== SITE FOOTER ===== */
 .site-footer {
@@ -1865,7 +1882,7 @@ a.player-cell,
   .hero-title { font-size: 3rem; letter-spacing: 3px; }
   .hero-stats { flex-direction: column; gap: 10px; }
   .about-inner { grid-template-columns: 1fr; gap: 28px; }
-  .discord-section { flex-direction: column; }
+  .discord-section { flex-direction: column; align-items: center; }
   .dropdown-menu-wide { grid-template-columns: 1fr; min-width: 160px; }
   .rankings-header-title { font-size: 1.5rem; }
   .footer-inner { flex-direction: column; gap: 32px; }
@@ -1883,8 +1900,10 @@ a.player-cell,
   .profile-header { flex-direction: column; text-align: center; }
   .profile-meta { justify-content: center; }
   .hero-title { font-size: 2.2rem; letter-spacing: 2px; }
-  .social-icon-btn { width: 50px; height: 50px; }
+  .discord-btns-row { grid-template-columns: 1fr; }
   .game-modes-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .game-modes-chip-grid { gap: 8px; }
+  .game-mode-chip { width: 100%; justify-content: center; }
   .footer-cols { flex-direction: column; gap: 24px; }
   .footer-inner { padding: 36px 20px 24px; }
 }

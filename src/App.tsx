@@ -28,7 +28,6 @@ function RippleLayer() {
       '.nav-dropdown-trigger',
       '.hero-btn',
       '.discord-btn',
-      '.social-icon-btn',
       '.category-tab',
       '.tier-player-row',
       '.player-row',
@@ -42,6 +41,7 @@ function RippleLayer() {
     ].join(',');
 
     const handlePointerDown = (e: PointerEvent) => {
+      spawnTapBurst(e);
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
       if (target.closest('.dropdown-menu')) {
@@ -52,6 +52,23 @@ function RippleLayer() {
       }
       spawnRipple(target, e);
     };
+
+    function spawnTapBurst(e: PointerEvent) {
+      const burst = document.createElement('span');
+      burst.className = 'tap-burst';
+      burst.style.left = `${e.clientX}px`;
+      burst.style.top = `${e.clientY}px`;
+
+      for (let i = 0; i < 6; i++) {
+        const spark = document.createElement('span');
+        spark.className = 'tap-spark';
+        spark.style.setProperty('--angle', `${i * 60}deg`);
+        burst.appendChild(spark);
+      }
+
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 620);
+    }
 
     function spawnRipple(target: HTMLElement, e: PointerEvent) {
       const rect = target.getBoundingClientRect();
