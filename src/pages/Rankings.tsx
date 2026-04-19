@@ -213,9 +213,8 @@ export default function Rankings() {
           </div>
         ) : (
           <div className="tier-columns-wrapper">
-            {/* T1 – T4 in a row */}
             <div className="tier-columns">
-              {(['T1','T2','T3','T4'] as const).map((tier) => {
+              {(['T1','T2','T3','T4','T5'] as const).map((tier) => {
                 const col = tierColumns.find(c => c.tier === tier);
                 const players = col?.players ?? [];
                 const cfg = TIER_CONFIG[tier];
@@ -263,52 +262,6 @@ export default function Rankings() {
                 );
               })}
             </div>
-
-            {/* T5 – full width row */}
-            {(() => {
-              const col = tierColumns.find(c => c.tier === 'T5');
-              const players = col?.players ?? [];
-              const cfg = TIER_CONFIG['T5'];
-              return (
-                <div className="tier-column tier-column-t5-full" style={{ '--tier-glow': cfg.glow } as React.CSSProperties}>
-                  <div
-                    className="tier-column-header"
-                    style={{
-                      background: cfg.gradient,
-                      borderBottom: `1px solid ${cfg.border}`,
-                      boxShadow: `0 2px 16px ${cfg.glow}`,
-                    }}
-                  >
-                    <div className="tier-header-top">
-                      <span className="tier-header-label" style={{ color: cfg.textColor }}>
-                        {cfg.label}
-                      </span>
-                      <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65, marginLeft: 6 }}>
-                        — {players.length} {players.length === 1 ? 'player' : 'players'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="tier-t5-players-grid">
-                    {players.length === 0 ? (
-                      <div className="tier-column-empty" style={{ width: '100%' }}>
-                        <span>No players</span>
-                      </div>
-                    ) : (
-                      players.map((player, i) => (
-                        <Link key={player.id} to={`/player/${player.username}`} className="tier-player-row tier-player-row-t5">
-                          <span className="tier-player-index">{i + 1}</span>
-                          <PlayerAvatar username={player.username} size={22} />
-                          <span className="tier-player-name">{player.username}</span>
-                          <svg className="tier-player-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <polyline points="9 18 15 12 9 6" />
-                          </svg>
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         )}
       </div>
