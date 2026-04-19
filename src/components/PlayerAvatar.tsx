@@ -19,6 +19,8 @@ export default function PlayerAvatar({ username, size = 32, className = '' }: Pl
       alt={username}
       width={size}
       height={size}
+      loading="lazy"
+      decoding="async"
       className={`player-avatar ${className}`}
       onError={() => setFailed(true)}
       style={{ imageRendering: 'pixelated' }}
