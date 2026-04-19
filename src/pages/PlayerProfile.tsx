@@ -1,13 +1,23 @@
 import { useParams, Link } from 'react-router-dom';
-import { PLAYERS, CATEGORIES, getTitle } from '../data/players';
+import { CATEGORIES, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
+import { usePlayer, usePlayers } from '../hooks/usePlayers';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
 import { ArrowLeft } from 'lucide-react';
 
 export default function PlayerProfile() {
   const { username } = useParams<{ username: string }>();
-  const player = PLAYERS.find(p => p.username.toLowerCase() === username?.toLowerCase());
+  const { player, loading } = usePlayer(username);
+  const { players } = usePlayers();
+
+  if (loading) {
+    return (
+      <div className="not-found-page">
+        <p style={{ color: 'var(--text-dim)' }}>Loading...</p>
+      </div>
+    );
+  }
 
   if (!player) {
     return (
@@ -29,7 +39,7 @@ export default function PlayerProfile() {
     );
   }
 
-  const sorted = [...PLAYERS].sort((a, b) => b.points - a.points);
+  const sorted = [...players].sort((a, b) => b.points - a.points);
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
 
