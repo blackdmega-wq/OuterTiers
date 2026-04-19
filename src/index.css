@@ -265,33 +265,76 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 /* ===== SCROLL TRAIL ===== */
 @keyframes scrollTrailAnim {
-  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-  60%  { opacity: 0.3; }
-  100% { transform: translate(-50%, calc(-50% + calc(var(--scroll-dy, -1) * 32px))) scale(0.3); opacity: 0; }
+  0%   {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.85;
+    filter: blur(0px);
+  }
+  30%  { opacity: 0.7; transform: translate(-50%, -50%) scale(1.15); }
+  70%  { opacity: 0.25; filter: blur(1px); }
+  100% {
+    transform: translate(-50%, calc(-50% + calc(var(--scroll-dy, -1) * 44px))) scale(0.1);
+    opacity: 0;
+    filter: blur(3px);
+  }
 }
 @keyframes scrollTrailRing {
-  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.6; }
-  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.7; }
+  50%  { opacity: 0.35; }
+  100% { transform: translate(-50%, -50%) scale(3.2); opacity: 0; }
+}
+@keyframes scrollTrailRing2 {
+  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.45; }
+  100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+@keyframes scrollTrailTail {
+  0%   { opacity: 0.55; transform: translate(-50%, -50%) scaleY(1); }
+  100% { opacity: 0; transform: translate(-50%, calc(-50% + calc(var(--scroll-dy, -1) * 22px))) scaleY(2.8); }
 }
 .scroll-trail {
   position: fixed;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 2147483646;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(91,164,245,0.85) 0%, rgba(37,99,235,0.35) 50%, transparent 100%);
-  box-shadow: 0 0 14px rgba(91,164,245,0.6), 0 0 28px rgba(37,99,235,0.25);
-  animation: scrollTrailAnim 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.95) 0%,
+    rgba(91,164,245,0.9) 35%,
+    rgba(37,99,235,0.5) 65%,
+    transparent 100%);
+  box-shadow:
+    0 0 10px rgba(91,164,245,0.9),
+    0 0 22px rgba(37,99,235,0.55),
+    0 0 40px rgba(91,164,245,0.25);
+  animation: scrollTrailAnim 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.scroll-trail::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 22px;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    rgba(91,164,245,0.0) 0%,
+    rgba(91,164,245,0.55) 40%,
+    rgba(255,255,255,0.25) 100%
+  );
+  transform-origin: 50% 0%;
+  animation: scrollTrailTail 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 .scroll-trail::after {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -5px;
   border-radius: 50%;
-  border: 1px solid rgba(91,164,245,0.5);
-  animation: scrollTrailRing 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  border: 1px solid rgba(91,164,245,0.6);
+  box-shadow: 0 0 6px rgba(91,164,245,0.3);
+  animation: scrollTrailRing 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
 }
 
 /* ===== SCROLL REVEAL ===== */
@@ -820,8 +863,15 @@ img { display: block; }
 
 /* Hero Stats Row */
 .hero-stats-row {
-  display: flex; align-items: stretch; justify-content: center; gap: 16px;
-  margin-bottom: 36px; flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 14px;
+  margin-bottom: 36px;
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .stat-card {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -829,12 +879,14 @@ img { display: block; }
   border-radius: 14px; padding: 22px 34px;
   backdrop-filter: blur(12px);
   transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
-  min-width: 130px;
   animation: shimmerBorder 5s ease-in-out infinite;
 }
 .stat-card:nth-child(2) { animation-delay: 1.5s; }
 .stat-card:nth-child(3) { animation-delay: 3s; }
-.stat-card-wide { min-width: 180px; padding: 22px 52px; }
+.stat-card-wide {
+  grid-column: 1 / -1;
+  padding: 18px 34px;
+}
 
 .stat-card-label {
   display: flex; align-items: center; gap: 5px;
@@ -2103,7 +2155,8 @@ a.player-cell,
 @media (max-width: 900px) {
   .col-tiers { display: none; }
   .hero-title { font-size: 3rem; letter-spacing: 3px; }
-  .hero-stats { flex-direction: column; gap: 10px; }
+  .hero-stats-row { grid-template-columns: 1fr; max-width: 320px; }
+  .stat-card-wide { grid-column: auto; }
   .about-inner { grid-template-columns: 1fr; gap: 28px; }
   .discord-section { flex-direction: column; align-items: center; }
   .dropdown-menu-wide { grid-template-columns: 1fr; min-width: 160px; }
