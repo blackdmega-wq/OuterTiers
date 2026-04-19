@@ -21,6 +21,8 @@ export interface Player {
   region: Region;
   points: number;
   tiers: PlayerTiers;
+  currentTier?: TierLevel;
+  peakTier?: TierLevel;
 }
 
 export function getTitle(points: number): string {
@@ -51,13 +53,15 @@ export const TIER_COLS: (keyof PlayerTiers)[] = [
   'ogvanilla', 'vanilla', 'uhc', 'pot', 'nethop', 'smp', 'sword', 'axe', 'mace', 'speed'
 ];
 
-// No players — to be filled with real data
 export const PLAYERS: Player[] = [];
 
-export function getCategoryTiers(category: keyof PlayerTiers): { tier: TierLevel; players: Player[] }[] {
+export function getCategoryTiers(
+  category: keyof PlayerTiers,
+  players: Player[] = PLAYERS
+): { tier: TierLevel; players: Player[] }[] {
   const tierOrder: TierLevel[] = ['T1', 'T2', 'T3', 'T4', 'T5'];
   const grouped: Record<string, Player[]> = {};
-  for (const player of PLAYERS) {
+  for (const player of players) {
     const tier = player.tiers[category];
     if (tier === '-') continue;
     if (!grouped[tier]) grouped[tier] = [];
