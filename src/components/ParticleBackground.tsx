@@ -11,6 +11,7 @@ interface Particle {
   color: string;
   type: 'dot' | 'orb' | 'spark' | 'ember';
   pulse: number;
+  cachedCanvas?: HTMLCanvasElement;
 }
 
 const COLORS = [
@@ -20,6 +21,23 @@ const COLORS = [
   '220,38,38',
   '239,68,68',
 ];
+
+function buildCachedCanvas(radius: number, color: string): HTMLCanvasElement {
+  const size = Math.ceil(radius * 2) + 2;
+  const oc = document.createElement('canvas');
+  oc.width = size;
+  oc.height = size;
+  const cx = size / 2;
+  const octx = oc.getContext('2d')!;
+  const grad = octx.createRadialGradient(cx, cx, 0, cx, cx, radius);
+  grad.addColorStop(0, `rgba(${color},1)`);
+  grad.addColorStop(1, `rgba(${color},0)`);
+  octx.beginPath();
+  octx.arc(cx, cx, radius, 0, Math.PI * 2);
+  octx.fillStyle = grad;
+  octx.fill();
+  return oc;
+}
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,13 +55,13 @@ export default function ParticleBackground() {
     let dpr = Math.min(window.devicePixelRatio || 1, 1.35);
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const compact = width < 720;
-    const TARGET_FPS = reducedMotion ? 18 : compact ? 30 : 42;
+    const TARGET_FPS = reducedMotion ? 18 : compact ? 28 : 38;
     const FRAME_MS = 1000 / TARGET_FPS;
-    const DOT_COUNT = reducedMotion ? 10 : compact ? 18 : 30;
-    const ORB_COUNT = reducedMotion ? 1 : compact ? 2 : 4;
-    const SPARK_COUNT = reducedMotion ? 0 : compact ? 5 : 9;
-    const EMBER_COUNT = reducedMotion ? 4 : compact ? 10 : 18;
-    const MAX_DIST = compact ? 82 : 112;
+    const DOT_COUNT = reducedMotion ? 10 : compact ? 16 : 26;
+    const ORB_COUNT = reducedMotion ? 1 : compact ? 2 : 3;
+    const SPARK_COUNT = reducedMotion ? 0 : compact ? 4 : 7;
+    const EMBER_COUNT = reducedMotion ? 4 : compact ? 8 : 14;
+    const MAX_DIST = compact ? 80 : 108;
     const MAX_DIST_SQ = MAX_DIST * MAX_DIST;
     const particles: Particle[] = [];
     const dots: Particle[] = [];
@@ -79,17 +97,20 @@ export default function ParticleBackground() {
     }
 
     for (let i = 0; i < ORB_COUNT; i++) {
+      const radius = Math.random() * 64 + 52;
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.06,
         vy: (Math.random() - 0.5) * 0.06,
-        radius: Math.random() * 64 + 52,
+        radius,
         opacity: Math.random() * 0.035 + 0.012,
         fadeDir: Math.random() > 0.5 ? 1 : -1,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        color,
         type: 'orb',
         pulse: Math.random() * Math.PI * 2,
+        cachedCanvas: buildCachedCanvas(radius, color),
       });
     }
 
@@ -109,17 +130,21 @@ export default function ParticleBackground() {
     }
 
     for (let i = 0; i < EMBER_COUNT; i++) {
+      const radius = Math.random() * 1.55 + 0.75;
+      const color = Math.random() > 0.72 ? '240,192,64' : '239,68,68';
+      const drawRadius = radius * 3.2;
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.26,
         vy: -Math.random() * 0.5 - 0.12,
-        radius: Math.random() * 1.55 + 0.75,
+        radius,
         opacity: Math.random() * 0.48 + 0.16,
         fadeDir: Math.random() > 0.5 ? 1 : -1,
-        color: Math.random() > 0.72 ? '240,192,64' : '239,68,68',
+        color,
         type: 'ember',
         pulse: Math.random() * Math.PI * 2,
+        cachedCanvas: buildCachedCanvas(drawRadius, color),
       });
     }
 
@@ -172,14 +197,10 @@ export default function ParticleBackground() {
           if (p.y > height + p.radius + 26) p.y = -p.radius;
         }
 
-        if (p.type === 'orb') {
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          grad.addColorStop(0, `rgba(${p.color},${p.opacity})`);
-          grad.addColorStop(1, `rgba(${p.color},0)`);
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
-          ctx.fill();
+        if (p.type === 'orb' && p.cachedCanvas) {
+          ctx.globalAlpha = p.opacity;
+          ctx.drawImage(p.cachedCanvas, p.x - p.radius - 1, p.y - p.radius - 1);
+          ctx.globalAlpha = 1;
         } else if (p.type === 'spark') {
           const tail = 20 + Math.sin(p.pulse) * 7;
           const angle = Math.atan2(p.vy, p.vx);
@@ -193,15 +214,12 @@ export default function ParticleBackground() {
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255,255,255,${p.opacity * 0.9})`;
           ctx.fill();
-        } else if (p.type === 'ember') {
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.2);
-          grad.addColorStop(0, `rgba(${p.color},${p.opacity})`);
-          grad.addColorStop(1, `rgba(${p.color},0)`);
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius * 3.2, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
-          ctx.fill();
-        } else {
+        } else if (p.type === 'ember' && p.cachedCanvas) {
+          const dr = p.radius * 3.2;
+          ctx.globalAlpha = p.opacity;
+          ctx.drawImage(p.cachedCanvas, p.x - dr - 1, p.y - dr - 1);
+          ctx.globalAlpha = 1;
+        } else if (p.type === 'dot') {
           const r = p.radius + Math.sin(p.pulse) * 0.18;
           ctx.beginPath();
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
@@ -253,6 +271,7 @@ export default function ParticleBackground() {
         width: '100%', height: '100%',
         zIndex: 0, pointerEvents: 'none', opacity: 0.92,
         mixBlendMode: 'screen',
+        willChange: 'auto',
       }}
     />
   );
