@@ -13,9 +13,9 @@ const DISCORD_SVG = (size = 22) => (
 const LIVE_TEST_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
 const HIGH_TIER_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
 
-function StatCard({ value, label, icon }: { value: string | number; label: string; icon: React.ReactNode }) {
+function StatCard({ value, label, icon, wide }: { value: string | number; label: string; icon: React.ReactNode; wide?: boolean }) {
   return (
-    <div className="stat-card ripple-card">
+    <div className={`stat-card ripple-card${wide ? ' stat-card-wide' : ''}`}>
       <div className="stat-card-icon">{icon}</div>
       <div className="stat-card-value">{value}</div>
       <div className="stat-card-label">{label}</div>
@@ -108,6 +108,7 @@ export default function Home() {
             }
           />
           <StatCard
+            wide
             value="5 Tiers"
             label="Ranking System"
             icon={
@@ -192,22 +193,6 @@ export default function Home() {
             </table>
           </div>
         )}
-      </div>
-
-      {/* ===== ALL GAME MODES (under Top 100) ===== */}
-      <div className="game-modes-bottom animate-fade-up" style={{ borderTop: 'none', paddingTop: 0, paddingBottom: 32 }}>
-        <div className="section-header">
-          <div className="section-label">All Game Modes</div>
-          <h2 className="section-heading">Every Mode on OuterTiers</h2>
-        </div>
-        <div className="game-modes-chip-grid">
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
-            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
-              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
-              <span>{cat.label}</span>
-            </Link>
-          ))}
-        </div>
       </div>
 
       {/* ===== ABOUT / DESCRIPTION ===== */}
@@ -305,24 +290,12 @@ export default function Home() {
         <div className="section-header">
           <div className="section-label">Game Modes</div>
           <h2 className="section-heading">Every Mode on OuterTiers</h2>
-          <p className="section-sub" style={{ marginTop: 8 }}>All competitive categories tracked and ranked on OuterTiers.</p>
         </div>
-        <div className="game-modes-full-grid">
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat, i) => (
-            <Link
-              key={cat.id}
-              to={`/rankings/${cat.id}`}
-              className="game-mode-full-card ripple-card animate-fade-up btn-press"
-              style={{ animationDelay: `${i * 0.045}s` }}
-            >
-              <img src={cat.icon} alt={cat.label} className="game-mode-full-icon" />
-              <div className="game-mode-full-info">
-                <span className="game-mode-full-label">{cat.label}</span>
-                <span className="game-mode-full-sub">View Rankings</span>
-              </div>
-              <svg className="game-mode-full-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+        <div className="game-modes-chip-grid">
+          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
+            <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
+              <img src={cat.icon} alt="" className="game-mode-chip-icon" />
+              <span>{cat.label}</span>
             </Link>
           ))}
         </div>
