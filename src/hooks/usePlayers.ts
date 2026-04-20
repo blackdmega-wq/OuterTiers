@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Player } from '../data/players';
 
-// Use VITE_API_URL env var if set (for production), otherwise use the Replit API
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://eaf5f4cd-1a77-4dba-80ac-7500213340a4-00-2z4cutntv6hop.riker.replit.dev';
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
 interface UsePlayersResult {
   players: Player[];
