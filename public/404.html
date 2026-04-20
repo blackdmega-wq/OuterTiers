@@ -1,18 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>OuterTiers</title>
-  <script>
-    // GitHub Pages SPA fallback
-    // Encode the path into the query string so index.html can decode it
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/' +
-      l.pathname.slice(1).split('/').slice(0, 1).join('/') +
-      '/?/' + l.pathname.slice(1) + (l.search ? '&' + l.search.slice(1) : '') + l.hash
-    );
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OuterTiers — Not Found</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0b14; color: #c0c4d8;
+      font-family: Inter, system-ui, sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .wrap { text-align: center; }
+    h1 { font-size: 5rem; font-weight: 900; color: #fff; line-height: 1; }
+    p  { color: #666; margin: 12px 0 28px; font-size: 1rem; }
+    a  {
+      display: inline-block; padding: 10px 24px; border-radius: 8px;
+      background: rgba(91,164,245,0.12); border: 1px solid rgba(91,164,245,0.3);
+      color: #5ba4f5; font-weight: 600; text-decoration: none;
+    }
+    a:hover { background: rgba(91,164,245,0.2); }
+  </style>
 </head>
-<body></body>
+<body>
+  <div class="wrap">
+    <h1>404</h1>
+    <p>This page doesn't exist.</p>
+    <a href="/">← Go Home</a>
+  </div>
+</body>
 </html>

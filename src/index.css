@@ -2215,6 +2215,13 @@ a.player-cell,
   }
   .top-card-tiers .cat-tier-badge { min-width: 24px !important; }
   .top-card-tiers .cat-tier-text { font-size: 0.48rem !important; }
+  /* 5-column grid: 10 categories = 2 clean rows of 5 on mobile */
+  .top-card-tiers .tier-badges-row {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px 3px !important;
+    flex-wrap: unset !important;
+  }
   /* Points inline next to name */
   .top-card-mobile-pts {
     display: inline-flex !important;

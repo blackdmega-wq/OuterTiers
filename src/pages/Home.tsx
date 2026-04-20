@@ -264,10 +264,6 @@ export default function Home() {
                           </div>
                           <div className="player-info">
                             <span className="player-name">{player.username}</span>
-                            <span className="player-title">
-                              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.7 }} />
-                              {player.points} pts
-                            </span>
                           </div>
                         </Link>
                       </td>
