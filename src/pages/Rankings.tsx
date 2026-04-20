@@ -4,101 +4,83 @@ import { CATEGORIES, TIER_COLS, getCategoryTiers, getTitle } from '../data/playe
 import type { Player, PlayerTiers } from '../data/players';
 import { usePlayers } from '../hooks/usePlayers';
 import CategoryTierBadge from '../components/CategoryTierBadge';
-import PlayerAvatar from '../components/PlayerAvatar';
 import InfoModal from '../components/InfoModal';
 import { Info } from 'lucide-react';
 
-const RANK_STYLE: Record<number, { bg: string; glow: string; shimmerClass: string }> = {
+const RANK_STYLE: Record<number, { bg: string; glow: string; border: string; shimmerClass: string }> = {
   1: {
-    bg: 'linear-gradient(135deg, #b8820a 0%, #f0c040 55%, #d4a020 100%)',
-    glow: 'rgba(240,192,64,0.55)',
+    bg: 'linear-gradient(145deg, #a06a00 0%, #f0c040 45%, #e8b820 70%, #c89010 100%)',
+    glow: 'rgba(240,192,64,0.6)',
+    border: 'rgba(240,192,64,0.35)',
     shimmerClass: 'shimmer-gold',
   },
   2: {
-    bg: 'linear-gradient(135deg, #6a7a8a 0%, #b0c0d0 55%, #808fa0 100%)',
-    glow: 'rgba(176,192,208,0.4)',
+    bg: 'linear-gradient(145deg, #4a5a6a 0%, #aabccc 45%, #98acbc 70%, #7890a0 100%)',
+    glow: 'rgba(170,188,204,0.45)',
+    border: 'rgba(170,188,204,0.25)',
     shimmerClass: 'shimmer-silver',
   },
   3: {
-    bg: 'linear-gradient(135deg, #7a4820 0%, #c07830 55%, #8a5828 100%)',
-    glow: 'rgba(192,120,48,0.4)',
+    bg: 'linear-gradient(145deg, #5a2a00 0%, #c07830 45%, #b06020 70%, #804010 100%)',
+    glow: 'rgba(192,120,48,0.5)',
+    border: 'rgba(192,120,48,0.3)',
     shimmerClass: 'shimmer-bronze',
   },
 };
 
-const TIER_CONFIG: Record<string, {
-  label: string;
-  gradient: string;
-  border: string;
-  glow: string;
-  textColor: string;
-}> = {
-  T1: {
-    label: 'Tier 1',
-    gradient: 'linear-gradient(135deg, rgba(212,160,23,0.22) 0%, rgba(255,200,40,0.10) 100%)',
-    border: 'rgba(212,160,23,0.7)',
-    glow: 'rgba(212,160,23,0.25)',
-    textColor: '#f0c040',
-  },
-  T2: {
-    label: 'Tier 2',
-    gradient: 'linear-gradient(135deg, rgba(150,160,175,0.18) 0%, rgba(180,190,200,0.08) 100%)',
-    border: 'rgba(170,180,195,0.55)',
-    glow: 'rgba(160,170,185,0.18)',
-    textColor: '#c8d0da',
-  },
-  T3: {
-    label: 'Tier 3',
-    gradient: 'linear-gradient(135deg, rgba(160,90,30,0.20) 0%, rgba(200,120,40,0.09) 100%)',
-    border: 'rgba(185,110,45,0.55)',
-    glow: 'rgba(175,100,35,0.18)',
-    textColor: '#d4884a',
-  },
-  T4: {
-    label: 'Tier 4',
-    gradient: 'linear-gradient(135deg, rgba(40,50,80,0.30) 0%, rgba(30,35,55,0.15) 100%)',
-    border: 'rgba(60,75,110,0.45)',
-    glow: 'rgba(50,65,100,0.10)',
-    textColor: '#8899bb',
-  },
-  T5: {
-    label: 'Tier 5',
-    gradient: 'linear-gradient(135deg, rgba(28,30,42,0.35) 0%, rgba(20,22,32,0.15) 100%)',
-    border: 'rgba(50,52,68,0.40)',
-    glow: 'rgba(40,42,58,0.08)',
-    textColor: '#666880',
-  },
+const TIER_CONFIG: Record<string, { label: string; gradient: string; border: string; glow: string; textColor: string }> = {
+  T1: { label: 'Tier 1', gradient: 'linear-gradient(135deg, rgba(212,160,23,0.22) 0%, rgba(255,200,40,0.10) 100%)', border: 'rgba(212,160,23,0.7)', glow: 'rgba(212,160,23,0.25)', textColor: '#f0c040' },
+  T2: { label: 'Tier 2', gradient: 'linear-gradient(135deg, rgba(91,164,245,0.18) 0%, rgba(120,180,255,0.08) 100%)', border: 'rgba(91,164,245,0.55)', glow: 'rgba(91,164,245,0.2)', textColor: '#7ab8ff' },
+  T3: { label: 'Tier 3', gradient: 'linear-gradient(135deg, rgba(76,199,104,0.18) 0%, rgba(100,220,120,0.08) 100%)', border: 'rgba(76,199,104,0.5)', glow: 'rgba(76,199,104,0.18)', textColor: '#5ddb78' },
+  T4: { label: 'Tier 4', gradient: 'linear-gradient(135deg, rgba(192,126,245,0.18) 0%, rgba(200,140,255,0.08) 100%)', border: 'rgba(192,126,245,0.45)', glow: 'rgba(192,126,245,0.15)', textColor: '#cf97f8' },
+  T5: { label: 'Tier 5', gradient: 'linear-gradient(135deg, rgba(28,30,42,0.35) 0%, rgba(20,22,32,0.15) 100%)', border: 'rgba(50,52,68,0.40)', glow: 'rgba(40,42,58,0.08)', textColor: '#666880' },
 };
 
 function TopCard({ player, rank }: { player: Player; rank: number }) {
   const rs = RANK_STYLE[rank];
+  const [bustFailed, setBustFailed] = useState(false);
+
   return (
-    <Link to={`/player/${player.username}`} className={`top-card top-card-rank-${rank}`}>
-      <div
-        className="top-card-stripe"
-        style={{ background: rs.bg, boxShadow: `4px 0 24px ${rs.glow}` }}
-      >
+    <Link
+      to={`/player/${player.username}`}
+      className={`top-card top-card-rank-${rank}`}
+      style={{ boxShadow: `0 0 0 1px ${rs.border}, 0 8px 32px rgba(0,0,0,0.3)` }}
+    >
+      <div className="top-card-stripe" style={{ background: rs.bg }}>
         <div className={`top-card-stripe-shimmer ${rs.shimmerClass}`} />
         <span className="top-card-rank-num">{rank}.</span>
+        <div className="top-card-bust-wrap">
+          <img
+            src={bustFailed
+              ? `https://mc-heads.net/avatar/${player.username}/80`
+              : `https://mc-heads.net/player/${player.username}`}
+            alt={player.username}
+            className="top-card-bust"
+            onError={() => setBustFailed(true)}
+          />
+        </div>
       </div>
-      <div className="top-card-avatar">
-        <PlayerAvatar username={player.username} size={54} />
-      </div>
+
       <div className="top-card-content">
         <div className="top-card-name-row">
           <span className="top-card-name">{player.username}</span>
           <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
         </div>
         <div className="top-card-subtitle">
-          <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.8 }} />
+          <span className="top-card-diamond">◆</span>
           <span>{getTitle(player.points)}</span>
-          <span className="top-card-pts">({player.points} pts)</span>
+          <span className="top-card-pts">· {player.points} pts</span>
         </div>
         <div className="top-card-tiers">
           <span className="top-card-tiers-label">TIERS</span>
-          <div className="tier-badges-row">
+          <div className="tier-badges-row" style={{ flexWrap: 'wrap', gap: '5px 4px' }}>
             {TIER_COLS.map(col => (
-              <CategoryTierBadge key={col} categoryId={col} tier={player.tiers[col]} />
+              <CategoryTierBadge
+                key={col}
+                categoryId={col}
+                tier={player.tiers[col]}
+                rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
+              />
             ))}
           </div>
         </div>
@@ -132,10 +114,7 @@ export default function Rankings() {
 
   const isOverall = category === 'overall';
   const sorted = [...players].sort((a, b) => b.points - a.points);
-  const tierColumns = !isOverall
-    ? getCategoryTiers(category as keyof PlayerTiers, players)
-    : [];
-
+  const tierColumns = !isOverall ? getCategoryTiers(category as keyof PlayerTiers, players) : [];
   const currentCat = CATEGORIES.find(c => c.id === category);
 
   return (
@@ -146,9 +125,7 @@ export default function Rankings() {
         <div className="rankings-page-header-glow" />
         <div className="rankings-header-inner">
           <div className="rankings-header-eyebrow">
-            {currentCat && (
-              <img src={currentCat.icon} alt={currentCat.label} width={14} height={14} style={{ opacity: 0.75 }} />
-            )}
+            {currentCat && <img src={currentCat.icon} alt={currentCat.label} width={14} height={14} style={{ opacity: 0.75 }} />}
             <span>Leaderboard</span>
           </div>
           <h1 className="rankings-header-title">
@@ -192,10 +169,11 @@ export default function Rankings() {
             ) : (
               <>
                 <div className="top3-cards">
-                  {sorted.slice(0, 3).map((p, i) => (
+                  {sorted.slice(0, Math.min(3, sorted.length)).map((p, i) => (
                     <TopCard key={p.id} player={p} rank={i + 1} />
                   ))}
                 </div>
+
                 {sorted.length > 3 && (
                   <div className="rankings-table-wrapper" style={{ marginTop: 16 }}>
                     <table className="rankings-table">
@@ -216,27 +194,36 @@ export default function Rankings() {
                             <td className="col-player">
                               <Link to={`/player/${player.username}`} className="player-cell">
                                 <div className="player-avatar-wrapper">
-                                  <PlayerAvatar username={player.username} size={40} />
+                                  <img
+                                    src={`https://mc-heads.net/avatar/${player.username}/40`}
+                                    alt={player.username}
+                                    width={40} height={40}
+                                    style={{ imageRendering: 'pixelated', borderRadius: 3, display: 'block' }}
+                                    loading="lazy"
+                                  />
                                 </div>
                                 <div className="player-info">
                                   <span className="player-name">{player.username}</span>
                                   <span className="player-title">
-                                    <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.8 }} />
+                                    <span style={{ color: '#7ab8ff', fontSize: '0.7em' }}>◆</span>
                                     {getTitle(player.points)}
-                                    <span className="player-points">({player.points} pts)</span>
+                                    <span className="player-points">· {player.points} pts</span>
                                   </span>
                                 </div>
                               </Link>
                             </td>
                             <td className="col-region">
-                              <span className={`region-badge region-${player.region.toLowerCase()}`}>
-                                {player.region}
-                              </span>
+                              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
                             </td>
                             <td className="col-tiers">
                               <div className="tier-badges-row">
                                 {TIER_COLS.map(col => (
-                                  <CategoryTierBadge key={col} categoryId={col} tier={player.tiers[col]} />
+                                  <CategoryTierBadge
+                                    key={col}
+                                    categoryId={col}
+                                    tier={player.tiers[col]}
+                                    rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
+                                  />
                                 ))}
                               </div>
                             </td>
@@ -260,16 +247,10 @@ export default function Rankings() {
                   <div key={tier} className="tier-column" style={{ '--tier-glow': cfg.glow } as React.CSSProperties}>
                     <div
                       className="tier-column-header"
-                      style={{
-                        background: cfg.gradient,
-                        borderBottom: `1px solid ${cfg.border}`,
-                        boxShadow: `0 2px 16px ${cfg.glow}`,
-                      }}
+                      style={{ background: cfg.gradient, borderBottom: `1px solid ${cfg.border}`, boxShadow: `0 2px 16px ${cfg.glow}` }}
                     >
                       <div className="tier-header-top">
-                        <span className="tier-header-label" style={{ color: cfg.textColor }}>
-                          {cfg.label}
-                        </span>
+                        <span className="tier-header-label" style={{ color: cfg.textColor }}>{cfg.label}</span>
                       </div>
                       <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65 }}>
                         {tieredPlayers.length} {tieredPlayers.length === 1 ? 'player' : 'players'}
@@ -277,15 +258,19 @@ export default function Rankings() {
                     </div>
                     <div className="tier-column-players">
                       {tieredPlayers.length === 0 ? (
-                        <div className="tier-column-empty">
-                          <span>No players</span>
-                        </div>
+                        <div className="tier-column-empty"><span>No players</span></div>
                       ) : (
                         tieredPlayers.map((player) => {
                           const rawTier = (player.rawTiers as Record<string, string | null | undefined> | undefined)?.[category];
                           return (
                             <Link key={player.id} to={`/player/${player.username}`} className="tier-player-row">
-                              <PlayerAvatar username={player.username} size={28} />
+                              <img
+                                src={`https://mc-heads.net/avatar/${player.username}/28`}
+                                alt={player.username}
+                                width={28} height={28}
+                                style={{ imageRendering: 'pixelated', borderRadius: 3, display: 'block', flexShrink: 0 }}
+                                loading="lazy"
+                              />
                               <span className="tier-player-name">{player.username}</span>
                               <TierArrows rawTier={rawTier} />
                             </Link>
