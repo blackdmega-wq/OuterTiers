@@ -116,10 +116,10 @@ function TierLabel({ tier }: { tier: string }) {
 function FeedItem({ username, category, tier, region }: FeedEntry) {
   return (
     <div className="feed-item">
-      <div className="feed-item-avatar"><PlayerAvatar username={username} size={44} /></div>
-      <div className="feed-item-name">{username}</div>
+      <div className="feed-item-avatar"><PlayerAvatar username={username} size={36} /></div>
+      <span className="feed-item-name">{username}</span>
+      <span className="feed-item-mode-pill">{category}</span>
       <div className="feed-item-right">
-        <span className="feed-item-category">{category}</span>
         <TierLabel tier={tier} />
         <RegionBadge region={region} />
       </div>
