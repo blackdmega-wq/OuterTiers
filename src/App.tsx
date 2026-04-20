@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import Rankings from './pages/Rankings';
 import PlayerProfile from './pages/PlayerProfile';
 import ApiDocs from './pages/ApiDocs';
-import Results from './pages/Results';
 
 function NotFound() {
   return (
@@ -20,9 +19,6 @@ function NotFound() {
   );
 }
 
-// ─────────────────────────────────────────────
-//  CLICK LAYER
-// ─────────────────────────────────────────────
 function ClickLayer() {
   useEffect(() => {
     const SELECTOR = [
@@ -34,13 +30,11 @@ function ClickLayer() {
 
     const onPointerDown = (e: PointerEvent) => {
       spawnClickEffect(e.clientX, e.clientY);
-
       const target = (e.target as Element).closest(SELECTOR) as HTMLElement | null;
       if (!target) return;
       const el = target.closest('.dropdown-menu')
         ? ((e.target as Element).closest('.dropdown-item') as HTMLElement | null) ?? target
         : target;
-
       spawnRipple(el, e);
       el.classList.remove('click-bounce');
       void el.offsetWidth;
@@ -50,15 +44,12 @@ function ClickLayer() {
     };
 
     function spawnClickEffect(x: number, y: number) {
-      // ── Central dot ──
       const dot = document.createElement('span');
       dot.className = 'click-dot';
       dot.style.left = `${x}px`;
       dot.style.top = `${y}px`;
       document.body.appendChild(dot);
       setTimeout(() => dot.remove(), 650);
-
-      // ── 2 expanding rings with staggered timing ──
       for (let i = 0; i < 2; i++) {
         const ring = document.createElement('span');
         ring.className = 'click-ring';
@@ -69,14 +60,7 @@ function ClickLayer() {
         document.body.appendChild(ring);
         setTimeout(() => ring.remove(), 600 + i * 80);
       }
-
-      // ── 6 sparks ──
-      const SPARK_COLORS = [
-        'rgba(255,255,255,1)',
-        'rgba(150,210,255,0.95)',
-        'rgba(240,192,64,0.9)',
-        'rgba(91,164,245,1)',
-      ];
+      const SPARK_COLORS = ['rgba(255,255,255,1)','rgba(150,210,255,0.95)','rgba(240,192,64,0.9)','rgba(91,164,245,1)'];
       for (let i = 0; i < 6; i++) {
         const angle = (i / 6) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
         const dist = 20 + Math.random() * 20;
@@ -105,187 +89,49 @@ function ClickLayer() {
       if (!hadRelative) target.style.position = 'relative';
       if (!hadOverflow) target.style.overflow = 'hidden';
       target.appendChild(ripple);
-      setTimeout(() => {
-        ripple.remove();
-        if (!hadRelative) target.style.position = '';
-        if (!hadOverflow) target.style.overflow = '';
-      }, 700);
+      setTimeout(() => { ripple.remove(); if (!hadRelative) target.style.position = ''; if (!hadOverflow) target.style.overflow = ''; }, 700);
     }
 
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
-
   return null;
 }
 
-// ─────────────────────────────────────────────
-//  TOUCH TRAIL — canvas-based, zero DOM overhead
-// ─────────────────────────────────────────────
 function TouchTrail() {
   useEffect(() => {
-    // Create a dedicated full-screen canvas overlay
     const canvas = document.createElement('canvas');
-    canvas.style.cssText =
-      'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645;';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645;';
     document.body.appendChild(canvas);
-
     const ctx = canvas.getContext('2d')!;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-
-    function resize() {
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      canvas.style.width = `${W}px`;
-      canvas.style.height = `${H}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    let W = window.innerWidth, H = window.innerHeight;
+    function resize() { W = window.innerWidth; H = window.innerHeight; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); canvas.style.width = `${W}px`; canvas.style.height = `${H}px`; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
     resize();
     window.addEventListener('resize', resize, { passive: true });
-
-    // Ring buffer: newest position is at index 0
-    // We store { x, y, t } where t = performance.now()
-    const MAX_PTS = 100;
-    const TRAIL_LIFE_MS = 380; // how long a point stays visible after being recorded
+    const MAX_PTS = 100, TRAIL_LIFE_MS = 380;
     const pts: { x: number; y: number; t: number }[] = [];
-
-    let rafId = 0;
-    let isActive = false;
-
-    function draw(now: number) {
-      rafId = 0;
-      ctx.clearRect(0, 0, W, H);
-
-      // Prune old points
-      const cutoff = now - TRAIL_LIFE_MS;
-      while (pts.length > 0 && pts[pts.length - 1].t < cutoff) pts.pop();
-
-      if (pts.length > 1) {
-        // Draw each point as a glowing circle.
-        // i=0 → newest (largest, most opaque), i=len-1 → oldest (tiny, transparent)
-        ctx.save();
-
-        for (let i = 0; i < pts.length; i++) {
-          const ageFrac = (now - pts[i].t) / TRAIL_LIFE_MS; // 0=fresh, 1=dying
-          const idxFrac = i / (pts.length - 1);             // 0=newest, 1=oldest
-          const fade = Math.max(0, 1 - ageFrac);
-          const alpha = fade * (1 - idxFrac * 0.55) * 0.92;
-          const radius = Math.max(1.5, 8.5 * (1 - idxFrac * 0.72) * fade);
-
-          if (alpha < 0.01) continue;
-
-          // Alternate core color: blue/white on newest, slightly gold on mid
-          const isMid = idxFrac > 0.3 && idxFrac < 0.7;
-          const r = isMid ? 230 : 180;
-          const g = isMid ? 195 : 225;
-          const b = 255;
-
-          ctx.globalAlpha = alpha;
-          ctx.shadowColor = `rgba(91,164,245,${alpha * 0.9})`;
-          ctx.shadowBlur = radius * 2.4;
-          ctx.beginPath();
-          ctx.arc(pts[i].x, pts[i].y, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
-          ctx.fill();
-        }
-
-        ctx.restore();
-      }
-
-      if (isActive || pts.length > 0) {
-        rafId = requestAnimationFrame(draw);
-      }
-    }
-
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      isActive = true;
-      pts.length = 0;
-      pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() });
-      if (!rafId) rafId = requestAnimationFrame(draw);
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      // Push EVERY event immediately — this is what makes it lag-free
-      pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() });
-      if (pts.length > MAX_PTS) pts.length = MAX_PTS;
-      if (!rafId) rafId = requestAnimationFrame(draw);
-    };
-
-    const onTouchEnd = () => {
-      isActive = false;
-      // Let the RAF loop drain the remaining points naturally
-    };
-
+    let rafId = 0, isActive = false;
+    function draw(now: number) { rafId = 0; ctx.clearRect(0, 0, W, H); const cutoff = now - TRAIL_LIFE_MS; while (pts.length > 0 && pts[pts.length - 1].t < cutoff) pts.pop(); if (pts.length > 1) { ctx.save(); for (let i = 0; i < pts.length; i++) { const ageFrac = (now - pts[i].t) / TRAIL_LIFE_MS; const idxFrac = i / (pts.length - 1); const fade = Math.max(0, 1 - ageFrac); const alpha = fade * (1 - idxFrac * 0.55) * 0.92; const radius = Math.max(1.5, 8.5 * (1 - idxFrac * 0.72) * fade); if (alpha < 0.01) continue; const isMid = idxFrac > 0.3 && idxFrac < 0.7; ctx.globalAlpha = alpha; ctx.shadowColor = `rgba(91,164,245,${alpha * 0.9})`; ctx.shadowBlur = radius * 2.4; ctx.beginPath(); ctx.arc(pts[i].x, pts[i].y, radius, 0, Math.PI * 2); ctx.fillStyle = `rgb(${isMid ? 230 : 180},${isMid ? 195 : 225},255)`; ctx.fill(); } ctx.restore(); } if (isActive || pts.length > 0) { rafId = requestAnimationFrame(draw); } }
+    const onTouchStart = (e: TouchEvent) => { const t = e.touches[0]; if (!t) return; isActive = true; pts.length = 0; pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() }); if (!rafId) rafId = requestAnimationFrame(draw); };
+    const onTouchMove = (e: TouchEvent) => { const t = e.touches[0]; if (!t) return; pts.unshift({ x: t.clientX, y: t.clientY, t: performance.now() }); if (pts.length > MAX_PTS) pts.length = MAX_PTS; if (!rafId) rafId = requestAnimationFrame(draw); };
+    const onTouchEnd = () => { isActive = false; };
     document.addEventListener('touchstart', onTouchStart, { passive: true });
     document.addEventListener('touchmove', onTouchMove, { passive: true });
     document.addEventListener('touchend', onTouchEnd, { passive: true });
     document.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-      document.removeEventListener('touchcancel', onTouchEnd);
-      window.removeEventListener('resize', resize);
-      if (rafId) cancelAnimationFrame(rafId);
-      canvas.remove();
-    };
+    return () => { document.removeEventListener('touchstart', onTouchStart); document.removeEventListener('touchmove', onTouchMove); document.removeEventListener('touchend', onTouchEnd); document.removeEventListener('touchcancel', onTouchEnd); window.removeEventListener('resize', resize); if (rafId) cancelAnimationFrame(rafId); canvas.remove(); };
   }, []);
-
   return null;
 }
 
-// ─────────────────────────────────────────────
-//  SCROLL REVEAL  — batched stagger, no jank
-// ─────────────────────────────────────────────
 function ScrollReveal() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('.reveal');
     if (!els.length) return;
-
-    let batchTimer = 0;
-    let batchQueue: HTMLElement[] = [];
-
-    const flushBatch = () => {
-      batchTimer = 0;
-      // Sort by vertical position so stagger goes top→bottom
-      batchQueue.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
-      batchQueue.forEach((el, i) => {
-        const delay = i * 50;
-        el.style.transitionDelay = `${delay}ms`;
-        el.classList.add('revealed');
-        setTimeout(() => { el.style.transitionDelay = ''; }, 520 + delay);
-      });
-      batchQueue = [];
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        let hadIntersecting = false;
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            batchQueue.push(entry.target as HTMLElement);
-            io.unobserve(entry.target);
-            hadIntersecting = true;
-          }
-        });
-        if (hadIntersecting) {
-          clearTimeout(batchTimer);
-          // Flush after one frame so simultaneous entries all land in the same batch
-          batchTimer = window.setTimeout(flushBatch, 16);
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
-    );
-
+    let batchTimer = 0, batchQueue: HTMLElement[] = [];
+    const flushBatch = () => { batchTimer = 0; batchQueue.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top); batchQueue.forEach((el, i) => { const delay = i * 50; el.style.transitionDelay = `${delay}ms`; el.classList.add('revealed'); setTimeout(() => { el.style.transitionDelay = ''; }, 520 + delay); }); batchQueue = []; };
+    const io = new IntersectionObserver((entries) => { let hadIntersecting = false; entries.forEach(entry => { if (entry.isIntersecting) { batchQueue.push(entry.target as HTMLElement); io.unobserve(entry.target); hadIntersecting = true; } }); if (hadIntersecting) { clearTimeout(batchTimer); batchTimer = window.setTimeout(flushBatch, 16); } }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     els.forEach(el => io.observe(el));
     return () => { io.disconnect(); clearTimeout(batchTimer); };
   }, []);
@@ -309,7 +155,6 @@ export default function App() {
             <Route path="/rankings" element={<Navigate to="/rankings/overall" replace />} />
             <Route path="/rankings/:category" element={<Rankings />} />
             <Route path="/player/:username" element={<PlayerProfile />} />
-            <Route path="/results" element={<Results />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
