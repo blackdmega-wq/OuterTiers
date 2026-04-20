@@ -1,40 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { CATEGORIES } from '../data/players';
+import { CATEGORIES, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 import DiscordJoinModal from '../components/DiscordJoinModal';
 import { usePlayers } from '../hooks/usePlayers';
-
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
-const GITHUB_REPO = 'blackdmega-wq/OuterTiers';
-const PLAYERS_FILE = 'src/data/players.ts';
-
-function useLivePlayerCount(fallback: number) {
-  const [count, setCount] = useState<number>(fallback);
-  const [live, setLive] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${PLAYERS_FILE}`, {
-      headers: { Accept: 'application/vnd.github.v3+json' },
-      cache: 'no-store',
-    })
-      .then(r => r.json())
-      .then((data: { content?: string }) => {
-        if (cancelled || !data.content) return;
-        const decoded = atob(data.content.replace(/\n/g, ''));
-        const match = decoded.match(/export const PLAYERS[^=]+=\s*\[([^]*)\]/);
-        if (!match) return;
-        const body = match[1];
-        const entries = body.match(/\{[^{}]*username:/g);
-        const n = entries ? entries.length : 0;
-        setCount(n);
-        setLive(true);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-  return { count, live };
-}
 
 function useCountUp(target: number, duration = 900) {
   const [display, setDisplay] = useState(0);
@@ -61,6 +30,7 @@ function useCountUp(target: number, duration = 900) {
 interface FeedEntry { username: string; category?: string; tier: string; region: string; mode?: string | null; }
 
 const HIGH_TIER_CUTOFF = new Set(['HT1', 'HT2', 'HT3']);
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
 function useLiveFeed() {
   const [liveResults, setLiveResults] = useState<FeedEntry[]>([]);
@@ -117,7 +87,7 @@ function StatCard({ value, label, icon, wide, liveIndicator }: { value: string |
       <div className="stat-card-value">{value}</div>
       <div className="stat-card-label">
         {label}
-        {liveIndicator && <span className="stat-live-dot" title="Live from GitHub" />}
+        {liveIndicator && <span className="stat-live-dot" title="Live count" />}
       </div>
     </div>
   );
@@ -161,8 +131,8 @@ export default function Home() {
   const { players, loading: playersLoading } = usePlayers();
   const top100 = [...players].sort((a, b) => b.points - a.points).slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
-  const { count: liveCount, live } = useLivePlayerCount(players.length);
-  const displayCount = useCountUp(liveCount, 1100);
+  const displayCount = useCountUp(players.length, 1100);
+  const live = !playersLoading;
   const { liveResults, highResults } = useLiveFeed();
 
   return (
@@ -273,6 +243,8 @@ export default function Home() {
                 <tr>
                   <th className="col-rank">#</th>
                   <th className="col-player">PLAYER</th>
+                  <th className="col-combat-title">RANK</th>
+                  <th className="col-region">REGION</th>
                   <th className="col-points">POINTS</th>
                 </tr>
               </thead>
@@ -299,6 +271,12 @@ export default function Home() {
                           </div>
                         </Link>
                       </td>
+                      <td className="col-combat-title">
+                        <span className="combat-title-badge">{getTitle(player.points)}</span>
+                      </td>
+                      <td className="col-region">
+                        <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                      </td>
                       <td className="col-points">
                         <span className="points-value">{player.points}</span>
                       </td>
@@ -313,31 +291,30 @@ export default function Home() {
 
       {/* ===== ABOUT / DESCRIPTION ===== */}
       <div className="about-section animate-fade-up">
-        <div className="about-inner">
-          <div className="about-text-col">
-            <div className="about-eyebrow">THE ULTIMATE COMPETITIVE PVP EXPERIENCE IN MINECRAFT FEATURING A STATE OF THE ART SERVER AND GLOBAL RANKING NETWORK.</div>
-            <h2 className="about-title">The Ultimate PvP Experience:</h2>
-            <p className="about-body">
-              OuterTiers is a Minecraft network consisting of a Tier List system
-              and various communities. Designed by competitive players, for competitive players.
-              We are the hub for all things related to competitive gameplay in Minecraft.
-              We specialize in championing 1.9+ combat via various kits which are globally
-              recognized as game modes within the community.
-            </p>
-          </div>
+        <div className="about-eyebrow">THE ULTIMATE COMPETITIVE PVP EXPERIENCE IN MINECRAFT FEATURING A STATE OF THE ART SERVER AND GLOBAL RANKING NETWORK.</div>
+        <h2 className="about-title">The Ultimate PvP Experience:</h2>
+        <p className="about-body">
+          OuterTiers is a Minecraft network consisting of a Tier List system
+          and various communities. Designed by competitive players, for competitive players.
+          We are the hub for all things related to competitive gameplay in Minecraft.
+          We specialize in championing 1.9+ combat via various kits which are globally
+          recognized as game modes within the community.
+        </p>
+      </div>
 
-          <div className="feed-card">
-            <div className="feed-card-header">
-              <h3 className="feed-card-title">High Tier Results</h3>
-              <span className="feed-badge feed-badge-red">HT3 AND ABOVE ONLY</span>
-            </div>
-            <div className="feed-list">
-              {highResults.length === 0 ? (
-                <div className="feed-empty">No high tier results yet.</div>
-              ) : (
-                highResults.map((r, i) => <FeedItem key={i} {...r} />)
-              )}
-            </div>
+      {/* ===== HIGH TIER RESULTS ===== */}
+      <div className="high-tier-section animate-fade-up">
+        <div className="feed-card feed-card-wide">
+          <div className="feed-card-header">
+            <h3 className="feed-card-title">High Tier Results</h3>
+            <span className="feed-badge feed-badge-red">HT3 AND ABOVE ONLY</span>
+          </div>
+          <div className="feed-list">
+            {highResults.length === 0 ? (
+              <div className="feed-empty">No high tier results yet.</div>
+            ) : (
+              highResults.map((r, i) => <FeedItem key={i} {...r} />)
+            )}
           </div>
         </div>
       </div>
