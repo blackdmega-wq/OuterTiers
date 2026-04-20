@@ -2257,7 +2257,7 @@ a.player-cell,
   align-items: stretch; min-width: 0;
 }
 .top-card-info-main {
-  flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0;
+  flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; min-width: 0;
 }
 .top-card-info-side {
   flex-shrink: 0; min-width: 90px;
@@ -2300,7 +2300,9 @@ a.player-cell,
 .top-card-diamond { color: #7ab8ff; font-size: 0.8em; }
 .top-card-pts { color: var(--text-muted); }
 .top-card-tiers {
-  margin-top: 8px; display: flex; flex-direction: column; gap: 6px;
+  flex: 1; display: flex; flex-direction: column; gap: 6px;
+  justify-content: center; padding: 0 16px; margin-left: 12px;
+  border-left: 1px solid rgba(255,255,255,0.07);
 }
 .top-card-tiers-label {
   font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
