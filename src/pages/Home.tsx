@@ -41,7 +41,7 @@ function useLiveFeed() {
       fetch(`${API_BASE}/api/results/live`).then(r => r.json()).catch(() => ({ results: [] })),
       fetch(`${API_BASE}/api/results/high-tier`).then(r => r.json()).catch(() => ({ results: [] })),
     ]).then(([live, high]) => {
-      const liveArr = (live.results ?? []).slice(0, 20).map((r: { username: string; mode?: string | null; tier: string; region: string }) => ({
+      const liveArr = (live.results ?? []).slice(0, 15).map((r: { username: string; mode?: string | null; tier: string; region: string }) => ({
         username: r.username,
         category: modeLabel(r.mode ?? null),
         tier: r.tier,
@@ -49,7 +49,7 @@ function useLiveFeed() {
       }));
       const highArr = (high.results ?? [])
         .filter((r: { tier: string }) => HIGH_TIER_CUTOFF.has(r.tier))
-        .slice(0, 10)
+        .slice(0, 15)
         .map((r: { username: string; mode?: string | null; tier: string; region: string }) => ({
           username: r.username,
           category: modeLabel(r.mode ?? null),
@@ -302,9 +302,9 @@ export default function Home() {
         </p>
       </div>
 
-      {/* ===== HIGH TIER RESULTS ===== */}
-      <div className="high-tier-section animate-fade-up">
-        <div className="feed-card feed-card-wide">
+      {/* ===== HIGH TIER RESULTS + LIVE TEST RESULTS (side by side) ===== */}
+      <div className="feeds-row-section animate-fade-up">
+        <div className="feed-card">
           <div className="feed-card-header">
             <h3 className="feed-card-title">High Tier Results</h3>
             <span className="feed-badge feed-badge-red">HT3 AND ABOVE ONLY</span>
@@ -317,11 +317,8 @@ export default function Home() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* ===== LIVE TEST RESULTS ===== */}
-      <div className="live-results-section animate-fade-up">
-        <div className="feed-card feed-card-wide">
+        <div className="feed-card">
           <div className="feed-card-header">
             <h3 className="feed-card-title">Live Test Results</h3>
             <span className="feed-badge feed-badge-red">FEED OF ALL TIER RESULTS</span>
