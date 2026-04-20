@@ -42,7 +42,6 @@ export default function PlayerProfile() {
   const sorted = [...players].sort((a, b) => b.points - a.points);
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
-
   const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
 
   return (
@@ -76,9 +75,7 @@ export default function PlayerProfile() {
                 </svg>
                 {player.points} pts
               </span>
-              <span className="profile-rank-badge">
-                #{rank}
-              </span>
+              {rank > 0 && <span className="profile-rank-badge">#{rank}</span>}
             </div>
           </div>
         </div>
@@ -89,18 +86,22 @@ export default function PlayerProfile() {
             <h2 className="section-heading" style={{ fontSize: '1.1rem' }}>Tier Rankings by Category</h2>
           </div>
           <div className="profile-tiers-grid">
-            {modeCats.map(cat => (
-              <div key={cat.id} className="profile-tier-card ripple-card">
-                <div className="profile-tier-mode">
-                  <img src={cat.icon} alt={cat.label} width={26} height={26} />
-                  <span>{cat.label}</span>
+            {modeCats.map(cat => {
+              const rawTier = player.rawTiers?.[cat.id as keyof typeof player.rawTiers];
+              return (
+                <div key={cat.id} className="profile-tier-card ripple-card">
+                  <div className="profile-tier-mode">
+                    <img src={cat.icon} alt={cat.label} width={26} height={26} />
+                    <span>{cat.label}</span>
+                  </div>
+                  <CategoryTierBadge
+                    categoryId={cat.id}
+                    tier={player.tiers[cat.id as keyof PlayerTiers]}
+                    rawTier={rawTier ?? null}
+                  />
                 </div>
-                <CategoryTierBadge
-                  categoryId={cat.id}
-                  tier={player.tiers[cat.id as keyof PlayerTiers]}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
