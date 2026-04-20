@@ -78,20 +78,20 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
           <div className="top-card-subtitle">
             <span className="top-card-diamond">◆</span>
             <span>{getTitle(player.points)}</span>
-            <span className="top-card-pts">· {player.points} pts</span>
           </div>
-          <div className="top-card-tiers">
-            <span className="top-card-tiers-label">TIERS</span>
-            <div className="tier-badges-row" style={{ flexWrap: 'wrap', gap: '5px 4px' }}>
-              {TIER_COLS.map(col => (
-                <CategoryTierBadge
-                  key={col}
-                  categoryId={col}
-                  tier={player.tiers[col]}
-                  rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
-                />
-              ))}
-            </div>
+        </div>
+
+        <div className="top-card-tiers">
+          <span className="top-card-tiers-label">TIERS</span>
+          <div className="tier-badges-row" style={{ flexWrap: 'wrap', gap: '5px 4px' }}>
+            {TIER_COLS.map(col => (
+              <CategoryTierBadge
+                key={col}
+                categoryId={col}
+                tier={player.tiers[col]}
+                rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
+              />
+            ))}
           </div>
         </div>
 
@@ -102,12 +102,6 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
             <div className="top-card-side-peak">
               <span className="top-card-side-peak-label">PEAK</span>
               <span className="top-card-side-peak-val">{player.peakTier}</span>
-            </div>
-          )}
-          {player.currentTier && player.currentTier !== '-' && (
-            <div className="top-card-side-peak" style={{ marginTop: 4 }}>
-              <span className="top-card-side-peak-label">CURRENT</span>
-              <span className="top-card-side-peak-val">{player.currentTier}</span>
             </div>
           )}
         </div>
