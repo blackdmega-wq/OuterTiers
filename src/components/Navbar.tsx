@@ -180,11 +180,6 @@ export default function Navbar() {
               </button>
             </div>
 
-            <Link to="/results" className={`nav-link${isActive("/results") ? " nav-link-active" : ""}`}>
-              <span style={{ fontSize: "0.9em" }}>📋</span>
-              <span>Results</span>
-            </Link>
-
             {/* Discords dropdown */}
             <div className="nav-dropdown" ref={discordRef}>
               <button
