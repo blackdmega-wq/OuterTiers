@@ -2081,3 +2081,121 @@ a.player-cell,
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== TOP 3 OVERALL CARDS ===== */
+.overall-rankings { display: flex; flex-direction: column; gap: 0; }
+.top3-cards { display: flex; flex-direction: column; gap: 10px; }
+
+.top-card {
+  display: flex; align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  position: relative;
+}
+.top-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-2);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.45);
+}
+.top-card-rank-1 { box-shadow: 0 0 0 1px rgba(240,192,64,0.25); }
+.top-card-rank-2 { box-shadow: 0 0 0 1px rgba(176,192,208,0.2); }
+.top-card-rank-3 { box-shadow: 0 0 0 1px rgba(192,120,48,0.2); }
+
+.top-card-stripe {
+  position: relative; overflow: hidden;
+  width: 76px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+}
+.top-card-stripe-shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation: shimmerMove 2.8s ease-in-out infinite;
+}
+.shimmer-gold   { animation-delay: 0s; }
+.shimmer-silver { animation-delay: 0.5s; }
+.shimmer-bronze { animation-delay: 1s; }
+
+@keyframes shimmerMove {
+  0%   { background-position: -250% 0; }
+  100% { background-position: 250% 0; }
+}
+
+.top-card-rank-num {
+  font-size: 2.2rem; font-weight: 900;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  position: relative; z-index: 1;
+  padding-right: 10px;
+  font-style: italic;
+}
+
+.top-card-avatar {
+  padding: 14px 8px 14px 12px; flex-shrink: 0;
+  display: flex; align-items: center;
+}
+.top-card-avatar img, .top-card-avatar canvas { border-radius: 4px; }
+
+.top-card-content {
+  flex: 1; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+
+.top-card-name-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.top-card-name {
+  font-size: 1.15rem; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.top-card:hover .top-card-name { color: #a8c8ff; }
+
+.top-card-subtitle {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; color: var(--text-muted);
+}
+.top-card-pts { color: var(--text-muted); }
+
+.top-card-tiers {
+  margin-top: 8px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.top-card-tiers-label {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--text-muted); text-transform: uppercase;
+}
+
+/* ===== TIER ARROW INDICATORS ===== */
+.tier-arrow-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; margin-left: auto;
+  line-height: 1;
+}
+.tier-arrow-wrap.ht { color: rgba(220,230,255,0.92); }
+.tier-arrow-wrap.lt { color: rgba(80,90,120,0.55); }
+.tier-arrow-wrap svg { display: block; }
+.arrow-second { margin-top: -6px; }
+
+/* ===== TIER PLAYER ROW UPDATED ===== */
+.tier-player-row {
+  padding: 10px 14px !important;
+  gap: 10px !important;
+}
+
+/* ===== TIER COLUMN WIDER ===== */
+.tier-column { min-width: 180px !important; }
+
+/* ===== RANKINGS LOADING/EMPTY ===== */
+.rankings-loading, .rankings-empty {
+  padding: 56px; text-align: center;
+  color: var(--text-muted); font-size: 0.9rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px;
+}
