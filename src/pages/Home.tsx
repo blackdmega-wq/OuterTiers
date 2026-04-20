@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { PLAYERS, getTitle, CATEGORIES } from '../data/players';
+import { CATEGORIES } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 import DiscordJoinModal from '../components/DiscordJoinModal';
+import { usePlayers } from '../hooks/usePlayers';
 
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 const GITHUB_REPO = 'blackdmega-wq/OuterTiers';
 const PLAYERS_FILE = 'src/data/players.ts';
 
 function useLivePlayerCount(fallback: number) {
   const [count, setCount] = useState<number>(fallback);
   const [live, setLive] = useState(false);
-
   useEffect(() => {
     let cancelled = false;
     fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${PLAYERS_FILE}`, {
@@ -32,14 +33,12 @@ function useLivePlayerCount(fallback: number) {
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
-
   return { count, live };
 }
 
 function useCountUp(target: number, duration = 900) {
   const [display, setDisplay] = useState(0);
   const prev = useRef(0);
-
   useEffect(() => {
     const start = prev.current;
     const diff = target - start;
@@ -56,8 +55,53 @@ function useCountUp(target: number, duration = 900) {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [target, duration]);
-
   return display;
+}
+
+interface FeedEntry { username: string; category?: string; tier: string; region: string; mode?: string | null; }
+
+const HIGH_TIER_CUTOFF = new Set(['HT1', 'HT2', 'HT3']);
+
+function useLiveFeed() {
+  const [liveResults, setLiveResults] = useState<FeedEntry[]>([]);
+  const [highResults, setHighResults] = useState<FeedEntry[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API_BASE}/api/results/live`).then(r => r.json()).catch(() => ({ results: [] })),
+      fetch(`${API_BASE}/api/results/high-tier`).then(r => r.json()).catch(() => ({ results: [] })),
+    ]).then(([live, high]) => {
+      const liveArr = (live.results ?? []).slice(0, 20).map((r: { username: string; mode?: string | null; tier: string; region: string }) => ({
+        username: r.username,
+        category: modeLabel(r.mode ?? null),
+        tier: r.tier,
+        region: r.region,
+      }));
+      const highArr = (high.results ?? [])
+        .filter((r: { tier: string }) => HIGH_TIER_CUTOFF.has(r.tier))
+        .slice(0, 10)
+        .map((r: { username: string; mode?: string | null; tier: string; region: string }) => ({
+          username: r.username,
+          category: modeLabel(r.mode ?? null),
+          tier: r.tier,
+          region: r.region,
+        }));
+      setLiveResults(liveArr);
+      setHighResults(highArr);
+    });
+  }, []);
+
+  return { liveResults, highResults };
+}
+
+function modeLabel(mode: string | null): string {
+  if (!mode) return 'Overall';
+  const MAP: Record<string, string> = {
+    sword: 'Sword', speed: 'Speed', pot: 'Pot', nethop: 'NethOP',
+    ogvanilla: 'OG Vanilla', vanilla: 'Vanilla', uhc: 'UHC',
+    axe: 'Axe', mace: 'Mace', smp: 'SMP',
+  };
+  return MAP[mode.toLowerCase()] ?? mode;
 }
 
 const DISCORD_SVG = (size = 22) => (
@@ -65,9 +109,6 @@ const DISCORD_SVG = (size = 22) => (
     <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
   </svg>
 );
-
-const LIVE_TEST_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
-const HIGH_TIER_RESULTS: { username: string; category: string; tier: string; region: string }[] = [];
 
 function StatCard({ value, label, icon, wide, liveIndicator }: { value: string | number; label: string; icon: React.ReactNode; wide?: boolean; liveIndicator?: boolean }) {
   return (
@@ -102,7 +143,7 @@ function TierLabel({ tier }: { tier: string }) {
   return <span className={`feed-tier-badge ${isHigh ? 'feed-tier-high' : 'feed-tier-low'}`}>{tier}</span>;
 }
 
-function FeedItem({ username, category, tier, region }: { username: string; category: string; tier: string; region: string }) {
+function FeedItem({ username, category, tier, region }: FeedEntry) {
   return (
     <div className="feed-item">
       <div className="feed-item-avatar"><PlayerAvatar username={username} size={44} /></div>
@@ -117,10 +158,12 @@ function FeedItem({ username, category, tier, region }: { username: string; cate
 }
 
 export default function Home() {
-  const top100 = [...PLAYERS].sort((a, b) => b.points - a.points).slice(0, 100);
+  const { players, loading: playersLoading } = usePlayers();
+  const top100 = [...players].sort((a, b) => b.points - a.points).slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
-  const { count: liveCount, live } = useLivePlayerCount(PLAYERS.length);
+  const { count: liveCount, live } = useLivePlayerCount(players.length);
   const displayCount = useCountUp(liveCount, 1100);
+  const { liveResults, highResults } = useLiveFeed();
 
   return (
     <div className="home-page">
@@ -211,7 +254,9 @@ export default function Home() {
           <div className="section-label">Leaderboard</div>
           <h2 className="section-heading">Top 100 Players</h2>
         </div>
-        {top100.length === 0 ? (
+        {playersLoading ? (
+          <div className="rankings-loading animate-fade-up">Loading leaderboard...</div>
+        ) : top100.length === 0 ? (
           <div className="empty-state animate-fade-up">
             <div className="empty-state-icon">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -249,7 +294,7 @@ export default function Home() {
                             <span className="player-name">{player.username}</span>
                             <span className="player-title">
                               <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.7 }} />
-                              {getTitle(player.points)}
+                              {player.points} pts
                             </span>
                           </div>
                         </Link>
@@ -284,13 +329,13 @@ export default function Home() {
           <div className="feed-card">
             <div className="feed-card-header">
               <h3 className="feed-card-title">High Tier Results</h3>
-              <span className="feed-badge feed-badge-red">LATEST HIGH TIER 3 AND ABOVE RESULTS</span>
+              <span className="feed-badge feed-badge-red">HT3 AND ABOVE ONLY</span>
             </div>
             <div className="feed-list">
-              {HIGH_TIER_RESULTS.length === 0 ? (
-                <div className="feed-empty">No results available yet.</div>
+              {highResults.length === 0 ? (
+                <div className="feed-empty">No high tier results yet.</div>
               ) : (
-                HIGH_TIER_RESULTS.map((r, i) => <FeedItem key={i} {...r} />)
+                highResults.map((r, i) => <FeedItem key={i} {...r} />)
               )}
             </div>
           </div>
@@ -305,10 +350,10 @@ export default function Home() {
             <span className="feed-badge feed-badge-red">FEED OF ALL TIER RESULTS</span>
           </div>
           <div className="feed-list">
-            {LIVE_TEST_RESULTS.length === 0 ? (
+            {liveResults.length === 0 ? (
               <div className="feed-empty">No results available yet.</div>
             ) : (
-              LIVE_TEST_RESULTS.map((r, i) => <FeedItem key={i} {...r} />)
+              liveResults.map((r, i) => <FeedItem key={i} {...r} />)
             )}
           </div>
         </div>
@@ -339,17 +384,11 @@ export default function Home() {
           <h2 className="discord-title">Join our official Discord Server!</h2>
           <p className="discord-subtitle">Choose your community and connect with competitive players.</p>
           <div className="discord-btns-row">
-            <button
-              className="discord-btn btn-press"
-              onClick={() => setShowDiscordModal(true)}
-            >
+            <button className="discord-btn btn-press" onClick={() => setShowDiscordModal(true)}>
               {DISCORD_SVG(22)}
               OuterTiers Official
             </button>
-            <button
-              className="discord-btn discord-btn-community btn-press"
-              onClick={() => setShowDiscordModal(true)}
-            >
+            <button className="discord-btn discord-btn-community btn-press" onClick={() => setShowDiscordModal(true)}>
               {DISCORD_SVG(22)}
               Outer Community
             </button>
@@ -357,9 +396,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== DISCORD MODAL ===== */}
       {showDiscordModal && <DiscordJoinModal onClose={() => setShowDiscordModal(false)} />}
-
     </div>
   );
 }
