@@ -1269,19 +1269,34 @@ img { display: block; }
 .modal-title-req { font-size: 0.78rem; color: var(--text-muted); }
 
 /* ===== POINTS TAB ===== */
-.modal-points-list { display: flex; flex-direction: column; gap: 10px; }
-.modal-points-tier {
-  padding: 10px 14px; border-radius: 6px;
-  display: flex; flex-direction: column; gap: 6px;
+.modal-points-note {
+  margin: 0 0 10px !important;
+  color: var(--text-muted) !important;
+  font-size: 0.78rem !important;
 }
-.modal-points-tier-header { display: flex; align-items: center; gap: 7px; }
-.modal-points-trophy { font-size: 1.1rem; line-height: 1; }
-.modal-points-tier-name { font-size: 0.95rem; font-weight: 700; }
-.modal-points-badges { display: flex; gap: 7px; flex-wrap: wrap; }
-.modal-points-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: 20px;
-  border: 1px solid; font-size: 0.8rem; font-weight: 600;
+.modal-points-header-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  padding: 4px 10px; margin-bottom: 4px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em;
+  color: var(--text-muted); text-transform: uppercase;
+}
+.modal-points-col-tier { text-align: left; }
+.modal-points-col-ht  { text-align: center; }
+.modal-points-col-lt  { text-align: center; }
+.modal-points-list { display: flex; flex-direction: column; gap: 5px; }
+.modal-points-tier {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  align-items: center; gap: 6px;
+  padding: 8px 10px; border-radius: 6px;
+}
+.modal-points-tier-label {
+  font-size: 0.88rem; font-weight: 700;
+}
+.modal-points-val {
+  text-align: center;
+  font-size: 0.82rem; font-weight: 700;
+  padding: 4px 8px; border-radius: 5px;
+  border: 1px solid;
 }
 
 .modal-tiers { display: flex; flex-direction: column; gap: 8px; }
