@@ -2167,142 +2167,170 @@ a.player-cell,
   .footer-inner { padding: 36px 20px 24px; }
   .features-grid { grid-template-columns: 1fr; }
 
-  /* ===== COMPACT PLAYER CARD ON MOBILE ===== */
-  .top-card { min-height: 0; border-radius: 8px; }
+  /* ===== MOBILE PLAYER CARD — mirrors PC horizontal layout ===== */
 
-  /* Stripe: 58px — shows rank number at top + player head below */
+  /* Card: horizontal strip, fixed height */
+  .top-card {
+    min-height: 0 !important;
+    height: 70px !important;
+    border-radius: 8px !important;
+    align-items: stretch !important;
+  }
+
+  /* Stripe: narrower, no diagonal clip */
   .top-card-stripe {
-    width: 58px !important;
+    width: 68px !important;
     clip-path: none !important;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
   }
-  .top-card-stripe-shimmer { display: none; }
+  .top-card-stripe-shimmer { display: none !important; }
 
-  /* Rank number: small, centered at top of stripe */
+  /* Rank number: top-left corner of stripe */
   .top-card-rank-num {
-    display: block !important;
-    font-size: 0.88rem !important;
-    font-style: normal !important;
-    top: 5px !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100%;
-    text-align: center;
+    font-size: 0.85rem !important;
+    font-style: italic !important;
+    top: 7px !important;
+    left: 7px !important;
+    right: auto !important;
+    width: auto !important;
+    text-align: left !important;
   }
 
-  /* Player head: smaller avatar centered in lower portion of stripe */
+  /* Player head: centered in stripe */
   .top-card-bust-wrap {
     display: flex !important;
-    width: 38px !important;
-    height: 38px !important;
+    width: 42px !important;
+    height: 42px !important;
     left: 50% !important;
-    top: 62% !important;
+    top: 56% !important;
     transform: translate(-50%, -50%) !important;
-    border: 1.5px solid rgba(255,255,255,0.2) !important;
+    border: 1.5px solid rgba(255,255,255,0.18) !important;
   }
   .top-card-bust {
-    width: 34px !important;
-    height: 34px !important;
+    width: 38px !important;
+    height: 38px !important;
   }
 
-  /* Content column */
+  /* Content: horizontal row, same as desktop */
   .top-card-content {
-    display: flex !important;
-    flex-direction: column;
-    padding: 5px 8px 5px 6px;
-    gap: 3px;
-  }
-  .top-card-info-main {
-    flex: unset !important;
-    justify-content: flex-start !important;
-  }
-  .top-card-info-side { display: none !important; }
-
-  /* Name row: name on left, points on right */
-  .top-card-name-row {
-    flex-wrap: nowrap !important;
-    gap: 4px !important;
-    align-items: center;
-  }
-  .top-card-name {
-    font-size: 0.80rem !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 0 6px 0 8px !important;
+    gap: 0 !important;
     min-width: 0;
   }
 
-  /* Points shown next to name */
-  .top-card-mobile-pts {
-    display: inline-flex !important;
-    align-items: center;
-    font-size: 0.72rem !important;
-    font-weight: 700;
-    color: var(--gold);
-    flex-shrink: 0;
-    white-space: nowrap;
+  /* Info-main: name + region + subtitle, fixed narrow width */
+  .top-card-info-main {
+    flex: 0 0 auto !important;
+    width: 90px !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    overflow: hidden;
   }
 
-  /* Region badge: desktop version hidden, mobile version shown below subtitle */
+  /* Name row */
+  .top-card-name-row {
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    align-items: center !important;
+    min-width: 0;
+  }
+  .top-card-name {
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0;
+  }
+
+  /* Region badge: keep in name row, make compact */
   .top-card-desktop-region {
-    display: none !important;
-  }
-  .top-card-mobile-region {
     display: inline-block !important;
-    font-size: 0.58rem !important;
-    padding: 1px 5px !important;
-    margin-top: 1px;
-    width: fit-content;
+    font-size: 0.52rem !important;
+    padding: 1px 4px !important;
+    flex-shrink: 0;
   }
-
-  /* Achievement title (subtitle) directly under username */
-  .top-card-subtitle {
-    font-size: 0.62rem !important;
-    gap: 3px;
-    margin-top: 0;
-  }
-  .top-card-diamond { font-size: 0.65em !important; }
-
-  /* Rank in name row: hidden — rank is in the stripe */
+  .top-card-mobile-region { display: none !important; }
+  .top-card-mobile-pts { display: none !important; }
   .top-card-mobile-rank { display: none !important; }
 
-  /* Tiers section */
+  /* Subtitle: achievement title under name */
+  .top-card-subtitle {
+    font-size: 0.60rem !important;
+    gap: 3px !important;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .top-card-diamond { font-size: 0.7em !important; }
+
+  /* Tiers section: flex-1, horizontal row matching PC */
   .top-card-tiers {
+    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    flex: 0 0 auto !important;
-    width: 100% !important;
-    gap: 2px;
-    border-left: none !important;
-    margin-left: 0 !important;
-    padding: 2px 0 0 !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    border-left: 1px solid rgba(255,255,255,0.07) !important;
+    margin-left: 8px !important;
+    padding: 0 0 0 8px !important;
+    width: auto !important;
+    min-width: 0;
+    overflow: hidden;
   }
 
-  /* Tier badges: compact row with circles AND tier text (LT5/HT5 etc.) */
-  .top-card-tiers-label { display: none !important; }
-  .top-card-tiers .cat-tier-text {
+  /* Tiers label */
+  .top-card-tiers-label {
     display: block !important;
-    font-size: 0.50rem !important;
-    font-weight: 700;
+    font-size: 0.48rem !important;
+    letter-spacing: 0.10em;
   }
-  .top-card-tiers .cat-tier-circle {
-    width: 26px !important;
-    height: 26px !important;
-  }
-  .top-card-tiers .cat-tier-circle img {
-    width: 13px !important;
-    height: 13px !important;
+
+  /* Tier badges: single row, compact circles with tier text */
+  .top-card-tiers .tier-badges-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
   }
   .top-card-tiers .cat-tier-badge {
     min-width: 0 !important;
     gap: 1px !important;
   }
-  .top-card-tiers .tier-badges-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 3px 2px !important;
+  .top-card-tiers .cat-tier-circle {
+    width: 22px !important;
+    height: 22px !important;
   }
+  .top-card-tiers .cat-tier-circle img {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .top-card-tiers .cat-tier-text {
+    display: block !important;
+    font-size: 0.46rem !important;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* Points side: visible on mobile, compact */
+  .top-card-info-side {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    min-width: 40px !important;
+    padding: 0 0 0 8px !important;
+    margin-left: 6px !important;
+    border-left: 1px solid rgba(255,255,255,0.07) !important;
+    gap: 1px !important;
+  }
+  .top-card-side-pts {
+    font-size: 1.3rem !important;
+    line-height: 1 !important;
+  }
+  .top-card-side-label {
+    font-size: 0.44rem !important;
+    letter-spacing: 0.10em !important;
+  }
+  .top-card-side-peak { display: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -2457,7 +2485,6 @@ a.player-cell,
 .top-card-pts { color: var(--text-muted); }
 .top-card-mobile-rank { display: none; }
 .top-card-mobile-pts { display: none; }
-.top-card-mobile-region { display: none; }
 .top-card-tiers {
   flex: 1; display: flex; flex-direction: column; gap: 6px;
   justify-content: center; padding: 0 16px; margin-left: 12px;
