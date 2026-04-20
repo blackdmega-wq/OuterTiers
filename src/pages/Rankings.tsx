@@ -37,15 +37,15 @@ const RANK_DEFAULT_STYLE = {
 
 const TIER_CONFIG: Record<string, { label: string; gradient: string; border: string; glow: string; textColor: string }> = {
   T1: { label: 'Tier 1', gradient: 'linear-gradient(135deg, rgba(212,160,23,0.22) 0%, rgba(255,200,40,0.10) 100%)', border: 'rgba(212,160,23,0.7)', glow: 'rgba(212,160,23,0.25)', textColor: '#f0c040' },
-  T2: { label: 'Tier 2', gradient: 'linear-gradient(135deg, rgba(91,164,245,0.18) 0%, rgba(120,180,255,0.08) 100%)', border: 'rgba(91,164,245,0.55)', glow: 'rgba(91,164,245,0.2)', textColor: '#7ab8ff' },
-  T3: { label: 'Tier 3', gradient: 'linear-gradient(135deg, rgba(76,199,104,0.18) 0%, rgba(100,220,120,0.08) 100%)', border: 'rgba(76,199,104,0.5)', glow: 'rgba(76,199,104,0.18)', textColor: '#5ddb78' },
+  T2: { label: 'Tier 2', gradient: 'linear-gradient(135deg, rgba(185,195,215,0.18) 0%, rgba(160,175,195,0.08) 100%)', border: 'rgba(185,195,215,0.55)', glow: 'rgba(180,190,210,0.2)', textColor: '#b8c8dc' },
+  T3: { label: 'Tier 3', gradient: 'linear-gradient(135deg, rgba(180,115,40,0.22) 0%, rgba(160,100,30,0.10) 100%)', border: 'rgba(180,115,40,0.60)', glow: 'rgba(170,105,35,0.2)', textColor: '#c8873a' },
   T4: { label: 'Tier 4', gradient: 'linear-gradient(135deg, rgba(192,126,245,0.18) 0%, rgba(200,140,255,0.08) 100%)', border: 'rgba(192,126,245,0.45)', glow: 'rgba(192,126,245,0.15)', textColor: '#cf97f8' },
   T5: { label: 'Tier 5', gradient: 'linear-gradient(135deg, rgba(28,30,42,0.35) 0%, rgba(20,22,32,0.15) 100%)', border: 'rgba(50,52,68,0.40)', glow: 'rgba(40,42,58,0.08)', textColor: '#666880' },
 };
 
 function PlayerCard({ player, rank }: { player: Player; rank: number }) {
   const rs = RANK_STYLE[rank] ?? RANK_DEFAULT_STYLE;
-  const [bustFailed, setBustFailed] = useState(false);
+  const [headFailed, setHeadFailed] = useState(false);
   const isTopThree = rank <= 3;
 
   return (
@@ -59,38 +59,57 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
         <span className="top-card-rank-num">{rank}.</span>
         <div className="top-card-bust-wrap">
           <img
-            src={bustFailed
-              ? `https://mc-heads.net/avatar/${player.username}/80`
-              : `https://mc-heads.net/player/${player.username}`}
+            src={headFailed
+              ? `https://mc-heads.net/avatar/${player.username}/96`
+              : `https://mc-heads.net/head/${player.username}`}
             alt={player.username}
             className="top-card-bust"
-            onError={() => setBustFailed(true)}
+            onError={() => setHeadFailed(true)}
           />
         </div>
       </div>
 
       <div className="top-card-content">
-        <div className="top-card-name-row">
-          <span className="top-card-name">{player.username}</span>
-          <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-        </div>
-        <div className="top-card-subtitle">
-          <span className="top-card-diamond">◆</span>
-          <span>{getTitle(player.points)}</span>
-          <span className="top-card-pts">· {player.points} pts</span>
-        </div>
-        <div className="top-card-tiers">
-          <span className="top-card-tiers-label">TIERS</span>
-          <div className="tier-badges-row" style={{ flexWrap: 'wrap', gap: '5px 4px' }}>
-            {TIER_COLS.map(col => (
-              <CategoryTierBadge
-                key={col}
-                categoryId={col}
-                tier={player.tiers[col]}
-                rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
-              />
-            ))}
+        <div className="top-card-info-main">
+          <div className="top-card-name-row">
+            <span className="top-card-name">{player.username}</span>
+            <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
           </div>
+          <div className="top-card-subtitle">
+            <span className="top-card-diamond">◆</span>
+            <span>{getTitle(player.points)}</span>
+            <span className="top-card-pts">· {player.points} pts</span>
+          </div>
+          <div className="top-card-tiers">
+            <span className="top-card-tiers-label">TIERS</span>
+            <div className="tier-badges-row" style={{ flexWrap: 'wrap', gap: '5px 4px' }}>
+              {TIER_COLS.map(col => (
+                <CategoryTierBadge
+                  key={col}
+                  categoryId={col}
+                  tier={player.tiers[col]}
+                  rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="top-card-info-side">
+          <div className="top-card-side-pts">{player.points}</div>
+          <div className="top-card-side-label">POINTS</div>
+          {player.peakTier && player.peakTier !== '-' && (
+            <div className="top-card-side-peak">
+              <span className="top-card-side-peak-label">PEAK</span>
+              <span className="top-card-side-peak-val">{player.peakTier}</span>
+            </div>
+          )}
+          {player.currentTier && player.currentTier !== '-' && (
+            <div className="top-card-side-peak" style={{ marginTop: 4 }}>
+              <span className="top-card-side-peak-label">CURRENT</span>
+              <span className="top-card-side-peak-val">{player.currentTier}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>
