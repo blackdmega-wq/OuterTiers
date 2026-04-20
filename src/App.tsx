@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Rankings from './pages/Rankings';
 import PlayerProfile from './pages/PlayerProfile';
 import ApiDocs from './pages/ApiDocs';
+import Results from './pages/Results';
 
 function NotFound() {
   return (
@@ -308,6 +309,7 @@ export default function App() {
             <Route path="/rankings" element={<Navigate to="/rankings/overall" replace />} />
             <Route path="/rankings/:category" element={<Rankings />} />
             <Route path="/player/:username" element={<PlayerProfile />} />
+            <Route path="/results" element={<Results />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
