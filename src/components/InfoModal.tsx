@@ -83,11 +83,11 @@ const TITLES = [
 ];
 
 const TIER_POINTS = [
-  { tier: 'Tier 1', htPts: 60, ltPts: 45, color: '#f0c040', border: '#c88010', trophy: '🏆', bg: 'rgba(212,160,23,0.12)' },
-  { tier: 'Tier 2', htPts: 30, ltPts: 20, color: '#c0c8d8', border: '#8090a8', trophy: '🏆', bg: 'rgba(160,170,185,0.10)' },
-  { tier: 'Tier 3', htPts: 10, ltPts: 6,  color: '#c87840', border: '#905030', trophy: '🏆', bg: 'rgba(160,90,30,0.10)' },
-  { tier: 'Tier 4', htPts: 4,  ltPts: 3,  color: '#8899bb', border: '#505a70', trophy: '',    bg: 'transparent' },
-  { tier: 'Tier 5', htPts: 2,  ltPts: 1,  color: '#606878', border: '#404550', trophy: '',    bg: 'transparent' },
+  { num: 1, htPts: 60, ltPts: 45, htColor: '#f0c040', ltColor: '#e0b030', htBorder: '#c88010', ltBorder: '#a86800', bg: 'rgba(212,160,23,0.10)' },
+  { num: 2, htPts: 30, ltPts: 20, htColor: '#7ab8ff', ltColor: '#5a98df', htBorder: '#4488cc', ltBorder: '#336699', bg: 'rgba(91,164,245,0.08)' },
+  { num: 3, htPts: 10, ltPts: 6,  htColor: '#5ddb78', ltColor: '#3dbb58', htBorder: '#2a9a40', ltBorder: '#1a7a30', bg: 'rgba(76,199,104,0.07)' },
+  { num: 4, htPts: 4,  ltPts: 3,  htColor: '#cf97f8', ltColor: '#af77d8', htBorder: '#8855cc', ltBorder: '#6633aa', bg: 'rgba(192,126,245,0.07)' },
+  { num: 5, htPts: 2,  ltPts: 1,  htColor: '#999',    ltColor: '#777',    htBorder: '#555',    ltBorder: '#444',    bg: 'rgba(100,100,100,0.05)' },
 ];
 
 export default function InfoModal({ onClose }: InfoModalProps) {
@@ -133,28 +133,24 @@ export default function InfoModal({ onClose }: InfoModalProps) {
               <p className="modal-section-title">
                 How <span className="modal-underline">ranking points</span> are calculated
               </p>
+              <p className="modal-points-note">
+                Each category tier gives points. <strong>HT</strong> = High Tier (harder), <strong>LT</strong> = Low Tier (easier).
+              </p>
+              <div className="modal-points-header-row">
+                <span className="modal-points-col-tier">Tier</span>
+                <span className="modal-points-col-ht">HT Points</span>
+                <span className="modal-points-col-lt">LT Points</span>
+              </div>
               <div className="modal-points-list">
-                {TIER_POINTS.map(({ tier, htPts, ltPts, color, border, trophy, bg }) => (
-                  <div className="modal-points-tier" key={tier} style={{ background: bg, borderLeft: `3px solid ${border}` }}>
-                    <div className="modal-points-tier-header">
-                      {trophy && <span className="modal-points-trophy" style={{ filter: tier === 'Tier 2' ? 'grayscale(1) brightness(1.3)' : tier === 'Tier 3' ? 'sepia(1) saturate(2) hue-rotate(-20deg) brightness(0.85)' : '' }}>{trophy}</span>}
-                      <span className="modal-points-tier-name" style={{ color }}>{tier}</span>
-                    </div>
-                    <div className="modal-points-badges">
-                      <span className="modal-points-badge" style={{ background: `${border}30`, borderColor: border, color }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="17 11 12 6 7 11"/>
-                          <polyline points="17 18 12 13 7 18"/>
-                        </svg>
-                        {htPts} Points
-                      </span>
-                      <span className="modal-points-badge" style={{ background: 'rgba(255,255,255,0.04)', borderColor: '#333', color: '#8899aa' }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="18 15 12 9 6 15"/>
-                        </svg>
-                        {ltPts} {ltPts === 1 ? 'Point' : 'Points'}
-                      </span>
-                    </div>
+                {TIER_POINTS.map(({ num, htPts, ltPts, htColor, ltColor, htBorder, ltBorder, bg }) => (
+                  <div className="modal-points-tier" key={num} style={{ background: bg }}>
+                    <span className="modal-points-tier-label" style={{ color: htColor }}>Tier {num}</span>
+                    <span className="modal-points-val" style={{ color: htColor, borderColor: htBorder, background: `${htBorder}22` }}>
+                      ↑ {htPts} {htPts === 1 ? 'pt' : 'pts'}
+                    </span>
+                    <span className="modal-points-val" style={{ color: ltColor, borderColor: ltBorder, background: `${ltBorder}22` }}>
+                      ↓ {ltPts} {ltPts === 1 ? 'pt' : 'pts'}
+                    </span>
                   </div>
                 ))}
               </div>
