@@ -2191,10 +2191,12 @@ a.player-cell,
   .top-card-tiers {
     display: flex !important;
     flex-direction: column !important;
+    flex: 0 0 auto !important;   /* override base flex:1 so it sizes to content, not collapses */
+    width: 100% !important;
     gap: 4px;
     border-left: none !important;
     margin-left: 0 !important;
-    padding: 2px 0 0 !important;
+    padding: 4px 0 0 !important;
   }
   /* TIERS label visible on mobile */
   .top-card-tiers-label {

@@ -1,3 +1,1 @@
-# Serve index.html for all routes (SPA fallback)
-# Works on Netlify, Render, Cloudflare Pages, and most static hosts
-/*    /index.html   200
+/*  /index.html  200
