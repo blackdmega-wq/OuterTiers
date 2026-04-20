@@ -75,12 +75,13 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
             <span className="top-card-mobile-rank">{rank}.</span>
             <span className="top-card-name">{player.username}</span>
             <span className="top-card-mobile-pts">{player.points} pts</span>
-            <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+            <span className={`region-badge region-${player.region.toLowerCase()} top-card-desktop-region`}>{player.region}</span>
           </div>
           <div className="top-card-subtitle">
             <span className="top-card-diamond">◆</span>
             <span>{getTitle(player.points)}</span>
           </div>
+          <span className={`region-badge region-${player.region.toLowerCase()} top-card-mobile-region`}>{player.region}</span>
         </div>
 
         <div className="top-card-tiers">
