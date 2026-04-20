@@ -1322,7 +1322,7 @@ img { display: block; }
 }
 
 /* ===== POINTS ===== */
-.col-points { width: 100px; text-align: right !important; padding-right: 18px !important; }
+.col-points { width: 100px; text-align: center !important; }
 .col-combat-title { text-align: center !important; }
 .points-value { color: var(--gold); font-weight: 600; font-size: 0.85rem; }
 
@@ -1741,8 +1741,11 @@ a.player-cell,
   border: 1px solid rgba(180,180,200,0.15);
 }
 
-/* ===== LIVE RESULTS SECTION ===== */
-.live-results-section {
+/* ===== FEEDS ROW (side by side) ===== */
+.feeds-row-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
   padding: 0 0 52px;
 }
 
@@ -2101,6 +2104,7 @@ a.player-cell,
   .footer-cols { gap: 32px; }
 }
 @media (max-width: 900px) {
+  .feeds-row-section { grid-template-columns: 1fr; }
   .col-tiers { display: none; }
   .col-combat-title { display: none; }
   .hero-title { font-size: 3rem; letter-spacing: 3px; }
@@ -2151,11 +2155,6 @@ a.player-cell,
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ===== HIGH TIER SECTION ===== */
-.high-tier-section {
-  padding: 0 0 36px;
 }
 
 /* ===== COMBAT TITLE COLUMN (Home top100) ===== */
