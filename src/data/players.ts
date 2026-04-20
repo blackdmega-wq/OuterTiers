@@ -1,6 +1,21 @@
 export type Region = 'NA' | 'EU' | 'AS' | 'OC';
 export type TierLevel = 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | '-';
 
+export interface RawTiers {
+  current?: string | null;
+  peak?: string | null;
+  ogvanilla?: string | null;
+  vanilla?: string | null;
+  uhc?: string | null;
+  pot?: string | null;
+  nethop?: string | null;
+  smp?: string | null;
+  sword?: string | null;
+  axe?: string | null;
+  mace?: string | null;
+  speed?: string | null;
+}
+
 export interface PlayerTiers {
   ogvanilla: TierLevel;
   vanilla: TierLevel;
@@ -21,6 +36,7 @@ export interface Player {
   region: Region;
   points: number;
   tiers: PlayerTiers;
+  rawTiers?: RawTiers;
   currentTier?: TierLevel;
   peakTier?: TierLevel;
 }
