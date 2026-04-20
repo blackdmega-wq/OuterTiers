@@ -2198,31 +2198,22 @@ a.player-cell,
     margin-left: 0 !important;
     padding: 4px 0 0 !important;
   }
-  /* TIERS label visible on mobile */
-  .top-card-tiers-label {
-    display: block !important;
-    font-size: 0.6rem !important;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 2px;
-  }
-  /* smaller circles on mobile */
+  /* TIERS label: hidden on mobile to save space */
+  .top-card-tiers-label { display: none !important; }
+  /* Compact single row: 10 small circles, no text label below each */
+  .top-card-tiers .cat-tier-text { display: none !important; }
   .top-card-tiers .cat-tier-circle {
-    width: 24px !important; height: 24px !important;
+    width: 22px !important; height: 22px !important;
   }
   .top-card-tiers .cat-tier-circle img {
-    width: 13px !important; height: 13px !important;
+    width: 11px !important; height: 11px !important;
   }
-  .top-card-tiers .cat-tier-badge { min-width: 24px !important; }
-  .top-card-tiers .cat-tier-text { font-size: 0.48rem !important; }
-  /* 5-column grid: 10 categories = 2 clean rows of 5 on mobile */
+  .top-card-tiers .cat-tier-badge { min-width: 0 !important; }
+  /* Single flex row — 10×22px + 9×4px gap = 256px, fits any phone */
   .top-card-tiers .tier-badges-row {
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 4px 3px !important;
-    flex-wrap: unset !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
   }
   /* Points inline next to name */
   .top-card-mobile-pts {

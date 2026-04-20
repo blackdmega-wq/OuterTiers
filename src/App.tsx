@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SiteFooter from './components/SiteFooter';
 import ParticleBackground from './components/ParticleBackground';
@@ -140,7 +140,7 @@ function ScrollReveal() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="page-bg" aria-hidden="true" />
       <div className="page-bg-grid" aria-hidden="true" />
       <GlobalGlow />
@@ -162,6 +162,6 @@ export default function App() {
         <SiteFooter />
       </div>
       <ScrollReveal />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
