@@ -4,6 +4,7 @@ services:
     env: static
     buildCommand: npm run build
     staticPublishPath: ./dist
+    # SPA fallback: serve index.html for all routes not matched by a static file
     routes:
       - type: rewrite
         source: /*
