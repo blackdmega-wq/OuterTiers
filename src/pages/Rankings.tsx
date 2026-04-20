@@ -28,6 +28,13 @@ const RANK_STYLE: Record<number, { bg: string; glow: string; border: string; shi
   },
 };
 
+const RANK_DEFAULT_STYLE = {
+  bg: 'linear-gradient(145deg, #111320 0%, #1a1d2e 50%, #141728 100%)',
+  glow: 'rgba(91,164,245,0.15)',
+  border: 'rgba(50,55,80,0.35)',
+  shimmerClass: '',
+};
+
 const TIER_CONFIG: Record<string, { label: string; gradient: string; border: string; glow: string; textColor: string }> = {
   T1: { label: 'Tier 1', gradient: 'linear-gradient(135deg, rgba(212,160,23,0.22) 0%, rgba(255,200,40,0.10) 100%)', border: 'rgba(212,160,23,0.7)', glow: 'rgba(212,160,23,0.25)', textColor: '#f0c040' },
   T2: { label: 'Tier 2', gradient: 'linear-gradient(135deg, rgba(91,164,245,0.18) 0%, rgba(120,180,255,0.08) 100%)', border: 'rgba(91,164,245,0.55)', glow: 'rgba(91,164,245,0.2)', textColor: '#7ab8ff' },
@@ -36,18 +43,19 @@ const TIER_CONFIG: Record<string, { label: string; gradient: string; border: str
   T5: { label: 'Tier 5', gradient: 'linear-gradient(135deg, rgba(28,30,42,0.35) 0%, rgba(20,22,32,0.15) 100%)', border: 'rgba(50,52,68,0.40)', glow: 'rgba(40,42,58,0.08)', textColor: '#666880' },
 };
 
-function TopCard({ player, rank }: { player: Player; rank: number }) {
-  const rs = RANK_STYLE[rank];
+function PlayerCard({ player, rank }: { player: Player; rank: number }) {
+  const rs = RANK_STYLE[rank] ?? RANK_DEFAULT_STYLE;
   const [bustFailed, setBustFailed] = useState(false);
+  const isTopThree = rank <= 3;
 
   return (
     <Link
       to={`/player/${player.username}`}
-      className={`top-card top-card-rank-${rank}`}
+      className={`top-card top-card-rank-${isTopThree ? rank : 'default'}`}
       style={{ boxShadow: `0 0 0 1px ${rs.border}, 0 8px 32px rgba(0,0,0,0.3)` }}
     >
       <div className="top-card-stripe" style={{ background: rs.bg }}>
-        <div className={`top-card-stripe-shimmer ${rs.shimmerClass}`} />
+        {rs.shimmerClass && <div className={`top-card-stripe-shimmer ${rs.shimmerClass}`} />}
         <span className="top-card-rank-num">{rank}.</span>
         <div className="top-card-bust-wrap">
           <img
@@ -167,73 +175,11 @@ export default function Rankings() {
             {sorted.length === 0 ? (
               <div className="rankings-empty">No players ranked yet.</div>
             ) : (
-              <>
-                <div className="top3-cards">
-                  {sorted.slice(0, Math.min(3, sorted.length)).map((p, i) => (
-                    <TopCard key={p.id} player={p} rank={i + 1} />
-                  ))}
-                </div>
-
-                {sorted.length > 3 && (
-                  <div className="rankings-table-wrapper" style={{ marginTop: 16 }}>
-                    <table className="rankings-table">
-                      <thead>
-                        <tr>
-                          <th className="col-rank">#</th>
-                          <th className="col-player">PLAYER</th>
-                          <th className="col-region">REGION</th>
-                          <th className="col-tiers">TIERS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sorted.slice(3).map((player, index) => (
-                          <tr key={player.id} className="player-row">
-                            <td className="col-rank">
-                              <span className="rank-number">{index + 4}.</span>
-                            </td>
-                            <td className="col-player">
-                              <Link to={`/player/${player.username}`} className="player-cell">
-                                <div className="player-avatar-wrapper">
-                                  <img
-                                    src={`https://mc-heads.net/avatar/${player.username}/40`}
-                                    alt={player.username}
-                                    width={40} height={40}
-                                    style={{ imageRendering: 'pixelated', borderRadius: 3, display: 'block' }}
-                                    loading="lazy"
-                                  />
-                                </div>
-                                <div className="player-info">
-                                  <span className="player-name">{player.username}</span>
-                                  <span className="player-title">
-                                    <span style={{ color: '#7ab8ff', fontSize: '0.7em' }}>◆</span>
-                                    {getTitle(player.points)}
-                                    <span className="player-points">· {player.points} pts</span>
-                                  </span>
-                                </div>
-                              </Link>
-                            </td>
-                            <td className="col-region">
-                              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-                            </td>
-                            <td className="col-tiers">
-                              <div className="tier-badges-row">
-                                {TIER_COLS.map(col => (
-                                  <CategoryTierBadge
-                                    key={col}
-                                    categoryId={col}
-                                    tier={player.tiers[col]}
-                                    rawTier={player.rawTiers?.[col as keyof typeof player.rawTiers]}
-                                  />
-                                ))}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </>
+              <div className="top3-cards">
+                {sorted.map((p, i) => (
+                  <PlayerCard key={p.id} player={p} rank={i + 1} />
+                ))}
+              </div>
             )}
           </div>
         ) : (
