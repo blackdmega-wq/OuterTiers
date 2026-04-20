@@ -548,12 +548,12 @@ img { display: block; }
 }
 
 .cat-tier-circle {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: 1.5px solid;
   display: flex; align-items: center; justify-content: center;
   transition: box-shadow 0.15s;
 }
-.cat-tier-circle img { width: 20px; height: 20px; object-fit: contain; }
+.cat-tier-circle img { width: 24px; height: 24px; object-fit: contain; }
 
 .cat-tier-circle-empty {
   border-color: #1e2030;
@@ -2174,27 +2174,57 @@ a.player-cell,
   .top-card-stripe-shimmer { display: none; }
   .top-card-rank-num { display: none; }
   .top-card-bust-wrap { display: none; }
+
+  /* 2-row grid: row1 = name|points, row2 = tiers */
   .top-card-content {
-    flex-direction: row !important;
-    align-items: center;
-    padding: 10px 14px;
-    gap: 10px;
+    display: grid !important;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    padding: 10px 12px;
+    gap: 4px 8px;
+    align-items: start;
   }
-  .top-card-info-main { flex: 1 !important; }
-  .top-card-tiers { display: none !important; }
+  .top-card-info-main {
+    grid-column: 1; grid-row: 1;
+    flex: unset !important;
+    justify-content: flex-start !important;
+  }
   .top-card-info-side {
+    grid-column: 2; grid-row: 1;
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-width: auto;
-    padding: 0 0 0 12px;
+    padding: 0 0 0 10px;
     margin-left: 0;
     border-left: 1px solid rgba(255,255,255,0.07);
   }
+  .top-card-tiers {
+    grid-column: 1 / -1; grid-row: 2;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 5px 4px;
+    align-items: center;
+    border-left: none !important;
+    margin-left: 0 !important;
+    padding: 4px 0 2px !important;
+  }
+  /* smaller circles on mobile */
+  .top-card-tiers .cat-tier-circle {
+    width: 26px !important; height: 26px !important;
+  }
+  .top-card-tiers .cat-tier-circle img {
+    width: 14px !important; height: 14px !important;
+  }
+  .top-card-tiers .cat-tier-badge { min-width: 26px !important; }
+  .top-card-tiers .cat-tier-text { font-size: 0.5rem !important; }
+  .top-card-tiers-label { display: none !important; }
+
   .top-card-side-pts { font-size: 1.3rem; }
   .top-card-name { font-size: 0.88rem; }
-  .top-card-subtitle { font-size: 0.7rem; }
+  .top-card-subtitle { font-size: 0.78rem; }
   .top-card-mobile-rank {
     display: inline;
     font-weight: 700;
@@ -2311,7 +2341,8 @@ a.player-cell,
   align-items: stretch; min-width: 0;
 }
 .top-card-info-main {
-  flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; min-width: 0;
+  flex: 0 0 auto; display: flex; flex-direction: column;
+  gap: 5px; min-width: 0; justify-content: center;
 }
 .top-card-info-side {
   flex-shrink: 0; min-width: 90px;
@@ -2349,7 +2380,7 @@ a.player-cell,
 }
 .top-card-subtitle {
   display: flex; align-items: center; gap: 5px;
-  font-size: 0.75rem; color: var(--text-muted);
+  font-size: 0.9rem; color: var(--text-muted);
 }
 .top-card-diamond { color: #7ab8ff; font-size: 0.8em; }
 .top-card-pts { color: var(--text-muted); }
