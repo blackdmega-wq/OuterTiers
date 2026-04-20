@@ -41,6 +41,32 @@ export interface Player {
   peakTier?: TierLevel;
 }
 
+export const TIER_POINTS: Record<string, number> = {
+  HT1: 60,
+  LT1: 45,
+  HT2: 30,
+  LT2: 20,
+  HT3: 10,
+  LT3: 6,
+  HT4: 4,
+  LT4: 3,
+  HT5: 2,
+  LT5: 1,
+};
+
+export function calculatePoints(rawTiers?: RawTiers | null): number {
+  if (!rawTiers) return 0;
+  let total = 0;
+  const modeKeys: (keyof RawTiers)[] = ['ogvanilla', 'vanilla', 'uhc', 'pot', 'nethop', 'smp', 'sword', 'axe', 'mace', 'speed'];
+  for (const key of modeKeys) {
+    const tier = rawTiers[key];
+    if (tier && tier !== '-') {
+      total += TIER_POINTS[tier.toUpperCase()] ?? 0;
+    }
+  }
+  return total;
+}
+
 export function getTitle(points: number): string {
   if (points >= 400) return 'Combat Grandmaster';
   if (points >= 250) return 'Combat Master';

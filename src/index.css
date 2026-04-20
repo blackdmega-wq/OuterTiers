@@ -2175,60 +2175,62 @@ a.player-cell,
   .top-card-rank-num { display: none; }
   .top-card-bust-wrap { display: none; }
 
-  /* 2-row grid: row1 = name|points, row2 = tiers */
+  /* Compact flex-column layout */
   .top-card-content {
-    display: grid !important;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    padding: 10px 12px;
-    gap: 4px 8px;
-    align-items: start;
+    display: flex !important;
+    flex-direction: column;
+    padding: 8px 10px;
+    gap: 5px;
   }
   .top-card-info-main {
-    grid-column: 1; grid-row: 1;
     flex: unset !important;
     justify-content: flex-start !important;
   }
-  .top-card-info-side {
-    grid-column: 2; grid-row: 1;
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: auto;
-    padding: 0 0 0 10px;
-    margin-left: 0;
-    border-left: 1px solid rgba(255,255,255,0.07);
-  }
+  /* Hide the separate points side panel — points shown inline next to name */
+  .top-card-info-side { display: none !important; }
   .top-card-tiers {
-    grid-column: 1 / -1; grid-row: 2;
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap;
-    gap: 5px 4px;
-    align-items: center;
+    flex-direction: column !important;
+    gap: 4px;
     border-left: none !important;
     margin-left: 0 !important;
-    padding: 4px 0 2px !important;
+    padding: 2px 0 0 !important;
+  }
+  /* TIERS label visible on mobile */
+  .top-card-tiers-label {
+    display: block !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 2px;
   }
   /* smaller circles on mobile */
   .top-card-tiers .cat-tier-circle {
-    width: 26px !important; height: 26px !important;
+    width: 24px !important; height: 24px !important;
   }
   .top-card-tiers .cat-tier-circle img {
-    width: 14px !important; height: 14px !important;
+    width: 13px !important; height: 13px !important;
   }
-  .top-card-tiers .cat-tier-badge { min-width: 26px !important; }
-  .top-card-tiers .cat-tier-text { font-size: 0.5rem !important; }
-  .top-card-tiers-label { display: none !important; }
-
-  .top-card-side-pts { font-size: 1.3rem; }
-  .top-card-name { font-size: 0.88rem; }
-  .top-card-subtitle { font-size: 0.78rem; }
+  .top-card-tiers .cat-tier-badge { min-width: 24px !important; }
+  .top-card-tiers .cat-tier-text { font-size: 0.48rem !important; }
+  /* Points inline next to name */
+  .top-card-mobile-pts {
+    display: inline-flex !important;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+  .top-card-name { font-size: 0.85rem; }
+  .top-card-subtitle { font-size: 0.72rem; }
   .top-card-mobile-rank {
     display: inline;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
     flex-shrink: 0;
   }
@@ -2385,6 +2387,7 @@ a.player-cell,
 .top-card-diamond { color: #7ab8ff; font-size: 0.8em; }
 .top-card-pts { color: var(--text-muted); }
 .top-card-mobile-rank { display: none; }
+.top-card-mobile-pts { display: none; }
 .top-card-tiers {
   flex: 1; display: flex; flex-direction: column; gap: 6px;
   justify-content: center; padding: 0 16px; margin-left: 12px;

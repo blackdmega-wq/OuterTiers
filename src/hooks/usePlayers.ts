@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Player } from '../data/players';
+import { calculatePoints } from '../data/players';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
@@ -24,7 +25,11 @@ export function usePlayers(): UsePlayersResult {
     fetch(`${API_BASE}/api/players`)
       .then(r => r.json())
       .then(data => {
-        setPlayers(data.players ?? []);
+        const mapped = (data.players ?? []).map((p: Player) => ({
+          ...p,
+          points: calculatePoints(p.rawTiers),
+        }));
+        setPlayers(mapped);
         setLoading(false);
       })
       .catch(err => {
@@ -53,7 +58,7 @@ export function usePlayer(username: string | undefined): UsePlayerResult {
         return r.json();
       })
       .then(data => {
-        setPlayer(data);
+        setPlayer({ ...data, points: calculatePoints(data.rawTiers) });
         setLoading(false);
       })
       .catch(() => {
