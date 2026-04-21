@@ -1,7 +1,9 @@
 /* ============================================================
    OuterTiers — extras.css
-   Logo, animated background upgrades, stylish tagline boxes,
-   selection / shield helpers. Loaded after index.css.
+   Logo, tagline boxes, animated background upgrades, layout
+   tweaks and shield helpers. Loaded after index.css.
+   Tuned for performance: compositor-only animations,
+   minimal blur/backdrop-filter, content-visibility skipping.
    ============================================================ */
 
 /* ---------- LOGO ---------- */
@@ -11,33 +13,43 @@
   -webkit-user-drag: none;
   pointer-events: none;
   object-fit: contain;
-  filter: drop-shadow(0 4px 18px rgba(91, 164, 245, 0.35));
 }
 .ot-logo-glow {
   filter:
-    drop-shadow(0 0 18px rgba(91, 164, 245, 0.55))
-    drop-shadow(0 0 38px rgba(91, 164, 245, 0.25))
-    drop-shadow(0 6px 22px rgba(0, 0, 0, 0.45));
+    drop-shadow(0 0 10px rgba(91, 164, 245, 0.45))
+    drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
   animation: ot-logo-float 6s ease-in-out infinite;
+  will-change: transform;
 }
 @keyframes ot-logo-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-6px) rotate(-1.2deg); }
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
 }
 
-.hero-logo-wrap {
-  display: flex;
-  justify-content: center;
+/* Hero title with inline logo */
+.hero-title-with-logo {
+  display: inline-flex !important;
   align-items: center;
-  margin: 8px auto 14px;
-  position: relative;
-  z-index: 2;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: nowrap;
 }
-.hero-logo-img {
-  width: 120px;
-  height: 120px;
+.hero-title-logo {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+}
+.hero-title-text {
+  display: inline-flex;
+  align-items: center;
+}
+.hero-title-text .logo-outer,
+.hero-title-text .logo-tiers {
+  font-size: inherit;
+  letter-spacing: inherit;
 }
 
+/* Footer brand: logo + wordmark, wordmark stays joined */
 .footer-logo-wrap {
   display: flex !important;
   align-items: center !important;
@@ -48,23 +60,28 @@
   height: 42px;
   flex: 0 0 auto;
 }
+.footer-brand-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;            /* OUTER and TIERS stay tight together */
+  letter-spacing: 0;
+  white-space: nowrap;
+}
 
 /* ---------- TAGLINE BOXES ---------- */
 .hero-tagline-box {
   position: relative;
   display: inline-block;
-  padding: 18px 34px;
+  padding: 16px 30px;
   margin: 8px auto 14px;
-  border-radius: 18px;
+  border-radius: 16px;
   isolation: isolate;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(15, 22, 38, 0.78), rgba(8, 12, 22, 0.86));
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 18px 48px -16px rgba(0, 0, 0, 0.65);
-  animation: ot-box-pulse 5.5s ease-in-out infinite;
+    0 12px 36px -16px rgba(0, 0, 0, 0.6);
 }
 .hero-tagline-box-text {
   position: relative;
@@ -74,13 +91,14 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 0 28px rgba(255, 255, 255, 0.18);
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.15);
   letter-spacing: 0.5px;
 }
 .hero-tagline-box-glow {
   position: absolute;
-  inset: -2px;
+  inset: -1px;
   z-index: 0;
+  border-radius: inherit;
   background:
     conic-gradient(
       from 0deg,
@@ -89,23 +107,16 @@
       rgba(240, 192, 64, 0.45),
       rgba(91, 164, 245, 0.55)
     );
-  filter: blur(22px);
-  opacity: 0.55;
-  animation: ot-box-rotate 14s linear infinite;
-}
-.hero-tagline-box::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(15, 22, 38, 0.78), rgba(8, 12, 22, 0.86));
+  filter: blur(14px);
+  opacity: 0.5;
+  animation: ot-box-rotate 18s linear infinite;
+  will-change: transform;
 }
 .hero-tagline-box-blue {
   box-shadow:
     0 0 0 1px rgba(91, 164, 245, 0.25) inset,
-    0 0 60px -8px rgba(91, 164, 245, 0.55),
-    0 18px 48px -16px rgba(0, 0, 0, 0.65);
+    0 0 40px -10px rgba(91, 164, 245, 0.45),
+    0 12px 36px -16px rgba(0, 0, 0, 0.6);
 }
 .hero-tagline-box-blue .hero-tagline-box-glow {
   background:
@@ -121,8 +132,8 @@
 .hero-tagline-box-purple {
   box-shadow:
     0 0 0 1px rgba(167, 90, 245, 0.25) inset,
-    0 0 60px -8px rgba(167, 90, 245, 0.55),
-    0 18px 48px -16px rgba(0, 0, 0, 0.65);
+    0 0 40px -10px rgba(167, 90, 245, 0.45),
+    0 12px 36px -16px rgba(0, 0, 0, 0.6);
 }
 .hero-tagline-box-purple .hero-tagline-box-glow {
   background:
@@ -137,12 +148,42 @@
 @keyframes ot-box-rotate {
   to { transform: rotate(360deg); }
 }
-@keyframes ot-box-pulse {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-2px); }
+
+/* ---------- STAT STACK (PC) ---------- */
+/* Stack all 4 stat cards top-to-bottom, full width like the wide one */
+.hero-stats-row {
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto !important;
+  max-width: 480px !important;
+  gap: 12px !important;
+}
+.hero-stats-row .stat-card,
+.hero-stats-row .stat-card.stat-card-wide {
+  grid-column: 1 / -1 !important;
+  width: 100%;
+}
+/* Drop expensive backdrop-filter on stat cards (4 layers stacked = jank). */
+.stat-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.035);
 }
 
-/* ---------- ANIMATED BACKGROUND UPGRADES ---------- */
+/* ---------- CENTER FEATURES HEADER (PC) ---------- */
+.features-section .section-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.features-section .section-sub {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+/* ---------- ANIMATED BACKGROUND (perf-tuned) ---------- */
 .page-bg::after {
   content: '';
   position: fixed;
@@ -150,60 +191,63 @@
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(60% 50% at 18% 22%, rgba(91, 164, 245, 0.18), transparent 60%),
-    radial-gradient(55% 45% at 82% 18%, rgba(167, 90, 245, 0.18), transparent 60%),
-    radial-gradient(70% 55% at 50% 92%, rgba(56, 220, 255, 0.12), transparent 60%);
-  animation: ot-bg-drift 22s ease-in-out infinite alternate;
+    radial-gradient(60% 50% at 18% 22%, rgba(91, 164, 245, 0.16), transparent 60%),
+    radial-gradient(55% 45% at 82% 18%, rgba(167, 90, 245, 0.16), transparent 60%),
+    radial-gradient(70% 55% at 50% 92%, rgba(56, 220, 255, 0.10), transparent 60%);
+  animation: ot-bg-drift 28s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
 }
 @keyframes ot-bg-drift {
-  0%   { transform: translate3d(0, 0, 0)     scale(1); }
-  50%  { transform: translate3d(-2%, 1%, 0)  scale(1.04); }
-  100% { transform: translate3d(2%, -1%, 0)  scale(1.06); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(2%, -1%, 0); }
 }
 
-.page-bg-grid {
-  background-image:
-    linear-gradient(rgba(91, 164, 245, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91, 164, 245, 0.05) 1px, transparent 1px) !important;
-  background-size: 56px 56px, 56px 56px !important;
-  animation: ot-grid-drift 28s linear infinite !important;
-}
-@keyframes ot-grid-drift {
-  to { background-position: 56px 56px, 56px 56px; }
-}
-
-/* Aurora ribbon */
+/* Aurora ribbon — single gradient, lower blur, GPU-only animation */
 body::before {
   content: '';
   position: fixed;
-  top: -30%;
+  top: -20%;
   left: -10%;
   width: 130%;
-  height: 80%;
+  height: 70%;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(closest-side, rgba(91, 164, 245, 0.22), transparent 70%),
-    radial-gradient(closest-side, rgba(167, 90, 245, 0.18), transparent 70%);
+    radial-gradient(closest-side, rgba(91, 164, 245, 0.18), transparent 70%),
+    radial-gradient(closest-side, rgba(167, 90, 245, 0.14), transparent 70%);
   background-size: 60% 100%, 60% 100%;
   background-position: 10% 30%, 80% 60%;
   background-repeat: no-repeat;
-  filter: blur(60px);
-  animation: ot-aurora 18s ease-in-out infinite alternate;
-  opacity: 0.85;
+  filter: blur(30px);
+  animation: ot-aurora 26s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+  opacity: 0.7;
 }
 @keyframes ot-aurora {
-  0%   { transform: translateX(-4%) rotate(-2deg); opacity: 0.6; }
-  50%  { transform: translateX(3%)  rotate(1deg);  opacity: 0.95; }
-  100% { transform: translateX(5%)  rotate(2deg);  opacity: 0.7; }
+  0%   { transform: translate3d(-3%, 0, 0); }
+  100% { transform: translate3d(4%, 1%, 0); }
 }
 
+/* ---------- PERFORMANCE: skip rendering of off-screen sections ---------- */
+.home-top100,
+.feeds-row-section,
+.features-section,
+.discord-section,
+.about-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+
+/* Avoid heavy backdrop blurs on stacked cards */
+.feature-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* ---------- REDUCED MOTION ---------- */
 @media (prefers-reduced-motion: reduce) {
   .ot-logo-glow,
-  .hero-tagline-box,
   .hero-tagline-box-glow,
   .page-bg::after,
-  .page-bg-grid,
   body::before {
     animation: none !important;
   }
@@ -232,3 +276,10 @@ body::before {
   user-select: text;
 }
 img { -webkit-user-drag: none; user-drag: none; }
+
+/* ---------- MOBILE TWEAKS ---------- */
+@media (max-width: 720px) {
+  .hero-title-with-logo { gap: 10px; }
+  .hero-title-logo { width: 56px; height: 56px; }
+  .hero-tagline-box { padding: 14px 22px; }
+}

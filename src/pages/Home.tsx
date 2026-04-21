@@ -150,17 +150,16 @@ export default function Home() {
         <div className="hero-glow-right" />
         <div className="hero-glow-center" />
 
-        <div className="hero-logo-wrap animate-fade-down">
-          <Logo size={120} className="hero-logo-img" />
-        </div>
-
         <div className="hero-eyebrow animate-fade-down" style={{ animationDelay: '0.05s' }}>
           <span className="hero-eyebrow-dot" />
           Minecraft PvP Ranking
         </div>
 
-        <h1 className="hero-title animate-fade-in">
-          <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
+        <h1 className="hero-title hero-title-with-logo animate-fade-in">
+          <Logo size={88} className="hero-title-logo" />
+          <span className="hero-title-text">
+            <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
+          </span>
         </h1>
         <p className="hero-tagline animate-fade-in" style={{ animationDelay: '0.1s' }}>Minecraft PvP Rankings</p>
 

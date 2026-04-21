@@ -37,7 +37,9 @@ export default function SiteFooter() {
           <div className="footer-brand">
             <div className="footer-logo-wrap">
               <Logo size={42} glow={false} className="footer-logo-img" />
-              <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
+              <span className="footer-brand-text">
+                <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
+              </span>
             </div>
             <p className="footer-brand-sub">
               The competitive Minecraft PvP ranking platform.
