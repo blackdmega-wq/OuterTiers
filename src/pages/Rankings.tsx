@@ -61,7 +61,7 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
           <img
             src={headFailed
               ? `https://mc-heads.net/avatar/${player.username}/96`
-              : `https://mc-heads.net/bust/${player.username}/120`}
+              : `https://starlightskins.lunareclipse.studio/render/default/${player.username}/bust`}
             alt={player.username}
             className="top-card-bust top-card-bust-body"
             onError={() => setHeadFailed(true)}
