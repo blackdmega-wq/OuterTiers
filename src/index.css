@@ -2291,7 +2291,7 @@ a.player-cell,
   .top-card-tiers .tier-badges-row {
     display: flex !important;
     flex-wrap: nowrap !important;
-    gap: 5px !important;
+    gap: 10px !important;
   }
   .top-card-tiers .cat-tier-badge {
     min-width: 0 !important;
