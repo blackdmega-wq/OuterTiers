@@ -288,7 +288,7 @@ img { -webkit-user-drag: none; user-drag: none; }
   border: 2px solid rgba(255, 210, 110, 0.85) !important;
   overflow: visible !important;
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-end !important;
   justify-content: center !important;
   padding: 0 !important;
   box-shadow:
@@ -348,10 +348,13 @@ img { -webkit-user-drag: none; user-drag: none; }
 }
 
 .top-card-bust-body {
-  width: 100% !important;
-  height: 100% !important;
+  width: 118% !important;
+  height: 118% !important;
   object-fit: contain !important;
-  object-position: center center !important;
+  object-position: center bottom !important;
+  margin-top: auto !important;
+  margin-bottom: -2px !important;
+  clip-path: circle(43% at 50% 47%);
   image-rendering: pixelated;
   display: block !important;
   filter:
