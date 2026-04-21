@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import TermsModal from './TermsModal';
 import PrivacyModal from './PrivacyModal';
 import DiscordJoinModal from './DiscordJoinModal';
+import Logo from './Logo';
 
 const DISCORD_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -35,6 +36,7 @@ export default function SiteFooter() {
           {/* Brand */}
           <div className="footer-brand">
             <div className="footer-logo-wrap">
+              <Logo size={42} glow={false} className="footer-logo-img" />
               <span className="logo-outer">OUTER</span><span className="logo-tiers">TIERS</span>
             </div>
             <p className="footer-brand-sub">
@@ -73,7 +75,7 @@ export default function SiteFooter() {
 
         <div className="footer-bottom">
           <p className="footer-copy">
-            © 2025 OuterTiers FZCO · Registered in the United Arab Emirates · Not affiliated with Mojang Studios
+            © {new Date().getFullYear()} OuterTiers · Community-run Minecraft PvP ranking project · Not affiliated with Mojang Studios or Microsoft
           </p>
         </div>
       </footer>

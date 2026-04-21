@@ -3,7 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 import DiscordJoinModal from '../components/DiscordJoinModal';
+import Logo from '../components/Logo';
 import { usePlayers } from '../hooks/usePlayers';
+import { usePresence } from '../hooks/usePresence';
+
+const GAME_MODE_CATEGORIES = CATEGORIES.filter(c => c.id !== 'overall');
 
 function useCountUp(target: number, duration = 900) {
   const [display, setDisplay] = useState(0);
@@ -134,6 +138,8 @@ export default function Home() {
   const displayCount = useCountUp(players.length, 1100);
   const live = !playersLoading;
   const { liveResults, highResults } = useLiveFeed();
+  const onlineCount = usePresence();
+  const displayOnline = useCountUp(onlineCount, 700);
 
   return (
     <div className="home-page">
@@ -144,7 +150,11 @@ export default function Home() {
         <div className="hero-glow-right" />
         <div className="hero-glow-center" />
 
-        <div className="hero-eyebrow animate-fade-down">
+        <div className="hero-logo-wrap animate-fade-down">
+          <Logo size={120} className="hero-logo-img" />
+        </div>
+
+        <div className="hero-eyebrow animate-fade-down" style={{ animationDelay: '0.05s' }}>
           <span className="hero-eyebrow-dot" />
           Minecraft PvP Ranking
         </div>
@@ -164,7 +174,7 @@ export default function Home() {
         <div className="hero-stats-row animate-fade-up" style={{ animationDelay: '0.35s' }}>
           <StatCard
             value={displayCount}
-            label="Ranked Players"
+            label="Players Tested"
             liveIndicator={live}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -174,7 +184,17 @@ export default function Home() {
             }
           />
           <StatCard
-            value={CATEGORIES.length}
+            value={displayOnline}
+            label="Viewers Online"
+            liveIndicator
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+          />
+          <StatCard
+            value={GAME_MODE_CATEGORIES.length}
             label="Game Modes"
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -209,7 +229,7 @@ export default function Home() {
         </div>
 
         <div className="hero-game-modes animate-fade-up" style={{ animationDelay: '0.55s' }}>
-          {CATEGORIES.filter(c => c.id !== 'overall').map((cat) => (
+          {GAME_MODE_CATEGORIES.map((cat) => (
             <Link key={cat.id} to={`/rankings/${cat.id}`} className="game-mode-chip btn-press">
               <img src={cat.icon} alt="" className="game-mode-chip-icon" />
               <span>{cat.label}</span>
@@ -288,7 +308,10 @@ export default function Home() {
       {/* ===== ABOUT / DESCRIPTION ===== */}
       <div className="about-section animate-fade-up">
         <div className="about-eyebrow">THE ULTIMATE COMPETITIVE PVP EXPERIENCE IN MINECRAFT FEATURING A STATE OF THE ART SERVER AND GLOBAL RANKING NETWORK.</div>
-        <h2 className="about-title">The Ultimate PvP Experience:</h2>
+        <div className="hero-tagline-box hero-tagline-box-purple">
+          <span className="hero-tagline-box-glow" />
+          <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
+        </div>
         <p className="about-body">
           OuterTiers is a Minecraft network consisting of a Tier List system
           and various communities. Designed by competitive players, for competitive players.
@@ -333,7 +356,10 @@ export default function Home() {
       <div className="features-section">
         <div className="section-header animate-fade-up">
           <div className="section-label">Why OuterTiers?</div>
-          <h2 className="section-heading">The best Minecraft PvP ranking system</h2>
+          <div className="hero-tagline-box hero-tagline-box-blue">
+            <span className="hero-tagline-box-glow" />
+            <h2 className="section-heading hero-tagline-box-text">The best Minecraft PvP ranking system</h2>
+          </div>
           <p className="section-sub animate-fade-up" style={{ animationDelay: '0.1s' }}>
             OuterTiers sets the standard for competitive Minecraft PvP ranking. Built by players who understand the scene at the highest level, our platform provides the most accurate, transparent and detailed skill evaluation available anywhere.
           </p>

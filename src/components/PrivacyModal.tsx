@@ -13,30 +13,46 @@ export default function PrivacyModal({ onClose }: Props) {
           </button>
         </div>
         <div className="modal-body">
-          <p>This Privacy Policy explains how <strong>OuterTiers</strong> collects, uses, and protects your information when you use our website.</p>
+          <p>This Privacy Policy explains what information <strong>OuterTiers</strong> — a community-run Minecraft PvP ranking project — collects when you use our website, and how it is used.</p>
 
           <div className="terms-section">
             <h3 className="terms-section-title">1. Information We Collect</h3>
-            <p>We may collect information such as your Minecraft username, region, and gameplay statistics for the purpose of maintaining accurate rankings on the platform.</p>
+            <p>We only collect information that is publicly available or that you choose to share with us:</p>
+            <ul>
+              <li>Public Minecraft usernames and UUIDs of players who are tested or ranked.</li>
+              <li>Tier placements, points, and region tags submitted by community testers.</li>
+              <li>Basic technical data your browser sends with every request (IP address, user-agent, request path) and a short-lived anonymous session id used to count how many viewers are currently online.</li>
+            </ul>
+            <p>We do not ask for, and do not knowingly store, real names, email addresses, passwords, or payment information.</p>
           </div>
 
           <div className="terms-section">
-            <h3 className="terms-section-title">2. How We Use Your Information</h3>
-            <p>Your data is used solely to provide and improve the OuterTiers ranking service. We do not sell or share your personal information with third parties.</p>
+            <h3 className="terms-section-title">2. How We Use Information</h3>
+            <p>The data above is used solely to operate the ranking platform: to display leaderboards, render player profiles, show how many people are currently viewing the site, and protect the service from abuse. We do not sell or rent your data.</p>
           </div>
 
           <div className="terms-section">
-            <h3 className="terms-section-title">3. Cookies</h3>
-            <p>Our website may use cookies to enhance your browsing experience. You can choose to disable cookies in your browser settings, though some features may not function properly as a result.</p>
+            <h3 className="terms-section-title">3. Cookies &amp; Local Storage</h3>
+            <p>We use a small amount of local browser storage (sessionStorage) to keep an anonymous viewer id so the live "online now" counter works. We do not use advertising or tracking cookies. You can clear this data at any time from your browser settings.</p>
           </div>
 
           <div className="terms-section">
-            <h3 className="terms-section-title">4. Data Security</h3>
-            <p>We take reasonable steps to protect your data from unauthorized access. However, no method of transmission over the Internet is 100% secure.</p>
+            <h3 className="terms-section-title">4. Third-Party Services</h3>
+            <p>We use Mojang's public APIs and PlayerDB to look up Minecraft profile information, and we host on third-party infrastructure providers. Those providers may process the technical request data described above according to their own privacy policies.</p>
           </div>
 
           <div className="terms-section">
-            <h3 className="terms-section-title">5. Changes to This Policy</h3>
+            <h3 className="terms-section-title">5. Data Removal</h3>
+            <p>If you are a Minecraft player who appears on the site and you would like your username removed from the rankings, contact us via our Discord server. We will remove your entry on reasonable request.</p>
+          </div>
+
+          <div className="terms-section">
+            <h3 className="terms-section-title">6. Data Security</h3>
+            <p>We take reasonable steps to protect the data we hold, but no method of transmission over the Internet is 100% secure.</p>
+          </div>
+
+          <div className="terms-section">
+            <h3 className="terms-section-title">7. Changes to This Policy</h3>
             <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page. Continued use of the site after changes constitutes acceptance of the new policy.</p>
           </div>
         </div>

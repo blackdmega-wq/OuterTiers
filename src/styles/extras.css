@@ -1,0 +1,234 @@
+/* ============================================================
+   OuterTiers — extras.css
+   Logo, animated background upgrades, stylish tagline boxes,
+   selection / shield helpers. Loaded after index.css.
+   ============================================================ */
+
+/* ---------- LOGO ---------- */
+.ot-logo {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 18px rgba(91, 164, 245, 0.35));
+}
+.ot-logo-glow {
+  filter:
+    drop-shadow(0 0 18px rgba(91, 164, 245, 0.55))
+    drop-shadow(0 0 38px rgba(91, 164, 245, 0.25))
+    drop-shadow(0 6px 22px rgba(0, 0, 0, 0.45));
+  animation: ot-logo-float 6s ease-in-out infinite;
+}
+@keyframes ot-logo-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(-1.2deg); }
+}
+
+.hero-logo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px auto 14px;
+  position: relative;
+  z-index: 2;
+}
+.hero-logo-img {
+  width: 120px;
+  height: 120px;
+}
+
+.footer-logo-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+}
+.footer-logo-img {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+
+/* ---------- TAGLINE BOXES ---------- */
+.hero-tagline-box {
+  position: relative;
+  display: inline-block;
+  padding: 18px 34px;
+  margin: 8px auto 14px;
+  border-radius: 18px;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 18px 48px -16px rgba(0, 0, 0, 0.65);
+  animation: ot-box-pulse 5.5s ease-in-out infinite;
+}
+.hero-tagline-box-text {
+  position: relative;
+  z-index: 2;
+  margin: 0 !important;
+  background: linear-gradient(120deg, #ffffff 0%, #d8e7ff 60%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.5px;
+}
+.hero-tagline-box-glow {
+  position: absolute;
+  inset: -2px;
+  z-index: 0;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(91, 164, 245, 0.55),
+      rgba(167, 90, 245, 0.55),
+      rgba(240, 192, 64, 0.45),
+      rgba(91, 164, 245, 0.55)
+    );
+  filter: blur(22px);
+  opacity: 0.55;
+  animation: ot-box-rotate 14s linear infinite;
+}
+.hero-tagline-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(15, 22, 38, 0.78), rgba(8, 12, 22, 0.86));
+}
+.hero-tagline-box-blue {
+  box-shadow:
+    0 0 0 1px rgba(91, 164, 245, 0.25) inset,
+    0 0 60px -8px rgba(91, 164, 245, 0.55),
+    0 18px 48px -16px rgba(0, 0, 0, 0.65);
+}
+.hero-tagline-box-blue .hero-tagline-box-glow {
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(91, 164, 245, 0.65),
+      rgba(56, 220, 255, 0.55),
+      rgba(91, 164, 245, 0.65),
+      rgba(56, 220, 255, 0.55),
+      rgba(91, 164, 245, 0.65)
+    );
+}
+.hero-tagline-box-purple {
+  box-shadow:
+    0 0 0 1px rgba(167, 90, 245, 0.25) inset,
+    0 0 60px -8px rgba(167, 90, 245, 0.55),
+    0 18px 48px -16px rgba(0, 0, 0, 0.65);
+}
+.hero-tagline-box-purple .hero-tagline-box-glow {
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(167, 90, 245, 0.65),
+      rgba(91, 164, 245, 0.55),
+      rgba(240, 192, 64, 0.45),
+      rgba(167, 90, 245, 0.65)
+    );
+}
+@keyframes ot-box-rotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes ot-box-pulse {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* ---------- ANIMATED BACKGROUND UPGRADES ---------- */
+.page-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(60% 50% at 18% 22%, rgba(91, 164, 245, 0.18), transparent 60%),
+    radial-gradient(55% 45% at 82% 18%, rgba(167, 90, 245, 0.18), transparent 60%),
+    radial-gradient(70% 55% at 50% 92%, rgba(56, 220, 255, 0.12), transparent 60%);
+  animation: ot-bg-drift 22s ease-in-out infinite alternate;
+}
+@keyframes ot-bg-drift {
+  0%   { transform: translate3d(0, 0, 0)     scale(1); }
+  50%  { transform: translate3d(-2%, 1%, 0)  scale(1.04); }
+  100% { transform: translate3d(2%, -1%, 0)  scale(1.06); }
+}
+
+.page-bg-grid {
+  background-image:
+    linear-gradient(rgba(91, 164, 245, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 164, 245, 0.05) 1px, transparent 1px) !important;
+  background-size: 56px 56px, 56px 56px !important;
+  animation: ot-grid-drift 28s linear infinite !important;
+}
+@keyframes ot-grid-drift {
+  to { background-position: 56px 56px, 56px 56px; }
+}
+
+/* Aurora ribbon */
+body::before {
+  content: '';
+  position: fixed;
+  top: -30%;
+  left: -10%;
+  width: 130%;
+  height: 80%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(closest-side, rgba(91, 164, 245, 0.22), transparent 70%),
+    radial-gradient(closest-side, rgba(167, 90, 245, 0.18), transparent 70%);
+  background-size: 60% 100%, 60% 100%;
+  background-position: 10% 30%, 80% 60%;
+  background-repeat: no-repeat;
+  filter: blur(60px);
+  animation: ot-aurora 18s ease-in-out infinite alternate;
+  opacity: 0.85;
+}
+@keyframes ot-aurora {
+  0%   { transform: translateX(-4%) rotate(-2deg); opacity: 0.6; }
+  50%  { transform: translateX(3%)  rotate(1deg);  opacity: 0.95; }
+  100% { transform: translateX(5%)  rotate(2deg);  opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ot-logo-glow,
+  .hero-tagline-box,
+  .hero-tagline-box-glow,
+  .page-bg::after,
+  .page-bg-grid,
+  body::before {
+    animation: none !important;
+  }
+}
+
+/* ---------- SHIELD HELPERS ---------- */
+.shield-no-select .hero-section,
+.shield-no-select .footer-inner,
+.shield-no-select .feature-card,
+.shield-no-select .stat-card,
+.shield-no-select .navbar,
+.shield-no-select .site-footer,
+.shield-no-select h1,
+.shield-no-select h2,
+.shield-no-select h3 {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.shield-no-select table,
+.shield-no-select .modal-body,
+.shield-no-select code,
+.shield-no-select pre,
+.shield-no-select input,
+.shield-no-select textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+img { -webkit-user-drag: none; user-drag: none; }

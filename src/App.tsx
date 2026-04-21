@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import SiteShield from './components/SiteShield';
 import SiteFooter from './components/SiteFooter';
 import ParticleBackground from './components/ParticleBackground';
 import GlobalGlow from './components/GlobalGlow';
@@ -145,6 +146,7 @@ export default function App() {
       <div className="page-bg-grid" aria-hidden="true" />
       <GlobalGlow />
       <ParticleBackground />
+      <SiteShield />
       <ClickLayer />
       <TouchTrail />
       <div className="app">
