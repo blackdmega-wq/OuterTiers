@@ -277,19 +277,76 @@ body::before {
 }
 img { -webkit-user-drag: none; user-drag: none; }
 
-/* ---------- OVERALL RANKING BUST (head + chest + arms, angled 3D render) ---------- */
+/* ---------- OVERALL RANKING BUST (3D angled skin, golden glow + animations) ---------- */
 .top-card-bust-wrap-body {
+  position: relative !important;
   width: 110px !important;
   height: 130px !important;
-  border-radius: 18px !important;
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.55) 70%) !important;
-  border: 2px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255, 224, 130, 0.55) 0%, rgba(255, 180, 50, 0.30) 35%, rgba(120, 70, 10, 0.20) 65%, rgba(20, 12, 0, 0.85) 100%) !important;
+  border: 2px solid rgba(255, 210, 110, 0.85) !important;
   overflow: visible !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
+  box-shadow:
+    0 0 18px rgba(255, 195, 70, 0.55),
+    0 0 36px rgba(255, 160, 40, 0.30),
+    inset 0 0 22px rgba(255, 220, 130, 0.22),
+    inset 0 0 2px rgba(255, 255, 255, 0.45),
+    0 10px 28px rgba(0, 0, 0, 0.55);
+  isolation: isolate;
+  animation: bustGoldPulse 3.2s ease-in-out infinite;
 }
+
+/* Rotating conic-gradient golden halo behind the skin */
+.top-card-bust-wrap-body::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 24px;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    #ffe486 0deg,
+    #f7b733 60deg,
+    #fff4c2 120deg,
+    #d98f1a 180deg,
+    #ffe486 240deg,
+    #f7b733 300deg,
+    #ffe486 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: bustGoldRotate 6s linear infinite;
+  z-index: -1;
+  filter: blur(0.4px) drop-shadow(0 0 8px rgba(255, 190, 70, 0.7));
+  pointer-events: none;
+}
+
+/* Shimmer streak that sweeps across the card */
+.top-card-bust-wrap-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.9;
+  transform: translateX(-120%);
+  animation: bustShimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .top-card-bust-body {
   width: 100% !important;
   height: 100% !important;
@@ -297,13 +354,89 @@ img { -webkit-user-drag: none; user-drag: none; }
   object-position: center center !important;
   image-rendering: pixelated;
   display: block !important;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5));
+  filter:
+    drop-shadow(0 0 6px rgba(255, 215, 110, 0.85))
+    drop-shadow(0 0 14px rgba(255, 165, 40, 0.55))
+    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+  animation: bustFloat 4s ease-in-out infinite;
+  transition: transform 0.35s ease;
 }
+
+/* Hover: lift + tilt + brighter glow */
+.top-card:hover .top-card-bust-wrap-body {
+  box-shadow:
+    0 0 28px rgba(255, 215, 90, 0.85),
+    0 0 56px rgba(255, 170, 40, 0.55),
+    inset 0 0 28px rgba(255, 230, 150, 0.35),
+    inset 0 0 3px rgba(255, 255, 255, 0.7),
+    0 14px 36px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 235, 160, 1) !important;
+}
+.top-card:hover .top-card-bust-body {
+  transform: scale(1.06) rotate(-2deg);
+  filter:
+    drop-shadow(0 0 10px rgba(255, 235, 150, 1))
+    drop-shadow(0 0 22px rgba(255, 180, 50, 0.8))
+    drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes bustGoldRotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes bustGoldPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(255, 195, 70, 0.55),
+      0 0 36px rgba(255, 160, 40, 0.30),
+      inset 0 0 22px rgba(255, 220, 130, 0.22),
+      inset 0 0 2px rgba(255, 255, 255, 0.45),
+      0 10px 28px rgba(0, 0, 0, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 26px rgba(255, 220, 110, 0.85),
+      0 0 52px rgba(255, 180, 60, 0.5),
+      inset 0 0 28px rgba(255, 230, 150, 0.35),
+      inset 0 0 3px rgba(255, 255, 255, 0.6),
+      0 12px 34px rgba(0, 0, 0, 0.6);
+  }
+}
+@keyframes bustFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-3px) rotate(0.6deg); }
+}
+@keyframes bustShimmer {
+  0%   { transform: translateX(-120%); opacity: 0; }
+  20%  { opacity: 0.9; }
+  60%  { transform: translateX(120%); opacity: 0.9; }
+  61%, 100% { transform: translateX(120%); opacity: 0; }
+}
+
+/* Floating golden sparkle particles around the skin */
+.top-card-bust-wrap-body .gold-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff4c2 0%, #ffd66a 55%, transparent 70%);
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95));
+}
+
 @media (max-width: 900px) {
   .top-card-bust-wrap-body {
     width: 82px !important;
     height: 96px !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-card-bust-wrap-body,
+  .top-card-bust-wrap-body::before,
+  .top-card-bust-wrap-body::after,
+  .top-card-bust-body {
+    animation: none !important;
   }
 }
 
