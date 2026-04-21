@@ -133,7 +133,10 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
 
 export default function Home() {
   const { players, loading: playersLoading } = usePlayers();
-  const top100 = [...players].sort((a, b) => b.points - a.points).slice(0, 100);
+  const top100 = [...players]
+    .filter(p => p.points > 0)
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
   const displayCount = useCountUp(players.length, 1100);
   const live = !playersLoading;

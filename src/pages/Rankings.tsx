@@ -57,13 +57,13 @@ function PlayerCard({ player, rank }: { player: Player; rank: number }) {
       <div className="top-card-stripe" style={{ background: rs.bg }}>
         {rs.shimmerClass && <div className={`top-card-stripe-shimmer ${rs.shimmerClass}`} />}
         <span className="top-card-rank-num">{rank}.</span>
-        <div className="top-card-bust-wrap">
+        <div className="top-card-bust-wrap top-card-bust-wrap-body">
           <img
             src={headFailed
               ? `https://mc-heads.net/avatar/${player.username}/96`
-              : `https://mc-heads.net/head/${player.username}`}
+              : `https://mc-heads.net/bust/${player.username}/120`}
             alt={player.username}
-            className="top-card-bust"
+            className="top-card-bust top-card-bust-body"
             onError={() => setHeadFailed(true)}
           />
         </div>
@@ -134,7 +134,9 @@ export default function Rankings() {
   const { players, loading } = usePlayers();
 
   const isOverall = category === 'overall';
-  const sorted = [...players].sort((a, b) => b.points - a.points);
+  const sorted = [...players]
+    .filter(p => p.points > 0)
+    .sort((a, b) => b.points - a.points);
   const tierColumns = !isOverall ? getCategoryTiers(category as keyof PlayerTiers, players) : [];
   const currentCat = CATEGORIES.find(c => c.id === category);
 

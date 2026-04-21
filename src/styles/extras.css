@@ -277,6 +277,30 @@ body::before {
 }
 img { -webkit-user-drag: none; user-drag: none; }
 
+/* ---------- OVERALL RANKING BUST (head + chest + arms) ---------- */
+.top-card-bust-wrap-body {
+  width: 110px !important;
+  height: 120px !important;
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 2px solid rgba(255, 255, 255, 0.12) !important;
+  transform: translate(-55%, -50%) !important;
+  padding: 6px 0 0 !important;
+}
+.top-card-bust-body {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+}
+@media (max-width: 900px) {
+  .top-card-bust-wrap-body {
+    width: 78px !important;
+    height: 86px !important;
+    transform: translate(-40%, -50%) !important;
+  }
+}
+
 /* ---------- MOBILE TWEAKS ---------- */
 @media (max-width: 720px) {
   .hero-title-with-logo { gap: 10px; }
