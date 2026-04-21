@@ -2172,7 +2172,7 @@ a.player-cell,
   /* Card: horizontal strip, fixed height */
   .top-card {
     min-height: 0 !important;
-    height: 70px !important;
+    height: auto !important;
     border-radius: 8px !important;
     align-items: stretch !important;
   }
@@ -2202,7 +2202,7 @@ a.player-cell,
     width: 42px !important;
     height: 42px !important;
     left: 50% !important;
-    top: 56% !important;
+    top: 50% !important;
     transform: translate(-50%, -50%) !important;
     border: 1.5px solid rgba(255,255,255,0.18) !important;
   }
@@ -2215,7 +2215,7 @@ a.player-cell,
   .top-card-content {
     flex-direction: row !important;
     align-items: center !important;
-    padding: 0 6px 0 8px !important;
+    padding: 8px 6px 8px 8px !important;
     gap: 0 !important;
     min-width: 0;
   }
@@ -2287,11 +2287,11 @@ a.player-cell,
     letter-spacing: 0.10em;
   }
 
-  /* Tier badges: single row, compact circles with tier text */
+  /* Tier badges: 2 rows of 5 — grid with 5 columns */
   .top-card-tiers .tier-badges-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 10px !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px 6px !important;
   }
   .top-card-tiers .cat-tier-badge {
     min-width: 0 !important;
