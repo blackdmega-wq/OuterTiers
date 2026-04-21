@@ -280,9 +280,9 @@ img { -webkit-user-drag: none; user-drag: none; }
 /* ---------- OVERALL RANKING BUST (3D angled skin, golden glow + animations) ---------- */
 .top-card-bust-wrap-body {
   position: relative !important;
-  width: 110px !important;
-  height: 130px !important;
-  border-radius: 20px !important;
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 50% !important;
   background:
     radial-gradient(ellipse at 50% 35%, rgba(255, 224, 130, 0.55) 0%, rgba(255, 180, 50, 0.30) 35%, rgba(120, 70, 10, 0.20) 65%, rgba(20, 12, 0, 0.85) 100%) !important;
   border: 2px solid rgba(255, 210, 110, 0.85) !important;
@@ -306,7 +306,7 @@ img { -webkit-user-drag: none; user-drag: none; }
   content: '';
   position: absolute;
   inset: -6px;
-  border-radius: 24px;
+  border-radius: 50%;
   padding: 2px;
   background: conic-gradient(
     from 0deg,
@@ -333,7 +333,7 @@ img { -webkit-user-drag: none; user-drag: none; }
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 20px;
+  border-radius: 50%;
   background: linear-gradient(
     115deg,
     transparent 30%,
@@ -358,8 +358,7 @@ img { -webkit-user-drag: none; user-drag: none; }
     drop-shadow(0 0 6px rgba(255, 215, 110, 0.85))
     drop-shadow(0 0 14px rgba(255, 165, 40, 0.55))
     drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
-  animation: bustFloat 4s ease-in-out infinite;
-  transition: transform 0.35s ease;
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
 
 /* Hover: lift + tilt + brighter glow */
@@ -373,7 +372,6 @@ img { -webkit-user-drag: none; user-drag: none; }
   border-color: rgba(255, 235, 160, 1) !important;
 }
 .top-card:hover .top-card-bust-body {
-  transform: scale(1.06) rotate(-2deg);
   filter:
     drop-shadow(0 0 10px rgba(255, 235, 150, 1))
     drop-shadow(0 0 22px rgba(255, 180, 50, 0.8))
@@ -401,10 +399,6 @@ img { -webkit-user-drag: none; user-drag: none; }
       0 12px 34px rgba(0, 0, 0, 0.6);
   }
 }
-@keyframes bustFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-3px) rotate(0.6deg); }
-}
 @keyframes bustShimmer {
   0%   { transform: translateX(-120%); opacity: 0; }
   20%  { opacity: 0.9; }
@@ -425,9 +419,9 @@ img { -webkit-user-drag: none; user-drag: none; }
 
 @media (max-width: 900px) {
   .top-card-bust-wrap-body {
-    width: 82px !important;
-    height: 96px !important;
-    border-radius: 16px !important;
+    width: 88px !important;
+    height: 88px !important;
+    border-radius: 50% !important;
   }
 }
 
