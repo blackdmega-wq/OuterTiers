@@ -277,31 +277,33 @@ body::before {
 }
 img { -webkit-user-drag: none; user-drag: none; }
 
-/* ---------- OVERALL RANKING BUST (head + chest + arms in circle) ---------- */
+/* ---------- OVERALL RANKING BUST (head + chest + arms, angled 3D render) ---------- */
 .top-card-bust-wrap-body {
-  width: 104px !important;
-  height: 104px !important;
-  border-radius: 50% !important;
-  background: rgba(0, 0, 0, 0.55) !important;
+  width: 110px !important;
+  height: 130px !important;
+  border-radius: 18px !important;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.55) 70%) !important;
   border: 2px solid rgba(255, 255, 255, 0.14) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
 }
 .top-card-bust-body {
-  width: 116% !important;
-  height: 116% !important;
-  object-fit: cover !important;
-  object-position: center top !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
   image-rendering: pixelated;
   display: block !important;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5));
 }
 @media (max-width: 900px) {
   .top-card-bust-wrap-body {
-    width: 76px !important;
-    height: 76px !important;
+    width: 82px !important;
+    height: 96px !important;
+    border-radius: 14px !important;
   }
 }
 
