@@ -23,6 +23,17 @@ const YOUTUBE_ICON = (
   </svg>
 );
 
+// Modrinth wordmark glyph — solid stylised "M" inside a rounded square so it
+// matches the silhouette of the other circular social icons. Uses
+// currentColor so the existing footer-social-btn hover/colour rules still
+// apply (turns Modrinth-green on hover via the .footer-social-btn--modrinth
+// modifier added below).
+const MODRINTH_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2.25A9.75 9.75 0 1021.75 12 9.76 9.76 0 0012 2.25zm0 17.5a7.74 7.74 0 01-7.49-5.78l1.85-.55a5.81 5.81 0 0011.27 0l1.85.55A7.74 7.74 0 0112 19.75zm6.07-9.45l-1.94.49a4.18 4.18 0 00-8.26 0l-1.94-.49A6.18 6.18 0 0112 5.5a6.18 6.18 0 016.07 4.8z"/>
+  </svg>
+);
+
 export default function SiteFooter() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -54,6 +65,16 @@ export default function SiteFooter() {
               </a>
               <a href="https://youtube.com/@outversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn" title="YouTube">
                 {YOUTUBE_ICON}
+              </a>
+              <a
+                href="https://modrinth.com/mod/tiertagger"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-social-btn footer-social-btn--modrinth"
+                title="TierTagger on Modrinth"
+                aria-label="TierTagger on Modrinth"
+              >
+                {MODRINTH_ICON}
               </a>
             </div>
           </div>

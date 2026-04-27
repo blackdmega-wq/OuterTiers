@@ -421,11 +421,16 @@ img { display: block; }
 
 .tab-icon {
   width: 28px; height: 28px; object-fit: contain;
-  filter: saturate(0.3) brightness(0.7);
+  /* Match the in-game item silhouette: sharp pixel edges + a soft drop
+     shadow so the gamemode tab icons read as actual Minecraft items. */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: saturate(0.3) brightness(0.7) drop-shadow(0 1px 1px rgba(0,0,0,0.5));
   transition: filter 0.15s;
 }
-.category-tab:hover .tab-icon { filter: saturate(0.65) brightness(0.9); }
-.category-tab.active .tab-icon { filter: saturate(1) brightness(1.05); }
+.category-tab:hover .tab-icon { filter: saturate(0.7) brightness(0.95) drop-shadow(0 1px 1px rgba(0,0,0,0.5)); }
+.category-tab.active .tab-icon { filter: saturate(1.05) brightness(1.08) drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
 .tab-label { letter-spacing: 0.02em; }
 
 /* ===== INFO BAR ===== */
@@ -553,7 +558,18 @@ img { display: block; }
   display: flex; align-items: center; justify-content: center;
   transition: box-shadow 0.15s;
 }
-.cat-tier-circle img { width: 24px; height: 24px; object-fit: contain; }
+.cat-tier-circle img {
+  width: 24px; height: 24px; object-fit: contain;
+  /* Pixel-art tier icons (sword/axe/mace/etc) — keep their blocky
+     Minecraft-texture look at every render size by disabling browser
+     anti-aliasing and adding a subtle drop shadow so they sit
+     against the dark background like real items in an inventory. */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.55))
+          drop-shadow(0 0 1px rgba(0,0,0,0.4));
+}
 
 .cat-tier-circle-empty {
   border-color: #1e2030;
@@ -565,6 +581,37 @@ img { display: block; }
   line-height: 1;
   text-shadow: 0 1px 1px rgba(0,0,0,0.5);
 }
+
+/* ===== TIER BADGE (per-service tier label) =====
+   v2026.04 — user feedback: "make service tiers bolder so they pop in the
+   rankings table". The TierBadge.tsx component only sets colours inline, so
+   weight + tracking + casing live here. Bumped to 800 with a subtle text
+   shadow so the gold/blue/purple tier text reads at the same visual weight
+   as the .cat-tier-text labels. */
+.tier-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.55);
+  white-space: nowrap;
+}
+.tier-badge-sm { font-size: 0.70rem; padding: 2px 7px; min-width: 30px; }
+.tier-badge-md { font-size: 0.82rem; padding: 4px 10px; min-width: 38px; }
+.tier-badge-empty {
+  font-weight: 700;
+  color: #3a3a4a;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.08);
+}
+
+/* Bolder weight for the supporting tier badges around the site so the
+   "service tier" labels (modal / feed / search results) all read with the
+   same emphasis as the rankings list. */
+.modal-tier-badge { font-weight: 800 !important; }
+.feed-tier-badge  { font-weight: 800 !important; }
+.result-tier-badge { font-weight: 900 !important; }
 
 /* ===== PLAYER AVATAR ===== */
 .player-avatar {
@@ -1904,6 +1951,14 @@ a.player-cell,
   color: var(--text); background: var(--bg-hover);
   border-color: rgba(255,255,255,0.2);
   transform: translateY(-2px);
+}
+/* Modrinth brand-green accent on hover so the new 4th icon visually
+   matches the project it links to (the in-mod button uses the same
+   #1BD96A green). */
+.footer-social-btn--modrinth:hover {
+  color: #1BD96A;
+  border-color: rgba(27, 217, 106, 0.45);
+  background: rgba(27, 217, 106, 0.08);
 }
 .footer-cols {
   flex: 1; display: flex; gap: 48px; flex-wrap: wrap;
