@@ -561,8 +561,9 @@ img { display: block; }
 }
 
 .cat-tier-text {
-  font-size: 0.57rem; font-weight: 700; letter-spacing: 0.02em;
+  font-size: 0.62rem; font-weight: 900; letter-spacing: 0.04em;
   line-height: 1;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
 }
 
 /* ===== PLAYER AVATAR ===== */
@@ -2307,9 +2308,10 @@ a.player-cell,
   }
   .top-card-tiers .cat-tier-text {
     display: block !important;
-    font-size: 0.46rem !important;
-    font-weight: 700;
+    font-size: 0.50rem !important;
+    font-weight: 900;
     line-height: 1;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
   }
 
   /* Points side: visible on mobile, compact */
