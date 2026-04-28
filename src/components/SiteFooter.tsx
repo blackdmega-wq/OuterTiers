@@ -67,12 +67,12 @@ export default function SiteFooter() {
                 {YOUTUBE_ICON}
               </a>
               <a
-                href="https://modrinth.com/mod/tiertagger"
+                href="https://modrinth.com/mod/outertiers-tiertagger"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-social-btn footer-social-btn--modrinth"
-                title="TierTagger on Modrinth"
-                aria-label="TierTagger on Modrinth"
+                title="OuterTiers TierTagger on Modrinth"
+                aria-label="OuterTiers TierTagger on Modrinth"
               >
                 {MODRINTH_ICON}
               </a>

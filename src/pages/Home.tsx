@@ -72,7 +72,7 @@ function modeLabel(mode: string | null): string {
   if (!mode) return 'Overall';
   const MAP: Record<string, string> = {
     sword: 'Sword', speed: 'Speed', pot: 'Pot', nethop: 'NethOP',
-    ogvanilla: 'OG Vanilla', vanilla: 'Vanilla', uhc: 'UHC',
+    ogvanilla: 'OG Vanilla', vanilla: 'Crystal', uhc: 'UHC',
     axe: 'Axe', mace: 'Mace', smp: 'SMP',
   };
   return MAP[mode.toLowerCase()] ?? mode;
@@ -153,6 +153,21 @@ export default function Home() {
         <div className="hero-glow-right" />
         <div className="hero-glow-center" />
 
+        <a
+          href="https://modrinth.com/mod/outertiers-tiertagger"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hero-tiertagger-link animate-fade-down"
+          style={{ animationDelay: '0.02s' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download TierTagger Mod
+        </a>
+
         <div className="hero-eyebrow animate-fade-down" style={{ animationDelay: '0.05s' }}>
           <span className="hero-eyebrow-dot" />
           Minecraft PvP Ranking
@@ -169,8 +184,7 @@ export default function Home() {
         <div className="hero-divider animate-expand" style={{ animationDelay: '0.2s' }} />
 
         <p className="hero-subtitle animate-fade-up" style={{ animationDelay: '0.25s' }}>
-          The competitive Minecraft PvP ranking platform.<br />
-          Every tier. Every category. Every player.
+          The competitive Minecraft PvP ranking platform.
         </p>
 
         <div className="hero-stats-row animate-fade-up" style={{ animationDelay: '0.35s' }}>

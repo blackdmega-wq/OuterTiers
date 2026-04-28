@@ -66,6 +66,7 @@ export default function PlayerProfile() {
             <div className="profile-title">
               <img src="/tier_icons/overall.svg" alt="" width={14} height={14} style={{ opacity: 0.7 }} />
               {getTitle(player.points)}
+              {rank > 0 && <span className="profile-title-rank">#{rank}</span>}
             </div>
             <div className="profile-meta">
               <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
@@ -75,7 +76,6 @@ export default function PlayerProfile() {
                 </svg>
                 {player.points} pts
               </span>
-              {rank > 0 && <span className="profile-rank-badge">#{rank}</span>}
             </div>
           </div>
         </div>

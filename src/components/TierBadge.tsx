@@ -1,15 +1,16 @@
 import type { TierLevel } from '../data/players';
 
 const TIER_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  HT1: { bg: '#1a2744', color: '#4fc3f7', border: '#1565c0' },
-  HT2: { bg: '#1a2c1a', color: '#81c784', border: '#2e7d32' },
-  HT3: { bg: '#2d1a2d', color: '#ce93d8', border: '#6a1b9a' },
-  HT4: { bg: '#2c2010', color: '#ffb74d', border: '#e65100' },
-  LT1: { bg: '#1a1a2d', color: '#7986cb', border: '#283593' },
-  LT2: { bg: '#1f2d1a', color: '#a5d6a7', border: '#388e3c' },
-  LT3: { bg: '#1a2020', color: '#80cbc4', border: '#00695c' },
-  LT4: { bg: '#2d2020', color: '#ef9a9a', border: '#b71c1c' },
-  LT5: { bg: '#1e1e1e', color: '#bdbdbd', border: '#424242' },
+  HT1: { bg: 'rgba(241,196,15,0.12)', color: '#f1c40f', border: '#f1c40f' },
+  LT1: { bg: 'rgba(212,179,84,0.12)', color: '#d4b354', border: '#d4b354' },
+  HT2: { bg: 'rgba(164,178,199,0.12)', color: '#a4b2c7', border: '#a4b2c7' },
+  LT2: { bg: 'rgba(136,141,149,0.12)', color: '#888d95', border: '#888d95' },
+  HT3: { bg: 'rgba(223,135,70,0.12)', color: '#df8746', border: '#df8746' },
+  LT3: { bg: 'rgba(179,105,50,0.12)', color: '#b36932', border: '#b36932' },
+  HT4: { bg: 'rgba(70,223,93,0.12)', color: '#46df5d', border: '#46df5d' },
+  LT4: { bg: 'rgba(49,146,40,0.12)', color: '#319228', border: '#319228' },
+  HT5: { bg: 'rgba(164,213,255,0.12)', color: '#a4d5ff', border: '#a4d5ff' },
+  LT5: { bg: 'rgba(164,213,255,0.12)', color: '#a4d5ff', border: '#a4d5ff' },
 };
 
 interface TierBadgeProps {

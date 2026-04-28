@@ -727,6 +727,26 @@ img { display: block; }
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
   padding: 5px 14px; border-radius: 20px;
 }
+
+.hero-tiertagger-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em;
+  color: #ffffff;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(46,165,84,0.22), rgba(20,120,56,0.18));
+  border: 1px solid rgba(70,200,110,0.45);
+  padding: 7px 16px; border-radius: 22px;
+  text-decoration: none;
+  box-shadow: 0 0 18px rgba(46,165,84,0.18), inset 0 0 12px rgba(46,165,84,0.06);
+  transition: transform 160ms ease, box-shadow 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.hero-tiertagger-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(110,225,140,0.85);
+  background: linear-gradient(135deg, rgba(46,165,84,0.32), rgba(20,120,56,0.26));
+  box-shadow: 0 0 26px rgba(46,165,84,0.36), inset 0 0 14px rgba(46,165,84,0.10);
+}
+.hero-tiertagger-link svg { color: #6ee18c; }
 .hero-eyebrow-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: #22c55e;
@@ -1013,8 +1033,16 @@ img { display: block; }
 .profile-header-info { display: flex; flex-direction: column; gap: 8px; }
 .profile-username { font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1.1; }
 .profile-title {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 8px;
   color: var(--text-dim); font-size: 0.85rem;
+}
+.profile-title-rank {
+  display: inline-flex; align-items: center;
+  background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.30);
+  color: #7ab8ff; font-size: 0.78rem; font-weight: 700;
+  padding: 2px 9px; border-radius: 20px;
+  margin-left: 4px;
+  letter-spacing: 0.02em;
 }
 .profile-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .profile-points-badge {

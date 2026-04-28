@@ -79,16 +79,16 @@ export function getTitle(points: number): string {
 
 export const CATEGORIES = [
   { id: 'overall',   label: 'Overall',    icon: '/tier_icons/overall.svg' },
-  { id: 'ogvanilla', label: 'OG Vanilla', icon: '/tier_icons/ogvanilla.svg' },
-  { id: 'vanilla',   label: 'Vanilla',    icon: '/tier_icons/vanilla.svg' },
-  { id: 'uhc',       label: 'UHC',        icon: '/tier_icons/uhc.svg' },
-  { id: 'pot',       label: 'Pot',        icon: '/tier_icons/pot.svg' },
-  { id: 'nethop',    label: 'NethOP',     icon: '/tier_icons/nethop.svg' },
-  { id: 'smp',       label: 'SMP',        icon: '/tier_icons/smp.svg' },
-  { id: 'sword',     label: 'Sword',      icon: '/tier_icons/sword.svg' },
-  { id: 'axe',       label: 'Axe',        icon: '/tier_icons/axe.svg' },
-  { id: 'mace',      label: 'Mace',       icon: '/tier_icons/mace.svg' },
-  { id: 'speed',     label: 'Speed',      icon: '/tier_icons/speed.svg' },
+  { id: 'ogvanilla', label: 'OG Vanilla', icon: '/tier_icons/ogvanilla.png' },
+  { id: 'vanilla',   label: 'Crystal',    icon: '/tier_icons/crystal.png' },
+  { id: 'uhc',       label: 'UHC',        icon: '/tier_icons/uhc.png' },
+  { id: 'pot',       label: 'Pot',        icon: '/tier_icons/pot.png' },
+  { id: 'nethop',    label: 'NethOP',     icon: '/tier_icons/nethop.png' },
+  { id: 'smp',       label: 'SMP',        icon: '/tier_icons/smp.png' },
+  { id: 'sword',     label: 'Sword',      icon: '/tier_icons/sword.png' },
+  { id: 'axe',       label: 'Axe',        icon: '/tier_icons/axe.png' },
+  { id: 'mace',      label: 'Mace',       icon: '/tier_icons/mace.png' },
+  { id: 'speed',     label: 'Speed',      icon: '/tier_icons/speed.png' },
 ];
 
 export const TIER_COLS: (keyof PlayerTiers)[] = [
