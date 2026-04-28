@@ -200,48 +200,84 @@ export default function Rankings() {
         ) : (
           <div className="tier-columns-wrapper">
             <div className="tier-columns">
-              {(['T1','T2','T3','T4','T5'] as const).map((tier) => {
-                const col = tierColumns.find(c => c.tier === tier);
-                const tieredPlayers = col?.players ?? [];
-                const cfg = TIER_CONFIG[tier];
-                return (
-                  <div key={tier} className="tier-column" style={{ '--tier-glow': cfg.glow } as React.CSSProperties}>
-                    <div
-                      className="tier-column-header"
-                      style={{ background: cfg.gradient, borderBottom: `1px solid ${cfg.border}`, boxShadow: `0 2px 16px ${cfg.glow}` }}
-                    >
-                      <div className="tier-header-top">
-                        <span className="tier-header-label" style={{ color: cfg.textColor }}>{cfg.label}</span>
+              {(() => {
+                // Compute each player's per-mode position the same way the
+                // other tierlist sites (mctiers.com / pvptiers.com / …) do
+                // it: rank 1 is the strongest player in T1 of this mode,
+                // then walk T1 → T5, sorting each tier by total points
+                // descending (HT ranks above LT inside each tier because
+                // HT is worth more points). The resulting "#N" badge sits
+                // next to the player name so visitors know where the
+                // player stands in this gamemode at a glance.
+                const positions = new Map<string, number>();
+                let cursor = 0;
+                for (const tier of ['T1','T2','T3','T4','T5'] as const) {
+                  const col = tierColumns.find(c => c.tier === tier);
+                  const tierPlayers = [...(col?.players ?? [])].sort((a, b) => b.points - a.points);
+                  for (const p of tierPlayers) {
+                    cursor += 1;
+                    positions.set(p.id, cursor);
+                  }
+                }
+                return (['T1','T2','T3','T4','T5'] as const).map((tier) => {
+                  const col = tierColumns.find(c => c.tier === tier);
+                  const tieredPlayers = [...(col?.players ?? [])].sort((a, b) => b.points - a.points);
+                  const cfg = TIER_CONFIG[tier];
+                  return (
+                    <div key={tier} className="tier-column" style={{ '--tier-glow': cfg.glow } as React.CSSProperties}>
+                      <div
+                        className="tier-column-header"
+                        style={{ background: cfg.gradient, borderBottom: `1px solid ${cfg.border}`, boxShadow: `0 2px 16px ${cfg.glow}` }}
+                      >
+                        <div className="tier-header-top">
+                          <span className="tier-header-label" style={{ color: cfg.textColor }}>{cfg.label}</span>
+                        </div>
+                        <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65 }}>
+                          {tieredPlayers.length} {tieredPlayers.length === 1 ? 'player' : 'players'}
+                        </span>
                       </div>
-                      <span className="tier-header-sub" style={{ color: cfg.textColor, opacity: 0.65 }}>
-                        {tieredPlayers.length} {tieredPlayers.length === 1 ? 'player' : 'players'}
-                      </span>
+                      <div className="tier-column-players">
+                        {tieredPlayers.length === 0 ? (
+                          <div className="tier-column-empty"><span>No players</span></div>
+                        ) : (
+                          tieredPlayers.map((player) => {
+                            const rawTier = (player.rawTiers as Record<string, string | null | undefined> | undefined)?.[category];
+                            const pos = positions.get(player.id);
+                            return (
+                              <Link key={player.id} to={`/player/${player.username}`} className="tier-player-row">
+                                <img
+                                  src={`https://mc-heads.net/avatar/${player.username}/28`}
+                                  alt={player.username}
+                                  width={28} height={28}
+                                  style={{ imageRendering: 'pixelated', borderRadius: 3, display: 'block', flexShrink: 0 }}
+                                  loading="lazy"
+                                />
+                                <span className="tier-player-name">{player.username}</span>
+                                {pos != null && (
+                                  <span
+                                    className="tier-player-pos"
+                                    style={{
+                                      marginLeft: 'auto',
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      letterSpacing: '0.02em',
+                                      color: 'rgba(180,190,210,0.55)',
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    #{pos}
+                                  </span>
+                                )}
+                                <TierArrows rawTier={rawTier} />
+                              </Link>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
-                    <div className="tier-column-players">
-                      {tieredPlayers.length === 0 ? (
-                        <div className="tier-column-empty"><span>No players</span></div>
-                      ) : (
-                        tieredPlayers.map((player) => {
-                          const rawTier = (player.rawTiers as Record<string, string | null | undefined> | undefined)?.[category];
-                          return (
-                            <Link key={player.id} to={`/player/${player.username}`} className="tier-player-row">
-                              <img
-                                src={`https://mc-heads.net/avatar/${player.username}/28`}
-                                alt={player.username}
-                                width={28} height={28}
-                                style={{ imageRendering: 'pixelated', borderRadius: 3, display: 'block', flexShrink: 0 }}
-                                loading="lazy"
-                              />
-                              <span className="tier-player-name">{player.username}</span>
-                              <TierArrows rawTier={rawTier} />
-                            </Link>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </div>
         )}
