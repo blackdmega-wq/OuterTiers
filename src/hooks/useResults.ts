@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://eaf5f4cd-1a77-4dba-80ac-7500213340a4-00-2z4cutntv6hop.riker.replit.dev';
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
+const POLL_MS = 30_000;
 
 export interface TierResult {
   id: number;
@@ -23,59 +24,59 @@ interface UseResultsResult {
   error: string | null;
 }
 
-export function useLiveResults(): UseResultsResult {
+function usePolledResults(endpoint: string): UseResultsResult {
   const [results, setResults] = useState<TierResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = () => {
-      fetch(`${API_BASE}/api/results/live`)
+      if (document.hidden) return; // skip fetch when tab is hidden
+      fetch(`${API_BASE}${endpoint}`)
         .then(r => r.json())
         .then(data => {
+          if (cancelled) return;
           setResults(data.results ?? []);
           setLoading(false);
         })
         .catch(err => {
+          if (cancelled) return;
           setError(err.message);
           setLoading(false);
         });
     };
+
+    const schedule = () => {
+      timerRef.current = setTimeout(() => { load(); schedule(); }, POLL_MS);
+    };
+
     load();
-    const interval = setInterval(load, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
+    schedule();
+
+    const onVisible = () => { if (!document.hidden) load(); };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      cancelled = true;
+      if (timerRef.current) clearTimeout(timerRef.current);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [endpoint]);
 
   return { results, loading, error };
+}
+
+export function useLiveResults(): UseResultsResult {
+  return usePolledResults('/api/results/live');
 }
 
 export function useHighTierResults(): UseResultsResult {
-  const [results, setResults] = useState<TierResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const load = () => {
-      fetch(`${API_BASE}/api/results/high-tier`)
-        .then(r => r.json())
-        .then(data => {
-          setResults(data.results ?? []);
-          setLoading(false);
-        })
-        .catch(err => {
-          setError(err.message);
-          setLoading(false);
-        });
-    };
-    load();
-    const interval = setInterval(load, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return { results, loading, error };
+  return usePolledResults('/api/results/high-tier');
 }
 
-/** Returns a human-readable time difference like "2 min ago" */
 export function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
