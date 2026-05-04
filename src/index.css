@@ -697,7 +697,9 @@ img { display: block; }
   background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 65%);
   filter: blur(50px);
   animation: glowPulse 5s ease-in-out infinite;
-  will-change: opacity;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  contain: layout style paint;
 }
 .hero-glow-right {
   position: absolute; top: -20px; right: -80px;
@@ -705,10 +707,12 @@ img { display: block; }
   background: radial-gradient(circle, rgba(240,192,64,0.11) 0%, transparent 63%);
   filter: blur(50px);
   animation: glowPulse 6s ease-in-out infinite reverse;
-  will-change: opacity;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  contain: layout style paint;
 }
 .hero-glow-center {
-  position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 20%; left: 50%; transform: translate3d(-50%,0,0);
   width: 700px; height: 300px; pointer-events: none;
   background: radial-gradient(ellipse at center,
     rgba(91,164,245,0.07) 0%,
@@ -717,7 +721,8 @@ img { display: block; }
   );
   filter: blur(30px);
   animation: glowPulse 8s ease-in-out infinite;
-  will-change: opacity;
+  will-change: opacity, transform;
+  contain: layout style paint;
 }
 
 .hero-eyebrow {
@@ -839,6 +844,7 @@ img { display: block; }
   backdrop-filter: blur(12px);
   transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
   animation: shimmerBorder 5s ease-in-out infinite;
+  will-change: box-shadow;
 }
 .stat-card:nth-child(2) { animation-delay: 1.5s; }
 .stat-card:nth-child(3) { animation-delay: 3s; }
