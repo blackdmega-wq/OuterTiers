@@ -2267,9 +2267,9 @@ a.player-cell,
     align-items: stretch !important;
   }
 
-  /* Stripe: narrower, no diagonal clip */
+  /* Stripe: wide enough to show bust (head + chest + arms) */
   .top-card-stripe {
-    width: 68px !important;
+    width: 88px !important;
     clip-path: none !important;
     flex-shrink: 0 !important;
   }
@@ -2286,19 +2286,21 @@ a.player-cell,
     text-align: left !important;
   }
 
-  /* Player head: centered in stripe */
+  /* Player bust: head + chest + arms, centered in stripe */
   .top-card-bust-wrap {
     display: flex !important;
-    width: 42px !important;
-    height: 42px !important;
+    width: 62px !important;
+    height: 74px !important;
     left: 50% !important;
     top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    border: 1.5px solid rgba(255,255,255,0.18) !important;
+    transform: translate(-50%, -46%) !important;
+    border: none !important;
+    overflow: visible !important;
   }
   .top-card-bust {
-    width: 38px !important;
-    height: 38px !important;
+    width: 62px !important;
+    height: 74px !important;
+    object-fit: contain !important;
   }
 
   /* Content: horizontal row, same as desktop */
