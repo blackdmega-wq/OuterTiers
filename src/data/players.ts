@@ -78,7 +78,7 @@ export function getTitle(points: number): string {
 }
 
 export const CATEGORIES = [
-  { id: 'overall',   label: 'Overall',    icon: '/tier_icons/overall.svg' },
+  { id: 'overall',   label: 'Overall',    icon: '/tier_icons/overall.png' },
   { id: 'ogvanilla', label: 'OG Vanilla', icon: '/tier_icons/ogvanilla.png' },
   { id: 'vanilla',   label: 'Crystal',    icon: '/tier_icons/crystal.png' },
   { id: 'uhc',       label: 'UHC',        icon: '/tier_icons/uhc.png' },
