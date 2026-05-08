@@ -21,14 +21,24 @@ export default defineConfig({
   build: {
     target: 'es2020',
     cssCodeSplit: true,
+    // Faster build reporting
+    reportCompressedSize: false,
+    // esbuild minifier is the default and fastest; explicit for clarity
+    minify: 'esbuild',
     rollupOptions: {
       output: {
+        // Chunk vendor code so returning visitors get cache hits
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          icons: ['lucide-react'],
+          icons:  ['lucide-react'],
         },
+        // Consistent hashed filenames for long-term caching
+        chunkFileNames:  'assets/[name]-[hash].js',
+        entryFileNames:  'assets/[name]-[hash].js',
+        assetFileNames:  'assets/[name]-[hash][extname]',
       },
     },
-    assetsInlineLimit: 4096,
+    // Inline small assets (< 8 KB) to save round trips on mobile
+    assetsInlineLimit: 8192,
   },
 })

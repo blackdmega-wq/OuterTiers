@@ -443,3 +443,122 @@ img { -webkit-user-drag: none; user-drag: none; }
   .hero-title-logo { width: 56px; height: 56px; }
   .hero-tagline-box { padding: 14px 22px; }
 }
+
+/* ============================================================
+   MOBILE PERFORMANCE OVERRIDES — iPhone 8 and similar
+   (max-width: 768px)
+
+   Goal: maintain 100% visual parity on desktop while eliminating
+   the top GPU/paint bottlenecks on A11-class mobile hardware.
+
+   Strategy:
+     • Remove large-element filter:blur() — biggest GPU killer
+     • Replace backdrop-filter:blur(18px) with thinner blur
+     • Stop background-position animations (force paint on Safari)
+     • Pause non-critical CSS animations
+     • Keep all compositor-only animations (transform/opacity)
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* ── #1 Killer: aurora ribbon w/ filter:blur(30px) on a full-screen
+        element + 26s animation. Removing this alone halves paint time. ── */
+  body::before { display: none !important; }
+
+  /* ── page-bg: background-position animation forces full repaint every
+        frame in Safari. Switch to static (visually imperceptible). ── */
+  .page-bg {
+    animation: none !important;
+    background-position: 0% 0%, 100% 100%, 0% 60%, 70% 10% !important;
+  }
+
+  /* ── page-bg::after drift: also background-position based, remove ── */
+  .page-bg::after { animation: none !important; }
+
+  /* ── Tagline glow: rotating conic-gradient w/ filter:blur(14px).
+        Two of these on Home = 2× GPU layers spinning. Hide them;
+        the border + box-shadow on the parent still looks great. ── */
+  .hero-tagline-box-glow { display: none !important; }
+
+  /* ── Logo float: compositor-only (translateY), keep but slow down ── */
+  .ot-logo-glow { animation-duration: 12s !important; }
+
+  /* ── GlobalGlow blur layers: gg-top-* are 70–130 vw blurred circles.
+        Remove filter:blur entirely; the gradient colours stay, just
+        without the blur radius. Visually almost identical at phone
+        screen sizes (blur was added for desktop viewing distance). ── */
+  .gg-top-center {
+    filter: none !important;
+    animation: none !important;
+    opacity: 0.38 !important;
+  }
+  .gg-top-left {
+    filter: none !important;
+    animation: none !important;
+    opacity: 0.28 !important;
+  }
+  .gg-top-right {
+    filter: none !important;
+    animation: none !important;
+    opacity: 0.25 !important;
+  }
+
+  /* ── Navbar glassmorphism: blur(18px) on the sticky bar composited
+        on every scroll frame. Drop to blur(6px) — still frosted glass,
+        much cheaper. ── */
+  .navbar {
+    backdrop-filter: blur(6px) saturate(1.1) !important;
+    -webkit-backdrop-filter: blur(6px) saturate(1.1) !important;
+  }
+
+  /* ── Dropdown: same glassmorphism reduction ── */
+  .dropdown-menu {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* ── Gold bust animations: 3 CSS animations composited simultaneously
+        (conic rotate + shimmer sweep + pulse). Keep the golden look but
+        pause non-essential animations. The static box-shadow + border
+        still reads as premium. ── */
+  .top-card-bust-wrap-body {
+    animation: none !important;
+    box-shadow:
+      0 0 18px rgba(255, 195, 70, 0.55),
+      0 0 36px rgba(255, 160, 40, 0.30),
+      inset 0 0 22px rgba(255, 220, 130, 0.22),
+      inset 0 0 2px rgba(255, 255, 255, 0.45),
+      0 10px 28px rgba(0, 0, 0, 0.55) !important;
+  }
+  .top-card-bust-wrap-body::before {
+    animation: none !important;
+    opacity: 0.7 !important;
+  }
+  .top-card-bust-wrap-body::after {
+    animation: none !important;
+    display: none !important;
+  }
+
+  /* ── API docs glows: blur(50–60px) on large positioned elements ── */
+  .apidocs-hero-glow  { filter: blur(20px) !important; animation: none !important; }
+  .apidocs-hero-glow2 { filter: blur(20px) !important; animation: none !important; }
+
+  /* ── Profile + modal backdrop blurs ── */
+  .profile-header-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+  }
+  .modal-overlay {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  /* ── Hero glow orbs: large blurred absolute elements under the hero ── */
+  .hero-glow-left,
+  .hero-glow-right,
+  .hero-glow-center {
+    filter: none !important;
+    opacity: 0.5 !important;
+    animation: none !important;
+  }
+}

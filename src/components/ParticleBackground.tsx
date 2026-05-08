@@ -52,27 +52,43 @@ export default function ParticleBackground() {
     let lastTime = performance.now();
     let width = window.innerWidth;
     let height = window.innerHeight;
-    let dpr = Math.min(window.devicePixelRatio || 1, 1.35);
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const compact = width < 720;
-    const TARGET_FPS = reducedMotion ? 18 : compact ? 28 : 38;
-    const FRAME_MS = 1000 / TARGET_FPS;
-    const DOT_COUNT = reducedMotion ? 10 : compact ? 16 : 26;
-    const ORB_COUNT = reducedMotion ? 1 : compact ? 2 : 3;
-    const SPARK_COUNT = reducedMotion ? 0 : compact ? 4 : 7;
-    const EMBER_COUNT = reducedMotion ? 4 : compact ? 8 : 14;
-    const MAX_DIST = compact ? 80 : 108;
+    const compact = width < 768; // treat tablets as mobile too
+
+    // ── Mobile: cap DPR at 1.0 to halve canvas pixel count on retina phones.
+    //    Desktop: cap at 1.5 (was 1.35, slight upgrade for sharp screens).
+    let dpr = Math.min(window.devicePixelRatio || 1, compact ? 1.0 : 1.5);
+
+    // ── Mobile: 20 fps is smooth-enough for ambient background particles and
+    //    burns ≈30% less GPU time than 28 fps.
+    const TARGET_FPS = reducedMotion ? 15 : compact ? 20 : 38;
+    const FRAME_MS   = 1000 / TARGET_FPS;
+
+    // ── Particle counts: mobile gets fewer of everything.
+    //    Sparks are removed on mobile — their atan2() + stroke call per
+    //    particle is disproportionately expensive on A-series GPUs.
+    const DOT_COUNT   = reducedMotion ? 6  : compact ? 9  : 26;
+    const ORB_COUNT   = reducedMotion ? 0  : compact ? 1  : 3;
+    const SPARK_COUNT = reducedMotion ? 0  : compact ? 0  : 7;  // always 0 on mobile
+    const EMBER_COUNT = reducedMotion ? 2  : compact ? 5  : 14;
+
+    // ── Connection lines: O(n²) distance checks + sqrt() every frame.
+    //    On mobile with 9 dots → 36 checks/frame = fine.
+    //    But we draw 0 lines on mobile anyway — too small to see clearly.
+    const DRAW_LINES  = !compact && !reducedMotion;
+    const MAX_DIST    = 108;
     const MAX_DIST_SQ = MAX_DIST * MAX_DIST;
+
     const particles: Particle[] = [];
     const dots: Particle[] = [];
 
     function resize() {
-      width = window.innerWidth;
+      width  = window.innerWidth;
       height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 1.35);
-      canvas!.width = Math.floor(width * dpr);
+      dpr    = Math.min(window.devicePixelRatio || 1, compact ? 1.0 : 1.5);
+      canvas!.width  = Math.floor(width  * dpr);
       canvas!.height = Math.floor(height * dpr);
-      canvas!.style.width = `${width}px`;
+      canvas!.style.width  = `${width}px`;
       canvas!.style.height = `${height}px`;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
@@ -98,7 +114,7 @@ export default function ParticleBackground() {
 
     for (let i = 0; i < ORB_COUNT; i++) {
       const radius = Math.random() * 64 + 52;
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const color  = COLORS[Math.floor(Math.random() * COLORS.length)];
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -130,8 +146,8 @@ export default function ParticleBackground() {
     }
 
     for (let i = 0; i < EMBER_COUNT; i++) {
-      const radius = Math.random() * 1.55 + 0.75;
-      const color = Math.random() > 0.72 ? '240,192,64' : '239,68,68';
+      const radius     = Math.random() * 1.55 + 0.75;
+      const color      = Math.random() > 0.72 ? '240,192,64' : '239,68,68';
       const drawRadius = radius * 3.2;
       particles.push({
         x: Math.random() * width,
@@ -161,8 +177,8 @@ export default function ParticleBackground() {
       for (const p of particles) {
         if (p.type === 'ember') p.x += Math.sin(now * 0.001 + p.pulse) * 0.34 * delta;
 
-        p.x += p.vx * delta;
-        p.y += p.vy * delta;
+        p.x     += p.vx * delta;
+        p.y     += p.vy * delta;
         p.pulse += 0.018 * delta;
 
         if (p.type === 'orb') {
@@ -171,12 +187,12 @@ export default function ParticleBackground() {
         } else if (p.type === 'spark') {
           p.opacity += p.fadeDir * 0.0032 * delta;
           if (p.opacity > 0.58 || p.opacity < 0.02) {
-            p.x = Math.random() * width;
-            p.y = height + 10;
+            p.x       = Math.random() * width;
+            p.y       = height + 10;
             p.opacity = 0.09;
             p.fadeDir = 1;
-            p.vx = (Math.random() - 0.5) * 0.9;
-            p.vy = -Math.random() * 0.95 - 0.25;
+            p.vx      = (Math.random() - 0.5) * 0.9;
+            p.vy      = -Math.random() * 0.95 - 0.25;
           }
         } else if (p.type === 'ember') {
           p.opacity += p.fadeDir * 0.0015 * delta;
@@ -191,8 +207,8 @@ export default function ParticleBackground() {
         }
 
         if (p.type === 'dot' || p.type === 'orb') {
-          if (p.x < -p.radius - 26) p.x = width + p.radius;
-          if (p.x > width + p.radius + 26) p.x = -p.radius;
+          if (p.x < -p.radius - 26) p.x = width  + p.radius;
+          if (p.x > width  + p.radius + 26) p.x = -p.radius;
           if (p.y < -p.radius - 26) p.y = height + p.radius;
           if (p.y > height + p.radius + 26) p.y = -p.radius;
         }
@@ -202,13 +218,13 @@ export default function ParticleBackground() {
           ctx.drawImage(p.cachedCanvas, p.x - p.radius - 1, p.y - p.radius - 1);
           ctx.globalAlpha = 1;
         } else if (p.type === 'spark') {
-          const tail = 20 + Math.sin(p.pulse) * 7;
+          const tail  = 20 + Math.sin(p.pulse) * 7;
           const angle = Math.atan2(p.vy, p.vx);
           ctx.beginPath();
           ctx.moveTo(p.x - Math.cos(angle) * tail, p.y - Math.sin(angle) * tail);
           ctx.lineTo(p.x, p.y);
           ctx.strokeStyle = `rgba(${p.color},${p.opacity * 0.55})`;
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth   = 1.2;
           ctx.stroke();
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -228,23 +244,28 @@ export default function ParticleBackground() {
         }
       }
 
-      for (let i = 0; i < dots.length; i++) {
-        for (let j = i + 1; j < dots.length; j++) {
-          const dx = dots[i].x - dots[j].x;
-          const dy = dots[i].y - dots[j].y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < MAX_DIST_SQ) {
-            const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / MAX_DIST) * 0.12;
-            ctx.beginPath();
-            ctx.moveTo(dots[i].x, dots[i].y);
-            ctx.lineTo(dots[j].x, dots[j].y);
-            ctx.strokeStyle = `rgba(91,164,245,${alpha})`;
-            ctx.lineWidth = 0.65;
-            ctx.stroke();
+      // ── Connection lines: skipped on mobile (DRAW_LINES = false).
+      //    On desktop this is the same O(n²) loop as before.
+      if (DRAW_LINES) {
+        for (let i = 0; i < dots.length; i++) {
+          for (let j = i + 1; j < dots.length; j++) {
+            const dx     = dots[i].x - dots[j].x;
+            const dy     = dots[i].y - dots[j].y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < MAX_DIST_SQ) {
+              const dist  = Math.sqrt(distSq);
+              const alpha = (1 - dist / MAX_DIST) * 0.12;
+              ctx.beginPath();
+              ctx.moveTo(dots[i].x, dots[i].y);
+              ctx.lineTo(dots[j].x, dots[j].y);
+              ctx.strokeStyle = `rgba(91,164,245,${alpha})`;
+              ctx.lineWidth   = 0.65;
+              ctx.stroke();
+            }
           }
         }
       }
+
       ctx.globalCompositeOperation = 'source-over';
     }
 
@@ -253,7 +274,6 @@ export default function ParticleBackground() {
     function handleVisibilityChange() {
       lastTime = performance.now();
     }
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {

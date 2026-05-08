@@ -2668,3 +2668,57 @@ a.player-cell,
   font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em;
   border: 1px solid transparent;
 }
+
+/* ============================================================
+   MOBILE PERFORMANCE OVERRIDES — index.css additions
+   These target elements whose styles live in index.css.
+   Desktop: completely unchanged.
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* gg-grid: compositor-only transform, keep it but slow it to 40s
+     so fewer recomposites per second ── */
+  .gg-grid { animation-duration: 40s !important; }
+
+  /* gg-scanline: transform-only, lightweight, keep as-is */
+
+  /* content-visibility already set for major sections in extras.css;
+     make sure intrinsic size is reasonable to avoid scroll jank ── */
+  .home-top100,
+  .feeds-row-section,
+  .features-section,
+  .discord-section,
+  .about-section {
+    contain-intrinsic-size: 1px 400px !important;
+  }
+
+  /* apidocs-base-card blur ── */
+  .apidocs-base-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  /* not-found glow: filter:blur(60px) on a 600px div ── */
+  .not-found-glow {
+    filter: blur(20px) !important;
+    opacity: 0.6 !important;
+  }
+
+  /* hero section glows inside index.css ── */
+  .hero-glow-left  { filter: blur(30px) !important; animation: none !important; }
+  .hero-glow-right { filter: blur(30px) !important; animation: none !important; }
+  .hero-glow-center { filter: blur(30px) !important; animation: none !important; }
+
+  /* Reduce transition complexity on interactive elements —
+     keep the feel but shorten durations on slow hardware ── */
+  .btn-press,
+  .nav-link,
+  .nav-dropdown-trigger,
+  .hero-btn,
+  .category-tab,
+  .tier-player-row,
+  .player-row {
+    transition-duration: 0.1s !important;
+  }
+}
