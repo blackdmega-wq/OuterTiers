@@ -2,7 +2,7 @@ services:
   - type: web
     name: outertiers
     env: static
-    buildCommand: npm run build
+    buildCommand: npm install -g pnpm && pnpm install --config.approve-builds=true && pnpm exec vite build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
