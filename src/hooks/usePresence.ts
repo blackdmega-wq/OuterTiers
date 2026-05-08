@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const PRESENCE_BASE = (import.meta.env.VITE_PRESENCE_URL as string | undefined)
-  || 'https://36f2c60a-a690-4757-9160-5f38bee94e1e-00-3hq7dks2gss8i.worf.replit.dev/api';
+  || 'https://outertiers-api.onrender.com/api';
 const HEARTBEAT_MS = 20000;
 
 function getOrCreateClientId(): string {
