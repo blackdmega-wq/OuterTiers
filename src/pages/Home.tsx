@@ -97,7 +97,7 @@ function StatCard({ value, label, icon, wide, liveIndicator }: { value: string |
   );
 }
 
-function FeatureCard({ icon, title, desc, delay }: { icon: string; title: string; desc: string; delay: string }) {
+function FeatureCard({ icon, title, desc, delay }: { icon: React.ReactNode; title: string; desc: string; delay: string }) {
   return (
     <div className="feature-card animate-fade-up ripple-card" style={{ animationDelay: delay }}>
       <div className="feature-card-icon">{icon}</div>
@@ -374,19 +374,19 @@ export default function Home() {
           <div className="section-label">Why OuterTiers?</div>
           <div className="hero-tagline-box hero-tagline-box-blue">
             <span className="hero-tagline-box-glow" />
-            <h2 className="section-heading hero-tagline-box-text">Why OuterTiers is Different</h2>
+            <h2 className="section-heading hero-tagline-box-text">Why OuterTiers is Goated</h2>
           </div>
           <p className="section-sub animate-fade-up" style={{ animationDelay: '0.1s' }}>
             OuterTiers exists to create a fair, competitive, and great ranking system where everyone will be satisfied. We will try our best for you to get the greatest experience on OuterTiers.
           </p>
         </div>
         <div className="features-grid">
-          <FeatureCard delay="0s"    icon="⚖️"  title="Fairness & Neutrality First" desc="Fairness and neutrality is our biggest priority. Every tier test and ticket is strictly overseen to make sure everything stays neutral and fair — no exceptions, no favouritism." />
-          <FeatureCard delay="0.07s" icon="🛡️"  title="Zero Corruption Tolerated" desc="We won't allow corrupted staff or testers on OuterTiers. Anyone who isn't neutral and fair will be immediately demoted. Boosting players is strictly forbidden, no matter who they are." />
-          <FeatureCard delay="0.14s" icon="🏅"  title="Accurate Rankings" desc="Faster and smoother testing means your tier placement reflects your actual skill. We rigorously oversee every test to eliminate inaccurate rankings and ensure the tier list stays trustworthy." />
-          <FeatureCard delay="0.21s" icon="⚡"  title="Better Queue System" desc="Queues open one minute after being announced, giving every player enough time to join. This makes queue-sniping bots useless and ensures the process is fair for everyone." />
-          <FeatureCard delay="0.28s" icon="🌍"  title="Equal Treatment for All" desc="Everyone is treated as any other member. No one is treated differently because of their ethnicity, religion, or personality. Unnecessary punishments or extended cooldowns will not happen here." />
-          <FeatureCard delay="0.35s" icon="🤝"  title="Real & Respectful Community" desc="We are friendly, respectful, and real — no hypocrisy on our team. We will never tolerate false punishments of legit players out of hatred. What you see is what you get." />
+          <FeatureCard delay="0s"    icon={<img src="/feature-icons/feature-1.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Fairness & Neutrality First" desc="Fairness and neutrality is our biggest priority. Every tier test and ticket is strictly overseen to make sure everything stays neutral and fair — no exceptions, no favouritism." />
+          <FeatureCard delay="0.07s" icon={<img src="/feature-icons/feature-2.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Zero Corruption Tolerated" desc="We won't allow corrupted staff or testers on OuterTiers. Anyone who isn't neutral and fair will be immediately demoted. Boosting players is strictly forbidden, no matter who they are." />
+          <FeatureCard delay="0.14s" icon={<img src="/feature-icons/feature-3.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Accurate Rankings" desc="Faster and smoother testing means your tier placement reflects your actual skill. We rigorously oversee every test to eliminate inaccurate rankings and ensure the tier list stays trustworthy." />
+          <FeatureCard delay="0.21s" icon={<img src="/feature-icons/feature-4.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Better Queue System" desc="Queues open one minute after being announced, giving every player enough time to join. This makes queue-sniping bots useless and ensures the process is fair for everyone." />
+          <FeatureCard delay="0.28s" icon={<img src="/feature-icons/feature-5.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Equal Treatment for All" desc="Everyone is treated as any other member. No one is treated differently because of their ethnicity, religion, or personality. Unnecessary punishments or extended cooldowns will not happen here." />
+          <FeatureCard delay="0.35s" icon={<img src="/feature-icons/feature-6.png" alt="" style={{width:48,height:48,objectFit:'contain'}} />} title="Real & Respectful Community" desc="We are friendly, respectful, and real — no hypocrisy on our team. We will never tolerate false punishments of legit players out of hatred. What you see is what you get." />
         </div>
       </div>
 
