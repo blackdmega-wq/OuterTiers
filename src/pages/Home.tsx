@@ -323,17 +323,18 @@ export default function Home() {
 
       {/* ===== ABOUT / DESCRIPTION ===== */}
       <div className="about-section animate-fade-up">
-        <div className="about-eyebrow">A FAIR, COMPETITIVE, AND GREAT RANKING SYSTEM WHERE EVERYONE WILL BE SATISFIED — BUILT BY PLAYERS WHO ARE TIRED OF CORRUPTION AND UNFAIRNESS.</div>
+        <img src="/minecraft-grass.gif" alt="Minecraft" style={{ display: 'block', margin: '0 auto 1.5rem', width: 64, height: 64, imageRendering: 'pixelated' }} />
+        <div className="about-eyebrow">THE ULTIMATE COMPETITIVE PVP EXPERIENCE IN MINECRAFT FEATURING A STATE OF THE ART SERVER AND GLOBAL RANKING NETWORK.</div>
         <div className="hero-tagline-box hero-tagline-box-purple">
           <span className="hero-tagline-box-glow" />
-          <h2 className="about-title hero-tagline-box-text">A Tier List You Can Actually Trust</h2>
+          <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
         </div>
         <p className="about-body">
-          OuterTiers is a Minecraft PvP community built on one principle: fairness.
-          We exist because we are tired of tier lists where staff rank players unfairly,
-          appeals get ignored out of hatred, and boosting goes unpunished. Here, every
-          tier test and ticket is strictly overseen to ensure neutrality. Everyone is
-          treated equally regardless of their ethnicity, religion, or personality.
+          OuterTiers is a Minecraft network consisting of a Tier List system
+          and various communities. Designed by competitive players, for competitive players.
+          We are the hub for all things related to competitive gameplay in Minecraft.
+          We specialize in championing 1.9+ combat via various kits which are globally
+          recognized as game modes within the community.
         </p>
       </div>
 
