@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const PRESENCE_BASE = (import.meta.env.VITE_PRESENCE_URL as string | undefined)
-  || 'https://350701e2-2c34-4d92-8605-57407cb0e8cf-00-1gl1v37b3pb1q.janeway.replit.dev/api';
+  || 'https://36f2c60a-a690-4757-9160-5f38bee94e1e-00-3hq7dks2gss8i.worf.replit.dev/api';
 const HEARTBEAT_MS = 20000;
 
 function getOrCreateClientId(): string {
@@ -56,3 +56,4 @@ export function usePresence() {
 
   return online;
 }
+
