@@ -81,9 +81,9 @@ export function usePlayer(username: string | undefined): UsePlayerResult {
 
     setLoading(true);
     fetch(`${API_BASE}/api/players/${encodeURIComponent(username)}`)
-      .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+      .then(r => { if (!r.ok) throw new Error('Player not found'); return r.json(); })
       .then(data => { setPlayer({ ...data, points: calculatePoints(data.rawTiers) }); setLoading(false); })
-      .catch(() => { setPlayer(null); setLoading(false); });
+      .catch(err => { setError(err.message); setPlayer(null); setLoading(false); });
   }, [username]);
 
   return { player, loading, error };
