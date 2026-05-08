@@ -323,17 +323,17 @@ export default function Home() {
 
       {/* ===== ABOUT / DESCRIPTION ===== */}
       <div className="about-section animate-fade-up">
-        <div className="about-eyebrow">THE ULTIMATE COMPETITIVE PVP EXPERIENCE IN MINECRAFT FEATURING A STATE OF THE ART SERVER AND GLOBAL RANKING NETWORK.</div>
+        <div className="about-eyebrow">A FAIR, COMPETITIVE, AND GREAT RANKING SYSTEM WHERE EVERYONE WILL BE SATISFIED — BUILT BY PLAYERS WHO ARE TIRED OF CORRUPTION AND UNFAIRNESS.</div>
         <div className="hero-tagline-box hero-tagline-box-purple">
           <span className="hero-tagline-box-glow" />
-          <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
+          <h2 className="about-title hero-tagline-box-text">A Tier List You Can Actually Trust</h2>
         </div>
         <p className="about-body">
-          OuterTiers is a Minecraft network consisting of a Tier List system
-          and various communities. Designed by competitive players, for competitive players.
-          We are the hub for all things related to competitive gameplay in Minecraft.
-          We specialize in championing 1.9+ combat via various kits which are globally
-          recognized as game modes within the community.
+          OuterTiers is a Minecraft PvP community built on one principle: fairness.
+          We exist because we are tired of tier lists where staff rank players unfairly,
+          appeals get ignored out of hatred, and boosting goes unpunished. Here, every
+          tier test and ticket is strictly overseen to ensure neutrality. Everyone is
+          treated equally regardless of their ethnicity, religion, or personality.
         </p>
       </div>
 
@@ -374,19 +374,19 @@ export default function Home() {
           <div className="section-label">Why OuterTiers?</div>
           <div className="hero-tagline-box hero-tagline-box-blue">
             <span className="hero-tagline-box-glow" />
-            <h2 className="section-heading hero-tagline-box-text">The best Minecraft PvP ranking system</h2>
+            <h2 className="section-heading hero-tagline-box-text">Why OuterTiers is Different</h2>
           </div>
           <p className="section-sub animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            OuterTiers sets the standard for competitive Minecraft PvP ranking. Built by players who understand the scene at the highest level, our platform provides the most accurate, transparent and detailed skill evaluation available anywhere.
+            OuterTiers exists to create a fair, competitive, and great ranking system where everyone will be satisfied. We will try our best for you to get the greatest experience on OuterTiers.
           </p>
         </div>
         <div className="features-grid">
-          <FeatureCard delay="0s"    icon="⚔️"  title="10 Unique Categories"   desc="From OG Vanilla and UHC to Mace and Speed — every major PvP discipline has its own dedicated leaderboard with category-specific tier placements, ensuring your real strengths are always recognised." />
-          <FeatureCard delay="0.07s" icon="🏆"  title="Transparent 5-Tier System"   desc="Our T1 through T5 ranking structure is crystal clear and rigorously maintained. No vague labels — just precise tier placements that the entire community trusts, updated regularly by experienced judges." />
-          <FeatureCard delay="0.14s" icon="📊"  title="Points, Ranks & Titles" desc="Every game mode you excel in rewards you with ranking points. Stack them across categories to climb from Rookie all the way to Combat Grandmaster and earn a title that reflects your true overall mastery." />
-          <FeatureCard delay="0.21s" icon="🔍"  title="Detailed Player Profiles" desc="Each player gets a full profile page — region, overall rank, title, total points, and their individual tier in every category at a glance. The most complete player card in the Minecraft PvP community." />
-          <FeatureCard delay="0.28s" icon="🌍"  title="Global Region Support" desc="Players from NA, EU, AS and OC all compete on the same platform. Regional badges let you identify where the best competition is coming from, no matter where in the world you play." />
-          <FeatureCard delay="0.35s" icon="🚀"  title="Built for the Community" desc="OuterTiers was created by competitive players for competitive players. Every design decision — from the tier definitions to the point system — was made with fairness, accuracy and community input at its core." />
+          <FeatureCard delay="0s"    icon="⚖️"  title="Fairness & Neutrality First" desc="Fairness and neutrality is our biggest priority. Every tier test and ticket is strictly overseen to make sure everything stays neutral and fair — no exceptions, no favouritism." />
+          <FeatureCard delay="0.07s" icon="🛡️"  title="Zero Corruption Tolerated" desc="We won't allow corrupted staff or testers on OuterTiers. Anyone who isn't neutral and fair will be immediately demoted. Boosting players is strictly forbidden, no matter who they are." />
+          <FeatureCard delay="0.14s" icon="🏅"  title="Accurate Rankings" desc="Faster and smoother testing means your tier placement reflects your actual skill. We rigorously oversee every test to eliminate inaccurate rankings and ensure the tier list stays trustworthy." />
+          <FeatureCard delay="0.21s" icon="⚡"  title="Better Queue System" desc="Queues open one minute after being announced, giving every player enough time to join. This makes queue-sniping bots useless and ensures the process is fair for everyone." />
+          <FeatureCard delay="0.28s" icon="🌍"  title="Equal Treatment for All" desc="Everyone is treated as any other member. No one is treated differently because of their ethnicity, religion, or personality. Unnecessary punishments or extended cooldowns will not happen here." />
+          <FeatureCard delay="0.35s" icon="🤝"  title="Real & Respectful Community" desc="We are friendly, respectful, and real — no hypocrisy on our team. We will never tolerate false punishments of legit players out of hatred. What you see is what you get." />
         </div>
       </div>
 
