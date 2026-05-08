@@ -3,6 +3,8 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  onlyBuiltDependencies:
+    - esbuild
 
 importers:
 
@@ -1019,6 +1021,7 @@ snapshots:
   electron-to-chromium@1.5.340: {}
 
   esbuild@0.25.12:
+    requiresBuild: true
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.25.12
       '@esbuild/android-arm': 0.25.12
