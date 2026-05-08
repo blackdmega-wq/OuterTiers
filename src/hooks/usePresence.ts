@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
+const PRESENCE_BASE = (import.meta.env.VITE_PRESENCE_URL as string | undefined)
+  || 'https://350701e2-2c34-4d92-8605-57407cb0e8cf-00-1gl1v37b3pb1q.janeway.replit.dev/api';
 const HEARTBEAT_MS = 20000;
 
 function getOrCreateClientId(): string {
@@ -26,7 +27,7 @@ export function usePresence() {
 
     const beat = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/presence`, {
+        const res = await fetch(`${PRESENCE_BASE}/presence`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: cid }),
