@@ -330,11 +330,10 @@ export default function Home() {
           <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
         </div>
         <p className="about-body">
-          OuterTiers is a Minecraft network consisting of a Tier List system
-          and various communities. Designed by competitive players, for competitive players.
-          We are the hub for all things related to competitive gameplay in Minecraft.
-          We specialize in championing 1.9+ combat via various kits which are globally
-          recognized as game modes within the community.
+          OuterTiers is a 1.9+ PvP tier list built by players who were tired of unfair
+          rankings and testers who don't care. We test across Crystal, Sword, and other
+          game modes with one goal — accurate placements, no bias, no politics.
+          If you want to know where you actually stand, this is the place.
         </p>
       </div>
 
