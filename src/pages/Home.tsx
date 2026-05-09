@@ -330,10 +330,10 @@ export default function Home() {
           <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
         </div>
         <p className="about-body">
-          Most tier lists are a joke. Testers rank their friends, results get
-          manipulated, and nobody's held accountable. OuterTiers exists because we got
-          tired of it. Crystal, Sword, and more — tested properly, ranked honestly.
-          No shortcuts. No favorites. Just your actual skill.
+          Pop your totem, take your L, run it back. That's the scene.
+          OuterTiers is where you find out exactly how good you actually are —
+          structured 1.9+ tests across Crystal, Sword, and more, with testers who
+          are actually held accountable. Real results. No inflation. No corruption.
         </p>
       </div>
 
