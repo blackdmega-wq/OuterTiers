@@ -330,10 +330,10 @@ export default function Home() {
           <h2 className="about-title hero-tagline-box-text">The Ultimate PvP Experience</h2>
         </div>
         <p className="about-body">
-          Pop your totem, take your L, run it back. That's the scene.
-          OuterTiers is where you find out exactly how good you actually are —
-          structured 1.9+ tests across Crystal, Sword, and more, with testers who
-          are actually held accountable. Real results. No inflation. No corruption.
+          The 1.9+ scene has always known who the real players are.
+          OuterTiers puts it on record. Structured tier tests across Crystal, Sword,
+          and more, with testers held to a strict standard. Your placement reflects
+          your actual skill. Nothing more, nothing less.
         </p>
       </div>
 
