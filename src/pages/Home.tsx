@@ -340,8 +340,6 @@ export default function Home() {
                         <PodiumSkin
                           username={player.username}
                           rank={rank as 1 | 2 | 3}
-                          width={rank === 1 ? 156 : rank === 2 ? 128 : 120}
-                          height={rank === 1 ? 224 : rank === 2 ? 184 : 176}
                           className="lb-pod-skin"
                         />
                       </div>
