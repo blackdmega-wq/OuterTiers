@@ -39,6 +39,8 @@ export interface Player {
   rawTiers?: RawTiers;
   currentTier?: TierLevel;
   peakTier?: TierLevel;
+  /** Unix timestamps (seconds) for when the player first received their current tier per mode */
+  tierDates?: Record<string, number>;
 }
 
 export const TIER_POINTS: Record<string, number> = {
