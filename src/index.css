@@ -428,10 +428,16 @@ img { display: block; }
    ============================================= */
 .home-top100 { max-width:1100px; margin:0 auto; padding:0 24px 80px; }
 .rankings-loading { text-align:center; padding:40px; color:var(--text-dim); font-size:0.9rem; }
-.top100-table-wrapper {
-  border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden;
+/* outer: clips rounded corners without being a scroll container — never auto-scrolls on focus */
+.top100-table-outer {
+  border:1px solid rgba(255,255,255,0.08); border-radius:14px;
+  overflow:clip; /* NOT hidden — clip does NOT create a scroll container */
   box-shadow:0 12px 56px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.02) inset;
-  overscroll-behavior-x:contain;
+}
+/* inner: actual horizontal scroll wrapper */
+.top100-table-wrapper {
+  overflow-x:auto;
+  overflow-y:visible;
 }
 
 .rankings-table { width:100%; border-collapse:collapse; }
@@ -833,14 +839,13 @@ img { display: block; }
 }
 
 /* ── 2. Mobile: leaderboard table, POINTS always visible ── */
-/* Wrapper always scrollable so layout never jumps on touch */
+/* top100-table-wrapper: horizontal scroll only, no height clipping */
+.top100-table-outer { overflow-x: visible; }
 .top100-table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
-  max-width: 100%;
-  width: 100%;
 }
 /* Fixed minimum width keeps columns STABLE — never reflow on click/tap */
 .rankings-table { min-width: 520px; table-layout: fixed; border-collapse: collapse; }
@@ -1762,7 +1767,7 @@ img { display: block; }
 /* Header row */
 .ot-rl-header {
   display: grid;
-  grid-template-columns: 44px 250px 68px 1fr 78px;
+  grid-template-columns: 44px 220px 68px 1fr 88px;
   align-items: center;
   gap: 10px;
   padding: 9px 22px;
@@ -1810,7 +1815,7 @@ img { display: block; }
 /* Rotating glow ring */
 .ot-rl-avatar-ring {
   position: relative; flex-shrink: 0;
-  width: 58px; height: 58px;
+  width: 50px; height: 70px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   padding: 3px;
@@ -1836,15 +1841,15 @@ img { display: block; }
 .ot-rl-avatar-bg {
   position: absolute; inset: 3px;
   border-radius: 50%;
-  background: #06091a;
+  background: linear-gradient(180deg, rgba(96,165,250,0.04), rgba(6,9,26,0.95));
   z-index: 0;
 }
 .ot-rl-avatar-img {
   position: absolute;
-  top: 3px;
+  top: 2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 52px;
+  width: 44px;
   height: auto;
   image-rendering: pixelated;
   z-index: 1;
@@ -1888,7 +1893,9 @@ img { display: block; }
 .ot-rl-tbadge--gold   .ot-rl-ticon-wrap { border-color: rgba(251,191,36,0.70); background: rgba(251,191,36,0.10); }
 .ot-rl-tbadge--silver .ot-rl-ticon-wrap { border-color: rgba(148,163,184,0.55); background: rgba(148,163,184,0.08); }
 .ot-rl-tbadge--blue   .ot-rl-ticon-wrap { border-color: rgba(96,165,250,0.50);  background: rgba(96,165,250,0.08);  }
-.ot-rl-tbadge--gray   .ot-rl-ticon-wrap { border-color: rgba(100,104,128,0.35); background: rgba(100,104,128,0.06); }
+.ot-rl-tbadge--gray      .ot-rl-ticon-wrap { border-color: rgba(100,104,128,0.35); background: rgba(100,104,128,0.06); }
+.ot-rl-tbadge--unranked  .ot-rl-ticon-wrap { border-color: rgba(80,84,108,0.22); background: rgba(80,84,108,0.04); opacity: 0.4; }
+.ot-rl-tbadge--unranked  .ot-rl-tlabel { color: rgba(120,125,160,0.5); }
 .ot-rl-ticon  { width: 22px; height: 22px; object-fit: contain; image-rendering: pixelated; }
 .ot-rl-tlabel {
   font-size: 0.50rem; font-weight: 700;
@@ -1903,6 +1910,25 @@ img { display: block; }
   display: flex; align-items: center; justify-content: center;
 }
 
+/* Points bar (mini progress under player name) */
+.ot-rl-ptsbar-wrap {
+  display: block; width: 100%; max-width: 120px;
+  height: 3px; background: rgba(255,255,255,0.07);
+  border-radius: 2px; margin-top: 5px; overflow: hidden;
+}
+.ot-rl-ptsbar {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, rgba(96,165,250,0.6), rgba(167,139,250,0.5));
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.ot-rl-row--top1 .ot-rl-ptsbar { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.ot-rl-row--top2 .ot-rl-ptsbar { background: linear-gradient(90deg, #94a3b8, #64748b); }
+.ot-rl-row--top3 .ot-rl-ptsbar { background: linear-gradient(90deg, #c07830, #92400e); }
+
+/* Medal for top 3 */
+.ot-rl-medal { font-size: 1.4rem; line-height: 1; display: block; text-align: center; }
+
 /* Points */
 .ot-rl-pts {
   text-align: right;
@@ -1915,33 +1941,36 @@ img { display: block; }
 .ot-rl-row--top1 .ot-rl-pts { color: #fbbf24; text-shadow: 0 0 14px rgba(251,191,36,0.40); }
 .ot-rl-row--top2 .ot-rl-pts { color: #94a3b8; text-shadow: none; }
 .ot-rl-row--top3 .ot-rl-pts { color: #c97940; text-shadow: none; }
+.ot-rl-pts-unit { font-size: 0.58rem; font-weight: 600; color: var(--text-muted); margin-left: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* ── Responsive ── */
 @media (max-width: 920px) {
-  .ot-rl-header, .ot-rl-row { grid-template-columns: 38px 210px 60px 1fr 70px; gap: 8px; }
+  .ot-rl-header, .ot-rl-row { grid-template-columns: 38px 200px 60px 1fr 76px; gap: 8px; }
   .ot-rl-row { padding: 11px 16px; }
   .ot-rl-header { padding: 9px 16px; }
 }
 @media (max-width: 700px) {
-  .ot-rl-header { grid-template-columns: 36px 1fr 52px 110px 58px; gap: 6px; padding: 7px 14px; min-width: 480px; }
-  .ot-rl-row { grid-template-columns: 36px 1fr 52px 110px 58px; gap: 6px; padding: 9px 14px; min-width: 480px; }
-  .ot-rl-tiers { display: flex; gap: 3px; flex-wrap: nowrap; }
-  .ot-rl-tbadge:nth-child(n+4) { display: none; }
-  .ot-rl-ticon-wrap { width: 26px; height: 26px; }
-  .ot-rl-ticon { width: 16px; height: 16px; }
+  /* All 10 modes visible — table scrolls horizontally */
+  .ot-rl-header { grid-template-columns: 34px 160px 50px 1fr 62px; gap: 5px; padding: 7px 12px; min-width: 560px; }
+  .ot-rl-row    { grid-template-columns: 34px 160px 50px 1fr 62px; gap: 5px; padding: 8px 12px; min-width: 560px; }
+  .ot-rl-tiers  { display: flex; gap: 2px; flex-wrap: nowrap; }
+  .ot-rl-ticon-wrap { width: 24px; height: 24px; border-width: 1.5px; }
+  .ot-rl-ticon  { width: 14px; height: 14px; }
   .ot-rl-tlabel { display: none; }
-  .ot-rl-tmore { width: 26px; height: 26px; font-size: 0.58rem; }
-  .ot-rl-pts { font-size: 0.88rem; }
-  .ot-rl-name { font-size: 0.84rem; }
-  .ot-rl-avatar-ring { width: 44px; height: 44px; border-radius: 50%; }
-  .ot-rl-avatar-img  { width: 38px; }
+  .ot-rl-pts    { font-size: 0.82rem; }
+  .ot-rl-pts-unit { display: none; }
+  .ot-rl-name   { font-size: 0.82rem; }
+  .ot-rl-title  { font-size: 0.58rem; }
+  .ot-rl-ptsbar-wrap { max-width: 80px; }
+  .ot-rl-avatar-ring { width: 38px; height: 54px; }
+  .ot-rl-avatar-img  { width: 32px; }
+  .ot-rl-medal  { font-size: 1.1rem; }
 }
 @media (max-width: 440px) {
-  .ot-rl-header { grid-template-columns: 28px 1fr 44px 88px 52px; padding: 6px 12px; gap: 5px; min-width: 430px; }
-  .ot-rl-row { grid-template-columns: 28px 1fr 44px 88px 52px; padding: 8px 12px; gap: 5px; min-width: 430px; }
-  .ot-rl-tbadge:nth-child(n+3) { display: none; }
-  .ot-rl-name { font-size: 0.80rem; }
-  .ot-rl-pts  { font-size: 0.82rem; }
-  .ot-rl-avatar-ring { width: 36px; height: 36px; }
-  .ot-rl-avatar-img  { width: 30px; }
+  .ot-rl-header { grid-template-columns: 28px 130px 44px 1fr 56px; padding: 6px 10px; gap: 4px; min-width: 500px; }
+  .ot-rl-row    { grid-template-columns: 28px 130px 44px 1fr 56px; padding: 7px 10px; gap: 4px; min-width: 500px; }
+  .ot-rl-name   { font-size: 0.78rem; }
+  .ot-rl-pts    { font-size: 0.78rem; }
+  .ot-rl-avatar-ring { width: 34px; height: 48px; }
+  .ot-rl-avatar-img  { width: 28px; }
 }
