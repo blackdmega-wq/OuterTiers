@@ -337,17 +337,14 @@ export default function Home() {
                           </svg>
                         )}
                         <img
-                          src={`https://starlightskins.lunareclipse.studio/render/${rank === 1 ? 'ultimate' : rank === 2 ? 'archer' : 'dungeons'}/${player.username}/full`}
+                          src={`https://mc-heads.net/body/${player.username}/256`}
                           alt={player.username}
-                          className="lb-pod-skin"
+                          className={`lb-pod-skin lb-pod-skin--pose${rank}`}
                           loading="lazy"
                           onError={(e) => {
                             const img = e.target as HTMLImageElement;
                             if (!img.dataset.fb) {
                               img.dataset.fb = '1';
-                              img.src = `https://mc-heads.net/body/${player.username}/256`;
-                            } else if (!img.dataset.fb2) {
-                              img.dataset.fb2 = '1';
                               img.src = `https://minotar.net/body/${player.username}/256`;
                             }
                           }}
