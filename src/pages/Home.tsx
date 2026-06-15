@@ -341,6 +341,13 @@ export default function Home() {
                           alt={player.username}
                           className="lb-pod-skin"
                           loading="lazy"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (!img.dataset.fb) {
+                              img.dataset.fb = '1';
+                              img.src = `https://visage.surgeplay.com/full/256/${player.username}.png`;
+                            }
+                          }}
                         />
                       </div>
                       <div className="lb-pod-pedestal">
