@@ -1,9 +1,5 @@
 /* ============================================================
-   OuterTiers — extras.css
-   Logo, tagline boxes, animated background upgrades, layout
-   tweaks and shield helpers. Loaded after index.css.
-   Tuned for performance: compositor-only animations,
-   minimal blur/backdrop-filter, content-visibility skipping.
+   OuterTiers — extras.css (redesigned)
    ============================================================ */
 
 /* ---------- LOGO ---------- */
@@ -16,14 +12,14 @@
 }
 .ot-logo-glow {
   filter:
-    drop-shadow(0 0 10px rgba(91, 164, 245, 0.45))
-    drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+    drop-shadow(0 0 12px rgba(91, 164, 245, 0.5))
+    drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5));
   animation: ot-logo-float 6s ease-in-out infinite;
   will-change: transform;
 }
 @keyframes ot-logo-float {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
+  50%      { transform: translateY(-6px); }
 }
 
 /* Hero title with inline logo */
@@ -31,7 +27,7 @@
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 20px;
   flex-wrap: nowrap;
 }
 .hero-title-logo {
@@ -49,21 +45,21 @@
   letter-spacing: inherit;
 }
 
-/* Footer brand: logo + wordmark, wordmark stays joined */
+/* Footer brand */
 .footer-logo-wrap {
   display: flex !important;
   align-items: center !important;
   gap: 10px;
 }
 .footer-logo-img {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
 }
 .footer-brand-text {
   display: inline-flex;
   align-items: center;
-  gap: 0;            /* OUTER and TIERS stay tight together */
+  gap: 0;
   letter-spacing: 0;
   white-space: nowrap;
 }
@@ -72,16 +68,16 @@
 .hero-tagline-box {
   position: relative;
   display: inline-block;
-  padding: 16px 30px;
-  margin: 8px auto 14px;
-  border-radius: 16px;
+  padding: 18px 34px;
+  margin: 8px auto 18px;
+  border-radius: 18px;
   isolation: isolate;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(135deg, rgba(15, 22, 38, 0.78), rgba(8, 12, 22, 0.86));
+  background: linear-gradient(135deg, rgba(12, 18, 38, 0.82), rgba(6, 9, 20, 0.90));
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 12px 36px -16px rgba(0, 0, 0, 0.6);
+    0 16px 40px -16px rgba(0, 0, 0, 0.7);
 }
 .hero-tagline-box-text {
   position: relative;
@@ -91,7 +87,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 0 22px rgba(255, 255, 255, 0.15);
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.12);
   letter-spacing: 0.5px;
 }
 .hero-tagline-box-glow {
@@ -102,74 +98,129 @@
   background:
     conic-gradient(
       from 0deg,
-      rgba(91, 164, 245, 0.55),
-      rgba(167, 90, 245, 0.55),
-      rgba(240, 192, 64, 0.45),
-      rgba(91, 164, 245, 0.55)
+      rgba(91, 164, 245, 0.6),
+      rgba(167, 90, 245, 0.6),
+      rgba(240, 192, 64, 0.5),
+      rgba(91, 164, 245, 0.6)
     );
-  filter: blur(14px);
-  opacity: 0.5;
+  filter: blur(16px);
+  opacity: 0.55;
   animation: ot-box-rotate 18s linear infinite;
   will-change: transform;
 }
 .hero-tagline-box-blue {
   box-shadow:
-    0 0 0 1px rgba(91, 164, 245, 0.25) inset,
-    0 0 40px -10px rgba(91, 164, 245, 0.45),
-    0 12px 36px -16px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(91, 164, 245, 0.28) inset,
+    0 0 48px -10px rgba(91, 164, 245, 0.50),
+    0 16px 40px -16px rgba(0, 0, 0, 0.7);
 }
 .hero-tagline-box-blue .hero-tagline-box-glow {
   background:
     conic-gradient(
       from 0deg,
-      rgba(91, 164, 245, 0.65),
-      rgba(56, 220, 255, 0.55),
-      rgba(91, 164, 245, 0.65),
-      rgba(56, 220, 255, 0.55),
-      rgba(91, 164, 245, 0.65)
+      rgba(91, 164, 245, 0.70),
+      rgba(56, 220, 255, 0.60),
+      rgba(91, 164, 245, 0.70),
+      rgba(56, 220, 255, 0.60),
+      rgba(91, 164, 245, 0.70)
     );
 }
 .hero-tagline-box-purple {
   box-shadow:
-    0 0 0 1px rgba(167, 90, 245, 0.25) inset,
-    0 0 40px -10px rgba(167, 90, 245, 0.45),
-    0 12px 36px -16px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(167, 90, 245, 0.28) inset,
+    0 0 48px -10px rgba(167, 90, 245, 0.50),
+    0 16px 40px -16px rgba(0, 0, 0, 0.7);
 }
 .hero-tagline-box-purple .hero-tagline-box-glow {
   background:
     conic-gradient(
       from 0deg,
-      rgba(167, 90, 245, 0.65),
-      rgba(91, 164, 245, 0.55),
-      rgba(240, 192, 64, 0.45),
-      rgba(167, 90, 245, 0.65)
+      rgba(167, 90, 245, 0.70),
+      rgba(91, 164, 245, 0.60),
+      rgba(240, 192, 64, 0.50),
+      rgba(167, 90, 245, 0.70)
     );
 }
-@keyframes ot-box-rotate {
-  to { transform: rotate(360deg); }
+@keyframes ot-box-rotate { to { transform: rotate(360deg); } }
+
+/* ---------- ANIMATED BACKGROUND ---------- */
+.page-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(62% 52% at 16% 20%, rgba(91, 164, 245, 0.14), transparent 62%),
+    radial-gradient(58% 48% at 84% 16%, rgba(167, 90, 245, 0.14), transparent 62%),
+    radial-gradient(72% 58% at 50% 94%, rgba(56, 220, 255, 0.09), transparent 62%);
+  animation: ot-bg-drift 30s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+}
+@keyframes ot-bg-drift {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(2%, -1%, 0); }
 }
 
-/* ---------- STAT STACK (PC) ---------- */
-/* Stack all 4 stat cards top-to-bottom, full width like the wide one */
+/* Aurora ribbon */
+body::before {
+  content: '';
+  position: fixed;
+  top: -22%;
+  left: -12%;
+  width: 130%;
+  height: 72%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(closest-side, rgba(59, 111, 240, 0.20), transparent 72%),
+    radial-gradient(closest-side, rgba(140, 70, 240, 0.15), transparent 72%);
+  background-size: 60% 100%, 60% 100%;
+  background-position: 10% 30%, 80% 60%;
+  background-repeat: no-repeat;
+  filter: blur(32px);
+  animation: ot-aurora 28s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+  opacity: 0.75;
+}
+@keyframes ot-aurora {
+  0%   { transform: translate3d(-3%, 0, 0); }
+  100% { transform: translate3d(4%, 1%, 0); }
+}
+
+/* ---------- PERFORMANCE: skip off-screen sections ---------- */
+.home-top100,
+.feeds-row-section,
+.features-section,
+.discord-section,
+.about-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+
+/* ---------- STAT CARDS ---------- */
 .hero-stats-row {
-  grid-template-columns: 1fr !important;
-  grid-template-rows: auto !important;
-  max-width: 480px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
   gap: 12px !important;
+  max-width: 800px !important;
+  margin: 0 auto 36px !important;
 }
-.hero-stats-row .stat-card,
-.hero-stats-row .stat-card.stat-card-wide {
-  grid-column: 1 / -1 !important;
-  width: 100%;
+.hero-stats-row .stat-card {
+  flex: 0 1 auto !important;
+  min-width: 150px !important;
 }
-/* Drop expensive backdrop-filter on stat cards (4 layers stacked = jank). */
 .stat-card {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: rgba(255, 255, 255, 0.035);
 }
+.feature-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
-/* ---------- CENTER FEATURES HEADER (PC) ---------- */
+/* ---------- CENTRE FEATURES HEADER ---------- */
 .features-section .section-header {
   text-align: center;
   display: flex;
@@ -183,74 +234,104 @@
   text-align: center;
 }
 
-/* ---------- ANIMATED BACKGROUND (perf-tuned) ---------- */
-.page-bg::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+/* ---------- TOP 3 ANIMATED GOLD BORDER ---------- */
+.top-card-rank-1 {
+  position: relative;
+}
+.top-card-rank-1::after {
+  content: ''; position: absolute; inset: -1px; border-radius: 15px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    rgba(241,196,15,0) 0%,
+    rgba(255,228,80,0.90) 20%,
+    rgba(241,196,15,0) 40%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  animation: rotateBorder 4s linear infinite;
+  z-index: 0; pointer-events: none;
+}
+@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes rotateBorder { to { --angle: 360deg; } }
+
+/* ---------- GOLDEN BUST (overall/rankings) ---------- */
+.top-card-bust-wrap-body {
+  position: relative !important;
+  width: 110px !important; height: 110px !important;
+  border-radius: 50% !important;
   background:
-    radial-gradient(60% 50% at 18% 22%, rgba(91, 164, 245, 0.16), transparent 60%),
-    radial-gradient(55% 45% at 82% 18%, rgba(167, 90, 245, 0.16), transparent 60%),
-    radial-gradient(70% 55% at 50% 92%, rgba(56, 220, 255, 0.10), transparent 60%);
-  animation: ot-bg-drift 28s ease-in-out infinite alternate;
-  will-change: transform;
-  transform: translateZ(0);
+    radial-gradient(ellipse at 50% 35%, rgba(255, 224, 130, 0.55) 0%, rgba(255, 180, 50, 0.30) 35%, rgba(120, 70, 10, 0.20) 65%, rgba(20, 12, 0, 0.85) 100%) !important;
+  border: 2px solid rgba(255, 210, 110, 0.85) !important;
+  overflow: visible !important;
+  display: flex !important; align-items: flex-end !important; justify-content: center !important;
+  padding: 0 !important;
+  box-shadow:
+    0 0 18px rgba(255, 195, 70, 0.55), 0 0 36px rgba(255, 160, 40, 0.30),
+    inset 0 0 22px rgba(255, 220, 130, 0.22), inset 0 0 2px rgba(255, 255, 255, 0.45),
+    0 10px 28px rgba(0, 0, 0, 0.55);
+  isolation: isolate;
+  animation: bustGoldPulse 3.2s ease-in-out infinite;
 }
-@keyframes ot-bg-drift {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(2%, -1%, 0); }
-}
-
-/* Aurora ribbon — single gradient, lower blur, GPU-only animation */
-body::before {
-  content: '';
-  position: fixed;
-  top: -20%;
-  left: -10%;
-  width: 130%;
-  height: 70%;
+.top-card-bust-wrap-body::before {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%; padding: 2px;
+  background: conic-gradient(from 0deg, #ffe486 0deg, #f7b733 60deg, #fff4c2 120deg, #d98f1a 180deg, #ffe486 240deg, #f7b733 300deg, #ffe486 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: bustGoldRotate 6s linear infinite; z-index: -1;
+  filter: blur(0.4px) drop-shadow(0 0 8px rgba(255, 190, 70, 0.7));
   pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(closest-side, rgba(91, 164, 245, 0.18), transparent 70%),
-    radial-gradient(closest-side, rgba(167, 90, 245, 0.14), transparent 70%);
-  background-size: 60% 100%, 60% 100%;
-  background-position: 10% 30%, 80% 60%;
-  background-repeat: no-repeat;
-  filter: blur(30px);
-  animation: ot-aurora 26s ease-in-out infinite alternate;
-  will-change: transform;
-  transform: translateZ(0);
-  opacity: 0.7;
 }
-@keyframes ot-aurora {
-  0%   { transform: translate3d(-3%, 0, 0); }
-  100% { transform: translate3d(4%, 1%, 0); }
+.top-card-bust-wrap-body::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  mix-blend-mode: overlay; opacity: 0.9;
+  transform: translateX(-120%);
+  animation: bustShimmer 4.5s ease-in-out infinite; pointer-events: none;
 }
-
-/* ---------- PERFORMANCE: skip rendering of off-screen sections ---------- */
-.home-top100,
-.feeds-row-section,
-.features-section,
-.discord-section,
-.about-section {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
+.top-card-bust-body {
+  width: 118% !important; height: 118% !important;
+  object-fit: contain !important; object-position: center bottom !important;
+  margin-top: auto !important; margin-bottom: -2px !important;
+  clip-path: circle(43% at 50% 47%);
+  image-rendering: pixelated; display: block !important;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 215, 110, 0.85))
+    drop-shadow(0 0 14px rgba(255, 165, 40, 0.55))
+    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
-
-/* Avoid heavy backdrop blurs on stacked cards */
-.feature-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-
-/* ---------- REDUCED MOTION ---------- */
-@media (prefers-reduced-motion: reduce) {
-  .ot-logo-glow,
-  .hero-tagline-box-glow,
-  .page-bg::after,
-  body::before {
-    animation: none !important;
+.top-card:hover .top-card-bust-wrap-body {
+  box-shadow:
+    0 0 28px rgba(255, 215, 90, 0.85), 0 0 56px rgba(255, 170, 40, 0.55),
+    inset 0 0 28px rgba(255, 230, 150, 0.35), inset 0 0 3px rgba(255, 255, 255, 0.7),
+    0 14px 36px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 235, 160, 1) !important;
+}
+.top-card:hover .top-card-bust-body {
+  filter:
+    drop-shadow(0 0 10px rgba(255, 235, 150, 1))
+    drop-shadow(0 0 22px rgba(255, 180, 50, 0.8))
+    drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
+}
+@keyframes bustGoldRotate { to { transform: rotate(360deg); } }
+@keyframes bustGoldPulse {
+  0%, 100% {
+    box-shadow: 0 0 18px rgba(255, 195, 70, 0.55), 0 0 36px rgba(255, 160, 40, 0.30),
+      inset 0 0 22px rgba(255, 220, 130, 0.22), inset 0 0 2px rgba(255, 255, 255, 0.45), 0 10px 28px rgba(0, 0, 0, 0.55);
   }
+  50% {
+    box-shadow: 0 0 26px rgba(255, 220, 110, 0.85), 0 0 52px rgba(255, 180, 60, 0.5),
+      inset 0 0 28px rgba(255, 230, 150, 0.35), inset 0 0 3px rgba(255, 255, 255, 0.6), 0 12px 34px rgba(0, 0, 0, 0.6);
+  }
+}
+@keyframes bustShimmer {
+  0%   { transform: translateX(-120%); opacity: 0; }
+  20%  { opacity: 0.9; }
+  60%  { transform: translateX(120%); opacity: 0.9; }
+  61%, 100% { transform: translateX(120%); opacity: 0; }
 }
 
 /* ---------- SHIELD HELPERS ---------- */
@@ -262,303 +343,45 @@ body::before {
 .shield-no-select .site-footer,
 .shield-no-select h1,
 .shield-no-select h2,
-.shield-no-select h3 {
-  -webkit-user-select: none;
-  user-select: none;
-}
+.shield-no-select h3 { -webkit-user-select: none; user-select: none; }
 .shield-no-select table,
 .shield-no-select .modal-body,
 .shield-no-select code,
 .shield-no-select pre,
 .shield-no-select input,
-.shield-no-select textarea {
-  -webkit-user-select: text;
-  user-select: text;
-}
+.shield-no-select textarea { -webkit-user-select: text; user-select: text; }
 img { -webkit-user-drag: none; user-drag: none; }
-
-/* ---------- OVERALL RANKING BUST (3D angled skin, golden glow + animations) ---------- */
-.top-card-bust-wrap-body {
-  position: relative !important;
-  width: 120px !important;
-  height: 120px !important;
-  border-radius: 50% !important;
-  background:
-    radial-gradient(ellipse at 50% 35%, rgba(255, 224, 130, 0.55) 0%, rgba(255, 180, 50, 0.30) 35%, rgba(120, 70, 10, 0.20) 65%, rgba(20, 12, 0, 0.85) 100%) !important;
-  border: 2px solid rgba(255, 210, 110, 0.85) !important;
-  overflow: visible !important;
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  box-shadow:
-    0 0 18px rgba(255, 195, 70, 0.55),
-    0 0 36px rgba(255, 160, 40, 0.30),
-    inset 0 0 22px rgba(255, 220, 130, 0.22),
-    inset 0 0 2px rgba(255, 255, 255, 0.45),
-    0 10px 28px rgba(0, 0, 0, 0.55);
-  isolation: isolate;
-  animation: bustGoldPulse 3.2s ease-in-out infinite;
-}
-
-/* Rotating conic-gradient golden halo behind the skin */
-.top-card-bust-wrap-body::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  padding: 2px;
-  background: conic-gradient(
-    from 0deg,
-    #ffe486 0deg,
-    #f7b733 60deg,
-    #fff4c2 120deg,
-    #d98f1a 180deg,
-    #ffe486 240deg,
-    #f7b733 300deg,
-    #ffe486 360deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: bustGoldRotate 6s linear infinite;
-  z-index: -1;
-  filter: blur(0.4px) drop-shadow(0 0 8px rgba(255, 190, 70, 0.7));
-  pointer-events: none;
-}
-
-/* Shimmer streak that sweeps across the card */
-.top-card-bust-wrap-body::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(
-    115deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.55) 50%,
-    transparent 70%
-  );
-  mix-blend-mode: overlay;
-  opacity: 0.9;
-  transform: translateX(-120%);
-  animation: bustShimmer 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.top-card-bust-body {
-  width: 118% !important;
-  height: 118% !important;
-  object-fit: contain !important;
-  object-position: center bottom !important;
-  margin-top: auto !important;
-  margin-bottom: -2px !important;
-  clip-path: circle(43% at 50% 47%);
-  image-rendering: pixelated;
-  display: block !important;
-  filter:
-    drop-shadow(0 0 6px rgba(255, 215, 110, 0.85))
-    drop-shadow(0 0 14px rgba(255, 165, 40, 0.55))
-    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
-  transition: transform 0.35s ease, filter 0.35s ease;
-}
-
-/* Hover: lift + tilt + brighter glow */
-.top-card:hover .top-card-bust-wrap-body {
-  box-shadow:
-    0 0 28px rgba(255, 215, 90, 0.85),
-    0 0 56px rgba(255, 170, 40, 0.55),
-    inset 0 0 28px rgba(255, 230, 150, 0.35),
-    inset 0 0 3px rgba(255, 255, 255, 0.7),
-    0 14px 36px rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 235, 160, 1) !important;
-}
-.top-card:hover .top-card-bust-body {
-  filter:
-    drop-shadow(0 0 10px rgba(255, 235, 150, 1))
-    drop-shadow(0 0 22px rgba(255, 180, 50, 0.8))
-    drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
-}
-
-@keyframes bustGoldRotate {
-  to { transform: rotate(360deg); }
-}
-@keyframes bustGoldPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 18px rgba(255, 195, 70, 0.55),
-      0 0 36px rgba(255, 160, 40, 0.30),
-      inset 0 0 22px rgba(255, 220, 130, 0.22),
-      inset 0 0 2px rgba(255, 255, 255, 0.45),
-      0 10px 28px rgba(0, 0, 0, 0.55);
-  }
-  50% {
-    box-shadow:
-      0 0 26px rgba(255, 220, 110, 0.85),
-      0 0 52px rgba(255, 180, 60, 0.5),
-      inset 0 0 28px rgba(255, 230, 150, 0.35),
-      inset 0 0 3px rgba(255, 255, 255, 0.6),
-      0 12px 34px rgba(0, 0, 0, 0.6);
-  }
-}
-@keyframes bustShimmer {
-  0%   { transform: translateX(-120%); opacity: 0; }
-  20%  { opacity: 0.9; }
-  60%  { transform: translateX(120%); opacity: 0.9; }
-  61%, 100% { transform: translateX(120%); opacity: 0; }
-}
-
-/* Floating golden sparkle particles around the skin */
-.top-card-bust-wrap-body .gold-spark {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff4c2 0%, #ffd66a 55%, transparent 70%);
-  pointer-events: none;
-  filter: drop-shadow(0 0 4px rgba(255, 215, 110, 0.95));
-}
-
-@media (max-width: 900px) {
-  .top-card-bust-wrap-body {
-    width: 88px !important;
-    height: 88px !important;
-    border-radius: 50% !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .top-card-bust-wrap-body,
-  .top-card-bust-wrap-body::before,
-  .top-card-bust-wrap-body::after,
-  .top-card-bust-body {
-    animation: none !important;
-  }
-}
 
 /* ---------- MOBILE TWEAKS ---------- */
 @media (max-width: 720px) {
-  .hero-title-with-logo { gap: 10px; }
-  .hero-title-logo { width: 56px; height: 56px; }
-  .hero-tagline-box { padding: 14px 22px; }
+  .hero-title-with-logo { gap: 12px; }
+  .hero-title-logo { width: 60px; height: 60px; }
+  .hero-tagline-box { padding: 14px 24px; }
 }
 
-/* ============================================================
-   MOBILE PERFORMANCE OVERRIDES — iPhone 8 and similar
-   (max-width: 768px)
-
-   Goal: maintain 100% visual parity on desktop while eliminating
-   the top GPU/paint bottlenecks on A11-class mobile hardware.
-
-   Strategy:
-     • Remove large-element filter:blur() — biggest GPU killer
-     • Replace backdrop-filter:blur(18px) with thinner blur
-     • Stop background-position animations (force paint on Safari)
-     • Pause non-critical CSS animations
-     • Keep all compositor-only animations (transform/opacity)
-   ============================================================ */
 @media (max-width: 768px) {
-
-  /* ── #1 Killer: aurora ribbon w/ filter:blur(30px) on a full-screen
-        element + 26s animation. Removing this alone halves paint time. ── */
   body::before { display: none !important; }
-
-  /* ── page-bg: background-position animation forces full repaint every
-        frame in Safari. Switch to static (visually imperceptible). ── */
-  .page-bg {
-    animation: none !important;
-    background-position: 0% 0%, 100% 100%, 0% 60%, 70% 10% !important;
-  }
-
-  /* ── page-bg::after drift: also background-position based, remove ── */
+  .page-bg { animation: none !important; }
   .page-bg::after { animation: none !important; }
-
-  /* ── Tagline glow: rotating conic-gradient w/ filter:blur(14px).
-        Two of these on Home = 2× GPU layers spinning. Hide them;
-        the border + box-shadow on the parent still looks great. ── */
   .hero-tagline-box-glow { display: none !important; }
-
-  /* ── Logo float: compositor-only (translateY), keep but slow down ── */
   .ot-logo-glow { animation-duration: 12s !important; }
+  .gg-top-center { filter: none !important; animation: none !important; opacity: 0.38 !important; }
+  .gg-top-left   { filter: none !important; animation: none !important; opacity: 0.28 !important; }
+  .gg-top-right  { filter: none !important; animation: none !important; opacity: 0.25 !important; }
+  .navbar { backdrop-filter: blur(6px) saturate(1.1) !important; -webkit-backdrop-filter: blur(6px) saturate(1.1) !important; }
+  .dropdown-menu { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+  .top-card-bust-wrap-body { animation: none !important; }
+  .top-card-bust-wrap-body::before { animation: none !important; opacity: 0.7 !important; }
+  .top-card-bust-wrap-body::after { animation: none !important; display: none !important; }
+}
 
-  /* ── GlobalGlow blur layers: gg-top-* are 70–130 vw blurred circles.
-        Remove filter:blur entirely; the gradient colours stay, just
-        without the blur radius. Visually almost identical at phone
-        screen sizes (blur was added for desktop viewing distance). ── */
-  .gg-top-center {
-    filter: none !important;
-    animation: none !important;
-    opacity: 0.38 !important;
-  }
-  .gg-top-left {
-    filter: none !important;
-    animation: none !important;
-    opacity: 0.28 !important;
-  }
-  .gg-top-right {
-    filter: none !important;
-    animation: none !important;
-    opacity: 0.25 !important;
-  }
+@media (max-width: 900px) {
+  .top-card-bust-wrap-body { width: 90px !important; height: 90px !important; }
+}
 
-  /* ── Navbar glassmorphism: blur(18px) on the sticky bar composited
-        on every scroll frame. Drop to blur(6px) — still frosted glass,
-        much cheaper. ── */
-  .navbar {
-    backdrop-filter: blur(6px) saturate(1.1) !important;
-    -webkit-backdrop-filter: blur(6px) saturate(1.1) !important;
-  }
-
-  /* ── Dropdown: same glassmorphism reduction ── */
-  .dropdown-menu {
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-  }
-
-  /* ── Gold bust animations: 3 CSS animations composited simultaneously
-        (conic rotate + shimmer sweep + pulse). Keep the golden look but
-        pause non-essential animations. The static box-shadow + border
-        still reads as premium. ── */
-  .top-card-bust-wrap-body {
-    animation: none !important;
-    box-shadow:
-      0 0 18px rgba(255, 195, 70, 0.55),
-      0 0 36px rgba(255, 160, 40, 0.30),
-      inset 0 0 22px rgba(255, 220, 130, 0.22),
-      inset 0 0 2px rgba(255, 255, 255, 0.45),
-      0 10px 28px rgba(0, 0, 0, 0.55) !important;
-  }
-  .top-card-bust-wrap-body::before {
-    animation: none !important;
-    opacity: 0.7 !important;
-  }
-  .top-card-bust-wrap-body::after {
-    animation: none !important;
-    display: none !important;
-  }
-
-  /* ── API docs glows: blur(50–60px) on large positioned elements ── */
-  .apidocs-hero-glow  { filter: blur(20px) !important; animation: none !important; }
-  .apidocs-hero-glow2 { filter: blur(20px) !important; animation: none !important; }
-
-  /* ── Profile + modal backdrop blurs ── */
-  .profile-header-card {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(255, 255, 255, 0.045) !important;
-  }
-  .modal-overlay {
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
-  }
-
-  /* ── Hero glow orbs: large blurred absolute elements under the hero ── */
-  .hero-glow-left,
-  .hero-glow-right,
-  .hero-glow-center {
-    filter: none !important;
-    opacity: 0.5 !important;
-    animation: none !important;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .ot-logo-glow, .hero-tagline-box-glow, .page-bg::after, body::before,
+  .top-card-bust-wrap-body, .top-card-bust-wrap-body::before,
+  .top-card-bust-wrap-body::after { animation: none !important; }
+  .top-card-rank-1::after { animation: none !important; }
 }
