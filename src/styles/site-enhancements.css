@@ -1,52 +1,22 @@
 /* ===================================================================
    GLOBAL SITE ENHANCEMENTS — site-enhancements.css
-   Layered on top of index.css + extras.css — no overrides of core vars
    =================================================================== */
 
-/* ── Grid background — more visible ── */
+/* ── Grid background — subtle but visible ── */
 .page-bg-grid {
   background-image:
-    linear-gradient(rgba(91,164,245,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91,164,245,0.035) 1px, transparent 1px) !important;
-  background-size: 46px 46px !important;
-  opacity: 0.9 !important;
+    linear-gradient(rgba(91,164,245,0.030) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,164,245,0.030) 1px, transparent 1px) !important;
+  background-size: 56px 56px !important;
 }
 
-/* ── Navbar logo — animated gradient ── */
-.logo-outer {
-  background: linear-gradient(135deg, #5ba4f5 0%, #a0c8ff 50%, #5ba4f5 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: logoShimmer 3s linear infinite;
-}
+/* ── Logo shimmer animation ── */
 @keyframes logoShimmer {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
-}
-.logo-tiers { letter-spacing: -0.01em; }
-
-/* ── Navbar search — better focus ── */
-.navbar-search:focus-within {
-  border-color: rgba(91,164,245,0.55) !important;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.15), 0 0 16px rgba(37,99,235,0.10) !important;
-}
-
-/* ── Hero title — animated gradient ── */
-.hero-title {
-  background: linear-gradient(130deg, #fff 10%, #c0d8ff 45%, #5ba4f5 70%, #c0d8ff 90%, #fff 100%) !important;
-  background-size: 250% auto !important;
-  -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  text-shadow: none !important;
-  animation: heroGradient 6s linear infinite !important;
-}
-@keyframes heroGradient {
-  0%   { background-position: 0% center; }
+  0%   { background-position: -200% center; }
   100% { background-position: 250% center; }
 }
 
-/* ── Hero stat cards — glassmorphism + glow hover ── */
+/* ── Hero stat cards ── */
 .hero-stat-card {
   background: rgba(255,255,255,0.035) !important;
   border-color: rgba(255,255,255,0.10) !important;
@@ -65,7 +35,7 @@
   transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
 }
 .game-mode-chip:hover {
-  transform: translateY(-3px) scale(1.07) !important;
+  transform: translateY(-3px) scale(1.06) !important;
 }
 
 /* ── Section headings ── */
@@ -75,41 +45,16 @@
   background-clip: text;
 }
 
-/* ── Top 3 cards (rankings / home) — animated border on #1 ── */
+/* ── Top 3 cards ── */
 .top-card {
   transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s !important;
 }
 .top-card:hover {
-  box-shadow: 0 14px 48px rgba(0,0,0,0.5), 0 0 24px rgba(37,99,235,0.12) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 28px rgba(37,99,235,0.14) !important;
 }
-.top-card-rank-1 {
-  position: relative;
-  box-shadow: 0 0 0 1px rgba(241,196,15,0.25), 0 8px 32px rgba(0,0,0,0.4) !important;
-}
-.top-card-rank-1::after {
-  content: ''; position: absolute; inset: -1px; border-radius: 13px;
-  background: conic-gradient(
-    from var(--angle, 0deg),
-    rgba(241,196,15,0) 0%,
-    rgba(255,228,80,0.85) 20%,
-    rgba(241,196,15,0) 40%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  padding: 1px;
-  animation: rotateBorder 4s linear infinite;
-  z-index: 0;
-  pointer-events: none;
-}
-@property --angle {
-  syntax: '<angle>'; initial-value: 0deg; inherits: false;
-}
-@keyframes rotateBorder { to { --angle: 360deg; } }
 
-/* ── Rankings page tier columns ── */
+/* ── Rankings tier columns ── */
 .tier-column {
   transition: border-color 0.22s, box-shadow 0.22s !important;
 }
@@ -118,28 +63,24 @@
   box-shadow: 0 6px 32px rgba(0,0,0,0.35), 0 0 16px rgba(37,99,235,0.08) !important;
 }
 
-/* ── Tier column header — glow top bar ── */
-.tier-col-header {
-  position: relative; overflow: hidden;
-}
+/* ── Tier column header glow ── */
+.tier-col-header { position: relative; overflow: hidden; }
 .tier-col-header::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent, currentColor, transparent);
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
-/* ── Cat tier circles — stronger glow, scale on hover ── */
+/* ── Cat tier circles ── */
 .cat-tier-circle {
   transition: box-shadow 0.22s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
 }
-.cat-tier-badge:hover .cat-tier-circle {
-  transform: scale(1.15) !important;
-}
+.cat-tier-badge:hover .cat-tier-circle { transform: scale(1.15) !important; }
 .cat-tier-text { font-weight: 900 !important; }
 
-/* ── Player rows in rankings — better hover ── */
+/* ── Player rows ── */
 .tier-player-row {
-  transition: background 0.18s !important;
+  transition: background 0.16s !important;
   position: relative;
 }
 .tier-player-row::before {
@@ -149,21 +90,17 @@
 .tier-player-row:hover { background: rgba(91,164,245,0.055) !important; }
 .tier-player-row:hover::before { opacity: 0.8; }
 
-/* ── Profile page header card — stronger border ── */
+/* ── Profile header card ── */
 .profile-header-card {
   background: rgba(255,255,255,0.03) !important;
   border-color: rgba(255,255,255,0.10) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 .profile-header-card--rank-gold   { border-color: rgba(241,196,15,0.25) !important; box-shadow: 0 0 40px rgba(241,196,15,0.08) !important; }
 .profile-header-card--rank-silver { border-color: rgba(164,178,199,0.25) !important; }
 .profile-header-card--rank-bronze { border-color: rgba(223,135,70,0.25) !important; }
 
-/* ── Points badge ── */
-.profile-points-badge {
-  animation: ptsPulse 3.5s ease-in-out infinite;
-}
+/* ── Points badge pulse ── */
+.profile-points-badge { animation: ptsPulse 3.5s ease-in-out infinite; }
 @keyframes ptsPulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(91,164,245,0); }
   50%     { box-shadow: 0 0 10px 2px rgba(91,164,245,0.20); }
@@ -181,9 +118,9 @@
   transition: transform 0.24s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s, box-shadow 0.25s !important;
 }
 .feature-card:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 20px 56px rgba(0,0,0,0.45), 0 0 28px rgba(37,99,235,0.14) !important;
-  border-color: rgba(91,164,245,0.22) !important;
+  transform: translateY(-6px) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,0.50), 0 0 32px rgba(37,99,235,0.16) !important;
+  border-color: rgba(91,164,245,0.24) !important;
 }
 
 /* ── Game mode cards ── */
@@ -195,33 +132,22 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
 }
 
-/* ── Region badges — bolder ── */
+/* ── Region badges ── */
 .region-badge {
   font-weight: 800 !important; letter-spacing: 0.08em !important;
 }
 
-/* ── Tier badge (simple TierBadge) — bolder ── */
+/* ── Tier badge ── */
 .tier-badge {
-  font-weight: 800 !important; letter-spacing: 0.04em !important;
+  font-weight: 800 !important; letter-spacing: 0.05em !important;
   transition: box-shadow 0.22s !important;
 }
 
-/* ── Discord section ── */
+/* ── Discord card ── */
 .discord-card {
   transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s !important;
 }
-.discord-card:hover {
-  transform: translateY(-3px) !important;
-}
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-::-webkit-scrollbar-thumb {
-  background: rgba(91,164,245,0.25); border-radius: 3px;
-  transition: background 0.2s;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(91,164,245,0.50); }
+.discord-card:hover { transform: translateY(-4px) !important; }
 
 /* ── Ripple cards ── */
 .ripple-card {
@@ -230,13 +156,20 @@
 .ripple-card:hover {
   transform: translateY(-3px) !important;
   border-color: rgba(255,255,255,0.16) !important;
-  box-shadow: 0 10px 36px rgba(0,0,0,0.40) !important;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.42) !important;
 }
 
-/* ── Overall glow pulses ── */
-.rankings-page-header-glow {
-  animation-duration: 5s !important;
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+::-webkit-scrollbar-thumb {
+  background: rgba(91,164,245,0.22); border-radius: 3px;
+  transition: background 0.2s;
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(91,164,245,0.45); }
+
+/* ── Global glow animations ── */
+.rankings-page-header-glow { animation-duration: 5s !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .logo-outer, .hero-title, .top-card-rank-1::after,
