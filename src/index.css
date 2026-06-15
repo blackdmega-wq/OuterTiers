@@ -2197,7 +2197,7 @@ img { display: block; }
   transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 .lb-pod:hover { transform: translateY(-5px); }
 .lb-pod:active { transform: translateY(-2px); }
@@ -2250,9 +2250,9 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 110px; height: 170px; margin-top: 20px; }
-.lb-pod--rank2 .lb-pod-skin-wrap { width: 88px; height: 140px; }
-.lb-pod--rank3 .lb-pod-skin-wrap { width: 82px; height: 132px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 140px; height: 220px; margin-top: 20px; }
+.lb-pod--rank2 .lb-pod-skin-wrap { width: 110px; height: 175px; }
+.lb-pod--rank3 .lb-pod-skin-wrap { width: 100px; height: 165px; }
 .lb-pod-skin {
   width: 100%;
   height: 100%;
@@ -2300,7 +2300,7 @@ img { display: block; }
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 0;
+  z-index: 2;
 }
 .lb-confetti-wrap .lb-rocket {
   position: absolute;
@@ -2526,9 +2526,9 @@ img { display: block; }
 /* ── Mobile responsive ── */
 @media (max-width: 580px) {
   .lb-podium { padding: 24px 0 0; }
-  .lb-pod--rank1 .lb-pod-skin-wrap { width: 64px; height: 85px; }
-  .lb-pod--rank2 .lb-pod-skin-wrap { width: 54px; height: 72px; }
-  .lb-pod--rank3 .lb-pod-skin-wrap { width: 50px; height: 66px; }
+  .lb-pod--rank1 .lb-pod-skin-wrap { width: 80px; height: 110px; }
+  .lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 90px; }
+  .lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 84px; }
   .lb-trophy--gold   { width: 30px; height: 30px; }
   .lb-trophy--silver { width: 24px; height: 24px; }
   .lb-trophy--bronze { width: 22px; height: 22px; }
