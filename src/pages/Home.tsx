@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
@@ -132,6 +132,7 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
   const { players, loading: playersLoading } = usePlayers();
   const top100 = [...players]
     .filter(p => p.points > 0)
@@ -290,19 +291,23 @@ export default function Home() {
                   const rank = i + 1;
                   const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
                   return (
-                    <tr key={player.id} className={`player-row ${rankClass ? 'player-row-top' : ''}`}>
+                    <tr
+                      key={player.id}
+                      className={`player-row ${rankClass ? 'player-row-top' : ''}`}
+                      onClick={() => navigate(`/player/${player.username}`)}
+                    >
                       <td className="col-rank">
                         <span className={`rank-number ${rankClass}`}>{rank}.</span>
                       </td>
                       <td className="col-player">
-                        <Link to={`/player/${player.username}`} className="player-cell">
+                        <div className="player-cell">
                           <div className={`player-avatar-wrapper ${rankClass}`}>
                             <PlayerAvatar username={player.username} size={36} />
                           </div>
                           <div className="player-info">
                             <span className="player-name">{player.username}</span>
                           </div>
-                        </Link>
+                        </div>
                       </td>
                       <td className="col-combat-title">
                         <span className="combat-title-badge">{getTitle(player.points)}</span>

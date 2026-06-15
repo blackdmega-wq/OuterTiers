@@ -219,19 +219,38 @@
 }
 
 /* ── Tier Cards Grid ──
-   BUG FIX #1: aspect-ratio: 1 forces every card to be a perfect square.
-   BUG FIX #2: ppv2-card-orb centred at 50% 50% — no dark-top/light-bottom split.
+   All tier cards in ONE horizontal scrollable row — no wrapping, no stacking.
+   Section title has no underline bar.
 */
-.ppv2-tiers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
-  gap: 14px;
-  margin-bottom: 44px;
+.ppv2-section-title {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
+.ppv2-section-head {
+  border-bottom: none !important;
+}
+.ppv2-tiers-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin-bottom: 44px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.10) transparent;
+}
+.ppv2-tiers-grid::-webkit-scrollbar { height: 3px; }
+.ppv2-tiers-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 3px; }
 
 .ppv2-tier-card {
   position: relative; overflow: hidden;
-  aspect-ratio: 1;                    /* ← SQUARE FIX */
+  flex: 0 0 148px;
+  width: 148px;
+  min-height: 148px;
   display: flex; flex-direction: column; align-items: center;
   justify-content: space-evenly;
   padding: 14px 10px;

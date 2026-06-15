@@ -86,14 +86,27 @@ function OverallTable({ players }: { players: Player[] }) {
             </span>
 
             <span className="ot-rl-player">
-              <span className={`ot-rl-avatar-ring ${ringCls}`}>
-                <span className="ot-rl-avatar-bg" />
-                <img
-                  src={`https://mc-heads.net/body/${player.username}`}
-                  alt={player.username}
-                  className="ot-rl-avatar-img"
-                  loading="lazy"
-                />
+              <span className={`ot-rl-skin-outer${rank <= 3 ? ` ot-rl-skin-outer--rank${rank}` : ''}`}>
+                {rank <= 3 && <span className="ot-rl-aura" />}
+                <span className={`ot-rl-avatar-ring ${ringCls}`}>
+                  <span className="ot-rl-avatar-bg" />
+                  <img
+                    src={`https://mc-heads.net/body/${player.username}`}
+                    alt={player.username}
+                    className="ot-rl-avatar-img"
+                    loading="lazy"
+                  />
+                </span>
+                {rank <= 3 && (
+                  <>
+                    <span className="ot-rl-bolt ot-rl-bolt--1" />
+                    <span className="ot-rl-bolt ot-rl-bolt--2" />
+                    <span className="ot-rl-bolt ot-rl-bolt--3" />
+                    <span className="ot-rl-bolt ot-rl-bolt--4" />
+                    <span className="ot-rl-bolt ot-rl-bolt--5" />
+                    <span className="ot-rl-bolt ot-rl-bolt--6" />
+                  </>
+                )}
               </span>
               <span className="ot-rl-info">
                 <span className="ot-rl-name">{player.username}</span>
@@ -265,7 +278,7 @@ export default function Rankings() {
                       } as React.CSSProperties}
                     >
                       {/* Column header */}
-                      <div className="tier-col-header" style={{ borderBottom: `1px solid ${cfg.border}`, background: cfg.headerBg }}>
+                      <div className="tier-col-header" style={{ background: cfg.headerBg }}>
                         {showTrophy && (
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
                             style={{ color: cfg.textColor, flexShrink: 0 }}>

@@ -662,8 +662,7 @@ img { display: block; }
 .tier-columns-container { display:flex;gap:14px;align-items:flex-start; }
 .tier-column { flex:1;min-width:0;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;transition:border-color 0.22s,box-shadow 0.22s; }
 .tier-column:hover { border-color:rgba(255,255,255,0.13);box-shadow:0 6px 36px rgba(0,0,0,0.40); }
-.tier-col-header { padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden; }
-.tier-col-header::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:0.70; }
+.tier-col-header { padding:14px 14px 12px;border-bottom:none;position:relative;overflow:hidden; }
 .tier-col-title { font-size:0.70rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase; }
 .tier-col-count { font-size:0.62rem;color:var(--text-muted);font-weight:600;margin-top:2px; }
 .tier-player-list { padding:6px 0; }
@@ -1841,7 +1840,10 @@ img { display: block; }
 .ot-rl-avatar-bg {
   position: absolute; inset: 3px;
   border-radius: 50%;
-  background: linear-gradient(180deg, rgba(96,165,250,0.04), rgba(6,9,26,0.95));
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 30%, rgba(96,165,250,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 80%, rgba(59,130,246,0.10) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(10,15,35,0.92) 0%, rgba(4,7,20,0.98) 100%);
   z-index: 0;
 }
 .ot-rl-avatar-img {
@@ -1968,9 +1970,202 @@ img { display: block; }
 }
 @media (max-width: 440px) {
   .ot-rl-header { grid-template-columns: 28px 130px 44px 1fr 56px; padding: 6px 10px; gap: 4px; min-width: 500px; }
-  .ot-rl-row    { grid-template-columns: 28px 130px 44px 1fr 56px; padding: 7px 10px; gap: 4px; min-width: 500px; }
+  .ot-rl-row    { grid-template-columns: 28px 130px 44px 1fr 56px; padding: 6px 10px; gap: 4px; min-width: 500px; min-height: 64px; }
   .ot-rl-name   { font-size: 0.78rem; }
   .ot-rl-pts    { font-size: 0.78rem; }
   .ot-rl-avatar-ring { width: 34px; height: 48px; }
   .ot-rl-avatar-img  { width: 28px; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   TOP 3 PLAYER SKIN — AURA + LIGHTNING (SSJ2 STYLE)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Outer wrapper that allows overflow for aura/bolts */
+.ot-rl-skin-outer {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* ── Pulsing aura glow ── */
+.ot-rl-aura {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: ot-aura-pulse 1.6s ease-in-out infinite;
+}
+.ot-rl-skin-outer--rank1 .ot-rl-aura {
+  background: radial-gradient(ellipse 90% 80% at 50% 55%,
+    rgba(255,230,60,0.70) 0%,
+    rgba(255,180,20,0.40) 30%,
+    rgba(255,140,0,0.15) 58%,
+    transparent 78%);
+  animation-duration: 1.4s;
+  box-shadow: 0 0 28px 8px rgba(255,210,40,0.28), 0 0 56px 18px rgba(255,165,0,0.15);
+}
+.ot-rl-skin-outer--rank2 .ot-rl-aura {
+  background: radial-gradient(ellipse 90% 80% at 50% 55%,
+    rgba(210,230,255,0.60) 0%,
+    rgba(150,195,255,0.32) 32%,
+    rgba(80,140,255,0.12) 58%,
+    transparent 78%);
+  animation-duration: 1.7s;
+  box-shadow: 0 0 22px 6px rgba(180,210,255,0.24), 0 0 46px 14px rgba(100,160,255,0.12);
+}
+.ot-rl-skin-outer--rank3 .ot-rl-aura {
+  background: radial-gradient(ellipse 90% 80% at 50% 55%,
+    rgba(255,190,90,0.55) 0%,
+    rgba(220,140,50,0.30) 32%,
+    rgba(180,100,20,0.12) 58%,
+    transparent 78%);
+  animation-duration: 1.9s;
+  box-shadow: 0 0 20px 5px rgba(220,160,70,0.22), 0 0 42px 12px rgba(180,110,30,0.11);
+}
+@keyframes ot-aura-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.75; }
+  50%       { transform: scale(1.18); opacity: 1; }
+}
+
+/* ── Animated outline ring around skin for top 3 ── */
+.ot-rl-skin-outer--rank1 .ot-rl-avatar-ring {
+  box-shadow:
+    0 0 0 2px rgba(255,230,60,0.95),
+    0 0 12px 3px rgba(255,200,30,0.80),
+    0 0 28px 8px rgba(255,170,0,0.45),
+    0 0 50px 15px rgba(255,140,0,0.20);
+  animation: ot-outline-gold 1.4s ease-in-out infinite;
+  overflow: visible;
+}
+.ot-rl-skin-outer--rank2 .ot-rl-avatar-ring {
+  box-shadow:
+    0 0 0 2px rgba(210,228,255,0.90),
+    0 0 10px 2px rgba(160,200,255,0.70),
+    0 0 24px 6px rgba(100,165,255,0.38),
+    0 0 44px 12px rgba(60,120,255,0.16);
+  animation: ot-outline-silver 1.7s ease-in-out infinite;
+  overflow: visible;
+}
+.ot-rl-skin-outer--rank3 .ot-rl-avatar-ring {
+  box-shadow:
+    0 0 0 2px rgba(255,195,90,0.88),
+    0 0 10px 2px rgba(220,155,50,0.65),
+    0 0 22px 6px rgba(180,110,30,0.35),
+    0 0 40px 10px rgba(140,80,10,0.14);
+  animation: ot-outline-bronze 1.9s ease-in-out infinite;
+  overflow: visible;
+}
+@keyframes ot-outline-gold {
+  0%,100% { box-shadow: 0 0 0 2px rgba(255,230,60,0.95), 0 0 12px 3px rgba(255,200,30,0.80), 0 0 28px 8px rgba(255,170,0,0.45), 0 0 50px 15px rgba(255,140,0,0.20); }
+  50%      { box-shadow: 0 0 0 2px rgba(255,255,120,1), 0 0 18px 5px rgba(255,220,60,1), 0 0 40px 12px rgba(255,190,10,0.70), 0 0 70px 22px rgba(255,150,0,0.35); }
+}
+@keyframes ot-outline-silver {
+  0%,100% { box-shadow: 0 0 0 2px rgba(210,228,255,0.90), 0 0 10px 2px rgba(160,200,255,0.70), 0 0 24px 6px rgba(100,165,255,0.38), 0 0 44px 12px rgba(60,120,255,0.16); }
+  50%      { box-shadow: 0 0 0 2px rgba(230,242,255,1), 0 0 15px 4px rgba(180,215,255,0.90), 0 0 34px 9px rgba(130,185,255,0.60), 0 0 60px 18px rgba(80,145,255,0.28); }
+}
+@keyframes ot-outline-bronze {
+  0%,100% { box-shadow: 0 0 0 2px rgba(255,195,90,0.88), 0 0 10px 2px rgba(220,155,50,0.65), 0 0 22px 6px rgba(180,110,30,0.35), 0 0 40px 10px rgba(140,80,10,0.14); }
+  50%      { box-shadow: 0 0 0 2px rgba(255,215,120,1), 0 0 15px 4px rgba(240,175,70,0.88), 0 0 32px 9px rgba(210,135,45,0.55), 0 0 56px 16px rgba(170,100,20,0.26); }
+}
+
+/* ── Special avatar background for top 3 ── */
+.ot-rl-skin-outer--rank1 .ot-rl-avatar-bg {
+  background:
+    radial-gradient(ellipse 75% 60% at 50% 25%, rgba(255,230,80,0.32) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 85%, rgba(255,160,20,0.22) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(30,18,5,0.95) 0%, rgba(12,7,2,0.99) 100%);
+}
+.ot-rl-skin-outer--rank2 .ot-rl-avatar-bg {
+  background:
+    radial-gradient(ellipse 75% 60% at 50% 25%, rgba(180,210,255,0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 85%, rgba(80,140,255,0.16) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(5,12,28,0.95) 0%, rgba(2,6,18,0.99) 100%);
+}
+.ot-rl-skin-outer--rank3 .ot-rl-avatar-bg {
+  background:
+    radial-gradient(ellipse 75% 60% at 50% 25%, rgba(255,190,80,0.26) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 85%, rgba(200,120,30,0.16) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(25,14,4,0.95) 0%, rgba(10,5,2,0.99) 100%);
+}
+
+/* ── Lightning bolt sparks ── */
+.ot-rl-bolt {
+  position: absolute;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+}
+
+/* Rank 1 = gold bolts */
+.ot-rl-skin-outer--rank1 .ot-rl-bolt { background: linear-gradient(180deg, rgba(255,255,120,1), rgba(255,200,30,0.85) 55%, transparent); }
+/* Rank 2 = silver/blue bolts */
+.ot-rl-skin-outer--rank2 .ot-rl-bolt { background: linear-gradient(180deg, rgba(200,230,255,1), rgba(130,185,255,0.85) 55%, transparent); }
+/* Rank 3 = orange bolts */
+.ot-rl-skin-outer--rank3 .ot-rl-bolt { background: linear-gradient(180deg, rgba(255,215,100,1), rgba(220,145,40,0.85) 55%, transparent); }
+
+/* Bolt positions — top, top-right, right-side, bottom, left-side, top-left */
+.ot-rl-bolt--1 { width: 2px; height: 15px; top: -18px; left: 50%; margin-left: -1px; transform-origin: 50% 100%; animation: ot-bolt-a 2.8s linear infinite 0.00s; }
+.ot-rl-bolt--2 { width: 2px; height: 13px; top: -4px; right: -18px; transform: rotate(70deg); transform-origin: 50% 100%; animation: ot-bolt-a 2.8s linear infinite 0.55s; }
+.ot-rl-bolt--3 { width: 2px; height: 12px; bottom: -16px; left: 55%; margin-left: -1px; transform: rotate(180deg); transform-origin: 50% 0%; animation: ot-bolt-a 2.8s linear infinite 1.10s; }
+.ot-rl-bolt--4 { width: 2px; height: 13px; bottom: 5px; left: -18px; transform: rotate(-70deg); transform-origin: 50% 100%; animation: ot-bolt-a 2.8s linear infinite 1.65s; }
+.ot-rl-bolt--5 { width: 2px; height: 11px; top: 10px; right: -16px; transform: rotate(90deg); transform-origin: 50% 100%; animation: ot-bolt-a 2.8s linear infinite 0.30s; }
+.ot-rl-bolt--6 { width: 2px; height: 10px; top: -12px; left: 25%; transform-origin: 50% 100%; animation: ot-bolt-a 2.8s linear infinite 1.90s; }
+
+@keyframes ot-bolt-a {
+  0%   { opacity: 0; transform: scaleY(0.15) scaleX(0.4); }
+  3%   { opacity: 1; transform: scaleY(1) scaleX(1); }
+  4%   { opacity: 0.5; transform: scaleY(0.8) scaleX(1.8); }
+  5%   { opacity: 0; transform: scaleY(0.1); }
+  40%  { opacity: 0; }
+  41%  { opacity: 0.9; transform: scaleY(1) scaleX(1); }
+  42%  { opacity: 0.25; transform: scaleY(0.5) scaleX(2); }
+  43%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* ── Mobile: reduce aura size ── */
+@media (max-width: 700px) {
+  .ot-rl-aura { inset: -9px; }
+  .ot-rl-bolt--1 { height: 11px; top: -13px; }
+  .ot-rl-bolt--2 { height: 10px; right: -13px; }
+  .ot-rl-bolt--3 { height: 9px; bottom: -11px; }
+  .ot-rl-bolt--4 { height: 10px; left: -13px; }
+  .ot-rl-bolt--5 { height: 8px; right: -11px; }
+  .ot-rl-bolt--6 { height: 8px; top: -9px; }
+}
+
+/* ── Mobile: reduce aura on reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ot-rl-aura, .ot-rl-bolt { animation: none !important; }
+  .ot-rl-aura { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOP100 TABLE — PREVENT SHRINK/SCROLL ON TAP
+   ═══════════════════════════════════════════════════════════ */
+.top100-table-outer {
+  overflow: clip !important;
+}
+.top100-table-wrapper {
+  overflow-x: auto;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.top100-player-row-link {
+  display: contents;
+}
+.player-row {
+  cursor: pointer;
+}
+.player-row .player-cell {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; color: inherit;
+}
+
