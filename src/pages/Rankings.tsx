@@ -74,10 +74,17 @@ function OverallTable({ players }: { players: Player[] }) {
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
               <img
-                src={`https://visage.surgeplay.com/bust/256/${player.username}.png`}
+                src={`https://mc-heads.net/avatar/${player.username}/64`}
                 alt={player.username}
                 className="ot-ov-av-img"
                 loading="lazy"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  if (!img.dataset.fb) {
+                    img.dataset.fb = '1';
+                    img.src = `https://minotar.net/avatar/${player.username}/64`;
+                  }
+                }}
               />
               <span className="ot-ov-rank-pill">{rank}.</span>
             </div>
