@@ -273,7 +273,8 @@ export default function Home() {
             <p className="empty-state-sub">Rankings will appear here once players are added to the system.</p>
           </div>
         ) : (
-          <div className="top100-table-wrapper animate-fade-up">
+          <div className="top100-table-outer animate-fade-up">
+            <div className="top100-table-wrapper">
             <table className="rankings-table">
               <thead>
                 <tr>
@@ -317,6 +318,7 @@ export default function Home() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>
