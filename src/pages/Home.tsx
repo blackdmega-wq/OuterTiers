@@ -131,6 +131,34 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
   );
 }
 
+/* ── Custom rank badge icons ── */
+function LbRankIcon({ rank }: { rank: number }) {
+  if (rank === 1) return (
+    <span className="lb-rank-icon lb-rank-icon--1" title="#1">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 8.5L6.5 14.5H12H17.5L22 8.5L16.5 12L12 4L7.5 12L2 8.5Z" fill="currentColor"/>
+        <rect x="7" y="17.5" width="10" height="2.5" rx="1.25" fill="currentColor" opacity="0.8"/>
+        <rect x="5.5" y="14.5" width="13" height="3" rx="1" fill="currentColor" opacity="0.9"/>
+      </svg>
+    </span>
+  );
+  if (rank === 2) return (
+    <span className="lb-rank-icon lb-rank-icon--2" title="#2">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L14.8 9L21.5 9.9L16.7 14.6L18 21.5L12 18.3L6 21.5L7.3 14.6L2.5 9.9L9.2 9L12 3Z" fill="currentColor"/>
+      </svg>
+    </span>
+  );
+  return (
+    <span className="lb-rank-icon lb-rank-icon--3" title="#3">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C9.2 5.2 6.5 7.2 3.5 8.5C3.5 15 7.3 20.2 12 22C16.7 20.2 20.5 15 20.5 8.5C17.5 7.2 14.8 5.2 12 2Z" fill="currentColor"/>
+        <path d="M12 6.5C10.3 9 8.5 10.5 6.5 11.5C6.8 15.5 9.1 18.5 12 19.8C14.9 18.5 17.2 15.5 17.5 11.5C15.5 10.5 13.7 9 12 6.5Z" fill="currentColor" opacity="0.38"/>
+      </svg>
+    </span>
+  );
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { players, loading: playersLoading } = usePlayers();
@@ -144,6 +172,9 @@ export default function Home() {
   const { liveResults, highResults } = useLiveFeed();
   const onlineCount = usePresence();
   const displayOnline = useCountUp(onlineCount, 700);
+
+  const top3 = top100.slice(0, 3);
+  const rest = top100.slice(3);
 
   return (
     <div className="home-page">
@@ -255,12 +286,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ===== TOP 100 ===== */}
+      {/* ===== TOP 100 REVAMPED ===== */}
       <div className="home-top100">
         <div className="section-header animate-fade-up">
           <div className="section-label">Leaderboard</div>
           <h2 className="section-heading">Top 100 Players</h2>
         </div>
+
         {playersLoading ? (
           <div className="rankings-loading animate-fade-up">Loading leaderboard...</div>
         ) : top100.length === 0 ? (
@@ -275,41 +307,87 @@ export default function Home() {
           </div>
         ) : (
           <div className="lb-wrap animate-fade-up">
-            <div className="lb-header">
-              <span className="lb-h-rank">#</span>
-              <span />
-              <span className="lb-h-player">Player</span>
-              <span className="lb-h-pts">Points</span>
-            </div>
-            {top100.map((player, i) => {
-              const rank = i + 1;
-              const topCls = rank <= 3 ? ` lb-row--top${rank}` : '';
-              return (
-                <div
-                  key={player.id}
-                  className={`lb-row${topCls}`}
-                  onClick={() => navigate(`/player/${player.username}`)}
-                >
-                  <span className="lb-rank">
-                    {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`}
-                  </span>
-                  <img
-                    src={`https://mc-heads.net/avatar/${player.username}/40`}
-                    alt={player.username}
-                    className="lb-avatar"
-                    loading="lazy"
-                  />
-                  <span className="lb-info">
-                    <span className="lb-name">{player.username}</span>
-                    <span className="lb-title">{getTitle(player.points)}</span>
-                  </span>
-                  <span className="lb-pts">
-                    {player.points}
-                    <span className="lb-pts-label">pts</span>
-                  </span>
+
+            {/* ── TOP 3 PODIUM ── */}
+            {top3.length > 0 && (
+              <div className="lb-podium">
+                {/* Reorder: 2nd left, 1st center, 3rd right */}
+                {[
+                  top3[1] ? { player: top3[1], rank: 2 } : null,
+                  top3[0] ? { player: top3[0], rank: 1 } : null,
+                  top3[2] ? { player: top3[2], rank: 3 } : null,
+                ].filter(Boolean).map((entry) => {
+                  const { player, rank } = entry!;
+                  return (
+                    <div
+                      key={player.id}
+                      className={`lb-pod lb-pod--rank${rank}`}
+                      onClick={() => navigate(`/player/${player.username}`)}
+                    >
+                      <div className="lb-pod-rank-badge">
+                        <LbRankIcon rank={rank} />
+                      </div>
+                      <div className="lb-pod-glow" />
+                      <div className="lb-pod-skin-wrap">
+                        <img
+                          src={`https://mc-heads.net/player/${player.username}`}
+                          alt={player.username}
+                          className="lb-pod-skin"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="lb-pod-info">
+                        <span className="lb-pod-name">{player.username}</span>
+                        <span className="lb-pod-title">{getTitle(player.points)}</span>
+                        <span className="lb-pod-pts">
+                          {player.points}
+                          <span className="lb-pod-pts-unit">pts</span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── RANKS 4–100 ── */}
+            {rest.length > 0 && (
+              <div className="lb-list">
+                <div className="lb-list-header">
+                  <span className="lb-lh-rank">#</span>
+                  <span />
+                  <span className="lb-lh-player">Player</span>
+                  <span className="lb-lh-pts">Points</span>
                 </div>
-              );
-            })}
+                {rest.map((player, i) => {
+                  const rank = i + 4;
+                  return (
+                    <div
+                      key={player.id}
+                      className="lb-row"
+                      onClick={() => navigate(`/player/${player.username}`)}
+                    >
+                      <span className="lb-rank">{rank}.</span>
+                      <img
+                        src={`https://mc-heads.net/avatar/${player.username}/40`}
+                        alt={player.username}
+                        className="lb-avatar"
+                        loading="lazy"
+                      />
+                      <span className="lb-info">
+                        <span className="lb-name">{player.username}</span>
+                        <span className="lb-title">{getTitle(player.points)}</span>
+                      </span>
+                      <span className="lb-pts">
+                        {player.points}
+                        <span className="lb-pts-label">pts</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
           </div>
         )}
       </div>

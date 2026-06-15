@@ -31,6 +31,28 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
+/* ── Custom rank icons (no emojis) ── */
+function RankIcon({ rank }: { rank: number }) {
+  if (rank === 1) return (
+    <svg className="ot-rl-rank-icon ot-rl-rank-icon--gold" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 8L6 14H12H18L22 8L17 11L12 4L7 11L2 8Z" fill="currentColor" opacity="0.95"/>
+      <rect x="7" y="17" width="10" height="3" rx="1.5" fill="currentColor"/>
+      <rect x="5" y="14" width="14" height="3.5" rx="1" fill="currentColor" opacity="0.85"/>
+    </svg>
+  );
+  if (rank === 2) return (
+    <svg className="ot-rl-rank-icon ot-rl-rank-icon--silver" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3L14.5 8.5L20.5 9.3L16.2 13.4L17.3 19.3L12 16.5L6.7 19.3L7.8 13.4L3.5 9.3L9.5 8.5L12 3Z" fill="currentColor"/>
+    </svg>
+  );
+  return (
+    <svg className="ot-rl-rank-icon ot-rl-rank-icon--bronze" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C9.5 5 7 7 4 8C4 14 7.5 19 12 21C16.5 19 20 14 20 8C17 7 14.5 5 12 2Z" fill="currentColor" opacity="0.9"/>
+      <path d="M12 6C10.5 8 9 9.5 7 10.5C7 14.5 9.2 17.8 12 19.2C14.8 17.8 17 14.5 17 10.5C15 9.5 13.5 8 12 6Z" fill="currentColor" opacity="0.5"/>
+    </svg>
+  );
+}
+
 /* ── Overall rankings — full list with ring-avatar + tier badges ── */
 
 const TIER_PRIORITY: Record<string, number> = {
@@ -50,7 +72,6 @@ function tierRingCls(tier: string): string {
 }
 
 function OverallTable({ players }: { players: Player[] }) {
-  const maxPts = players[0]?.points ?? 1;
   return (
     <div className="ot-rl-wrap">
       <div className="ot-rl-header">
@@ -75,13 +96,16 @@ function OverallTable({ players }: { players: Player[] }) {
         ];
         const ringCls = rank === 1 ? 'ring-gold' : rank === 2 ? 'ring-silver' : rank === 3 ? 'ring-bronze' : 'ring-blue';
         const rowCls = rank <= 3 ? ` ot-rl-row--top${rank}` : '';
-        const pct = Math.round((player.points / maxPts) * 100);
+
+        /* Mobile: show first 5 badges, rest overflow */
+        const MOBILE_MAX = 5;
+        const overflowCount = sortedModes.length - MOBILE_MAX;
 
         return (
           <Link key={player.id} to={`/player/${player.username}`} className={`ot-rl-row${rowCls}`}>
             <span className="ot-rl-rank">
               {rank <= 3
-                ? <span className="ot-rl-medal">{rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}</span>
+                ? <span className="ot-rl-medal"><RankIcon rank={rank} /></span>
                 : `${rank}.`}
             </span>
 
@@ -91,7 +115,7 @@ function OverallTable({ players }: { players: Player[] }) {
                 <span className={`ot-rl-avatar-ring ${ringCls}`}>
                   <span className="ot-rl-avatar-bg" />
                   <img
-                    src={`https://mc-heads.net/avatar/${player.username}/44`}
+                    src={`https://mc-heads.net/player/${player.username}`}
                     alt={player.username}
                     className="ot-rl-avatar-img"
                     loading="lazy"
@@ -111,9 +135,6 @@ function OverallTable({ players }: { players: Player[] }) {
               <span className="ot-rl-info">
                 <span className="ot-rl-name">{player.username}</span>
                 <span className="ot-rl-title">◆ {getTitle(player.points)}</span>
-                <span className="ot-rl-ptsbar-wrap" title={`${pct}% of top score`}>
-                  <span className="ot-rl-ptsbar" style={{ width: `${pct}%` }} />
-                </span>
               </span>
             </span>
 
@@ -122,12 +143,16 @@ function OverallTable({ players }: { players: Player[] }) {
             </span>
 
             <span className="ot-rl-tiers">
-              {sortedModes.map(({ modeId, rawTier }) => {
+              {sortedModes.map(({ modeId, rawTier }, idx) => {
                 const cat = CATEGORIES.find(c => c.id === modeId);
                 if (!cat) return null;
                 const hasRank = !!rawTier && rawTier !== '-';
+                const isOverflowHidden = idx >= MOBILE_MAX;
                 return (
-                  <span key={modeId} className={`ot-rl-tbadge${hasRank ? ` ot-rl-tbadge--${tierRingCls(rawTier!)}` : ' ot-rl-tbadge--unranked'}`}>
+                  <span
+                    key={modeId}
+                    className={`ot-rl-tbadge${hasRank ? ` ot-rl-tbadge--${tierRingCls(rawTier!)}` : ' ot-rl-tbadge--unranked'}${isOverflowHidden ? ' ot-rl-tbadge--mobile-hidden' : ''}`}
+                  >
                     <span className="ot-rl-ticon-wrap">
                       <img src={cat.icon} alt={cat.label} className="ot-rl-ticon" loading="lazy" />
                     </span>
@@ -135,6 +160,9 @@ function OverallTable({ players }: { players: Player[] }) {
                   </span>
                 );
               })}
+              {overflowCount > 0 && (
+                <span className="ot-rl-tmore ot-rl-tmore--mobile-only">+{overflowCount}</span>
+              )}
             </span>
 
             <span className="ot-rl-pts">{player.points}<span className="ot-rl-pts-unit">pts</span></span>
