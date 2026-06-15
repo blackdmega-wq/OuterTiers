@@ -431,7 +431,7 @@ img { display: block; }
 .top100-table-wrapper {
   border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden;
   box-shadow:0 12px 56px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.02) inset;
-  touch-action:pan-y; overscroll-behavior-x:none;
+  overscroll-behavior-x:contain;
 }
 
 .rankings-table { width:100%; border-collapse:collapse; }
@@ -838,6 +838,7 @@ img { display: block; }
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
   max-width: 100%;
   width: 100%;
 }
@@ -1751,7 +1752,10 @@ img { display: block; }
   background: rgba(8,11,22,0.85);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
   box-shadow: 0 8px 40px rgba(0,0,0,0.45);
 }
 
@@ -1789,8 +1793,8 @@ img { display: block; }
 /* Rotating glow ring */
 .ot-rl-avatar-ring {
   position: relative; flex-shrink: 0;
-  width: 52px; height: 70px;
-  border-radius: 10px;
+  width: 58px; height: 58px;
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   padding: 3px;
   overflow: hidden;
@@ -1814,18 +1818,19 @@ img { display: block; }
 
 .ot-rl-avatar-bg {
   position: absolute; inset: 3px;
-  border-radius: 8px;
+  border-radius: 50%;
   background: #06091a;
   z-index: 0;
 }
 .ot-rl-avatar-img {
-  width: 46px; height: 66px;
-  border-radius: 0;
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52px;
+  height: auto;
   image-rendering: pixelated;
-  display: block;
-  position: relative; z-index: 1;
-  object-fit: contain;
-  object-position: center top;
+  z-index: 1;
 }
 
 /* Name + title */
@@ -1899,14 +1904,23 @@ img { display: block; }
   .ot-rl-row { grid-template-columns: 38px 210px 60px 1fr 70px; gap: 8px; padding: 11px 16px; }
 }
 @media (max-width: 700px) {
-  .ot-rl-row { grid-template-columns: 34px 1fr 56px 68px; padding: 10px 14px; gap: 7px; }
-  .ot-rl-tiers { display: none; }
-  .ot-rl-pts { font-size: 1.1rem; }
-  .ot-rl-avatar-ring { width: 40px; height: 56px; border-radius: 8px; }
-  .ot-rl-avatar-img  { width: 34px; height: 50px; }
+  .ot-rl-row { grid-template-columns: 36px 1fr 52px 110px 58px; gap: 6px; padding: 9px 14px; min-width: 480px; }
+  .ot-rl-tiers { display: flex; gap: 3px; flex-wrap: nowrap; }
+  .ot-rl-tbadge:nth-child(n+4) { display: none; }
+  .ot-rl-ticon-wrap { width: 26px; height: 26px; }
+  .ot-rl-ticon { width: 16px; height: 16px; }
+  .ot-rl-tlabel { display: none; }
+  .ot-rl-tmore { width: 26px; height: 26px; font-size: 0.58rem; }
+  .ot-rl-pts { font-size: 0.88rem; }
+  .ot-rl-name { font-size: 0.84rem; }
+  .ot-rl-avatar-ring { width: 44px; height: 44px; border-radius: 50%; }
+  .ot-rl-avatar-img  { width: 38px; }
 }
 @media (max-width: 440px) {
-  .ot-rl-row { grid-template-columns: 28px 1fr 50px 60px; padding: 9px 12px; gap: 6px; }
-  .ot-rl-name { font-size: 0.83rem; }
-  .ot-rl-pts  { font-size: 0.96rem; }
+  .ot-rl-row { grid-template-columns: 28px 1fr 44px 88px 52px; padding: 8px 12px; gap: 5px; min-width: 430px; }
+  .ot-rl-tbadge:nth-child(n+3) { display: none; }
+  .ot-rl-name { font-size: 0.80rem; }
+  .ot-rl-pts  { font-size: 0.82rem; }
+  .ot-rl-avatar-ring { width: 36px; height: 36px; }
+  .ot-rl-avatar-img  { width: 30px; }
 }
