@@ -719,7 +719,7 @@ img { display: block; }
 .footer-social-btn { display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);color:var(--text-dim);transition:background 0.18s,color 0.18s,border-color 0.18s,transform 0.18s,box-shadow 0.18s; }
 .footer-social-btn:hover { background:rgba(88,101,242,0.14);border-color:rgba(88,101,242,0.32);color:#7289da;transform:translateY(-2px);box-shadow:0 8px 24px rgba(88,101,242,0.20); }
 .footer-social-btn--modrinth:hover { background:rgba(0,186,124,0.12);border-color:rgba(0,186,124,0.32);color:#00ba7c; }
-.footer-social-btn--tiktok:hover  { background:rgba(255,0,80,0.12);border-color:rgba(255,0,80,0.32);color:#ff0050;box-shadow:0 8px 24px rgba(255,0,80,0.22); }
+.footer-social-btn--tiktok:hover  { background:rgba(5,5,5,0.45);border-color:rgba(70,70,70,0.65);color:#efefef;box-shadow:0 8px 32px rgba(0,0,0,0.90),0 0 0 1px rgba(255,255,255,0.07); }
 .footer-social-btn--youtube:hover { background:rgba(255,0,0,0.12);border-color:rgba(255,0,0,0.32);color:#ff0000;box-shadow:0 8px 24px rgba(255,0,0,0.22); }
 .footer-social-btn--discord:hover { background:rgba(88,101,242,0.16);border-color:rgba(88,101,242,0.38);color:#7289da;box-shadow:0 8px 24px rgba(88,101,242,0.28); }
 .footer-cols { display:flex;gap:52px;flex-wrap:wrap; }
@@ -833,17 +833,24 @@ img { display: block; }
 }
 
 /* ── 2. Mobile: leaderboard table, POINTS always visible ── */
-.top100-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; touch-action:pan-y; overscroll-behavior-x:none; }
-.rankings-table { min-width: 540px; table-layout: fixed; }
-@media (max-width: 580px) {
-  .top100-table-wrapper { overflow-x: hidden; }
+.top100-table-wrapper { overflow-x: hidden; max-width: 100%; width: 100%; }
+.rankings-table { min-width: 0; width: 100%; table-layout: fixed; border-collapse: collapse; }
+/* Desktop: wider min-width allowed */
+@media (min-width: 581px) {
+  .top100-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rankings-table { min-width: 520px; }
+}
+@media (max-width: 700px) {
+  .top100-table-wrapper { overflow-x: hidden; overflow-y: visible; }
   .rankings-table { min-width: 0; width: 100%; font-size: 0.78rem; }
-  .rankings-table th, .rankings-table td { padding: 9px 10px; }
-  .col-rank { padding-left: 12px !important; width: 48px; }
-  .col-points { padding-right: 12px !important; width: 70px; }
-  .col-region { width: 70px; }
+  .rankings-table th, .rankings-table td { padding: 9px 8px; }
+  .col-rank   { padding-left: 10px !important; width: 38px; }
+  .col-points { padding-right: 10px !important; width: 64px; text-align: right !important; }
+  .col-region { width: 62px; text-align: center !important; }
   .col-combat-title { display: none; }
+  .col-player { width: auto; min-width: 0; }
   .player-avatar-wrapper img { width: 28px !important; height: 28px !important; }
+  .player-row td { position: static !important; }
 }
 
 /* ── 3. Discord icon spin on hover ── */
@@ -1757,7 +1764,7 @@ img { display: block; }
   text-decoration: none;
   color: inherit;
   transition: background 0.14s;
-  min-height: 62px;
+  min-height: 82px;
 }
 .ot-rl-row:last-child { border-bottom: none; }
 .ot-rl-row:hover      { background: rgba(96,165,250,0.05); }
@@ -1781,10 +1788,11 @@ img { display: block; }
 /* Rotating glow ring */
 .ot-rl-avatar-ring {
   position: relative; flex-shrink: 0;
-  width: 52px; height: 52px;
-  border-radius: 50%;
+  width: 52px; height: 70px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   padding: 3px;
+  overflow: hidden;
 }
 .ot-rl-avatar-ring.ring-gold {
   background: conic-gradient(rgba(253,230,138,0) 0deg, rgba(253,230,138,1) 90deg, rgba(245,158,11,0.55) 180deg, rgba(253,230,138,0.9) 270deg, rgba(253,230,138,0) 360deg);
@@ -1808,16 +1816,18 @@ img { display: block; }
 
 .ot-rl-avatar-bg {
   position: absolute; inset: 3px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: #06091a;
   z-index: 0;
 }
 .ot-rl-avatar-img {
-  width: 44px; height: 44px;
-  border-radius: 50%;
+  width: 46px; height: 66px;
+  border-radius: 0;
   image-rendering: pixelated;
   display: block;
   position: relative; z-index: 1;
+  object-fit: contain;
+  object-position: center top;
 }
 
 /* Name + title */
@@ -1894,8 +1904,8 @@ img { display: block; }
   .ot-rl-row { grid-template-columns: 34px 1fr 56px 68px; padding: 10px 14px; gap: 7px; }
   .ot-rl-tiers { display: none; }
   .ot-rl-pts { font-size: 1.1rem; }
-  .ot-rl-avatar-ring { width: 46px; height: 46px; }
-  .ot-rl-avatar-img  { width: 38px; height: 38px; }
+  .ot-rl-avatar-ring { width: 40px; height: 56px; border-radius: 8px; }
+  .ot-rl-avatar-img  { width: 34px; height: 50px; }
 }
 @media (max-width: 440px) {
   .ot-rl-row { grid-template-columns: 28px 1fr 50px 60px; padding: 9px 12px; gap: 6px; }
