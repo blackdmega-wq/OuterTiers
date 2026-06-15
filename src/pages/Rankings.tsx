@@ -52,6 +52,14 @@ function tierRingCls(tier: string): string {
 function OverallTable({ players }: { players: Player[] }) {
   return (
     <div className="ot-rl-wrap">
+      {/* Header row */}
+      <div className="ot-rl-header">
+        <span />
+        <span className="ot-rl-hcol">Player</span>
+        <span className="ot-rl-hcol ot-rl-hcol--center">Region</span>
+        <span className="ot-rl-hcol">Tiers</span>
+        <span className="ot-rl-hcol ot-rl-hcol--right">Pts</span>
+      </div>
       {players.map((player, i) => {
         const rank = i + 1;
         const raw = player.rawTiers ?? {};
