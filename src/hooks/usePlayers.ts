@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { Player } from '../data/players';
 import { calculatePoints } from '../data/players';
 
@@ -67,23 +67,40 @@ export function usePlayer(username: string | undefined): UsePlayerResult {
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const prevUsername = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!username) { setLoading(false); return; }
-    if (prevUsername.current === username) return;
-    prevUsername.current = username;
 
+    // Show cached data immediately as a fast placeholder
     if (_cachedPlayers) {
-      const cached = _cachedPlayers.find(p => p.username.toLowerCase() === username.toLowerCase());
-      if (cached) { setPlayer(cached); setLoading(false); return; }
+      const cached = _cachedPlayers.find(
+        p => p.username.toLowerCase() === username.toLowerCase()
+      );
+      if (cached) {
+        setPlayer(cached);
+        // Don't return — always fetch individual endpoint for full tierDates
+      }
     }
 
-    setLoading(true);
+    // Always fetch the individual player endpoint to get complete data (incl. tierDates)
     fetch(`${API_BASE}/api/players/${encodeURIComponent(username)}`)
       .then(r => { if (!r.ok) throw new Error('Player not found'); return r.json(); })
-      .then(data => { setPlayer({ ...data, points: calculatePoints(data.rawTiers) }); setLoading(false); })
-      .catch(err => { setError(err.message); setPlayer(null); setLoading(false); });
+      .then(data => {
+        const full: Player = { ...data, points: calculatePoints(data.rawTiers) };
+        setPlayer(full);
+        setLoading(false);
+        // Patch the cache so navigating away and back still shows full data
+        if (_cachedPlayers) {
+          const idx = _cachedPlayers.findIndex(
+            p => p.username.toLowerCase() === username.toLowerCase()
+          );
+          if (idx >= 0) _cachedPlayers[idx] = full;
+        }
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, [username]);
 
   return { player, loading, error };
