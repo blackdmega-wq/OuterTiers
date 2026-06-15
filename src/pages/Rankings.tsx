@@ -64,104 +64,145 @@ function tierRingCls(tier: string): string {
   return 'gray';
 }
 
-function OverallTable({ players }: { players: Player[] }) {
+const POSE_TYPE: Record<number, string> = { 1: 'cheering', 2: 'pointing', 3: 'walking' };
+
+function CrownSVG() {
   return (
-    <div className="ot-rl-wrap">
-      <div className="ot-rl-header">
-        <span />
-        <span className="ot-rl-hcol">Player</span>
-        <span className="ot-rl-hcol ot-rl-hcol--center">Region</span>
-        <span className="ot-rl-hcol">All Modes</span>
-        <span className="ot-rl-hcol ot-rl-hcol--right">Points</span>
-      </div>
-      {players.map((player, i) => {
-        const rank = i + 1;
-        const raw = player.rawTiers ?? {};
-        const allModes = MODE_KEYS.map(k => ({
-          modeId: k as string,
-          rawTier: (raw as Record<string, string | null | undefined>)[k] ?? null,
-        }));
-        const sortedModes = [
-          ...allModes
-            .filter((e): e is { modeId: string; rawTier: string } => !!e.rawTier && e.rawTier !== '-')
-            .sort((a, b) => (TIER_PRIORITY[a.rawTier.toUpperCase()] ?? 99) - (TIER_PRIORITY[b.rawTier.toUpperCase()] ?? 99)),
-          ...allModes.filter(e => !e.rawTier || e.rawTier === '-'),
-        ];
-        const ringCls = rank === 1 ? 'ring-gold' : rank === 2 ? 'ring-silver' : rank === 3 ? 'ring-bronze' : 'ring-blue';
-        const rowCls = rank <= 3 ? ` ot-rl-row--top${rank}` : '';
+    <svg className="ot-ov-crown" viewBox="0 0 64 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 36L16 12L32 26L48 12L58 36H6Z" fill="#fbbf24"/>
+      <path d="M6 36L16 12L32 24L48 12L58 36" fill="none" stroke="#f59e0b" strokeWidth="1.5"/>
+      <circle cx="6" cy="12" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
+      <circle cx="32" cy="6" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
+      <circle cx="58" cy="12" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
+    </svg>
+  );
+}
 
-        /* Mobile portrait: show first 4 badges, rest overflow */
-        const MOBILE_MAX = 4;
-        const overflowCount = sortedModes.length - MOBILE_MAX;
+function MedalSVG({ rank }: { rank: 2 | 3 }) {
+  const bg = rank === 2 ? '#64748b' : '#92400e';
+  const fill = rank === 2 ? '#94a3b8' : '#c07830';
+  const stroke = rank === 2 ? '#cbd5e1' : '#d4924e';
+  return (
+    <svg className={`ot-ov-medal ot-ov-medal--${rank === 2 ? 'silver' : 'bronze'}`} viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18" fill={bg} stroke={stroke} strokeWidth="2.5"/>
+      <circle cx="20" cy="20" r="13" fill={fill}/>
+      <text x="20" y="26" textAnchor="middle" fontSize="15" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif">{rank}</text>
+    </svg>
+  );
+}
 
-        return (
-          <Link key={player.id} to={`/player/${player.username}`} className={`ot-rl-row${rowCls}`}>
-            <span className="ot-rl-rank">
-              {rank <= 3
-                ? <span className="ot-rl-medal"><RankIcon rank={rank} /></span>
-                : `${rank}.`}
-            </span>
+function OverallTable({ players }: { players: Player[] }) {
+  const top3 = players.slice(0, 3);
+  const rest = players.slice(3);
 
-            <span className="ot-rl-player">
-              <span className={`ot-rl-skin-outer${rank <= 3 ? ` ot-rl-skin-outer--rank${rank}` : ''}`}>
-                {rank <= 3 && <span className="ot-rl-aura" />}
-                <span className={`ot-rl-avatar-ring ${ringCls}`}>
-                  <span className="ot-rl-avatar-bg" />
+  return (
+    <div className="ot-ov-wrap">
+
+      {/* ── TOP 3 HERO PODIUM ── */}
+      {top3.length > 0 && (
+        <div className="ot-ov-top3">
+          {([
+            top3[1] ? { p: top3[1], rank: 2 } : null,
+            top3[0] ? { p: top3[0], rank: 1 } : null,
+            top3[2] ? { p: top3[2], rank: 3 } : null,
+          ] as Array<{ p: Player; rank: number } | null>)
+            .filter((e): e is { p: Player; rank: number } => e !== null)
+            .map(({ p, rank }) => (
+              <Link key={p.id} to={`/player/${p.username}`} className={`ot-ov-hero ot-ov-hero--rank${rank}`}>
+                <div className="ot-ov-pose-wrap">
+                  {rank === 1 && <CrownSVG />}
+                  {rank === 2 && <MedalSVG rank={2} />}
+                  {rank === 3 && <MedalSVG rank={3} />}
                   <img
-                    src={`https://visage.surgeplay.com/full/256/${player.username}.png`}
-                    alt={player.username}
-                    className="ot-rl-avatar-img"
+                    src={`https://starlightskins.lunareclipse.studio/render/${POSE_TYPE[rank]}/${p.username}/full`}
+                    alt={p.username}
+                    className="ot-ov-pose"
                     loading="lazy"
                   />
-                </span>
-                {rank <= 3 && (
-                  <>
-                    <span className="ot-rl-bolt ot-rl-bolt--1" />
-                    <span className="ot-rl-bolt ot-rl-bolt--2" />
-                    <span className="ot-rl-bolt ot-rl-bolt--3" />
-                    <span className="ot-rl-bolt ot-rl-bolt--4" />
-                    <span className="ot-rl-bolt ot-rl-bolt--5" />
-                    <span className="ot-rl-bolt ot-rl-bolt--6" />
-                  </>
-                )}
-              </span>
-              <span className="ot-rl-info">
-                <span className="ot-rl-name">{player.username}</span>
-                <span className="ot-rl-title">◆ {getTitle(player.points)}</span>
-              </span>
-            </span>
-
-            <span className="ot-rl-region">
-              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-            </span>
-
-            <span className="ot-rl-tiers">
-              {sortedModes.map(({ modeId, rawTier }, idx) => {
-                const cat = CATEGORIES.find(c => c.id === modeId);
-                if (!cat) return null;
-                const hasRank = !!rawTier && rawTier !== '-';
-                const isOverflowHidden = idx >= MOBILE_MAX;
-                return (
-                  <span
-                    key={modeId}
-                    className={`ot-rl-tbadge${hasRank ? ` ot-rl-tbadge--${tierRingCls(rawTier!)}` : ' ot-rl-tbadge--unranked'}${isOverflowHidden ? ' ot-rl-tbadge--mobile-hidden' : ''}`}
-                  >
-                    <span className="ot-rl-ticon-wrap">
-                      <img src={cat.icon} alt={cat.label} className="ot-rl-ticon" loading="lazy" />
-                    </span>
-                    <span className="ot-rl-tlabel">{hasRank ? rawTier : '—'}</span>
+                </div>
+                <div className={`ot-ov-pedestal ot-ov-pedestal--rank${rank}`}>#{rank}</div>
+                <div className="ot-ov-hero-info">
+                  <RankIcon rank={rank} />
+                  <span className="ot-ov-hero-name">{p.username}</span>
+                  <span className="ot-ov-hero-title">{getTitle(p.points)}</span>
+                  <span className="ot-ov-hero-pts">
+                    {p.points}<span className="ot-ov-hero-pts-unit"> pts</span>
                   </span>
-                );
-              })}
-              {overflowCount > 0 && (
-                <span className="ot-rl-tmore ot-rl-tmore--mobile-only">+{overflowCount}</span>
-              )}
-            </span>
+                  <span className={`region-badge region-${p.region.toLowerCase()}`}>{p.region}</span>
+                </div>
+              </Link>
+            ))}
+        </div>
+      )}
 
-            <span className="ot-rl-pts">{player.points}<span className="ot-rl-pts-unit">pts</span></span>
-          </Link>
-        );
-      })}
+      {/* ── RANKS 4+ TABLE ── */}
+      {rest.length > 0 && (
+        <div className="ot-ov-table-scroll">
+          <div className="ot-rl-header">
+            <span />
+            <span className="ot-rl-hcol">Player</span>
+            <span className="ot-rl-hcol ot-rl-hcol--center">Region</span>
+            <span className="ot-rl-hcol">All Modes</span>
+            <span className="ot-rl-hcol ot-rl-hcol--right">Points</span>
+          </div>
+          {rest.map((player, i) => {
+            const rank = i + 4;
+            const raw = player.rawTiers ?? {};
+            const allModes = MODE_KEYS.map(k => ({
+              modeId: k as string,
+              rawTier: (raw as Record<string, string | null | undefined>)[k] ?? null,
+            }));
+            const sortedModes = [
+              ...allModes
+                .filter((e): e is { modeId: string; rawTier: string } => !!e.rawTier && e.rawTier !== '-')
+                .sort((a, b) => (TIER_PRIORITY[a.rawTier.toUpperCase()] ?? 99) - (TIER_PRIORITY[b.rawTier.toUpperCase()] ?? 99)),
+              ...allModes.filter(e => !e.rawTier || e.rawTier === '-'),
+            ];
+            const MOBILE_MAX = 4;
+            const overflowCount = sortedModes.length - MOBILE_MAX;
+            return (
+              <Link key={player.id} to={`/player/${player.username}`} className="ot-rl-row">
+                <span className="ot-rl-rank">{rank}.</span>
+                <span className="ot-rl-player">
+                  <span className="ot-rl-avatar-ring ring-blue">
+                    <span className="ot-rl-avatar-bg" />
+                    <img
+                      src={`https://visage.surgeplay.com/full/256/${player.username}.png`}
+                      alt={player.username}
+                      className="ot-rl-avatar-img"
+                      loading="lazy"
+                    />
+                  </span>
+                  <span className="ot-rl-info">
+                    <span className="ot-rl-name">{player.username}</span>
+                    <span className="ot-rl-title">◆ {getTitle(player.points)}</span>
+                  </span>
+                </span>
+                <span className="ot-rl-region">
+                  <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                </span>
+                <span className="ot-rl-tiers">
+                  {sortedModes.map(({ modeId, rawTier }, idx) => {
+                    const cat = CATEGORIES.find(c => c.id === modeId);
+                    if (!cat) return null;
+                    const hasRank = !!rawTier && rawTier !== '-';
+                    return (
+                      <span key={modeId} className={`ot-rl-tbadge${hasRank ? ` ot-rl-tbadge--${tierRingCls(rawTier!)}` : ' ot-rl-tbadge--unranked'}${idx >= MOBILE_MAX ? ' ot-rl-tbadge--mobile-hidden' : ''}`}>
+                        <span className="ot-rl-ticon-wrap">
+                          <img src={cat.icon} alt={cat.label} className="ot-rl-ticon" loading="lazy" />
+                        </span>
+                        <span className="ot-rl-tlabel">{hasRank ? rawTier : '—'}</span>
+                      </span>
+                    );
+                  })}
+                  {overflowCount > 0 && <span className="ot-rl-tmore ot-rl-tmore--mobile-only">+{overflowCount}</span>}
+                </span>
+                <span className="ot-rl-pts">{player.points}<span className="ot-rl-pts-unit">pts</span></span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

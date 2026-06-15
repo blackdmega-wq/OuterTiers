@@ -2247,19 +2247,42 @@ img { display: block; }
 .lb-pod-skin-wrap {
   position: relative;
   margin-top: 8px;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
-  border-radius: 8px 8px 0 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 104px; }
-.lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 85px; }
-.lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 80px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; }
+.lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 92px; }
+.lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 88px; }
 .lb-pod-skin {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
-  object-fit: cover;
-  object-position: top center;
+  object-fit: contain;
+  object-position: bottom center;
+  image-rendering: pixelated;
+}
+/* Crown overlay (rank 1) */
+.lb-pod-crown {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(251,191,36,0.75));
+  z-index: 2;
+}
+/* Medal overlays (rank 2/3) */
+.lb-pod-medal {
+  position: absolute;
+  bottom: 8px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
 }
 
 /* ── PEDESTAL BLOCK ── */
@@ -2414,5 +2437,225 @@ img { display: block; }
   .lb-avatar      { width: 28px; height: 28px; }
   .lb-name        { font-size: 0.80rem; }
   .lb-pts         { font-size: 0.78rem; }
+}
+
+/* ════════════════════════════════════════════
+   RANKINGS OVERALL REVAMP  (.ot-ov-*)
+   ════════════════════════════════════════════ */
+.ot-ov-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP 3 PODIUM GRID ── */
+.ot-ov-top3 {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  align-items: end;
+  gap: 8px;
+  padding: 28px 16px 0;
+}
+
+/* ── HERO CARD ── */
+.ot-ov-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 14px 14px 0 0;
+  padding: 14px 8px 0;
+  position: relative;
+  overflow: visible;
+  transition: transform 0.18s ease, filter 0.18s ease;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+.ot-ov-hero:hover { transform: translateY(-6px); filter: brightness(1.12); }
+
+.ot-ov-hero--rank1 {
+  background: linear-gradient(180deg, rgba(251,191,36,0.13) 0%, rgba(251,191,36,0.04) 100%);
+  border-color: rgba(251,191,36,0.28);
+  box-shadow: 0 -4px 32px rgba(251,191,36,0.10) inset;
+}
+.ot-ov-hero--rank2 {
+  background: linear-gradient(180deg, rgba(148,163,184,0.11) 0%, rgba(148,163,184,0.03) 100%);
+  border-color: rgba(148,163,184,0.22);
+}
+.ot-ov-hero--rank3 {
+  background: linear-gradient(180deg, rgba(192,120,48,0.11) 0%, rgba(192,120,48,0.03) 100%);
+  border-color: rgba(192,120,48,0.22);
+}
+
+/* ── POSE IMAGE ── */
+.ot-ov-pose-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  padding-top: 24px;
+}
+.ot-ov-pose {
+  width: 80%;
+  max-width: 88px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  object-position: bottom center;
+  image-rendering: pixelated;
+}
+.ot-ov-hero--rank1 .ot-ov-pose { max-width: 106px; }
+
+/* ── CROWN OVERLAY ── */
+.ot-ov-crown {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(251,191,36,0.80));
+  z-index: 3;
+}
+
+/* ── MEDAL OVERLAY ── */
+.ot-ov-medal {
+  position: absolute;
+  bottom: 18%;
+  right: 10%;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+/* ── PEDESTAL STRIP ── */
+.ot-ov-pedestal {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.ot-ov-pedestal--rank1 {
+  height: 30px;
+  background: linear-gradient(90deg, rgba(251,191,36,0.20), rgba(251,191,36,0.10), rgba(251,191,36,0.20));
+  border-top: 2px solid rgba(251,191,36,0.55);
+  color: #fbbf24;
+  text-shadow: 0 0 12px rgba(251,191,36,0.50);
+}
+.ot-ov-pedestal--rank2 {
+  height: 24px;
+  background: linear-gradient(90deg, rgba(148,163,184,0.17), rgba(148,163,184,0.08), rgba(148,163,184,0.17));
+  border-top: 2px solid rgba(148,163,184,0.42);
+  color: #94a3b8;
+}
+.ot-ov-pedestal--rank3 {
+  height: 20px;
+  background: linear-gradient(90deg, rgba(192,120,48,0.17), rgba(192,120,48,0.08), rgba(192,120,48,0.17));
+  border-top: 2px solid rgba(192,120,48,0.42);
+  color: #c07830;
+}
+
+/* ── HERO INFO ── */
+.ot-ov-hero-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px 14px;
+  width: 100%;
+}
+.ot-ov-hero-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+  color: var(--text);
+}
+.ot-ov-hero--rank1 .ot-ov-hero-name {
+  color: #fde68a;
+  font-size: 0.92rem;
+  text-shadow: 0 0 14px rgba(251,191,36,0.30);
+}
+.ot-ov-hero--rank2 .ot-ov-hero-name { color: #e2e8f0; }
+.ot-ov-hero--rank3 .ot-ov-hero-name { color: #fdba74; }
+.ot-ov-hero-title {
+  font-size: 0.56rem;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ot-ov-hero-pts {
+  font-size: 0.94rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  margin-top: 3px;
+  color: var(--text);
+}
+.ot-ov-hero--rank1 .ot-ov-hero-pts { color: #fbbf24; font-size: 1.04rem; text-shadow: 0 0 12px rgba(251,191,36,0.35); }
+.ot-ov-hero--rank2 .ot-ov-hero-pts { color: #94a3b8; }
+.ot-ov-hero--rank3 .ot-ov-hero-pts { color: #c07830; }
+.ot-ov-hero-pts-unit {
+  font-size: 0.48rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.ot-ov-hero-info .lb-trophy { margin-bottom: 2px; }
+
+/* ── TABLE (ranks 4+) ── */
+.ot-ov-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 4px;
+}
+
+/* ── MOBILE responsive ── */
+@media (max-width: 580px) {
+  .ot-ov-top3 { padding: 20px 10px 0; gap: 6px; }
+  .ot-ov-hero { padding: 10px 4px 0; border-radius: 12px 12px 0 0; }
+  .ot-ov-pose { max-width: 60px !important; }
+  .ot-ov-hero--rank1 .ot-ov-pose { max-width: 74px !important; }
+  .ot-ov-crown { width: 34px; top: 0; }
+  .ot-ov-medal { width: 22px; height: 22px; }
+  .ot-ov-hero-name { font-size: 0.72rem; }
+  .ot-ov-hero--rank1 .ot-ov-hero-name { font-size: 0.80rem; }
+  .ot-ov-hero-title { display: none; }
+  .ot-ov-hero-pts { font-size: 0.80rem; }
+  .ot-ov-hero--rank1 .ot-ov-hero-pts { font-size: 0.88rem; }
+  .ot-ov-pedestal--rank1 { height: 24px; font-size: 0.68rem; }
+  .ot-ov-pedestal--rank2 { height: 20px; font-size: 0.62rem; }
+  .ot-ov-pedestal--rank3 { height: 18px; font-size: 0.60rem; }
+  .ot-ov-hero-info { padding: 7px 4px 10px; gap: 2px; }
+  .ot-ov-hero-info .lb-trophy { width: 18px; height: 18px; }
+  .ot-ov-pose-wrap { padding-top: 18px; }
+}
+@media (max-width: 400px) {
+  .ot-ov-top3 { grid-template-columns: 1fr 1.1fr 1fr; gap: 4px; padding: 16px 6px 0; }
+  .ot-ov-pose { max-width: 52px !important; }
+  .ot-ov-hero--rank1 .ot-ov-pose { max-width: 64px !important; }
+  .ot-ov-hero-name { font-size: 0.64rem; }
+  .ot-ov-hero--rank1 .ot-ov-hero-name { font-size: 0.72rem; }
+  .lb-pod-crown { width: 38px; }
+  .lb-pod-medal { width: 22px; height: 22px; }
 }
 
