@@ -31,48 +31,102 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
-/* ── Overall rankings — pvptiers-style flat table ── */
+/* ── Overall rankings — premium podium + list ── */
+const RANK_CFG = {
+  1: { medal: '🥇', color: '#fde68a', pts: '#fbbf24', border: 'rgba(251,191,36,0.45)', glow: 'rgba(251,191,36,0.28)', bg: 'linear-gradient(180deg,rgba(251,191,36,0.11) 0%,rgba(120,70,0,0.06) 100%)' },
+  2: { medal: '🥈', color: '#e2e8f0', pts: '#94a3b8', border: 'rgba(148,163,184,0.32)', glow: 'rgba(148,163,184,0.18)', bg: 'linear-gradient(180deg,rgba(148,163,184,0.08) 0%,rgba(50,60,80,0.04) 100%)' },
+  3: { medal: '🥉', color: '#fbd0a0', pts: '#c97940', border: 'rgba(192,120,48,0.32)', glow: 'rgba(192,120,48,0.18)', bg: 'linear-gradient(180deg,rgba(192,120,48,0.08) 0%,rgba(80,40,10,0.04) 100%)' },
+} as const;
+
 function OverallTable({ players }: { players: Player[] }) {
+  const top3 = players.slice(0, 3);
+  const rest  = players.slice(3);
+
+  const podiumOrder = top3.length >= 3
+    ? [{ p: top3[1], r: 2 as const }, { p: top3[0], r: 1 as const }, { p: top3[2], r: 3 as const }]
+    : top3.map((p, i) => ({ p, r: (i + 1) as 1 | 2 | 3 }));
+
   return (
-    <div className="pvp-leaderboard">
-      <div className="pvp-table-card">
-        <div className="pvp-table-header">
-          <span className="pvp-th pvp-th-rank">#</span>
-          <span className="pvp-th pvp-th-player">Player</span>
-          <span className="pvp-th pvp-th-region">Region</span>
-          <span className="pvp-th pvp-th-pts">Points</span>
-        </div>
-        <div className="pvp-table-body">
-          {players.map((player, i) => {
-            const rank = i + 1;
-            const rk = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+    <div className="ot-v2-wrap">
+
+      {/* ── TOP 3 PODIUM with full body skins ── */}
+      {top3.length > 0 && (
+        <div className="ot-v2-podium">
+          {podiumOrder.map(({ p: player, r: rank }) => {
+            const cfg = RANK_CFG[rank];
             return (
               <Link
                 key={player.id}
                 to={`/player/${player.username}`}
-                className={`pvp-row${rk ? ` pvp-row--${rk}` : ''}`}
+                className={`ot-v2-card ot-v2-card--r${rank}`}
+                style={{
+                  '--c-border': cfg.border,
+                  '--c-glow':   cfg.glow,
+                  '--c-bg':     cfg.bg,
+                  '--c-pts':    cfg.pts,
+                } as React.CSSProperties}
               >
-                <span className={`pvp-rank-num${rk ? ` pvp-rank-${rk}` : ''}`}>{rank}.</span>
-                <span className="pvp-player">
+                <div className="ot-v2-glow-ovl" />
+                <div className="ot-v2-card-top">
+                  <span className="ot-v2-medal">{cfg.medal}</span>
+                  <span className="ot-v2-card-rnum" style={{ color: cfg.color }}>#{rank}</span>
+                </div>
+                <div className="ot-v2-body-wrap">
                   <img
-                    src={`https://mc-heads.net/avatar/${player.username}/36`}
+                    src={`https://mc-heads.net/body/${player.username}/${rank === 1 ? 130 : 110}`}
                     alt={player.username}
-                    width={36} height={36}
-                    className="pvp-avatar"
+                    className="ot-v2-body-img"
                     loading="lazy"
                   />
-                  <span className="pvp-pname">{player.username}</span>
-                  <span className={`region-badge region-${player.region.toLowerCase()} pvp-region-inline`}>{player.region}</span>
-                </span>
-                <span className="pvp-region-col">
-                  <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-                </span>
-                <span className="pvp-pts-val">{player.points}</span>
+                  <div className="ot-v2-body-floor" />
+                </div>
+                <div className="ot-v2-card-footer">
+                  <div className="ot-v2-card-pname" style={{ color: cfg.color }}>{player.username}</div>
+                  <div className="ot-v2-card-meta">
+                    <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                  </div>
+                  <div className="ot-v2-pts-row">
+                    <span className="ot-v2-pts-num" style={{ color: cfg.pts }}>{player.points}</span>
+                    <span className="ot-v2-pts-sfx">pts</span>
+                  </div>
+                </div>
               </Link>
             );
           })}
         </div>
-      </div>
+      )}
+
+      {/* ── LIST rank 4+ ── */}
+      {rest.length > 0 && (
+        <div className="ot-v2-list">
+          <div className="ot-v2-list-hd">
+            <span className="ot-v2-lh">#</span>
+            <span className="ot-v2-lh">Player</span>
+            <span className="ot-v2-lh ot-v2-lh-c">Region</span>
+            <span className="ot-v2-lh ot-v2-lh-r">Points</span>
+          </div>
+          {rest.map((player, i) => (
+            <Link key={player.id} to={`/player/${player.username}`} className="ot-v2-row">
+              <span className="ot-v2-rrank">{i + 4}.</span>
+              <span className="ot-v2-rplayer">
+                <img
+                  src={`https://mc-heads.net/avatar/${player.username}/32`}
+                  alt={player.username}
+                  width={32} height={32}
+                  className="ot-v2-ravatar"
+                  loading="lazy"
+                />
+                <span className="ot-v2-rname">{player.username}</span>
+                <span className={`region-badge region-${player.region.toLowerCase()} ot-v2-rinline`}>{player.region}</span>
+              </span>
+              <span className="ot-v2-rregion">
+                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+              </span>
+              <span className="ot-v2-rpts">{player.points}</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
