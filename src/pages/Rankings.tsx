@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CATEGORIES, TIER_COLS, getCategoryTiers, getTitle } from '../data/players';
+import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
 import { usePlayers } from '../hooks/usePlayers';
-import CategoryTierBadge from '../components/CategoryTierBadge';
 import InfoModal from '../components/InfoModal';
 import { Info } from 'lucide-react';
 
