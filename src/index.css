@@ -1814,8 +1814,8 @@ img { display: block; }
 /* Rotating glow ring */
 .ot-rl-avatar-ring {
   position: relative; flex-shrink: 0;
-  width: 40px; height: 68px;
-  border-radius: 10px;
+  width: 38px; height: 46px;
+  border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
   padding: 2px;
   overflow: hidden;
@@ -1848,11 +1848,11 @@ img { display: block; }
 }
 .ot-rl-avatar-img {
   position: absolute;
-  inset: 2px;
+  top: 2px; left: 2px;
   width: calc(100% - 4px);
-  height: calc(100% - 4px);
-  object-fit: contain;
-  object-position: center top;
+  height: auto;
+  object-fit: cover;
+  object-position: top center;
   image-rendering: pixelated;
   z-index: 1;
   border-radius: 6px;
@@ -2137,7 +2137,7 @@ img { display: block; }
   .ot-rl-bolt--4 { height: 9px; left: -12px; }
   .ot-rl-bolt--5 { height: 7px; right: -10px; }
   .ot-rl-bolt--6 { height: 7px; top: -8px; }
-  .ot-rl-avatar-ring { width: 30px; height: 52px; }
+  .ot-rl-avatar-ring { width: 30px; height: 36px; border-radius: 7px; }
 }
 
 /* ── Mobile: reduce aura on reduced motion ── */

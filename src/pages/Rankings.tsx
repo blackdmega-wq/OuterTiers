@@ -90,8 +90,8 @@ function OverallTable({ players }: { players: Player[] }) {
         const ringCls = rank === 1 ? 'ring-gold' : rank === 2 ? 'ring-silver' : rank === 3 ? 'ring-bronze' : 'ring-blue';
         const rowCls = rank <= 3 ? ` ot-rl-row--top${rank}` : '';
 
-        /* Mobile: show first 5 badges, rest overflow */
-        const MOBILE_MAX = 5;
+        /* Mobile portrait: show first 4 badges, rest overflow */
+        const MOBILE_MAX = 4;
         const overflowCount = sortedModes.length - MOBILE_MAX;
 
         return (
