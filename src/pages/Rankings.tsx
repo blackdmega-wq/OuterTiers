@@ -73,7 +73,7 @@ function OverallTable({ players }: { players: Player[] }) {
               <span className={`ot-rl-avatar-ring ${ringCls}`}>
                 <span className="ot-rl-avatar-bg" />
                 <img
-                  src={`https://mc-heads.net/avatar/${player.username}/42`}
+                  src={`https://mc-heads.net/body/${player.username}`}
                   alt={player.username}
                   className="ot-rl-avatar-img"
                   loading="lazy"
