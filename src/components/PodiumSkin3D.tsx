@@ -5,15 +5,18 @@ interface Props {
   rank: 1 | 2 | 3;
 }
 
+/* Canvas sizes — match CSS lb-pod-skin-wrap sizes */
 const SIZES = {
-  1: { width: 110, height: 170, cameraZ: 62 },
-  2: { width: 88,  height: 140, cameraZ: 68 },
-  3: { width: 82,  height: 132, cameraZ: 70 },
+  1: { width: 140, height: 220 },
+  2: { width: 110, height: 175 },
+  3: { width: 100, height: 165 },
 } as const;
+
+const ZOOM: Record<1|2|3, number> = { 1: 0.82, 2: 0.85, 3: 0.85 };
 
 export default function PodiumSkin3D({ username, rank }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { width, height, cameraZ } = SIZES[rank];
+  const { width, height } = SIZES[rank];
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -27,56 +30,56 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         canvas: canvasRef.current,
         width,
         height,
+        skin: `https://mc-heads.net/skin/${username}`,
+        background: null,
       });
 
-      /* transparent background */
-      try { viewer.background = null; } catch (_) {}
-      try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
-      viewer.camera.position.z = cameraZ;
+      viewer.zoom = ZOOM[rank];
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
 
-      /* load skin async */
-      viewer.loadSkin(`https://mc-heads.net/skin/${username}`).catch(() =>
-        viewer.loadSkin(`https://minotar.net/skin/${username}`)
-      );
-
       if (rank === 3) {
-        /* ── #3 SPRINT: built-in skeletal running animation, 2.4× speed ── */
+        /* ── #3 SPRINT ── built-in skeletal running at 2.2× speed */
         const anim = new sv3d.RunningAnimation();
-        (anim as any).speed = 2.4;
+        (anim as any).speed = 2.2;
         viewer.animation = anim;
 
       } else if (rank === 2) {
-        /* ── #2 FORTNITE FLOSS: big arm swings + hip counter-twist ── */
+        /* ── #2 FORTNITE FLOSS ── big arm swings + hip counter-twist */
         viewer.animation = (player: any, time: number) => {
-          const t = time * 5.5;
-          const swing = Math.sin(t) * 1.5;
-          player.skin.leftArm.rotation.z  =  swing + 0.5;
-          player.skin.rightArm.rotation.z = -swing - 0.5;
-          player.skin.leftArm.rotation.x  =  Math.cos(t) * 0.35;
-          player.skin.rightArm.rotation.x = -Math.cos(t) * 0.35;
-          /* Body hip counter-twist — the floss signature */
-          player.skin.body.rotation.y = -Math.sin(t) * 0.55;
-          player.skin.body.rotation.z = -Math.sin(t) * 0.07;
-          /* Knee bounce */
-          player.skin.leftLeg.rotation.x  =  Math.sin(t * 0.5) * 0.25;
-          player.skin.rightLeg.rotation.x = -Math.sin(t * 0.5) * 0.25;
+          try {
+            const s = player?.skin;
+            if (!s) return;
+            const t = time * 5.5;
+            const swing = Math.sin(t) * 1.5;
+            s.leftArm.rotation.z  =  swing + 0.5;
+            s.rightArm.rotation.z = -swing - 0.5;
+            s.leftArm.rotation.x  =  Math.cos(t) * 0.35;
+            s.rightArm.rotation.x = -Math.cos(t) * 0.35;
+            s.body.rotation.y = -Math.sin(t) * 0.55;
+            s.body.rotation.z = -Math.sin(t) * 0.07;
+            s.leftLeg.rotation.x  =  Math.sin(t * 0.5) * 0.25;
+            s.rightLeg.rotation.x = -Math.sin(t * 0.5) * 0.25;
+          } catch (_) { /* skin not ready yet, skip frame */ }
         };
 
       } else {
-        /* ── #1 VICTORY: arms raised + waving, excited head, body sway ── */
+        /* ── #1 VICTORY ── arms raised high, waving, excited head */
         viewer.animation = (player: any, time: number) => {
-          const t = time * 2.8;
-          player.skin.leftArm.rotation.z  = -(1.6 + Math.sin(t * 1.7) * 0.5);
-          player.skin.rightArm.rotation.z =   1.6 + Math.sin(t * 1.7 + Math.PI) * 0.5;
-          player.skin.leftArm.rotation.x  =  Math.sin(t) * 0.35 - 0.3;
-          player.skin.rightArm.rotation.x = -Math.sin(t) * 0.35 - 0.3;
-          player.skin.head.rotation.x = -0.2 + Math.sin(t * 0.9) * 0.15;
-          player.skin.head.rotation.y =  Math.sin(t * 0.7) * 0.3;
-          player.skin.body.rotation.y = Math.sin(t * 0.45) * 0.12;
-          player.skin.leftLeg.rotation.x  =  Math.sin(t * 1.6) * 0.1;
-          player.skin.rightLeg.rotation.x = -Math.sin(t * 1.6) * 0.1;
+          try {
+            const s = player?.skin;
+            if (!s) return;
+            const t = time * 2.8;
+            s.leftArm.rotation.z  = -(1.6 + Math.sin(t * 1.7) * 0.5);
+            s.rightArm.rotation.z =   1.6 + Math.sin(t * 1.7 + Math.PI) * 0.5;
+            s.leftArm.rotation.x  =  Math.sin(t) * 0.35 - 0.3;
+            s.rightArm.rotation.x = -Math.sin(t) * 0.35 - 0.3;
+            s.head.rotation.x = -0.2 + Math.sin(t * 0.9) * 0.15;
+            s.head.rotation.y =  Math.sin(t * 0.7) * 0.3;
+            s.body.rotation.y = Math.sin(t * 0.45) * 0.12;
+            s.leftLeg.rotation.x  =  Math.sin(t * 1.6) * 0.1;
+            s.rightLeg.rotation.x = -Math.sin(t * 1.6) * 0.1;
+          } catch (_) { /* skin not ready yet, skip frame */ }
         };
       }
     }).catch(console.error);
@@ -92,7 +95,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       ref={canvasRef}
       width={width}
       height={height}
-      style={{ display: 'block', background: 'transparent' }}
+      style={{
+        display: 'block',
+        background: 'transparent',
+        position: 'relative',
+        zIndex: 1,
+      }}
     />
   );
 }
