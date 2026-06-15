@@ -31,24 +31,17 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
-/* ── Custom rank icons (no emojis) ── */
+/* ── Custom rank icons — trophy shape ── */
 function RankIcon({ rank }: { rank: number }) {
-  if (rank === 1) return (
-    <svg className="ot-rl-rank-icon ot-rl-rank-icon--gold" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 8L6 14H12H18L22 8L17 11L12 4L7 11L2 8Z" fill="currentColor" opacity="0.95"/>
-      <rect x="7" y="17" width="10" height="3" rx="1.5" fill="currentColor"/>
-      <rect x="5" y="14" width="14" height="3.5" rx="1" fill="currentColor" opacity="0.85"/>
-    </svg>
-  );
-  if (rank === 2) return (
-    <svg className="ot-rl-rank-icon ot-rl-rank-icon--silver" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 3L14.5 8.5L20.5 9.3L16.2 13.4L17.3 19.3L12 16.5L6.7 19.3L7.8 13.4L3.5 9.3L9.5 8.5L12 3Z" fill="currentColor"/>
-    </svg>
-  );
+  const cls = rank === 1 ? 'ot-rl-rank-icon--gold' : rank === 2 ? 'ot-rl-rank-icon--silver' : 'ot-rl-rank-icon--bronze';
   return (
-    <svg className="ot-rl-rank-icon ot-rl-rank-icon--bronze" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2C9.5 5 7 7 4 8C4 14 7.5 19 12 21C16.5 19 20 14 20 8C17 7 14.5 5 12 2Z" fill="currentColor" opacity="0.9"/>
-      <path d="M12 6C10.5 8 9 9.5 7 10.5C7 14.5 9.2 17.8 12 19.2C14.8 17.8 17 14.5 17 10.5C15 9.5 13.5 8 12 6Z" fill="currentColor" opacity="0.5"/>
+    <svg className={`ot-rl-rank-icon ${cls}`} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 2h12v8a6 6 0 0 1-12 0V2z"/>
+      <path d="M4 4H6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <path d="M18 4h2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <line x1="12" y1="14" x2="12" y2="16.5" stroke="currentColor" strokeWidth="2" fill="none"/>
+      <rect x="7.5" y="16.5" width="9" height="2.6" rx="1.3"/>
+      <rect x="9.5" y="19" width="5" height="1.8" rx="0.9" opacity="0.7"/>
     </svg>
   );
 }
@@ -115,7 +108,7 @@ function OverallTable({ players }: { players: Player[] }) {
                 <span className={`ot-rl-avatar-ring ${ringCls}`}>
                   <span className="ot-rl-avatar-bg" />
                   <img
-                    src={`https://mc-heads.net/player/${player.username}`}
+                    src={`https://visage.surgeplay.com/full/256/${player.username}.png`}
                     alt={player.username}
                     className="ot-rl-avatar-img"
                     loading="lazy"
