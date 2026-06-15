@@ -31,9 +31,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         width,
         height,
         skin: `https://mc-heads.net/skin/${username}`,
-        background: null,
       });
 
+      /* transparent background — null not allowed in TS types so use renderer directly */
+      try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
       viewer.zoom = ZOOM[rank];
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
