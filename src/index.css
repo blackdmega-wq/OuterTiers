@@ -2250,7 +2250,7 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 20px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 44px; }
 .lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 92px; }
 .lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 88px; }
 .lb-pod-skin {
@@ -2600,15 +2600,15 @@ img { display: block; }
   line-height: 1;
 }
 /* Tier number ring colors — match CategoryTierBadge RAW_TIER_STYLES exactly */
-.ot-ov-badge--tv1 .ot-ov-badge-icon { border-color: #f1c40f; box-shadow: 0 0 6px rgba(241,196,15,0.55); }
+.ot-ov-badge--tv1 .ot-ov-badge-icon { border-color: #f1c40f; background: rgba(241,196,15,0.15); box-shadow: 0 0 7px rgba(241,196,15,0.55), inset 0 0 6px rgba(241,196,15,0.12); }
 .ot-ov-badge--tv1 .ot-ov-badge-lbl  { color: #f1c40f; }
-.ot-ov-badge--tv2 .ot-ov-badge-icon { border-color: #a4b2c7; box-shadow: 0 0 5px rgba(164,178,199,0.45); }
+.ot-ov-badge--tv2 .ot-ov-badge-icon { border-color: #a4b2c7; background: rgba(164,178,199,0.15); box-shadow: 0 0 5px rgba(164,178,199,0.45), inset 0 0 6px rgba(164,178,199,0.12); }
 .ot-ov-badge--tv2 .ot-ov-badge-lbl  { color: #a4b2c7; }
-.ot-ov-badge--tv3 .ot-ov-badge-icon { border-color: #df8746; box-shadow: 0 0 5px rgba(223,135,70,0.50); }
+.ot-ov-badge--tv3 .ot-ov-badge-icon { border-color: #df8746; background: rgba(223,135,70,0.15); box-shadow: 0 0 5px rgba(223,135,70,0.50), inset 0 0 6px rgba(223,135,70,0.12); }
 .ot-ov-badge--tv3 .ot-ov-badge-lbl  { color: #df8746; }
-.ot-ov-badge--tv4 .ot-ov-badge-icon { border-color: #46df5d; box-shadow: 0 0 7px rgba(70,223,93,0.50); }
+.ot-ov-badge--tv4 .ot-ov-badge-icon { border-color: #46df5d; background: rgba(70,223,93,0.15); box-shadow: 0 0 7px rgba(70,223,93,0.50), inset 0 0 6px rgba(70,223,93,0.12); }
 .ot-ov-badge--tv4 .ot-ov-badge-lbl  { color: #46df5d; }
-.ot-ov-badge--tv5 .ot-ov-badge-icon { border-color: #a4d5ff; box-shadow: 0 0 5px rgba(164,213,255,0.45); }
+.ot-ov-badge--tv5 .ot-ov-badge-icon { border-color: #a4d5ff; background: rgba(164,213,255,0.15); box-shadow: 0 0 5px rgba(164,213,255,0.45), inset 0 0 6px rgba(164,213,255,0.12); }
 .ot-ov-badge--tv5 .ot-ov-badge-lbl  { color: #a4d5ff; }
 
 /* ── POINTS COLUMN ── */
