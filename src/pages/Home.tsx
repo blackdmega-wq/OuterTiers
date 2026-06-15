@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
+import PodiumSkin3D from '../components/PodiumSkin3D';
 import DiscordJoinModal from '../components/DiscordJoinModal';
 import Logo from '../components/Logo';
 import { usePlayers } from '../hooks/usePlayers';
@@ -340,19 +341,7 @@ export default function Home() {
                         )}
 
 
-                        <img
-                          src={`https://mc-heads.net/body/${player.username}/256`}
-                          alt={player.username}
-                          className={`lb-pod-skin lb-pod-skin--pose${rank}`}
-                          loading="lazy"
-                          onError={(e) => {
-                            const img = e.target as HTMLImageElement;
-                            if (!img.dataset.fb) {
-                              img.dataset.fb = '1';
-                              img.src = `https://minotar.net/body/${player.username}/256`;
-                            }
-                          }}
-                        />
+                        <PodiumSkin3D username={player.username} rank={rank as 1 | 2 | 3} />
                       </div>
                       <div className="lb-pod-pedestal">
                         <span className="lb-pod-num">{rank}</span>
