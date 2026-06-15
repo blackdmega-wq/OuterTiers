@@ -2264,50 +2264,95 @@ img { display: block; }
 
 /* ── Rank-specific pose transforms ── */
 
-/* #1 Champion: floats, slight left isometric tilt, breathing scale */
-@keyframes lb-skin-float {
-  0%,100% { transform: perspective(500px) rotateY(-8deg) rotateX(4deg) translateY(0px) scale(1.0); }
-  50%      { transform: perspective(500px) rotateY(-8deg) rotateX(4deg) translateY(-7px) scale(1.03); }
+/* ─────────────────────────────────────────────
+   #1 GOLD — Victory Emote + celebratory bounce
+   ───────────────────────────────────────────── */
+@keyframes lb-skin-victory {
+  0%   { transform: translateY(0px) scale(1.0) rotate(0deg); }
+  18%  { transform: translateY(-15px) scale(1.07) rotate(-4deg); }
+  36%  { transform: translateY(-8px) scale(1.04) rotate(3deg); }
+  54%  { transform: translateY(-18px) scale(1.09) rotate(-3deg); }
+  72%  { transform: translateY(-5px) scale(1.02) rotate(2deg); }
+  88%  { transform: translateY(-12px) scale(1.05) rotate(-2deg); }
+  100% { transform: translateY(0px) scale(1.0) rotate(0deg); }
 }
-@keyframes lb-skin-glow-pulse {
-  0%,100% { filter: drop-shadow(0 0 12px rgba(251,191,36,0.70)) drop-shadow(0 4px 18px rgba(251,191,36,0.40)); }
-  50%      { filter: drop-shadow(0 0 22px rgba(251,191,36,0.95)) drop-shadow(0 4px 28px rgba(251,191,36,0.65)); }
+@keyframes lb-skin-victory-glow {
+  0%,100% { filter: drop-shadow(0 0 14px rgba(251,191,36,0.80)) drop-shadow(0 4px 20px rgba(251,191,36,0.45)); }
+  50%     { filter: drop-shadow(0 0 28px rgba(255,230,80,1.0)) drop-shadow(0 6px 36px rgba(251,191,36,0.80)); }
 }
 .lb-pod-skin--pose1 {
-  animation: lb-skin-float 2.8s ease-in-out infinite, lb-skin-glow-pulse 2.8s ease-in-out infinite;
+  animation: lb-skin-victory 2.2s cubic-bezier(0.36,0.07,0.19,0.97) infinite, lb-skin-victory-glow 2.2s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 14px rgba(251,191,36,0.80));
+  filter: drop-shadow(0 0 16px rgba(251,191,36,0.90));
 }
 
-/* #2 Silver: turned right (battle-ready look), subtle rock */
-@keyframes lb-skin-battle {
-  0%,100% { transform: perspective(420px) rotateY(18deg) rotate(-4deg) scale(1.0); }
-  50%      { transform: perspective(420px) rotateY(14deg) rotate(-3deg) scale(1.01); }
+/* Confetti rocket particles behind #1 */
+.lb-confetti-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
 }
-@keyframes lb-skin-silver-glow {
-  0%,100% { filter: drop-shadow(0 0 8px rgba(203,213,225,0.55)) drop-shadow(0 3px 12px rgba(148,163,184,0.35)); }
-  50%      { filter: drop-shadow(0 0 14px rgba(226,232,240,0.75)) drop-shadow(0 3px 20px rgba(148,163,184,0.55)); }
+.lb-confetti-wrap .lb-rocket {
+  position: absolute;
+  bottom: -10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: lb-rocket-up var(--dur, 1.4s) var(--delay, 0s) ease-out infinite;
+}
+@keyframes lb-rocket-up {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translateY(-160px) scale(0.3); opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   #2 SILVER — Fortnite Floss Dance
+   Side-to-side arm swing, hip rhythm
+   ───────────────────────────────────────────── */
+@keyframes lb-skin-floss {
+  0%   { transform: rotate(10deg) translateX(7px) scaleX(1.06) translateY(2px); }
+  12%  { transform: rotate(5deg) translateX(3px) scaleX(1.02) translateY(-4px); }
+  25%  { transform: rotate(0deg) translateX(0px) scaleX(1.0) translateY(-6px); }
+  37%  { transform: rotate(-5deg) translateX(-3px) scaleX(0.98) translateY(-4px); }
+  50%  { transform: rotate(-10deg) translateX(-7px) scaleX(0.94) translateY(2px); }
+  62%  { transform: rotate(-5deg) translateX(-3px) scaleX(0.98) translateY(-4px); }
+  75%  { transform: rotate(0deg) translateX(0px) scaleX(1.0) translateY(-6px); }
+  87%  { transform: rotate(5deg) translateX(3px) scaleX(1.02) translateY(-4px); }
+  100% { transform: rotate(10deg) translateX(7px) scaleX(1.06) translateY(2px); }
+}
+@keyframes lb-skin-floss-glow {
+  0%,50%  { filter: drop-shadow(0 0 10px rgba(203,213,225,0.65)) drop-shadow(0 3px 14px rgba(148,163,184,0.45)); }
+  25%,75% { filter: drop-shadow(0 0 18px rgba(226,232,240,0.90)) drop-shadow(0 3px 22px rgba(148,163,184,0.70)); }
 }
 .lb-pod-skin--pose2 {
-  animation: lb-skin-battle 3.2s ease-in-out infinite, lb-skin-silver-glow 3.2s ease-in-out infinite;
+  animation: lb-skin-floss 0.65s ease-in-out infinite, lb-skin-floss-glow 1.3s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 9px rgba(203,213,225,0.55));
+  filter: drop-shadow(0 0 10px rgba(203,213,225,0.65));
 }
 
-/* #3 Bronze: turned left, slight lean (challenger stance) */
-@keyframes lb-skin-challenger {
-  0%,100% { transform: perspective(380px) rotateY(-18deg) rotate(5deg) scale(1.0); }
-  40%      { transform: perspective(380px) rotateY(-12deg) rotate(3deg) scale(0.99); }
-  70%      { transform: perspective(380px) rotateY(-20deg) rotate(6deg) scale(1.01); }
+/* ─────────────────────────────────────────────
+   #3 BRONZE — Fast Sprint / Run Emote
+   Forward lean + rapid stride bobbing
+   ───────────────────────────────────────────── */
+@keyframes lb-skin-sprint {
+  0%   { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-3px); }
+  20%  { transform: rotate(-13deg) translateY(-7px) scaleX(1.00) translateX(2px); }
+  40%  { transform: rotate(-16deg) translateY(0px) scaleX(0.94) translateX(-4px); }
+  60%  { transform: rotate(-13deg) translateY(-6px) scaleX(1.01) translateX(3px); }
+  80%  { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-2px); }
+  100% { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-3px); }
 }
-@keyframes lb-skin-bronze-glow {
-  0%,100% { filter: drop-shadow(0 0 7px rgba(201,119,56,0.55)) drop-shadow(0 3px 10px rgba(180,95,38,0.35)); }
-  50%      { filter: drop-shadow(0 0 13px rgba(217,145,68,0.72)) drop-shadow(0 3px 18px rgba(180,95,38,0.52)); }
+@keyframes lb-skin-sprint-glow {
+  0%,100% { filter: drop-shadow(0 0 8px rgba(201,119,56,0.60)) drop-shadow(3px 3px 10px rgba(180,95,38,0.45)); }
+  50%     { filter: drop-shadow(0 0 15px rgba(230,150,80,0.80)) drop-shadow(4px 4px 16px rgba(200,110,48,0.65)); }
 }
 .lb-pod-skin--pose3 {
-  animation: lb-skin-challenger 3.6s ease-in-out infinite, lb-skin-bronze-glow 3.6s ease-in-out infinite;
+  animation: lb-skin-sprint 0.38s linear infinite, lb-skin-sprint-glow 0.76s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 8px rgba(201,119,56,0.55));
+  filter: drop-shadow(0 0 9px rgba(201,119,56,0.60));
 }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
