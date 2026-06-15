@@ -1,177 +1,150 @@
 /* ===================================================================
-   GLOBAL SITE ENHANCEMENTS — site-enhancements.css
+   GLOBAL SITE ENHANCEMENTS — site-enhancements.css — PREMIUM v2
    =================================================================== */
 
-/* ── Grid background — subtle but visible ── */
+/* ── Grid background ── */
 .page-bg-grid {
   background-image:
-    linear-gradient(rgba(91,164,245,0.030) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(91,164,245,0.030) 1px, transparent 1px) !important;
-  background-size: 56px 56px !important;
+    linear-gradient(rgba(96,165,250,0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96,165,250,0.032) 1px, transparent 1px) !important;
+  background-size: 52px 52px !important;
+  mask-image: radial-gradient(ellipse 110% 90% at 50% 0%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 110% 90% at 50% 0%, #000 30%, transparent 100%);
 }
 
-/* ── Logo shimmer animation ── */
-@keyframes logoShimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 250% center; }
+/* ── Navbar scrolled style ── */
+.navbar-scrolled {
+  background: rgba(2,3,8,0.97) !important;
+  border-bottom-color: rgba(96,165,250,0.18) !important;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.70), 0 0 48px rgba(59,130,246,0.07) !important;
 }
 
-/* ── Hero stat cards ── */
-.hero-stat-card {
-  background: rgba(255,255,255,0.035) !important;
-  border-color: rgba(255,255,255,0.10) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  transition: transform 0.24s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.24s, border-color 0.24s !important;
-}
-.hero-stat-card:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(91,164,245,0.30) !important;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.4), 0 0 24px rgba(37,99,235,0.15) !important;
+/* ── Card hover lifts ── */
+.feature-card,
+.stat-card,
+.feed-card,
+.top-card,
+.discord-card {
+  transition: transform 0.26s cubic-bezier(0.34,1.56,0.64,1),
+              border-color 0.22s,
+              box-shadow 0.26s !important;
+  will-change: transform;
 }
 
-/* ── Game mode chips ── */
-.game-mode-chip {
-  transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
-}
-.game-mode-chip:hover {
-  transform: translateY(-3px) scale(1.06) !important;
+/* ── Tier player rows: left glow bar on hover ── */
+.tier-player-row:hover { background: rgba(96,165,250,0.060) !important; }
+
+/* ── Leaderboard row hover ── */
+.player-row:hover { background: rgba(96,165,250,0.052) !important; }
+
+/* ── Player name hover color ── */
+.player-cell a:hover .player-name,
+.tier-player-row a:hover .tier-player-name {
+  color: var(--blue-bright) !important;
 }
 
-/* ── Section headings ── */
-.section-heading {
-  background: linear-gradient(130deg, #fff 35%, #b0d0ff 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ── Feed items ── */
+.feed-item:hover { background: rgba(96,165,250,0.040) !important; }
+
+/* ── Top-card rank 2 & 3 border glows ── */
+.top-card-rank-2 {
+  box-shadow: 0 0 0 1px rgba(148,163,184,0.22), 0 8px 32px rgba(0,0,0,0.45) !important;
+}
+.top-card-rank-2:hover {
+  box-shadow: 0 0 0 1px rgba(148,163,184,0.38), 0 20px 60px rgba(0,0,0,0.65), 0 0 28px rgba(148,163,184,0.14) !important;
+}
+.top-card-rank-3:hover {
+  box-shadow: 0 0 0 1px rgba(180,110,60,0.35), 0 20px 60px rgba(0,0,0,0.65), 0 0 24px rgba(180,110,60,0.14) !important;
 }
 
-/* ── Top 3 cards ── */
-.top-card {
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s !important;
+/* ── Category tab: gold accent on active ── */
+.category-tab.active {
+  color: var(--text) !important;
+  border-bottom-color: var(--gold) !important;
+  background: rgba(251,191,36,0.04) !important;
 }
-.top-card:hover {
-  transform: translateY(-6px) !important;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 28px rgba(37,99,235,0.14) !important;
-}
-
-/* ── Rankings tier columns ── */
-.tier-column {
-  transition: border-color 0.22s, box-shadow 0.22s !important;
-}
-.tier-column:hover {
-  border-color: rgba(255,255,255,0.16) !important;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.35), 0 0 16px rgba(37,99,235,0.08) !important;
+.category-tab.active .tab-icon {
+  filter: saturate(1.3) brightness(1.15) drop-shadow(0 0 4px rgba(251,191,36,0.45)) !important;
 }
 
-/* ── Tier column header glow ── */
-.tier-col-header { position: relative; overflow: hidden; }
-.tier-col-header::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, currentColor, transparent);
-  opacity: 0.65;
+/* ── Hero title text-shadow for depth ── */
+.hero-title .logo-outer {
+  filter: drop-shadow(0 0 18px rgba(96,165,250,0.70)) drop-shadow(0 4px 18px rgba(0,0,0,0.90)) !important;
+}
+.hero-title .logo-tiers {
+  filter: drop-shadow(0 0 22px rgba(251,191,36,0.80)) drop-shadow(0 4px 18px rgba(0,0,0,0.90)) !important;
 }
 
-/* ── Cat tier circles ── */
-.cat-tier-circle {
-  transition: box-shadow 0.22s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+/* ── Navbar link: active indicator dot ── */
+.nav-link-active::before {
+  content: '';
+  position: absolute;
+  left: 50%; bottom: -3px;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 8px rgba(96,165,250,0.80);
 }
-.cat-tier-badge:hover .cat-tier-circle { transform: scale(1.15) !important; }
-.cat-tier-text { font-weight: 900 !important; }
+.nav-link { position: relative; }
 
-/* ── Player rows ── */
-.tier-player-row {
-  transition: background 0.16s !important;
+/* ── Section dividers ── */
+.home-page > section:not(:first-child)::before,
+.home-page > div:not(:first-child) > .section-header::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  margin-bottom: 24px;
+}
+
+/* ── Gold rank shimmer (#1 row) ── */
+.player-row.rank-gold-row td:first-child {
   position: relative;
 }
-.tier-player-row::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-  background: #5ba4f5; opacity: 0; transition: opacity 0.18s;
-}
-.tier-player-row:hover { background: rgba(91,164,245,0.055) !important; }
-.tier-player-row:hover::before { opacity: 0.8; }
-
-/* ── Profile header card ── */
-.profile-header-card {
-  background: rgba(255,255,255,0.03) !important;
-  border-color: rgba(255,255,255,0.10) !important;
-}
-.profile-header-card--rank-gold   { border-color: rgba(241,196,15,0.25) !important; box-shadow: 0 0 40px rgba(241,196,15,0.08) !important; }
-.profile-header-card--rank-silver { border-color: rgba(164,178,199,0.25) !important; }
-.profile-header-card--rank-bronze { border-color: rgba(223,135,70,0.25) !important; }
-
-/* ── Points badge pulse ── */
-.profile-points-badge { animation: ptsPulse 3.5s ease-in-out infinite; }
-@keyframes ptsPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(91,164,245,0); }
-  50%     { box-shadow: 0 0 10px 2px rgba(91,164,245,0.20); }
+.player-row.rank-gold-row td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, rgba(251,191,36,0.10), rgba(251,191,36,0.85), rgba(251,191,36,0.10));
+  border-radius: 0 2px 2px 0;
 }
 
-/* ── Rankings header ── */
-.rankings-header-title {
-  background: linear-gradient(135deg, #fff 25%, #a8c8ff 100%) !important;
-  -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
+/* ── About section text ── */
+.about-title {
+  background: linear-gradient(130deg, #fff 30%, #bfdbfe 75%, var(--blue) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-/* ── Feature cards ── */
-.feature-card {
-  transition: transform 0.24s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s, box-shadow 0.25s !important;
+/* ── Modal entrance ── */
+.modal-overlay { animation: fadeIn 0.22s ease both; }
+.modal-box     { animation: fadeInUp 0.32s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ── Discord btn icon spin on hover ── */
+.discord-btn:hover svg { animation: spin 0.6s ease; }
+
+/* ── API badge ── */
+.feed-badge-red {
+  position: relative;
+  overflow: hidden;
 }
-.feature-card:hover {
-  transform: translateY(-6px) !important;
-  box-shadow: 0 22px 60px rgba(0,0,0,0.50), 0 0 32px rgba(37,99,235,0.16) !important;
-  border-color: rgba(91,164,245,0.24) !important;
+.feed-badge-red::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(239,68,68,0.25), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
 }
 
-/* ── Game mode cards ── */
-.game-mode-card, .game-mode-full-card {
-  transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
-}
-.game-mode-card:hover, .game-mode-full-card:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
-}
+/* ── Hover helper for profile links ── */
+.profile-link-hover { transition: color 0.15s; }
+.profile-link-hover:hover { color: var(--blue-bright) !important; }
 
-/* ── Region badges ── */
-.region-badge {
-  font-weight: 800 !important; letter-spacing: 0.08em !important;
-}
-
-/* ── Tier badge ── */
-.tier-badge {
-  font-weight: 800 !important; letter-spacing: 0.05em !important;
-  transition: box-shadow 0.22s !important;
-}
-
-/* ── Discord card ── */
-.discord-card {
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s !important;
-}
-.discord-card:hover { transform: translateY(-4px) !important; }
-
-/* ── Ripple cards ── */
-.ripple-card {
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s, box-shadow 0.22s !important;
-}
-.ripple-card:hover {
-  transform: translateY(-3px) !important;
-  border-color: rgba(255,255,255,0.16) !important;
-  box-shadow: 0 10px 36px rgba(0,0,0,0.42) !important;
-}
-
-/* ── Custom scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-::-webkit-scrollbar-thumb {
-  background: rgba(91,164,245,0.22); border-radius: 3px;
-  transition: background 0.2s;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(91,164,245,0.45); }
-
-/* ── Global glow animations ── */
-.rankings-page-header-glow { animation-duration: 5s !important; }
-
+/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .logo-outer, .hero-title, .top-card-rank-1::after,
-  .ppv2-crown, .ptsPulse { animation: none !important; }
+  .feature-card, .stat-card, .feed-card, .top-card, .discord-card {
+    transition: border-color 0.1s, box-shadow 0.1s !important;
+  }
 }
