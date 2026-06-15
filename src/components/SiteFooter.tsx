@@ -54,16 +54,15 @@ export default function SiteFooter() {
             </div>
             <p className="footer-brand-sub">
               The competitive Minecraft PvP ranking platform.
-              Every tier. Every category. Every player.
             </p>
             <div className="footer-social-row">
-              <button className="footer-social-btn" title="Discord servers" aria-label="Discord servers" onClick={() => setShowDiscord(true)}>
+              <button className="footer-social-btn footer-social-btn--discord" title="Discord servers" aria-label="Discord servers" onClick={() => setShowDiscord(true)}>
                 {DISCORD_ICON}
               </button>
-              <a href="https://www.tiktok.com/@0utversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn" title="TikTok">
+              <a href="https://www.tiktok.com/@0utversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn footer-social-btn--tiktok" title="TikTok">
                 {TIKTOK_ICON}
               </a>
-              <a href="https://youtube.com/@outversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn" title="YouTube">
+              <a href="https://youtube.com/@outversal" target="_blank" rel="noopener noreferrer" className="footer-social-btn footer-social-btn--youtube" title="YouTube">
                 {YOUTUBE_ICON}
               </a>
               <a

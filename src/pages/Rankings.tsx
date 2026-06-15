@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CATEGORIES, getCategoryTiers } from '../data/players';
+import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
 import { usePlayers } from '../hooks/usePlayers';
 import InfoModal from '../components/InfoModal';
@@ -31,102 +31,84 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
-/* ── Overall rankings — premium podium + list ── */
-const RANK_CFG = {
-  1: { medal: '🥇', color: '#fde68a', pts: '#fbbf24', border: 'rgba(251,191,36,0.45)', glow: 'rgba(251,191,36,0.28)', bg: 'linear-gradient(180deg,rgba(251,191,36,0.11) 0%,rgba(120,70,0,0.06) 100%)' },
-  2: { medal: '🥈', color: '#e2e8f0', pts: '#94a3b8', border: 'rgba(148,163,184,0.32)', glow: 'rgba(148,163,184,0.18)', bg: 'linear-gradient(180deg,rgba(148,163,184,0.08) 0%,rgba(50,60,80,0.04) 100%)' },
-  3: { medal: '🥉', color: '#fbd0a0', pts: '#c97940', border: 'rgba(192,120,48,0.32)', glow: 'rgba(192,120,48,0.18)', bg: 'linear-gradient(180deg,rgba(192,120,48,0.08) 0%,rgba(80,40,10,0.04) 100%)' },
-} as const;
+/* ── Overall rankings — full list with ring-avatar + tier badges ── */
+
+const TIER_PRIORITY: Record<string, number> = {
+  HT1: 0, LT1: 1, HT2: 2, LT2: 3, HT3: 4, LT3: 5, HT4: 6, LT4: 7, HT5: 8, LT5: 9,
+};
+
+const MODE_KEYS: (keyof NonNullable<Player['rawTiers']>)[] = [
+  'ogvanilla', 'vanilla', 'uhc', 'pot', 'nethop', 'smp', 'sword', 'axe', 'mace', 'speed',
+];
+
+function tierRingCls(tier: string): string {
+  const t = tier.toUpperCase();
+  if (t.endsWith('1')) return 'gold';
+  if (t.endsWith('2')) return 'silver';
+  if (t.endsWith('3')) return 'blue';
+  return 'gray';
+}
 
 function OverallTable({ players }: { players: Player[] }) {
-  const top3 = players.slice(0, 3);
-  const rest  = players.slice(3);
-
-  const podiumOrder = top3.length >= 3
-    ? [{ p: top3[1], r: 2 as const }, { p: top3[0], r: 1 as const }, { p: top3[2], r: 3 as const }]
-    : top3.map((p, i) => ({ p, r: (i + 1) as 1 | 2 | 3 }));
-
   return (
-    <div className="ot-v2-wrap">
+    <div className="ot-rl-wrap">
+      {players.map((player, i) => {
+        const rank = i + 1;
+        const raw = player.rawTiers ?? {};
+        const tierEntries = MODE_KEYS
+          .map(k => ({ modeId: k as string, rawTier: (raw as Record<string, string | null | undefined>)[k] }))
+          .filter((e): e is { modeId: string; rawTier: string } => !!e.rawTier && e.rawTier !== '-')
+          .sort((a, b) => (TIER_PRIORITY[a.rawTier.toUpperCase()] ?? 99) - (TIER_PRIORITY[b.rawTier.toUpperCase()] ?? 99));
 
-      {/* ── TOP 3 PODIUM with full body skins ── */}
-      {top3.length > 0 && (
-        <div className="ot-v2-podium">
-          {podiumOrder.map(({ p: player, r: rank }) => {
-            const cfg = RANK_CFG[rank];
-            return (
-              <Link
-                key={player.id}
-                to={`/player/${player.username}`}
-                className={`ot-v2-card ot-v2-card--r${rank}`}
-                style={{
-                  '--c-border': cfg.border,
-                  '--c-glow':   cfg.glow,
-                  '--c-bg':     cfg.bg,
-                  '--c-pts':    cfg.pts,
-                } as React.CSSProperties}
-              >
-                <div className="ot-v2-glow-ovl" />
-                <div className="ot-v2-card-top">
-                  <span className="ot-v2-medal">{cfg.medal}</span>
-                  <span className="ot-v2-card-rnum" style={{ color: cfg.color }}>#{rank}</span>
-                </div>
-                <div className="ot-v2-body-wrap">
-                  <img
-                    src={`https://mc-heads.net/body/${player.username}/${rank === 1 ? 130 : 110}`}
-                    alt={player.username}
-                    className="ot-v2-body-img"
-                    loading="lazy"
-                  />
-                  <div className="ot-v2-body-floor" />
-                </div>
-                <div className="ot-v2-card-footer">
-                  <div className="ot-v2-card-pname" style={{ color: cfg.color }}>{player.username}</div>
-                  <div className="ot-v2-card-meta">
-                    <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-                  </div>
-                  <div className="ot-v2-pts-row">
-                    <span className="ot-v2-pts-num" style={{ color: cfg.pts }}>{player.points}</span>
-                    <span className="ot-v2-pts-sfx">pts</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+        const visibleTiers = tierEntries.slice(0, 7);
+        const extra = tierEntries.length - visibleTiers.length;
+        const ringCls = rank === 1 ? 'ring-gold' : rank === 2 ? 'ring-silver' : rank === 3 ? 'ring-bronze' : 'ring-blue';
+        const rowCls = rank <= 3 ? ` ot-rl-row--top${rank}` : '';
 
-      {/* ── LIST rank 4+ ── */}
-      {rest.length > 0 && (
-        <div className="ot-v2-list">
-          <div className="ot-v2-list-hd">
-            <span className="ot-v2-lh">#</span>
-            <span className="ot-v2-lh">Player</span>
-            <span className="ot-v2-lh ot-v2-lh-c">Region</span>
-            <span className="ot-v2-lh ot-v2-lh-r">Points</span>
-          </div>
-          {rest.map((player, i) => (
-            <Link key={player.id} to={`/player/${player.username}`} className="ot-v2-row">
-              <span className="ot-v2-rrank">{i + 4}.</span>
-              <span className="ot-v2-rplayer">
+        return (
+          <Link key={player.id} to={`/player/${player.username}`} className={`ot-rl-row${rowCls}`}>
+            <span className="ot-rl-rank">{rank}.</span>
+
+            <span className="ot-rl-player">
+              <span className={`ot-rl-avatar-ring ${ringCls}`}>
+                <span className="ot-rl-avatar-bg" />
                 <img
-                  src={`https://mc-heads.net/avatar/${player.username}/32`}
+                  src={`https://mc-heads.net/avatar/${player.username}/42`}
                   alt={player.username}
-                  width={32} height={32}
-                  className="ot-v2-ravatar"
+                  className="ot-rl-avatar-img"
                   loading="lazy"
                 />
-                <span className="ot-v2-rname">{player.username}</span>
-                <span className={`region-badge region-${player.region.toLowerCase()} ot-v2-rinline`}>{player.region}</span>
               </span>
-              <span className="ot-v2-rregion">
-                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+              <span className="ot-rl-info">
+                <span className="ot-rl-name">{player.username}</span>
+                <span className="ot-rl-title">◆ {getTitle(player.points)}</span>
               </span>
-              <span className="ot-v2-rpts">{player.points}</span>
-            </Link>
-          ))}
-        </div>
-      )}
+            </span>
+
+            <span className="ot-rl-region">
+              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+            </span>
+
+            <span className="ot-rl-tiers">
+              {visibleTiers.map(({ modeId, rawTier }) => {
+                const cat = CATEGORIES.find(c => c.id === modeId);
+                if (!cat) return null;
+                return (
+                  <span key={modeId} className={`ot-rl-tbadge ot-rl-tbadge--${tierRingCls(rawTier)}`}>
+                    <span className="ot-rl-ticon-wrap">
+                      <img src={cat.icon} alt={cat.label} className="ot-rl-ticon" loading="lazy" />
+                    </span>
+                    <span className="ot-rl-tlabel">{rawTier}</span>
+                  </span>
+                );
+              })}
+              {extra > 0 && <span className="ot-rl-tmore">+{extra}</span>}
+            </span>
+
+            <span className="ot-rl-pts">{player.points}</span>
+          </Link>
+        );
+      })}
     </div>
   );
 }

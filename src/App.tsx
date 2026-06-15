@@ -31,7 +31,7 @@ function ClickLayer() {
       'button', 'a', '.nav-link', '.nav-dropdown-trigger',
       '.hero-btn', '.discord-btn', '.tier-player-row',
       '.player-row', '.apidocs-endpoint-card', '.dj-choice', '.info-btn',
-      '.modal-tab-btn', '.modal-close', '.stat-card', '.feature-card',
+      '.modal-tab-btn', '.modal-close', '.stat-card',
     ].join(',');
 
     const onPointerDown = (e: PointerEvent) => {
