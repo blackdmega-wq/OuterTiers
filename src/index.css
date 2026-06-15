@@ -2480,10 +2480,11 @@ img { display: block; }
 .ot-ov-av-ring {
   position: relative;
   width: 72px;
-  height: 72px;
-  border-radius: 50%;
+  height: 92px;
+  border-radius: 14px;
   flex-shrink: 0;
   padding: 3px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2508,14 +2509,16 @@ img { display: block; }
   background: rgba(255,255,255,0.06);
 }
 .ot-ov-av-img {
-  width: calc(100% - 6px);
-  height: calc(100% - 6px);
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 11px;
   object-fit: cover;
   object-position: top center;
   display: block;
   background: rgba(10,15,35,0.95);
   image-rendering: pixelated;
+  transform: perspective(600px) rotateY(-12deg) scale(1.06);
+  transform-origin: center top;
 }
 
 /* ── RANK PILL (bottom of avatar) ── */
@@ -2652,8 +2655,8 @@ img { display: block; }
 @media (max-width: 640px) {
   .ot-ov-wrap { padding: 10px 10px 18px; gap: 8px; }
   .ot-ov-row { grid-template-columns: 64px minmax(70px, 120px) 1fr 52px; gap: 8px; padding: 8px 10px 8px 8px; border-radius: 12px; }
-  .ot-ov-av-ring { width: 60px; height: 60px; }
-  .ot-ov-av-img { width: calc(100% - 5px); height: calc(100% - 5px); }
+  .ot-ov-av-ring { width: 60px; height: 76px; border-radius: 12px; }
+  .ot-ov-av-img { width: 100%; height: 100%; }
   .ot-ov-rank-pill { font-size: 0.62rem; padding: 1px 5px; }
   .ot-ov-name { font-size: 0.80rem; }
   .ot-ov-title-txt { font-size: 0.54rem; }
@@ -2665,7 +2668,7 @@ img { display: block; }
 }
 @media (max-width: 400px) {
   .ot-ov-row { grid-template-columns: 56px minmax(60px, 100px) 1fr 46px; gap: 6px; padding: 7px 8px 7px 7px; }
-  .ot-ov-av-ring { width: 52px; height: 52px; }
+  .ot-ov-av-ring { width: 52px; height: 66px; border-radius: 10px; }
   .ot-ov-badge-icon { width: 20px; height: 20px; border-width: 1.5px; }
   .ot-ov-badge-img { width: 12px; height: 12px; }
   .ot-ov-badge-lbl { font-size: 0.33rem; }
