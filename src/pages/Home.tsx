@@ -337,7 +337,7 @@ export default function Home() {
                           </svg>
                         )}
                         <img
-                          src={`https://starlightskins.lunareclipse.studio/render/${rank === 1 ? 'cheering' : rank === 2 ? 'pointing' : 'walking'}/${player.username}/full`}
+                          src={`https://starlightskins.lunareclipse.studio/render/${rank === 1 ? 'ultimate' : rank === 2 ? 'archer' : 'dungeons'}/${player.username}/full`}
                           alt={player.username}
                           className="lb-pod-skin"
                           loading="lazy"
