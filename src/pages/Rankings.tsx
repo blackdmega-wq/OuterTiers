@@ -50,32 +50,40 @@ function tierRingCls(tier: string): string {
 }
 
 function OverallTable({ players }: { players: Player[] }) {
+  const maxPts = players[0]?.points ?? 1;
   return (
     <div className="ot-rl-wrap">
-      {/* Header row */}
       <div className="ot-rl-header">
         <span />
         <span className="ot-rl-hcol">Player</span>
         <span className="ot-rl-hcol ot-rl-hcol--center">Region</span>
-        <span className="ot-rl-hcol">Tiers</span>
-        <span className="ot-rl-hcol ot-rl-hcol--right">Pts</span>
+        <span className="ot-rl-hcol">All Modes</span>
+        <span className="ot-rl-hcol ot-rl-hcol--right">Points</span>
       </div>
       {players.map((player, i) => {
         const rank = i + 1;
         const raw = player.rawTiers ?? {};
-        const tierEntries = MODE_KEYS
-          .map(k => ({ modeId: k as string, rawTier: (raw as Record<string, string | null | undefined>)[k] }))
-          .filter((e): e is { modeId: string; rawTier: string } => !!e.rawTier && e.rawTier !== '-')
-          .sort((a, b) => (TIER_PRIORITY[a.rawTier.toUpperCase()] ?? 99) - (TIER_PRIORITY[b.rawTier.toUpperCase()] ?? 99));
-
-        const visibleTiers = tierEntries.slice(0, 7);
-        const extra = tierEntries.length - visibleTiers.length;
+        const allModes = MODE_KEYS.map(k => ({
+          modeId: k as string,
+          rawTier: (raw as Record<string, string | null | undefined>)[k] ?? null,
+        }));
+        const sortedModes = [
+          ...allModes
+            .filter((e): e is { modeId: string; rawTier: string } => !!e.rawTier && e.rawTier !== '-')
+            .sort((a, b) => (TIER_PRIORITY[a.rawTier.toUpperCase()] ?? 99) - (TIER_PRIORITY[b.rawTier.toUpperCase()] ?? 99)),
+          ...allModes.filter(e => !e.rawTier || e.rawTier === '-'),
+        ];
         const ringCls = rank === 1 ? 'ring-gold' : rank === 2 ? 'ring-silver' : rank === 3 ? 'ring-bronze' : 'ring-blue';
         const rowCls = rank <= 3 ? ` ot-rl-row--top${rank}` : '';
+        const pct = Math.round((player.points / maxPts) * 100);
 
         return (
           <Link key={player.id} to={`/player/${player.username}`} className={`ot-rl-row${rowCls}`}>
-            <span className="ot-rl-rank">{rank}.</span>
+            <span className="ot-rl-rank">
+              {rank <= 3
+                ? <span className="ot-rl-medal">{rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}</span>
+                : `${rank}.`}
+            </span>
 
             <span className="ot-rl-player">
               <span className={`ot-rl-avatar-ring ${ringCls}`}>
@@ -90,6 +98,9 @@ function OverallTable({ players }: { players: Player[] }) {
               <span className="ot-rl-info">
                 <span className="ot-rl-name">{player.username}</span>
                 <span className="ot-rl-title">◆ {getTitle(player.points)}</span>
+                <span className="ot-rl-ptsbar-wrap" title={`${pct}% of top score`}>
+                  <span className="ot-rl-ptsbar" style={{ width: `${pct}%` }} />
+                </span>
               </span>
             </span>
 
@@ -98,22 +109,22 @@ function OverallTable({ players }: { players: Player[] }) {
             </span>
 
             <span className="ot-rl-tiers">
-              {visibleTiers.map(({ modeId, rawTier }) => {
+              {sortedModes.map(({ modeId, rawTier }) => {
                 const cat = CATEGORIES.find(c => c.id === modeId);
                 if (!cat) return null;
+                const hasRank = !!rawTier && rawTier !== '-';
                 return (
-                  <span key={modeId} className={`ot-rl-tbadge ot-rl-tbadge--${tierRingCls(rawTier)}`}>
+                  <span key={modeId} className={`ot-rl-tbadge${hasRank ? ` ot-rl-tbadge--${tierRingCls(rawTier!)}` : ' ot-rl-tbadge--unranked'}`}>
                     <span className="ot-rl-ticon-wrap">
                       <img src={cat.icon} alt={cat.label} className="ot-rl-ticon" loading="lazy" />
                     </span>
-                    <span className="ot-rl-tlabel">{rawTier}</span>
+                    <span className="ot-rl-tlabel">{hasRank ? rawTier : '—'}</span>
                   </span>
                 );
               })}
-              {extra > 0 && <span className="ot-rl-tmore">+{extra}</span>}
             </span>
 
-            <span className="ot-rl-pts">{player.points}</span>
+            <span className="ot-rl-pts">{player.points}<span className="ot-rl-pts-unit">pts</span></span>
           </Link>
         );
       })}
