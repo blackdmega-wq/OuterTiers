@@ -338,20 +338,8 @@ export default function Home() {
                             <circle cx="58" cy="12" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
                           </svg>
                         )}
-                        {rank === 2 && (
-                          <svg className="lb-pod-medal lb-pod-medal--silver" viewBox="0 0 40 40" fill="none">
-                            <circle cx="20" cy="20" r="18" fill="#64748b" stroke="#cbd5e1" strokeWidth="2.5"/>
-                            <circle cx="20" cy="20" r="13" fill="#94a3b8"/>
-                            <text x="20" y="26" textAnchor="middle" fontSize="15" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif">2</text>
-                          </svg>
-                        )}
-                        {rank === 3 && (
-                          <svg className="lb-pod-medal lb-pod-medal--bronze" viewBox="0 0 40 40" fill="none">
-                            <circle cx="20" cy="20" r="18" fill="#92400e" stroke="#d4924e" strokeWidth="2.5"/>
-                            <circle cx="20" cy="20" r="13" fill="#c07830"/>
-                            <text x="20" y="26" textAnchor="middle" fontSize="15" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif">3</text>
-                          </svg>
-                        )}
+
+
                         <img
                           src={`https://mc-heads.net/body/${player.username}/256`}
                           alt={player.username}
