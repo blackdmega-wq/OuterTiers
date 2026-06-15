@@ -39,13 +39,15 @@ const MODE_KEYS: (keyof NonNullable<Player['rawTiers']>)[] = [
 ];
 
 function tierNumCls(tier: string): string {
+  if (!tier || tier === '-') return '';
+  const upper = tier.toUpperCase();
+  const isHigh = upper.startsWith('HT');
+  const isLow  = upper.startsWith('LT');
   const n = parseInt(tier.replace(/\D/g, ''));
-  if (n === 1) return 'tv1';
-  if (n === 2) return 'tv2';
-  if (n === 3) return 'tv3';
-  if (n === 4) return 'tv4';
-  if (n === 5) return 'tv5';
-  return '';
+  if (!n || n < 1 || n > 5) return '';
+  if (isHigh) return `tvh${n}`;
+  if (isLow)  return `tvl${n}`;
+  return `tvh${n}`;
 }
 
 function OverallTable({ players }: { players: Player[] }) {

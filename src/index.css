@@ -2250,7 +2250,7 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 72px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 36px; }
 .lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 92px; }
 .lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 88px; }
 .lb-pod-skin {
@@ -2264,7 +2264,7 @@ img { display: block; }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
   position: absolute;
-  top: -10px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
   width: 48px;
@@ -2599,17 +2599,28 @@ img { display: block; }
   text-align: center;
   line-height: 1;
 }
-/* Tier number ring colors — match CategoryTierBadge RAW_TIER_STYLES exactly */
-.ot-ov-badge--tv1 .ot-ov-badge-icon { border: 3px solid #f1c40f; background: rgba(241,196,15,0.28); box-shadow: 0 0 10px rgba(241,196,15,0.70), inset 0 0 8px rgba(241,196,15,0.20); }
-.ot-ov-badge--tv1 .ot-ov-badge-lbl  { color: #f1c40f; font-weight: 800; }
-.ot-ov-badge--tv2 .ot-ov-badge-icon { border: 3px solid #a4b2c7; background: rgba(164,178,199,0.28); box-shadow: 0 0 8px rgba(164,178,199,0.60), inset 0 0 8px rgba(164,178,199,0.20); }
-.ot-ov-badge--tv2 .ot-ov-badge-lbl  { color: #a4b2c7; font-weight: 800; }
-.ot-ov-badge--tv3 .ot-ov-badge-icon { border: 3px solid #df8746; background: rgba(223,135,70,0.28); box-shadow: 0 0 8px rgba(223,135,70,0.65), inset 0 0 8px rgba(223,135,70,0.20); }
-.ot-ov-badge--tv3 .ot-ov-badge-lbl  { color: #df8746; font-weight: 800; }
-.ot-ov-badge--tv4 .ot-ov-badge-icon { border: 3px solid #46df5d; background: rgba(70,223,93,0.28); box-shadow: 0 0 10px rgba(70,223,93,0.65), inset 0 0 8px rgba(70,223,93,0.20); }
-.ot-ov-badge--tv4 .ot-ov-badge-lbl  { color: #46df5d; font-weight: 800; }
-.ot-ov-badge--tv5 .ot-ov-badge-icon { border: 3px solid #a4d5ff; background: rgba(164,213,255,0.28); box-shadow: 0 0 8px rgba(164,213,255,0.60), inset 0 0 8px rgba(164,213,255,0.20); }
-.ot-ov-badge--tv5 .ot-ov-badge-lbl  { color: #a4d5ff; font-weight: 800; }
+/* HT (High Tier) — brighter, stronger border */
+.ot-ov-badge--tvh1 .ot-ov-badge-icon { border: 2px solid #f1c40f; background: rgba(241,196,15,0.18); box-shadow: 0 0 6px rgba(241,196,15,0.50); }
+.ot-ov-badge--tvh1 .ot-ov-badge-lbl  { color: #f1c40f; font-weight: 700; }
+.ot-ov-badge--tvh2 .ot-ov-badge-icon { border: 2px solid #a4b2c7; background: rgba(164,178,199,0.18); box-shadow: 0 0 5px rgba(164,178,199,0.45); }
+.ot-ov-badge--tvh2 .ot-ov-badge-lbl  { color: #a4b2c7; font-weight: 700; }
+.ot-ov-badge--tvh3 .ot-ov-badge-icon { border: 2px solid #df8746; background: rgba(223,135,70,0.18); box-shadow: 0 0 5px rgba(223,135,70,0.50); }
+.ot-ov-badge--tvh3 .ot-ov-badge-lbl  { color: #df8746; font-weight: 700; }
+.ot-ov-badge--tvh4 .ot-ov-badge-icon { border: 2px solid #46df5d; background: rgba(70,223,93,0.18); box-shadow: 0 0 6px rgba(70,223,93,0.50); }
+.ot-ov-badge--tvh4 .ot-ov-badge-lbl  { color: #46df5d; font-weight: 700; }
+.ot-ov-badge--tvh5 .ot-ov-badge-icon { border: 2px solid #a4d5ff; background: rgba(164,213,255,0.18); box-shadow: 0 0 5px rgba(164,213,255,0.45); }
+.ot-ov-badge--tvh5 .ot-ov-badge-lbl  { color: #a4d5ff; font-weight: 700; }
+/* LT (Low Tier) — darker tones, subtle glow */
+.ot-ov-badge--tvl1 .ot-ov-badge-icon { border: 2px solid #d4b354; background: rgba(212,179,84,0.13); box-shadow: 0 0 4px rgba(212,179,84,0.38); }
+.ot-ov-badge--tvl1 .ot-ov-badge-lbl  { color: #d4b354; font-weight: 700; }
+.ot-ov-badge--tvl2 .ot-ov-badge-icon { border: 2px solid #8a909a; background: rgba(138,144,154,0.13); box-shadow: 0 0 3px rgba(138,144,154,0.35); }
+.ot-ov-badge--tvl2 .ot-ov-badge-lbl  { color: #8a909a; font-weight: 700; }
+.ot-ov-badge--tvl3 .ot-ov-badge-icon { border: 2px solid #b36932; background: rgba(179,105,50,0.13); box-shadow: 0 0 4px rgba(179,105,50,0.38); }
+.ot-ov-badge--tvl3 .ot-ov-badge-lbl  { color: #b36932; font-weight: 700; }
+.ot-ov-badge--tvl4 .ot-ov-badge-icon { border: 2px solid #33942a; background: rgba(51,148,42,0.13); box-shadow: 0 0 4px rgba(51,148,42,0.38); }
+.ot-ov-badge--tvl4 .ot-ov-badge-lbl  { color: #33942a; font-weight: 700; }
+.ot-ov-badge--tvl5 .ot-ov-badge-icon { border: 2px solid #82b8e0; background: rgba(130,184,224,0.13); box-shadow: 0 0 3px rgba(130,184,224,0.35); }
+.ot-ov-badge--tvl5 .ot-ov-badge-lbl  { color: #82b8e0; font-weight: 700; }
 
 /* ── POINTS COLUMN ── */
 .ot-ov-pts-col {
