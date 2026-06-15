@@ -9,24 +9,31 @@
 }
 @keyframes ppv2-spin { to { transform: rotate(360deg); } }
 
-/* ── Page ── */
 .ppv2-page { padding: 0; }
 
-/* ── Hero ── */
+/* ── Hero ──
+   FIX: Gradient fades to transparent at the bottom → no visible "split"
+   between the hero section and the content below.
+*/
 .ppv2-hero {
   position: relative;
-  padding: 40px 0 32px;
-  background: linear-gradient(160deg, rgba(14,22,55,0.95) 0%, rgba(8,10,24,0.85) 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 44px 0 48px;
+  background: linear-gradient(180deg,
+    rgba(12,16,44,0.97) 0%,
+    rgba(10,13,32,0.88) 50%,
+    rgba(8,10,22,0.35) 85%,
+    transparent 100%
+  );
+  border-bottom: none;
   overflow: hidden;
 }
 .ppv2-hero-glow {
-  position: absolute; top: -100px; left: 50%;
+  position: absolute; top: -120px; left: 50%;
   transform: translateX(-50%);
-  width: 170%; height: 320px;
+  width: 180%; height: 360px;
   background: radial-gradient(ellipse at 50% 0%,
-    rgba(37,99,235,0.45) 0%,
-    rgba(37,99,235,0.10) 45%,
+    rgba(37,99,235,0.50) 0%,
+    rgba(37,99,235,0.12) 45%,
     transparent 70%);
   filter: blur(60px); pointer-events: none;
   animation: glowPulse 5s ease-in-out infinite;
@@ -37,18 +44,17 @@
     linear-gradient(rgba(91,164,245,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(91,164,245,0.04) 1px, transparent 1px);
   background-size: 44px 44px;
-  pointer-events: none; opacity: 0.6;
+  pointer-events: none; opacity: 0.55;
 }
 .ppv2-hero-inner {
-  max-width: 920px; margin: 0 auto; padding: 0 24px;
+  max-width: 960px; margin: 0 auto; padding: 0 24px;
   position: relative; z-index: 1;
 }
-.ppv2-back { margin-bottom: 24px; }
+.ppv2-back { margin-bottom: 28px; }
 
-/* ── Header ── */
 .ppv2-header {
-  display: flex; align-items: center; gap: 24px;
-  margin-bottom: 28px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 28px;
+  margin-bottom: 32px; flex-wrap: wrap;
   animation: ppv2-fade-up 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes ppv2-fade-up {
@@ -56,10 +62,9 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Avatar ring */
 .ppv2-avatar-wrap {
   position: relative; flex-shrink: 0;
-  width: 116px; height: 116px;
+  width: 120px; height: 120px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
 }
@@ -106,8 +111,8 @@
   position: relative; z-index: 2;
 }
 .ppv2-crown {
-  position: absolute; top: -10px; right: -6px; z-index: 3;
-  font-size: 1.4rem;
+  position: absolute; top: -12px; right: -6px; z-index: 3;
+  font-size: 1.5rem;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.9));
   animation: ppv2-float 2.8s ease-in-out infinite;
 }
@@ -116,7 +121,6 @@
   50%       { transform: translateY(-7px) rotate(8deg); }
 }
 
-/* Header info */
 .ppv2-header-info { flex: 1; min-width: 0; }
 .ppv2-eyebrow {
   display: inline-flex; align-items: center; gap: 5px;
@@ -125,8 +129,8 @@
   margin-bottom: 5px;
 }
 .ppv2-username {
-  font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em;
-  line-height: 1.05; margin: 0 0 7px;
+  font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em;
+  line-height: 1.05; margin: 0 0 8px;
   background: linear-gradient(130deg, #ffffff 20%, #c0d8ff 60%, #5ba4f5 100%);
   background-size: 200% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -138,12 +142,12 @@
 }
 .ppv2-title-row {
   display: flex; align-items: center; gap: 5px;
-  color: var(--text-dim); font-size: 0.82rem; margin-bottom: 11px;
+  color: var(--text-dim); font-size: 0.85rem; margin-bottom: 12px;
 }
 .ppv2-badges-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ppv2-rank-pill {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 11px; border-radius: 20px;
+  padding: 3px 12px; border-radius: 20px;
   font-size: 0.70rem; font-weight: 700; letter-spacing: 0.04em;
   background: rgba(37,99,235,0.13); border: 1px solid rgba(37,99,235,0.28);
   color: #5ba4f5;
@@ -161,30 +165,29 @@
   50%     { box-shadow: 0 0 16px 3px rgba(241,196,15,0.30); }
 }
 
-/* Stats row */
 .ppv2-stats-row {
   display: inline-flex; align-items: stretch;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 14px; overflow: hidden;
-  max-width: 540px;
+  border-radius: 16px; overflow: hidden;
+  max-width: 560px;
   animation: ppv2-fade-up 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.12s both;
 }
 .ppv2-stat-box {
-  flex: 1; padding: 14px 20px;
+  flex: 1; padding: 16px 22px;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  text-align: center; min-width: 72px;
+  text-align: center; min-width: 76px;
   transition: background 0.18s;
 }
 .ppv2-stat-box:hover { background: rgba(255,255,255,0.04); }
 .ppv2-stat-icon { color: #5ba4f5; opacity: 0.72; margin-bottom: 2px; }
 .ppv2-stat-num {
-  font-size: 1.4rem; font-weight: 900; color: #fff;
+  font-size: 1.45rem; font-weight: 900; color: #fff;
   line-height: 1; letter-spacing: -0.025em;
 }
 .ppv2-stat-of { font-size: 0.7em; opacity: 0.45; }
 .ppv2-stat-lbl {
-  font-size: 0.58rem; text-transform: uppercase;
+  font-size: 0.57rem; text-transform: uppercase;
   letter-spacing: 0.11em; color: var(--text-muted);
 }
 .ppv2-stat-sep {
@@ -192,30 +195,36 @@
   background: rgba(255,255,255,0.08);
 }
 
-/* ── Content ── */
-.ppv2-content { padding-top: 40px; padding-bottom: 70px; max-width: 920px; }
-.ppv2-section-head { margin-bottom: 20px; }
+.ppv2-content { padding-top: 40px; padding-bottom: 80px; max-width: 960px; }
+.ppv2-section-head { margin-bottom: 22px; }
 .ppv2-section-title {
   background: linear-gradient(130deg, #fff 40%, #aaccff 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-/* ── Tier Cards Grid ── */
+/* ── Tier Cards Grid ──
+   FIX #1: aspect-ratio: 1 forces every card to be a perfect square.
+   FIX #2: The ppv2-card-orb now fills the entire card area evenly
+           (radial-gradient centred at 50% 50%) instead of being
+           positioned at the top, which was causing the dark-top /
+           light-bottom "split" appearance inside each card.
+*/
 .ppv2-tiers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
-  gap: 12px;
-  margin-bottom: 36px;
+  gap: 14px;
+  margin-bottom: 40px;
 }
 
 .ppv2-tier-card {
   position: relative; overflow: hidden;
+  aspect-ratio: 1;                   /* ← SQUARE FIX */
   display: flex; flex-direction: column; align-items: center;
-  gap: 10px; padding: 20px 14px 14px;
+  justify-content: space-evenly;
+  padding: 14px 10px;
   background: var(--tier-bg, rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  /* Direct animation — NO dependency on ScrollReveal */
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 18px;
   animation: ppv2-card-in 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
   transition: transform 0.24s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s, box-shadow 0.25s;
   cursor: default;
@@ -225,17 +234,16 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Top glow blob */
+/* SPLIT FIX: orb covers full card from centre, not just the top */
 .ppv2-card-orb {
-  position: absolute; top: -30px; left: 50%;
-  transform: translateX(-50%);
-  width: 120px; height: 80px; border-radius: 50%;
-  background: var(--tier-glow, rgba(91,164,245,0.3));
-  filter: blur(28px);
-  opacity: 0.55; pointer-events: none;
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 90% 80% at 50% 50%,
+    var(--tier-glow, rgba(91,164,245,0.22)),
+    transparent 75%);
+  opacity: 0.45; pointer-events: none;
   transition: opacity 0.3s;
+  border-radius: inherit;
 }
-/* Bottom shimmer line */
 .ppv2-tier-card::after {
   content: ''; position: absolute;
   bottom: 0; left: 15%; right: 15%; height: 1px;
@@ -247,40 +255,37 @@
   transition: opacity 0.3s;
 }
 .ppv2-tier-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  border-color: rgba(255,255,255,0.18);
+  transform: translateY(-5px) scale(1.03);
+  border-color: rgba(255,255,255,0.20);
   box-shadow:
-    0 16px 48px rgba(0,0,0,0.45),
-    0 0 32px var(--tier-glow, rgba(91,164,245,0.15));
+    0 20px 52px rgba(0,0,0,0.50),
+    0 0 32px var(--tier-glow, rgba(91,164,245,0.18));
 }
-.ppv2-tier-card:hover .ppv2-card-orb { opacity: 0.9; }
+.ppv2-tier-card:hover .ppv2-card-orb { opacity: 0.85; }
 .ppv2-tier-card:hover::after { opacity: 0.9; }
 .ppv2-tier-card > * { position: relative; z-index: 1; }
 
-/* Mode icon box */
 .ppv2-card-icon {
-  width: 46px; height: 46px; border-radius: 12px;
-  background: rgba(255,255,255,0.055);
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.22s, box-shadow 0.22s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 .ppv2-tier-card:hover .ppv2-card-icon {
-  background: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.12);
   box-shadow: 0 0 20px var(--tier-glow, rgba(91,164,245,0.28));
-  transform: scale(1.08);
+  transform: scale(1.10);
 }
 
-/* Mode name */
 .ppv2-card-mode {
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.10em;
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.10em;
   text-transform: uppercase; color: var(--text-dim); text-align: center;
 }
 
-/* Tier badge */
 .ppv2-card-badge { display: flex; align-items: center; justify-content: center; }
 .ppv2-card-badge .tier-badge {
-  font-size: 1.05rem !important; padding: 6px 16px !important;
+  font-size: 1.0rem !important; padding: 5px 14px !important;
   letter-spacing: 0.06em !important;
   animation: ppv2-tier-glow 3s ease-in-out infinite;
 }
@@ -288,7 +293,7 @@
   0%,100% { box-shadow: 0 0 10px var(--tier-glow, rgba(91,164,245,0.30)); }
   50%     { box-shadow: 0 0 24px var(--tier-glow, rgba(91,164,245,0.60)), 0 0 48px var(--tier-glow, rgba(91,164,245,0.15)); }
 }
-.ppv2-card-badge .cat-tier-badge { transform: scale(1.15); }
+.ppv2-card-badge .cat-tier-badge { transform: scale(1.12); }
 .ppv2-card-badge .cat-tier-circle {
   animation: ppv2-circle-glow 3s ease-in-out infinite;
 }
@@ -297,13 +302,12 @@
   50%     { box-shadow: 0 0 22px var(--tier-glow, rgba(91,164,245,0.70)); }
 }
 
-/* Since date */
 .ppv2-card-date {
   display: flex; align-items: center; gap: 4px;
-  font-size: 0.60rem; color: var(--text-muted);
-  background: rgba(255,255,255,0.045);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 20px; padding: 3px 9px; white-space: nowrap;
+  font-size: 0.58rem; color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 3px 8px; white-space: nowrap;
   transition: background 0.2s, border-color 0.2s;
 }
 .ppv2-tier-card:hover .ppv2-card-date {
@@ -312,15 +316,14 @@
 }
 .ppv2-card-date--unknown { opacity: 0.38; font-style: italic; }
 
-/* No ranks / unranked */
 .ppv2-no-ranks {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 48px 0; color: var(--text-muted); font-size: 0.88rem;
+  padding: 60px 0; color: var(--text-muted); font-size: 0.88rem;
 }
-.ppv2-unranked { margin-top: 8px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.06); }
+.ppv2-unranked { margin-top: 8px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); }
 .ppv2-unranked-lbl {
   font-size: 0.64rem; font-weight: 700; letter-spacing: 0.11em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
 }
 .ppv2-unranked-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .ppv2-unranked-chip {
@@ -330,15 +333,14 @@
   font-size: 0.70rem; color: var(--text-muted); opacity: 0.5;
 }
 
-/* ── Responsive ── */
 @media (max-width: 640px) {
   .ppv2-header { flex-direction: column; text-align: center; align-items: center; }
   .ppv2-badges-row { justify-content: center; }
-  .ppv2-username { font-size: 1.65rem; }
+  .ppv2-username { font-size: 1.75rem; }
   .ppv2-stats-row { max-width: 100%; width: 100%; }
-  .ppv2-stat-box { padding: 11px 10px; min-width: 60px; }
-  .ppv2-tiers-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 9px; }
-  .ppv2-content { padding-top: 26px; }
+  .ppv2-stat-box { padding: 12px 10px; min-width: 60px; }
+  .ppv2-tiers-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .ppv2-content { padding-top: 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ppv2-spinner, .ppv2-hero-glow, .ppv2-avatar-wrap::before,
