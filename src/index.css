@@ -2265,25 +2265,31 @@ img { display: block; }
 /* ── Rank-specific pose transforms ── */
 
 /* ─────────────────────────────────────────────
-   #1 GOLD — Victory Emote + celebratory bounce
+   #1 GOLD — Victory Emote: explosive jump-celebration
+   Arms-wide, big bounce, golden burst
    ───────────────────────────────────────────── */
 @keyframes lb-skin-victory {
-  0%   { transform: translateY(0px) scale(1.0) rotate(0deg); }
-  18%  { transform: translateY(-15px) scale(1.07) rotate(-4deg); }
-  36%  { transform: translateY(-8px) scale(1.04) rotate(3deg); }
-  54%  { transform: translateY(-18px) scale(1.09) rotate(-3deg); }
-  72%  { transform: translateY(-5px) scale(1.02) rotate(2deg); }
-  88%  { transform: translateY(-12px) scale(1.05) rotate(-2deg); }
-  100% { transform: translateY(0px) scale(1.0) rotate(0deg); }
+  0%   { transform: translateY(0px) scaleX(1.0) scaleY(1.0) rotate(0deg); }
+  10%  { transform: translateY(-24px) scaleX(1.22) scaleY(0.85) rotate(-6deg); }
+  20%  { transform: translateY(-12px) scaleX(0.95) scaleY(1.08) rotate(4deg); }
+  32%  { transform: translateY(-28px) scaleX(1.25) scaleY(0.80) rotate(-5deg); }
+  44%  { transform: translateY(-8px)  scaleX(0.92) scaleY(1.10) rotate(3deg); }
+  56%  { transform: translateY(-22px) scaleX(1.20) scaleY(0.86) rotate(-4deg); }
+  68%  { transform: translateY(-6px)  scaleX(0.96) scaleY(1.06) rotate(2deg); }
+  80%  { transform: translateY(-18px) scaleX(1.18) scaleY(0.88) rotate(-3deg); }
+  92%  { transform: translateY(-3px)  scaleX(0.98) scaleY(1.02) rotate(1deg); }
+  100% { transform: translateY(0px) scaleX(1.0) scaleY(1.0) rotate(0deg); }
 }
 @keyframes lb-skin-victory-glow {
-  0%,100% { filter: drop-shadow(0 0 14px rgba(251,191,36,0.80)) drop-shadow(0 4px 20px rgba(251,191,36,0.45)); }
-  50%     { filter: drop-shadow(0 0 28px rgba(255,230,80,1.0)) drop-shadow(0 6px 36px rgba(251,191,36,0.80)); }
+  0%,100% { filter: drop-shadow(0 0 16px rgba(251,191,36,0.85)) drop-shadow(0 6px 22px rgba(251,191,36,0.50)); }
+  32%     { filter: drop-shadow(0 0 36px rgba(255,235,80,1.0)) drop-shadow(0 8px 40px rgba(251,191,36,0.90)) drop-shadow(0 0 60px rgba(255,220,50,0.50)); }
+  56%     { filter: drop-shadow(0 0 28px rgba(255,220,60,0.95)) drop-shadow(0 6px 32px rgba(251,191,36,0.75)); }
 }
 .lb-pod-skin--pose1 {
-  animation: lb-skin-victory 2.2s cubic-bezier(0.36,0.07,0.19,0.97) infinite, lb-skin-victory-glow 2.2s ease-in-out infinite;
+  animation: lb-skin-victory 1.6s cubic-bezier(0.25,0.46,0.45,0.94) infinite,
+             lb-skin-victory-glow 1.6s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 16px rgba(251,191,36,0.90));
+  filter: drop-shadow(0 0 18px rgba(251,191,36,0.90));
 }
 
 /* Confetti rocket particles behind #1 */
@@ -2297,62 +2303,71 @@ img { display: block; }
 .lb-confetti-wrap .lb-rocket {
   position: absolute;
   bottom: -10px;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   animation: lb-rocket-up var(--dur, 1.4s) var(--delay, 0s) ease-out infinite;
 }
 @keyframes lb-rocket-up {
-  0%   { transform: translateY(0) scale(1); opacity: 1; }
-  70%  { opacity: 1; }
-  100% { transform: translateY(-160px) scale(0.3); opacity: 0; }
+  0%   { transform: translateY(0) scale(1.2) translateX(0px); opacity: 1; }
+  40%  { opacity: 1; transform: translateY(-80px) scale(0.9) translateX(var(--sx,3px)); }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(-170px) scale(0.2) translateX(var(--sx,3px)); opacity: 0; }
 }
 
 /* ─────────────────────────────────────────────
    #2 SILVER — Fortnite Floss Dance
-   Side-to-side arm swing, hip rhythm
+   Big arm-swing left & right, clear hip rhythm
    ───────────────────────────────────────────── */
 @keyframes lb-skin-floss {
-  0%   { transform: rotate(10deg) translateX(7px) scaleX(1.06) translateY(2px); }
-  12%  { transform: rotate(5deg) translateX(3px) scaleX(1.02) translateY(-4px); }
-  25%  { transform: rotate(0deg) translateX(0px) scaleX(1.0) translateY(-6px); }
-  37%  { transform: rotate(-5deg) translateX(-3px) scaleX(0.98) translateY(-4px); }
-  50%  { transform: rotate(-10deg) translateX(-7px) scaleX(0.94) translateY(2px); }
-  62%  { transform: rotate(-5deg) translateX(-3px) scaleX(0.98) translateY(-4px); }
-  75%  { transform: rotate(0deg) translateX(0px) scaleX(1.0) translateY(-6px); }
-  87%  { transform: rotate(5deg) translateX(3px) scaleX(1.02) translateY(-4px); }
-  100% { transform: rotate(10deg) translateX(7px) scaleX(1.06) translateY(2px); }
+  /* Beat 1: swing hard right */
+  0%   { transform: rotate(30deg) translateX(12px) skewX(-12deg) translateY(0px); }
+  /* centre up */
+  25%  { transform: rotate(0deg) translateX(0px) skewX(0deg) translateY(-10px) scaleX(1.08); }
+  /* Beat 2: swing hard left */
+  50%  { transform: rotate(-30deg) translateX(-12px) skewX(12deg) translateY(0px); }
+  /* centre up */
+  75%  { transform: rotate(0deg) translateX(0px) skewX(0deg) translateY(-10px) scaleX(1.08); }
+  /* back to right */
+  100% { transform: rotate(30deg) translateX(12px) skewX(-12deg) translateY(0px); }
 }
 @keyframes lb-skin-floss-glow {
-  0%,50%  { filter: drop-shadow(0 0 10px rgba(203,213,225,0.65)) drop-shadow(0 3px 14px rgba(148,163,184,0.45)); }
-  25%,75% { filter: drop-shadow(0 0 18px rgba(226,232,240,0.90)) drop-shadow(0 3px 22px rgba(148,163,184,0.70)); }
+  0%,50%  { filter: drop-shadow(-8px 0 14px rgba(148,163,184,0.80)) drop-shadow(0 4px 10px rgba(203,213,225,0.55)); }
+  25%,75% { filter: drop-shadow(0 -6px 18px rgba(226,232,240,0.90)) drop-shadow(0 4px 14px rgba(203,213,225,0.70)); }
 }
 .lb-pod-skin--pose2 {
-  animation: lb-skin-floss 0.65s ease-in-out infinite, lb-skin-floss-glow 1.3s ease-in-out infinite;
+  animation: lb-skin-floss 0.55s ease-in-out infinite,
+             lb-skin-floss-glow 0.55s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 10px rgba(203,213,225,0.65));
+  filter: drop-shadow(0 0 12px rgba(203,213,225,0.70));
 }
 
 /* ─────────────────────────────────────────────
-   #3 BRONZE — Fast Sprint / Run Emote
-   Forward lean + rapid stride bobbing
+   #3 BRONZE — Full Sprint Emote
+   Heavy forward lean + fast running stride
    ───────────────────────────────────────────── */
 @keyframes lb-skin-sprint {
-  0%   { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-3px); }
-  20%  { transform: rotate(-13deg) translateY(-7px) scaleX(1.00) translateX(2px); }
-  40%  { transform: rotate(-16deg) translateY(0px) scaleX(0.94) translateX(-4px); }
-  60%  { transform: rotate(-13deg) translateY(-6px) scaleX(1.01) translateX(3px); }
-  80%  { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-2px); }
-  100% { transform: rotate(-15deg) translateY(0px) scaleX(0.95) translateX(-3px); }
+  /* left foot forward */
+  0%   { transform: rotate(-32deg) translateY(0px) translateX(-6px) scaleX(0.88); }
+  /* push off */
+  20%  { transform: rotate(-28deg) translateY(-11px) translateX(6px) scaleX(1.04); }
+  /* right foot forward */
+  40%  { transform: rotate(-34deg) translateY(1px) translateX(-5px) scaleX(0.87); }
+  /* push off */
+  60%  { transform: rotate(-28deg) translateY(-10px) translateX(7px) scaleX(1.04); }
+  /* left foot */
+  80%  { transform: rotate(-32deg) translateY(0px) translateX(-6px) scaleX(0.88); }
+  100% { transform: rotate(-32deg) translateY(0px) translateX(-6px) scaleX(0.88); }
 }
 @keyframes lb-skin-sprint-glow {
-  0%,100% { filter: drop-shadow(0 0 8px rgba(201,119,56,0.60)) drop-shadow(3px 3px 10px rgba(180,95,38,0.45)); }
-  50%     { filter: drop-shadow(0 0 15px rgba(230,150,80,0.80)) drop-shadow(4px 4px 16px rgba(200,110,48,0.65)); }
+  0%,100% { filter: drop-shadow(4px 4px 10px rgba(201,119,56,0.70)) drop-shadow(0 0 8px rgba(180,95,38,0.50)); }
+  50%     { filter: drop-shadow(6px 6px 18px rgba(235,160,90,0.90)) drop-shadow(0 0 16px rgba(210,130,60,0.70)); }
 }
 .lb-pod-skin--pose3 {
-  animation: lb-skin-sprint 0.38s linear infinite, lb-skin-sprint-glow 0.76s ease-in-out infinite;
+  animation: lb-skin-sprint 0.32s linear infinite,
+             lb-skin-sprint-glow 0.64s ease-in-out infinite;
   transform-origin: bottom center;
-  filter: drop-shadow(0 0 9px rgba(201,119,56,0.60));
+  filter: drop-shadow(0 0 10px rgba(201,119,56,0.65));
 }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
