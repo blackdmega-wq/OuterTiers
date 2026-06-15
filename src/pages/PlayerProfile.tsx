@@ -5,7 +5,7 @@ import type { PlayerTiers } from '../data/players';
 import { usePlayer, usePlayers } from '../hooks/usePlayers';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
-import { ArrowLeft, Calendar, Star, Trophy, Globe } from 'lucide-react';
+import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap } from 'lucide-react';
 import '../styles/profile-v2.css';
 
 function formatDate(ts: number | undefined): string | null {
@@ -15,7 +15,7 @@ function formatDate(ts: number | undefined): string | null {
   });
 }
 
-function useCountUp(target: number, duration = 900) {
+function useCountUp(target: number, duration = 1100) {
   const [val, setVal] = useState(0);
   const rafRef = useRef(0);
   useEffect(() => {
@@ -23,10 +23,10 @@ function useCountUp(target: number, duration = 900) {
     let start: number | null = null;
     const step = (ts: number) => {
       if (!start) start = ts;
-      const progress = Math.min((ts - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 4);
       setVal(Math.round(ease * target));
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+      if (p < 1) rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafRef.current);
@@ -35,11 +35,19 @@ function useCountUp(target: number, duration = 900) {
 }
 
 const TIER_GLOW: Record<string, string> = {
-  HT1: 'rgba(241,196,15,0.65)',  LT1: 'rgba(212,179,84,0.55)',
-  HT2: 'rgba(164,178,199,0.55)', LT2: 'rgba(136,141,149,0.45)',
-  HT3: 'rgba(223,135,70,0.65)',  LT3: 'rgba(179,105,50,0.55)',
-  HT4: 'rgba(70,223,93,0.55)',   LT4: 'rgba(49,146,40,0.45)',
-  HT5: 'rgba(164,213,255,0.45)', LT5: 'rgba(164,213,255,0.35)',
+  HT1: 'rgba(241,196,15,0.7)',   LT1: 'rgba(212,179,84,0.6)',
+  HT2: 'rgba(164,178,199,0.65)', LT2: 'rgba(136,141,149,0.5)',
+  HT3: 'rgba(223,135,70,0.7)',   LT3: 'rgba(179,105,50,0.6)',
+  HT4: 'rgba(70,223,93,0.65)',   LT4: 'rgba(49,146,40,0.55)',
+  HT5: 'rgba(164,213,255,0.5)',  LT5: 'rgba(164,213,255,0.4)',
+};
+
+const TIER_BG: Record<string, string> = {
+  HT1: 'rgba(241,196,15,0.06)',   LT1: 'rgba(212,179,84,0.05)',
+  HT2: 'rgba(164,178,199,0.06)',  LT2: 'rgba(136,141,149,0.05)',
+  HT3: 'rgba(223,135,70,0.06)',   LT3: 'rgba(179,105,50,0.05)',
+  HT4: 'rgba(70,223,93,0.06)',    LT4: 'rgba(49,146,40,0.05)',
+  HT5: 'rgba(164,213,255,0.05)',  LT5: 'rgba(164,213,255,0.04)',
 };
 
 export default function PlayerProfile() {
@@ -52,7 +60,7 @@ export default function PlayerProfile() {
     return (
       <div className="not-found-page">
         <div className="ppv2-spinner" />
-        <p style={{ color: 'var(--text-dim)', marginTop: 16 }}>Loading player…</p>
+        <p style={{ color: 'var(--text-dim)', marginTop: 18 }}>Loading player…</p>
       </div>
     );
   }
@@ -80,7 +88,6 @@ export default function PlayerProfile() {
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
   const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
-
   const rankedModes = modeCats.filter(c => {
     const t = player.tiers[c.id as keyof PlayerTiers];
     return t && t !== '-';
@@ -93,67 +100,73 @@ export default function PlayerProfile() {
   return (
     <div className="profile-page ppv2-page">
 
-      {/* ── Hero Banner ── */}
+      {/* ── Hero ── */}
       <div className="ppv2-hero">
         <div className="ppv2-hero-glow" />
+        <div className="ppv2-hero-grid" />
         <div className="ppv2-hero-inner">
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
             <ArrowLeft size={14} /> Back to Rankings
           </Link>
 
           <div className="ppv2-header">
-            {/* Avatar */}
-            <div className={`ppv2-avatar-wrap ${rankClass}`}>
+            <div className={`ppv2-avatar-wrap${rankClass ? ` ppv2-avatar-${rankClass}` : ''}`}>
               <div className="ppv2-avatar-bg" />
-              <PlayerAvatar username={player.username} size={100} />
+              <PlayerAvatar username={player.username} size={106} />
               {rank > 0 && rank <= 3 && (
-                <div className={`ppv2-crown ppv2-crown--${rankClass}`}>
+                <div className="ppv2-crown">
                   {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
                 </div>
               )}
             </div>
 
-            {/* Info */}
             <div className="ppv2-header-info">
+              <div className="ppv2-eyebrow">
+                <Zap size={10} style={{ opacity: 0.7 }} />
+                OuterTiers Player
+              </div>
               <h1 className="ppv2-username">{player.username}</h1>
               <div className="ppv2-title-row">
-                <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.65 }} />
+                <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.6 }} />
                 <span>{getTitle(player.points)}</span>
               </div>
               <div className="ppv2-badges-row">
                 <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
                 {rank > 0 && (
-                  <span className={`ppv2-rank-badge${rankClass ? ` ppv2-rank-badge--${rankClass}` : ''}`}>
-                    <Trophy size={10} /> #{rank}
+                  <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
+                    <Trophy size={10} /> #{rank} Overall
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Stats strip */}
-          <div className="ppv2-stats-strip">
-            <div className="ppv2-stat">
-              <Star size={13} className="ppv2-stat-icon" />
-              <span className="ppv2-stat-val">{animPts}</span>
-              <span className="ppv2-stat-label">Points</span>
+          {/* Stats */}
+          <div className="ppv2-stats-row">
+            <div className="ppv2-stat-box">
+              <Star size={14} className="ppv2-stat-icon" />
+              <div className="ppv2-stat-num">{animPts}</div>
+              <div className="ppv2-stat-lbl">Total Points</div>
             </div>
             <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat">
-              <Trophy size={13} className="ppv2-stat-icon" />
-              <span className="ppv2-stat-val">{rank > 0 ? `#${rank}` : '—'}</span>
-              <span className="ppv2-stat-label">Overall Rank</span>
+            <div className="ppv2-stat-box">
+              <Trophy size={14} className="ppv2-stat-icon" />
+              <div className="ppv2-stat-num">{rank > 0 ? `#${rank}` : '—'}</div>
+              <div className="ppv2-stat-lbl">Overall Rank</div>
             </div>
             <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat">
-              <Globe size={13} className="ppv2-stat-icon" />
-              <span className="ppv2-stat-val">{player.region}</span>
-              <span className="ppv2-stat-label">Region</span>
+            <div className="ppv2-stat-box">
+              <Globe size={14} className="ppv2-stat-icon" />
+              <div className="ppv2-stat-num">{player.region}</div>
+              <div className="ppv2-stat-lbl">Region</div>
             </div>
             <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat">
-              <span className="ppv2-stat-val">{rankedModes.length}<span style={{ fontSize: '0.75em', opacity: 0.5 }}>/{modeCats.length}</span></span>
-              <span className="ppv2-stat-label">Modes Ranked</span>
+            <div className="ppv2-stat-box">
+              <div className="ppv2-stat-num">
+                {rankedModes.length}
+                <span className="ppv2-stat-of">/{modeCats.length}</span>
+              </div>
+              <div className="ppv2-stat-lbl">Modes Ranked</div>
             </div>
           </div>
         </div>
@@ -163,49 +176,56 @@ export default function PlayerProfile() {
       <div className="profile-container ppv2-content">
         {rankedModes.length > 0 && (
           <>
-            <div className="profile-section-header ppv2-section-header">
+            <div className="ppv2-section-head">
               <div className="section-label">Performance</div>
-              <h2 className="section-heading" style={{ fontSize: '1.1rem' }}>Tier Rankings by Category</h2>
+              <h2 className="section-heading ppv2-section-title">Tier Rankings by Category</h2>
             </div>
+
             <div className="ppv2-tiers-grid">
               {rankedModes.map((cat, i) => {
                 const rawTier = player.rawTiers?.[cat.id as keyof typeof player.rawTiers];
                 const tierLevel = player.tiers[cat.id as keyof PlayerTiers];
                 const dateTs = player.tierDates?.[cat.id];
                 const dateStr = formatDate(dateTs);
-                const glow = rawTier ? (TIER_GLOW[rawTier.toUpperCase()] ?? 'rgba(91,164,245,0.3)') : 'rgba(91,164,245,0.3)';
+                const rawUp = rawTier?.toUpperCase() ?? '';
+                const glow = TIER_GLOW[rawUp] ?? 'rgba(91,164,245,0.35)';
+                const bg   = TIER_BG[rawUp]   ?? 'rgba(91,164,245,0.04)';
 
                 return (
                   <div
                     key={cat.id}
-                    className="ppv2-tier-card reveal"
+                    className="ppv2-tier-card"
                     style={{
                       '--tier-glow': glow,
-                      animationDelay: `${i * 45}ms`,
+                      '--tier-bg': bg,
+                      animationDelay: `${i * 55}ms`,
                     } as React.CSSProperties}
                   >
-                    <div className="ppv2-card-mode-row">
-                      <div className="ppv2-card-icon-wrap">
-                        <img src={cat.icon} alt={cat.label} width={20} height={20} />
-                      </div>
-                      <span className="ppv2-card-mode-name">{cat.label}</span>
+                    {/* Glow orb */}
+                    <div className="ppv2-card-orb" />
+
+                    {/* Mode icon */}
+                    <div className="ppv2-card-icon">
+                      <img src={cat.icon} alt={cat.label} width={24} height={24} />
                     </div>
 
-                    <div className="ppv2-card-tier-wrap">
-                      <CategoryTierBadge categoryId={cat.id} tier={tierLevel} rawTier={rawTier ?? null} />
+                    {/* Mode name */}
+                    <div className="ppv2-card-mode">{cat.label}</div>
+
+                    {/* Tier badge — the star of the card */}
+                    <div className="ppv2-card-badge">
+                      <CategoryTierBadge
+                        categoryId={cat.id}
+                        tier={tierLevel}
+                        rawTier={rawTier ?? null}
+                      />
                     </div>
 
-                    {dateStr ? (
-                      <div className="ppv2-card-since">
-                        <Calendar size={9} />
-                        <span>Since {dateStr}</span>
-                      </div>
-                    ) : (
-                      <div className="ppv2-card-since ppv2-card-since--empty">
-                        <Calendar size={9} />
-                        <span>Date unknown</span>
-                      </div>
-                    )}
+                    {/* Since date */}
+                    <div className={`ppv2-card-date${!dateStr ? ' ppv2-card-date--unknown' : ''}`}>
+                      <Calendar size={9} />
+                      <span>{dateStr ? `Since ${dateStr}` : 'Date unknown'}</span>
+                    </div>
                   </div>
                 );
               })}
@@ -213,16 +233,22 @@ export default function PlayerProfile() {
           </>
         )}
 
-        {/* Unranked modes */}
+        {rankedModes.length === 0 && (
+          <div className="ppv2-no-ranks">
+            <Trophy size={28} style={{ opacity: 0.3 }} />
+            <p>No ranked modes yet</p>
+          </div>
+        )}
+
         {unrankedModes.length > 0 && (
-          <div className="ppv2-unranked-section">
-            <div className="ppv2-unranked-label">Not yet ranked in</div>
+          <div className="ppv2-unranked">
+            <div className="ppv2-unranked-lbl">Not yet ranked in</div>
             <div className="ppv2-unranked-chips">
               {unrankedModes.map(cat => (
-                <div key={cat.id} className="ppv2-unranked-chip">
-                  <img src={cat.icon} alt={cat.label} width={14} height={14} style={{ opacity: 0.4 }} />
-                  <span>{cat.label}</span>
-                </div>
+                <span key={cat.id} className="ppv2-unranked-chip">
+                  <img src={cat.icon} alt={cat.label} width={13} height={13} style={{ opacity: 0.35 }} />
+                  {cat.label}
+                </span>
               ))}
             </div>
           </div>
