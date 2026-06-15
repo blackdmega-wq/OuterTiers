@@ -833,24 +833,25 @@ img { display: block; }
 }
 
 /* ── 2. Mobile: leaderboard table, POINTS always visible ── */
-.top100-table-wrapper { overflow-x: hidden; max-width: 100%; width: 100%; }
-.rankings-table { min-width: 0; width: 100%; table-layout: fixed; border-collapse: collapse; }
-/* Desktop: wider min-width allowed */
-@media (min-width: 581px) {
-  .top100-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .rankings-table { min-width: 520px; }
+/* Wrapper always scrollable so layout never jumps on touch */
+.top100-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
+  width: 100%;
 }
+/* Fixed minimum width keeps columns STABLE — never reflow on click/tap */
+.rankings-table { min-width: 520px; table-layout: fixed; border-collapse: collapse; }
 @media (max-width: 700px) {
-  .top100-table-wrapper { overflow-x: hidden; overflow-y: visible; }
-  .rankings-table { min-width: 0; width: 100%; font-size: 0.78rem; }
-  .rankings-table th, .rankings-table td { padding: 9px 8px; }
-  .col-rank   { padding-left: 10px !important; width: 38px; }
-  .col-points { padding-right: 10px !important; width: 64px; text-align: right !important; }
-  .col-region { width: 62px; text-align: center !important; }
+  .rankings-table { min-width: 440px; font-size: 0.78rem; }
+  .rankings-table th, .rankings-table td { padding: 9px 10px; }
+  .col-rank   { padding-left: 12px !important; width: 40px; }
+  .col-player { width: auto; }
   .col-combat-title { display: none; }
-  .col-player { width: auto; min-width: 0; }
+  .col-region { width: 68px; text-align: center !important; }
+  .col-points { padding-right: 12px !important; width: 68px; text-align: right !important; }
   .player-avatar-wrapper img { width: 28px !important; height: 28px !important; }
-  .player-row td { position: static !important; }
 }
 
 /* ── 3. Discord icon spin on hover ── */
@@ -1797,17 +1798,14 @@ img { display: block; }
 .ot-rl-avatar-ring.ring-gold {
   background: conic-gradient(rgba(253,230,138,0) 0deg, rgba(253,230,138,1) 90deg, rgba(245,158,11,0.55) 180deg, rgba(253,230,138,0.9) 270deg, rgba(253,230,138,0) 360deg);
   box-shadow: 0 0 18px rgba(251,191,36,0.50);
-  animation: ot-ring-spin 3.2s linear infinite;
 }
 .ot-rl-avatar-ring.ring-silver {
   background: conic-gradient(rgba(226,232,240,0) 0deg, rgba(226,232,240,1) 90deg, rgba(100,116,139,0.55) 180deg, rgba(226,232,240,0.9) 270deg, rgba(226,232,240,0) 360deg);
   box-shadow: 0 0 14px rgba(148,163,184,0.35);
-  animation: ot-ring-spin 3.2s linear infinite;
 }
 .ot-rl-avatar-ring.ring-bronze {
   background: conic-gradient(rgba(251,181,104,0) 0deg, rgba(251,181,104,1) 90deg, rgba(161,95,38,0.55) 180deg, rgba(251,181,104,0.9) 270deg, rgba(251,181,104,0) 360deg);
   box-shadow: 0 0 14px rgba(192,120,48,0.35);
-  animation: ot-ring-spin 3.2s linear infinite;
 }
 .ot-rl-avatar-ring.ring-blue {
   background: conic-gradient(rgba(147,197,253,0) 0deg, rgba(147,197,253,0.65) 90deg, rgba(37,99,235,0.30) 180deg, rgba(147,197,253,0.55) 270deg, rgba(147,197,253,0) 360deg);
