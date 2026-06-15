@@ -274,56 +274,42 @@ export default function Home() {
             <p className="empty-state-sub">Rankings will appear here once players are added to the system.</p>
           </div>
         ) : (
-          <div className="top100-table-outer animate-fade-up">
-            <div className="top100-table-wrapper">
-            <table className="rankings-table">
-              <thead>
-                <tr>
-                  <th className="col-rank">#</th>
-                  <th className="col-player">PLAYER</th>
-                  <th className="col-combat-title">RANK</th>
-                  <th className="col-region">REGION</th>
-                  <th className="col-points">POINTS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {top100.map((player, i) => {
-                  const rank = i + 1;
-                  const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
-                  return (
-                    <tr
-                      key={player.id}
-                      className={`player-row ${rankClass ? 'player-row-top' : ''}`}
-                      onClick={() => navigate(`/player/${player.username}`)}
-                    >
-                      <td className="col-rank">
-                        <span className={`rank-number ${rankClass}`}>{rank}.</span>
-                      </td>
-                      <td className="col-player">
-                        <div className="player-cell">
-                          <div className={`player-avatar-wrapper ${rankClass}`}>
-                            <PlayerAvatar username={player.username} size={36} />
-                          </div>
-                          <div className="player-info">
-                            <span className="player-name">{player.username}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="col-combat-title">
-                        <span className="combat-title-badge">{getTitle(player.points)}</span>
-                      </td>
-                      <td className="col-region">
-                        <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-                      </td>
-                      <td className="col-points">
-                        <span className="points-value">{player.points}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="lb-wrap animate-fade-up">
+            <div className="lb-header">
+              <span className="lb-h-rank">#</span>
+              <span />
+              <span className="lb-h-player">Player</span>
+              <span className="lb-h-pts">Points</span>
             </div>
+            {top100.map((player, i) => {
+              const rank = i + 1;
+              const topCls = rank <= 3 ? ` lb-row--top${rank}` : '';
+              return (
+                <div
+                  key={player.id}
+                  className={`lb-row${topCls}`}
+                  onClick={() => navigate(`/player/${player.username}`)}
+                >
+                  <span className="lb-rank">
+                    {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`}
+                  </span>
+                  <img
+                    src={`https://mc-heads.net/avatar/${player.username}/40`}
+                    alt={player.username}
+                    className="lb-avatar"
+                    loading="lazy"
+                  />
+                  <span className="lb-info">
+                    <span className="lb-name">{player.username}</span>
+                    <span className="lb-title">{getTitle(player.points)}</span>
+                  </span>
+                  <span className="lb-pts">
+                    {player.points}
+                    <span className="lb-pts-label">pts</span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
