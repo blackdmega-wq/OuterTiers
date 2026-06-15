@@ -101,7 +101,21 @@ export default function Rankings() {
   const { category = 'overall' } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [infoOpen, setInfoOpen] = useState(false);
+  const [_prevCategory, setPrevCategory] = useState(category);
+  const [slideDir, setSlideDir] = useState<'right' | 'left'>('right');
+  const [contentKey, setContentKey] = useState(0);
   const { players, loading } = usePlayers();
+
+  const handleTabClick = (catId: string) => {
+    if (catId === category) return;
+    const cats = CATEGORIES.map(c => c.id);
+    const prevIdx = cats.indexOf(category);
+    const nextIdx = cats.indexOf(catId);
+    setSlideDir(nextIdx > prevIdx ? 'right' : 'left');
+    setContentKey(k => k + 1);
+    setPrevCategory(catId);
+    navigate(`/rankings/${catId}`);
+  };
 
   const isOverall = category === 'overall';
   const sorted = [...players].filter(p => p.points > 0).sort((a, b) => b.points - a.points);
@@ -136,7 +150,7 @@ export default function Rankings() {
             <button
               key={cat.id}
               className={`category-tab ${category === cat.id ? 'active' : ''}`}
-              onClick={() => navigate(`/rankings/${cat.id}`)}
+              onClick={() => handleTabClick(cat.id)}
             >
               <span className="tab-icon-wrap">
                 <img src={cat.icon} alt={cat.label} className="tab-icon" />
@@ -159,7 +173,7 @@ export default function Rankings() {
             Loading players...
           </div>
         ) : isOverall ? (
-          <div className="overall-rankings">
+          <div key={contentKey} className={`overall-rankings rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}>
             {sorted.length === 0
               ? <div className="rankings-empty">No players ranked yet.</div>
               : <OverallTable players={sorted} />
@@ -167,7 +181,7 @@ export default function Rankings() {
           </div>
         ) : (
           /* ── GAMEMODE TIER COLUMNS ── */
-          <div className="tier-grid-outer">
+          <div key={contentKey} className={`tier-grid-outer rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}>
             <div className="tier-grid">
               {(() => {
                 const positions = new Map<string, number>();
