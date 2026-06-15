@@ -314,6 +314,22 @@ export default function Home() {
                       <LbTrophyIcon rank={rank} />
                       <div className="lb-pod-skin-wrap">
                         {rank === 1 && (
+                          <div className="lb-confetti-wrap">
+                            {[
+                              {l:'18%',c:'#ff4e50',dur:'1.3s',delay:'0s'},
+                              {l:'35%',c:'#ffd700',dur:'1.6s',delay:'0.25s'},
+                              {l:'50%',c:'#fff',dur:'1.1s',delay:'0.5s'},
+                              {l:'65%',c:'#fc913a',dur:'1.5s',delay:'0.1s'},
+                              {l:'80%',c:'#00c9ff',dur:'1.2s',delay:'0.7s'},
+                              {l:'28%',c:'#f7ff00',dur:'1.8s',delay:'0.9s'},
+                              {l:'72%',c:'#ff6ec7',dur:'1.0s',delay:'0.35s'},
+                              {l:'55%',c:'#39ff14',dur:'1.4s',delay:'0.6s'},
+                            ].map((r,i) => (
+                              <div key={i} className="lb-rocket" style={{left:r.l,background:r.c,'--dur':r.dur,'--delay':r.delay} as React.CSSProperties} />
+                            ))}
+                          </div>
+                        )}
+                        {rank === 1 && (
                           <svg className="lb-pod-crown" viewBox="0 0 64 38" fill="none">
                             <path d="M6 36L16 12L32 26L48 12L58 36H6Z" fill="#fbbf24"/>
                             <path d="M6 36L16 12L32 24L48 12L58 36" fill="none" stroke="#f59e0b" strokeWidth="1.5"/>
