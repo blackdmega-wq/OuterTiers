@@ -2250,7 +2250,7 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 36px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 78px; height: 112px; margin-top: 40px; }
 .lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 92px; }
 .lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 88px; }
 .lb-pod-skin {
@@ -2264,7 +2264,7 @@ img { display: block; }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
   position: absolute;
-  top: -20px;
+  top: -32px;
   left: 50%;
   transform: translateX(-50%);
   width: 48px;

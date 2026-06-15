@@ -345,7 +345,10 @@ export default function Home() {
                             const img = e.target as HTMLImageElement;
                             if (!img.dataset.fb) {
                               img.dataset.fb = '1';
-                              img.src = `https://visage.surgeplay.com/full/256/${player.username}.png`;
+                              img.src = `https://mc-heads.net/body/${player.username}/256`;
+                            } else if (!img.dataset.fb2) {
+                              img.dataset.fb2 = '1';
+                              img.src = `https://minotar.net/body/${player.username}/256`;
                             }
                           }}
                         />
