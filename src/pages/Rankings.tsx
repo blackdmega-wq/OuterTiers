@@ -32,37 +32,11 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
 }
 
 /* ── Custom rank icons — trophy shape ── */
-function RankIcon({ rank }: { rank: number }) {
-  const cls = rank === 1 ? 'ot-rl-rank-icon--gold' : rank === 2 ? 'ot-rl-rank-icon--silver' : 'ot-rl-rank-icon--bronze';
-  return (
-    <svg className={`ot-rl-rank-icon ${cls}`} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 2h12v8a6 6 0 0 1-12 0V2z"/>
-      <path d="M4 4H6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      <path d="M18 4h2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      <line x1="12" y1="14" x2="12" y2="16.5" stroke="currentColor" strokeWidth="2" fill="none"/>
-      <rect x="7.5" y="16.5" width="9" height="2.6" rx="1.3"/>
-      <rect x="9.5" y="19" width="5" height="1.8" rx="0.9" opacity="0.7"/>
-    </svg>
-  );
-}
-
 /* ── Overall rankings — full list with ring-avatar + tier badges ── */
-
-const TIER_PRIORITY: Record<string, number> = {
-  HT1: 0, LT1: 1, HT2: 2, LT2: 3, HT3: 4, LT3: 5, HT4: 6, LT4: 7, HT5: 8, LT5: 9,
-};
 
 const MODE_KEYS: (keyof NonNullable<Player['rawTiers']>)[] = [
   'ogvanilla', 'vanilla', 'uhc', 'pot', 'nethop', 'smp', 'sword', 'axe', 'mace', 'speed',
 ];
-
-function tierRingCls(tier: string): string {
-  const t = tier.toUpperCase();
-  if (t.endsWith('1')) return 'gold';
-  if (t.endsWith('2')) return 'silver';
-  if (t.endsWith('3')) return 'blue';
-  return 'gray';
-}
 
 function tierNumCls(tier: string): string {
   const n = parseInt(tier.replace(/\D/g, ''));
