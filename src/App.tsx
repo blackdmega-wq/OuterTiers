@@ -29,7 +29,7 @@ function ClickLayer() {
   useEffect(() => {
     const SELECTOR = [
       'button', 'a', '.nav-link', '.nav-dropdown-trigger',
-      '.hero-btn', '.discord-btn', '.category-tab', '.tier-player-row',
+      '.hero-btn', '.discord-btn', '.tier-player-row',
       '.player-row', '.apidocs-endpoint-card', '.dj-choice', '.info-btn',
       '.modal-tab-btn', '.modal-close', '.stat-card', '.feature-card',
     ].join(',');

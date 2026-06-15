@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
@@ -31,68 +31,99 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
-/* ── Overall rankings table (pvptiers-style) ── */
+/* ── Overall rankings — Podium top 3 + clean list ── */
 function OverallTable({ players }: { players: Player[] }) {
-  const rankMedal = (r: number) =>
-    r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : null;
+  const top3 = players.slice(0, 3);
+  const rest = players.slice(3);
+
+  /* Order: silver(#2) left, gold(#1) center, bronze(#3) right */
+  const podiumOrder: (Player | undefined)[] = top3.length >= 2
+    ? [top3[1], top3[0], top3[2]]
+    : [top3[0]];
+  const podiumRanks = top3.length >= 2 ? [2, 1, 3] : [1];
+
+  const POD_COLOR  = ['', '#fde68a', '#d4e4f4', '#fbd0a0'];
+  const POD_BG     = ['', 'rgba(251,191,36,0.09)', 'rgba(148,163,184,0.07)', 'rgba(192,120,48,0.07)'];
+  const POD_BORDER = ['', 'rgba(251,191,36,0.38)', 'rgba(148,163,184,0.28)', 'rgba(192,120,48,0.32)'];
+  const EMOJIS     = ['', '🥇', '🥈', '🥉'];
 
   return (
-    <div className="ot-leaderboard">
-      <div className="ot-lb-head">
-        <span className="ot-lbh-rank">#</span>
-        <span className="ot-lbh-player">Player</span>
-        <span className="ot-lbh-title">Title</span>
-        <span className="ot-lbh-region">Region</span>
-        <span className="ot-lbh-pts">Points</span>
-      </div>
-      {players.map((player, i) => {
-        const rank = i + 1;
-        const isTop = rank <= 3;
-        const medal = rankMedal(rank);
-        return (
-          <Link
-            key={player.id}
-            to={`/player/${player.username}`}
-            className={`ot-lb-row${isTop ? ` ot-lb-row--${rank}` : ''}`}
-          >
-            {/* Rank */}
-            <span className={`ot-lb-rank${isTop ? ` ot-lb-rank--top` : ''}`}>
-              {medal
-                ? <span className="ot-lb-medal">{medal}</span>
-                : <span className="ot-lb-ranknum">{rank}</span>}
-            </span>
+    <div className="ot-wrapper">
+      {/* ── PODIUM TOP 3 ── */}
+      {top3.length > 0 && (
+        <div className="ot-podium">
+          {podiumOrder.map((player, idx) => {
+            if (!player) return <div key={`empty-${idx}`} className="ot-podium-empty" />;
+            const rank = podiumRanks[idx];
+            return (
+              <Link
+                key={player.id}
+                to={`/player/${player.username}`}
+                className={`ot-podium-card ot-podium-card--${rank}`}
+                style={{
+                  '--pod-color': POD_COLOR[rank],
+                  '--pod-bg':    POD_BG[rank],
+                  '--pod-border': POD_BORDER[rank],
+                } as React.CSSProperties}
+              >
+                <div className="ot-pod-glow" />
+                <span className="ot-pod-emoji">{EMOJIS[rank]}</span>
+                <div className="ot-pod-avatar-wrap">
+                  <img
+                    src={`https://mc-heads.net/avatar/${player.username}/72`}
+                    alt={player.username}
+                    width={72} height={72}
+                    style={{ imageRendering: 'pixelated', borderRadius: 10, display: 'block' }}
+                    loading="lazy"
+                  />
+                </div>
+                <span className="ot-pod-name">{player.username}</span>
+                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                <div className="ot-pod-pts">
+                  <span className="ot-pod-pts-num">{player.points}</span>
+                  <span className="ot-pod-pts-sfx"> pts</span>
+                </div>
+                <div className="ot-pod-title">{getTitle(player.points)}</div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
-            {/* Player avatar + name */}
-            <span className="ot-lb-player">
-              <span className={`ot-lb-avatar-wrap${isTop ? ` ot-lb-avatar-wrap--${rank}` : ''}`}>
+      {/* ── LIST rank 4+ ── */}
+      {rest.length > 0 && (
+        <div className="ot-list">
+          <div className="ot-list-head">
+            <span>#</span>
+            <span>Player</span>
+            <span className="ot-lh-title">Title</span>
+            <span className="ot-lh-region">Region</span>
+            <span>Points</span>
+          </div>
+          {rest.map((player, i) => (
+            <Link key={player.id} to={`/player/${player.username}`} className="ot-list-row">
+              <span className="ot-lr-rank">{i + 4}</span>
+              <span className="ot-lr-player">
                 <img
-                  src={`https://mc-heads.net/avatar/${player.username}/${isTop ? 40 : 32}`}
+                  src={`https://mc-heads.net/avatar/${player.username}/28`}
                   alt={player.username}
-                  width={isTop ? 40 : 32}
-                  height={isTop ? 40 : 32}
-                  style={{ imageRendering: 'pixelated', borderRadius: 6, display: 'block' }}
+                  width={28} height={28}
+                  style={{ imageRendering: 'pixelated', borderRadius: 5, display: 'block', flexShrink: 0 }}
                   loading="lazy"
                 />
+                <span className="ot-lr-name">{player.username}</span>
               </span>
-              <span className={`ot-lb-name${isTop ? ` ot-lb-name--${rank}` : ''}`}>{player.username}</span>
-            </span>
-
-            {/* Title */}
-            <span className="ot-lb-title">{getTitle(player.points)}</span>
-
-            {/* Region */}
-            <span className="ot-lb-region">
-              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-            </span>
-
-            {/* Points */}
-            <span className={`ot-lb-pts${isTop ? ` ot-lb-pts--${rank}` : ''}`}>
-              {player.points}
-              <span className="ot-lb-pts-sfx"> pts</span>
-            </span>
-          </Link>
-        );
-      })}
+              <span className="ot-lh-title ot-lr-title-val">{getTitle(player.points)}</span>
+              <span className="ot-lh-region">
+                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+              </span>
+              <span className="ot-lr-pts">
+                {player.points}<span className="ot-lr-pts-sfx"> pts</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -101,10 +132,21 @@ export default function Rankings() {
   const { category = 'overall' } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [infoOpen, setInfoOpen] = useState(false);
-  const [_prevCategory, setPrevCategory] = useState(category);
   const [slideDir, setSlideDir] = useState<'right' | 'left'>('right');
   const [contentKey, setContentKey] = useState(0);
   const { players, loading } = usePlayers();
+
+  /* ── Sliding tab indicator ── */
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
+
+  useEffect(() => {
+    const tabs = tabsRef.current;
+    if (!tabs) return;
+    const active = tabs.querySelector<HTMLElement>('.category-tab.active');
+    if (!active) return;
+    setIndicator({ left: active.offsetLeft, width: active.offsetWidth, ready: true });
+  }, [category]);
 
   const handleTabClick = (catId: string) => {
     if (catId === category) return;
@@ -113,7 +155,6 @@ export default function Rankings() {
     const nextIdx = cats.indexOf(catId);
     setSlideDir(nextIdx > prevIdx ? 'right' : 'left');
     setContentKey(k => k + 1);
-    setPrevCategory(catId);
     navigate(`/rankings/${catId}`);
   };
 
@@ -145,11 +186,18 @@ export default function Rankings() {
       </div>
 
       <div className="rankings-container">
-        <div className="category-tabs">
+        {/* ── CATEGORY TABS with sliding indicator ── */}
+        <div className="category-tabs" ref={tabsRef}>
+          {indicator.ready && (
+            <div
+              className="tab-slide-indicator"
+              style={{ left: indicator.left, width: indicator.width }}
+            />
+          )}
           {CATEGORIES.map(cat => (
             <button
               key={cat.id}
-              className={`category-tab ${category === cat.id ? 'active' : ''}`}
+              className={`category-tab${category === cat.id ? ' active' : ''}`}
               onClick={() => handleTabClick(cat.id)}
             >
               <span className="tab-icon-wrap">
@@ -173,7 +221,10 @@ export default function Rankings() {
             Loading players...
           </div>
         ) : isOverall ? (
-          <div key={contentKey} className={`overall-rankings rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}>
+          <div
+            key={contentKey}
+            className={`overall-rankings rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}
+          >
             {sorted.length === 0
               ? <div className="rankings-empty">No players ranked yet.</div>
               : <OverallTable players={sorted} />
@@ -181,7 +232,10 @@ export default function Rankings() {
           </div>
         ) : (
           /* ── GAMEMODE TIER COLUMNS ── */
-          <div key={contentKey} className={`tier-grid-outer rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}>
+          <div
+            key={contentKey}
+            className={`tier-grid-outer rankings-tab-content${slideDir === 'left' ? ' rankings-tab-content--left' : ''}`}
+          >
             <div className="tier-grid">
               {(() => {
                 const positions = new Map<string, number>();
@@ -195,6 +249,7 @@ export default function Rankings() {
                   const col = tierColumns.find(c => c.tier === tier);
                   const tieredPlayers = [...(col?.players ?? [])].sort((a, b) => b.points - a.points);
                   const cfg = TIER_CONFIG[tier];
+                  const showTrophy = tier === 'T1' || tier === 'T2' || tier === 'T3';
                   return (
                     <div
                       key={tier}
@@ -207,11 +262,13 @@ export default function Rankings() {
                     >
                       {/* Column header */}
                       <div className="tier-col-header" style={{ borderBottom: `1px solid ${cfg.border}`, background: cfg.headerBg }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
-                          style={{ color: cfg.textColor, flexShrink: 0 }}>
-                          <path d="M6 3h12v7a6 6 0 01-12 0V3z"/>
-                          <path d="M4 5h2" strokeLinecap="round"/><path d="M20 5h-2" strokeLinecap="round"/>
-                        </svg>
+                        {showTrophy && (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
+                            style={{ color: cfg.textColor, flexShrink: 0 }}>
+                            <path d="M6 3h12v7a6 6 0 01-12 0V3z"/>
+                            <path d="M4 5h2" strokeLinecap="round"/><path d="M20 5h-2" strokeLinecap="round"/>
+                          </svg>
+                        )}
                         <span className="tier-col-title" style={{ color: cfg.textColor }}>{cfg.label}</span>
                         <span className="tier-col-count" style={{ color: cfg.textColor }}>
                           {tieredPlayers.length}
