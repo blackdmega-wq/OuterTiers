@@ -330,15 +330,7 @@ export default function Home() {
                             ))}
                           </div>
                         )}
-                        {rank === 1 && (
-                          <svg className="lb-pod-crown" viewBox="0 0 64 38" fill="none">
-                            <path d="M6 36L16 12L32 26L48 12L58 36H6Z" fill="#fbbf24"/>
-                            <path d="M6 36L16 12L32 24L48 12L58 36" fill="none" stroke="#f59e0b" strokeWidth="1.5"/>
-                            <circle cx="6" cy="12" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
-                            <circle cx="32" cy="6" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
-                            <circle cx="58" cy="12" r="5" fill="#fde68a" stroke="#f59e0b" strokeWidth="1.5"/>
-                          </svg>
-                        )}
+
 
 
                         <PodiumSkin3D username={player.username} rank={rank as 1 | 2 | 3} />
