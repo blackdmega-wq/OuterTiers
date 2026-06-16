@@ -2254,6 +2254,13 @@ img { display: block; }
   justify-content: center;
 }
 .lb-pod--rank1 .lb-pod-skin-wrap { width: 100px; height: 152px; margin-top: 12px; }
+/* Rockets in bg: content elements must stack above lb-fire-wrap (z-index:-1) */
+.lb-pod--rank1 .lb-pod-skin-wrap,
+.lb-pod--rank1 .lb-pod-pedestal,
+.lb-pod--rank1 .lb-pod-info {
+  position: relative;
+  z-index: 1;
+}
 .lb-pod--rank2 .lb-pod-skin-wrap { width: 82px; height: 128px; }
 .lb-pod--rank3 .lb-pod-skin-wrap { width: 76px; height: 118px; }
 .lb-pod-skin {
@@ -2303,7 +2310,7 @@ img { display: block; }
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 0;
+  z-index: -1;
 }
 /* Minecraft bottle rocket: white tip → gray body → orange flame trail */
 /* ── Minecraft firework rocket: rises then EXPLODES at top ── */
