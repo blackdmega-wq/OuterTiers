@@ -335,6 +335,28 @@ export default function Home() {
                           ))}
                         </div>
                       )}
+                      {rank === 2 && (
+                        <div className="lb-silver-wrap">
+                          {/* Silver sparkle stars for rank 2 */}
+                          {([
+                            {l:'8%',  dur:'3.2s', delay:'0s',    sz:'4px', shape:'star'},
+                            {l:'20%', dur:'2.8s', delay:'0.6s',  sz:'3px', shape:'dot'},
+                            {l:'33%', dur:'3.8s', delay:'1.4s',  sz:'5px', shape:'star'},
+                            {l:'47%', dur:'2.6s', delay:'0.3s',  sz:'3px', shape:'dot'},
+                            {l:'60%', dur:'3.5s', delay:'1.9s',  sz:'4px', shape:'star'},
+                            {l:'73%', dur:'3.0s', delay:'0.9s',  sz:'3px', shape:'dot'},
+                            {l:'85%', dur:'4.0s', delay:'1.6s',  sz:'4px', shape:'star'},
+                            {l:'15%', dur:'2.9s', delay:'2.1s',  sz:'3px', shape:'dot'},
+                            {l:'55%', dur:'3.4s', delay:'0.5s',  sz:'5px', shape:'star'},
+                            {l:'90%', dur:'2.7s', delay:'1.2s',  sz:'3px', shape:'dot'},
+                          ] as {l:string;dur:string;delay:string;sz:string;shape:string}[]).map((p,i) => (
+                            <div key={i}
+                              className={`lb-silver-star lb-silver-star--${p.shape}`}
+                              style={{'--sdur':p.dur,'--sdelay':p.delay,'--ssz':p.sz,left:p.l} as React.CSSProperties}
+                            />
+                          ))}
+                        </div>
+                      )}
                                             <LbTrophyIcon rank={rank} />
                       <div className="lb-pod-skin-wrap">
                         <PodiumSkin3D username={player.username} rank={rank as 1 | 2 | 3} />
