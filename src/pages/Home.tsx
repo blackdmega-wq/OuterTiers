@@ -330,25 +330,7 @@ export default function Home() {
                           ))}
                         </div>
                       )}
-                      {rank === 1 && (
-                        <div className="lb-confetti-wrap lb-confetti-full">
-                          {[
-                            {l:'10%',c:'#ffff00',dur:'1.2s',delay:'0s',   sx:'-5px', sz:'9px'},
-                            {l:'25%',c:'#ff4e50',dur:'1.4s',delay:'0.3s', sx:'6px',  sz:'8px'},
-                            {l:'40%',c:'#00c9ff',dur:'1.1s',delay:'0.6s', sx:'-6px', sz:'9px'},
-                            {l:'55%',c:'#ffd700',dur:'1.3s',delay:'0.15s',sx:'7px',  sz:'7px'},
-                            {l:'70%',c:'#39ff14',dur:'1.0s',delay:'0.45s',sx:'-4px', sz:'10px'},
-                            {l:'85%',c:'#ff6ec7',dur:'1.5s',delay:'0.75s',sx:'5px',  sz:'8px'},
-                            {l:'18%',c:'#fc913a',dur:'1.2s',delay:'0.9s', sx:'-7px', sz:'9px'},
-                            {l:'45%',c:'#fff',   dur:'1.4s',delay:'0.5s', sx:'6px',  sz:'7px'},
-                            {l:'62%',c:'#ffd700',dur:'1.1s',delay:'1.1s', sx:'-5px', sz:'10px'},
-                            {l:'78%',c:'#00c9ff',dur:'1.3s',delay:'0.25s',sx:'4px',  sz:'8px'},
-                          ].map((r,i) => (
-                            <div key={i} className="lb-rocket" style={{left:r.l,background:r.c,'--dur':r.dur,'--delay':r.delay,'--sx':r.sx,width:r.sz,height:r.sz,borderRadius:i%4===0?'2px':'50%'} as React.CSSProperties} />
-                          ))}
-                        </div>
-                      )}
-                      <LbTrophyIcon rank={rank} />
+                                            <LbTrophyIcon rank={rank} />
                       <div className="lb-pod-skin-wrap">
                         <PodiumSkin3D username={player.username} rank={rank as 1 | 2 | 3} />
                       </div>
