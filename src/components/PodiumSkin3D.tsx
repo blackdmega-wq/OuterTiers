@@ -98,48 +98,49 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── speed & easing ── */
-            const SPEED = 0.82;
-            const raw = ((progress * SPEED * 4) % 4 + 4) % 4;
-            const ki  = Math.floor(raw);
+            /* ── speed & timing ── */
+            const SPEED = 0.80;
+            const raw  = ((progress * SPEED * 4) % 4 + 4) % 4;
+            const ki   = Math.floor(raw);
             const frac = raw - ki;
 
-            /* Cubic ease-in-out: fast swing, natural deceleration */
+            /* Quintic ease-in-out: snappier hold at pose extremes, smoother transitions */
             const ease = (t: number) =>
-              t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+              t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
             const ef   = ease(frac);
             const lerp = (a: number, b: number) => a + (b - a) * ef;
 
-            /* ── 4 keyframe poses ── */
-            /* see KEYS block below for axis reference */
-            /* ─────────────────────────────────────────────────────────────
-               VERIFIED 4-POSE FLOSS KEYFRAMES
-               Axis reference validated against the #1 victory pose:
-                 leftArm.z  NEGATIVE → extends character's LEFT
-                 leftArm.z  POSITIVE → crosses toward character's RIGHT
-                 rightArm.z POSITIVE → extends character's RIGHT   ← KEY FIX
-                 rightArm.z NEGATIVE → crosses toward character's LEFT
-                 .x NEGATIVE → arm FORWARD (belly)  .x POSITIVE → arm BACKWARD (behind)
-               ───────────────────────────────────────────────────────────── */
+            /* ── Verified axis conventions (from #1 victory pose reference) ──
+               leftArm.z  NEGATIVE → extends character's LEFT
+               leftArm.z  POSITIVE → crosses toward character's RIGHT
+               rightArm.z POSITIVE → extends character's RIGHT
+               rightArm.z NEGATIVE → crosses toward character's LEFT
+               .x NEGATIVE → arm FORWARD (belly)  .x POSITIVE → arm BACKWARD (behind)
+
+               Frame 1: L-arm horizontal LEFT,  R-arm BEHIND BACK
+                 lAz=-1.55 (outward left)
+                 rAx=+1.40 (strongly backward ~80°), rAz=+0.25 (pulls toward body center)
+               Frame 2: R-arm horizontal RIGHT, L-arm FORWARD across belly
+                 lAx=-1.38 (strongly forward), lAz=+1.05 (crosses right)
+                 rAz=+1.55 (outward right)
+               Frame 3: BOTH arms to the LEFT
+                 lAz=-1.55 (outward left)
+                 rAx=-0.25 (slight forward → at chest height), rAz=-1.30 (crosses left)
+               Frame 4: R-arm horizontal RIGHT, L-arm BEHIND BACK
+                 lAx=+1.40 (strongly backward ~80°), lAz=+0.25 (pulls toward body center)
+                 rAz=+1.55 (outward right)
+            ─────────────────────────────────────────────────────────────── */
             const KEYS = [
-              /* Frame 1: L-arm extends character-LEFT, R-arm BEHIND BACK */
-              { lAx:  0.00, lAz: -1.55, rAx:  0.78, rAz:  0.00, bz: -0.12 },
-              /* Frame 2: R-arm extends character-RIGHT, L-arm FORWARD in front of belly  */
-              /*          lAx=-1.38 pushes arm well forward → no chest-clip               */
-              /*          lAz=+1.05 crosses leftArm toward character-RIGHT (belly cross)  */
-              { lAx: -1.38, lAz:  1.05, rAx:  0.00, rAz:  1.55, bz:  0.12 },
-              /* Frame 3: BOTH arms to character-LEFT                                     */
-              /*          leftArm extends left (lAz=-1.55), rightArm crosses left         */
-              /*          rightArm crosses LEFT = NEGATIVE rAz (not positive!)            */
-              { lAx:  0.00, lAz: -1.55, rAx: -0.25, rAz: -1.30, bz: -0.12 },
-              /* Frame 4: R-arm extends character-RIGHT, L-arm BEHIND BACK                */
-              { lAx:  0.78, lAz:  0.00, rAx:  0.00, rAz:  1.55, bz:  0.12 },
+              { lAx:  0.00, lAz: -1.55, rAx:  1.40, rAz:  0.25, bz: -0.13 },
+              { lAx: -1.38, lAz:  1.05, rAx:  0.00, rAz:  1.55, bz:  0.13 },
+              { lAx:  0.00, lAz: -1.55, rAx: -0.25, rAz: -1.30, bz: -0.13 },
+              { lAx:  1.40, lAz:  0.25, rAx:  0.00, rAz:  1.55, bz:  0.13 },
             ];
 
             const kA = KEYS[ki % 4];
             const kB = KEYS[(ki + 1) % 4];
 
-            /* Apply arm rotations */
+            /* Arms */
             s.leftArm.rotation.x  = lerp(kA.lAx, kB.lAx);
             s.leftArm.rotation.z  = lerp(kA.lAz, kB.lAz);
             s.leftArm.rotation.y  = 0;
@@ -147,16 +148,24 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.rightArm.rotation.z = lerp(kA.rAz, kB.rAz);
             s.rightArm.rotation.y = 0;
 
-            /* Body: chest still, hips sway opposite to arms */
-            s.body.rotation.y = 0;
-            s.body.rotation.x = 0;
+            /* Body: hip sway + slight forward lean */
+            const t2 = progress * SPEED * Math.PI * 2;
             s.body.rotation.z = lerp(kA.bz, kB.bz);
+            s.body.rotation.y = Math.sin(t2 * 2) * 0.07;
+            s.body.rotation.x = 0.06;
 
-            /* Legs: slightly spread apart for authentic floss stance */
-            s.leftLeg.rotation.x  = 0.05;
+            /* Head: subtle bob & look in rhythm */
+            if (s.head) {
+              s.head.rotation.x = -0.05 + Math.sin(t2) * 0.07;
+              s.head.rotation.y = Math.sin(t2) * 0.10;
+              s.head.rotation.z = 0;
+            }
+
+            /* Legs: spread + small alternating swing matching hip */
+            s.leftLeg.rotation.x  = -Math.sin(t2 * 2) * 0.07;
             s.leftLeg.rotation.z  =  0.14;
             s.leftLeg.rotation.y  = 0;
-            s.rightLeg.rotation.x = 0.05;
+            s.rightLeg.rotation.x =  Math.sin(t2 * 2) * 0.07;
             s.rightLeg.rotation.z = -0.14;
             s.rightLeg.rotation.y = 0;
           } catch (_) {}
