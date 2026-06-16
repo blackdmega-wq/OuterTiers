@@ -98,74 +98,52 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── speed & timing ── */
-            const SPEED = 0.80;
-            const raw  = ((progress * SPEED * 4) % 4 + 4) % 4;
-            const ki   = Math.floor(raw);
-            const frac = raw - ki;
+            /* ── FLOSS DANCE: pure sine-wave pendulum ──────────────────────
+               Both arms swing TOGETHER left↔right like a pendulum.
+               No keyframes — one equation drives everything smoothly.
 
-            /* Quintic ease-in-out: snappier hold at pose extremes, smoother transitions */
-            const ease = (t: number) =>
-              t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
-            const ef   = ease(frac);
-            const lerp = (a: number, b: number) => a + (b - a) * ef;
+               Verified axes (from victory-pose ground truth):
+                 leftArm.z  POSITIVE → crosses right   NEGATIVE → extends left
+                 rightArm.z POSITIVE → extends right   NEGATIVE → crosses left
+                 arm.x      NEGATIVE → forward/belly   POSITIVE → backward
 
-            /* ── Verified axis conventions (from #1 victory pose reference) ──
-               leftArm.z  NEGATIVE → extends character's LEFT
-               leftArm.z  POSITIVE → crosses toward character's RIGHT
-               rightArm.z POSITIVE → extends character's RIGHT
-               rightArm.z NEGATIVE → crosses toward character's LEFT
-               .x NEGATIVE → arm FORWARD (belly)  .x POSITIVE → arm BACKWARD (behind)
+               When swing > 0 (arms RIGHT):
+                 rightArm extends right  (rAz = +swing * 1.55, rAx = 0)
+                 leftArm  crosses right  (lAz = +swing * 1.55, lAx = forward)
+               When swing < 0 (arms LEFT):
+                 leftArm  extends left   (lAz = swing * 1.55,  lAx = 0)
+                 rightArm crosses left   (rAz = swing * 1.55,  rAx = forward)
+            ──────────────────────────────────────────────────────────────── */
+            const SPEED = 2.2;
+            const t     = progress * SPEED;
+            const swing = Math.sin(t);   /* −1 (full-left) → +1 (full-right) */
 
-               Frame 1: L-arm horizontal LEFT,  R-arm BEHIND BACK
-                 lAz=-1.55 (outward left)
-                 rAx=+1.40 (strongly backward ~80°), rAz=+0.25 (pulls toward body center)
-               Frame 2: R-arm horizontal RIGHT, L-arm FORWARD across belly
-                 lAx=-1.38 (strongly forward), lAz=+1.05 (crosses right)
-                 rAz=+1.55 (outward right)
-               Frame 3: BOTH arms to the LEFT
-                 lAz=-1.55 (outward left)
-                 rAx=-0.25 (slight forward → at chest height), rAz=-1.30 (crosses left)
-               Frame 4: R-arm horizontal RIGHT, L-arm BEHIND BACK
-                 lAx=+1.40 (strongly backward ~80°), lAz=+0.25 (pulls toward body center)
-                 rAz=+1.55 (outward right)
-            ─────────────────────────────────────────────────────────────── */
-            const KEYS = [
-              { lAx:  0.00, lAz: -1.55, rAx:  1.40, rAz:  0.25, bz: -0.13 },
-              { lAx: -1.38, lAz:  1.05, rAx:  0.00, rAz:  1.55, bz:  0.13 },
-              { lAx:  0.00, lAz: -1.55, rAx: -0.25, rAz: -1.30, bz: -0.13 },
-              { lAx:  1.40, lAz:  0.25, rAx:  0.00, rAz:  1.55, bz:  0.13 },
-            ];
-
-            const kA = KEYS[ki % 4];
-            const kB = KEYS[(ki + 1) % 4];
-
-            /* Arms */
-            s.leftArm.rotation.x  = lerp(kA.lAx, kB.lAx);
-            s.leftArm.rotation.z  = lerp(kA.lAz, kB.lAz);
+            /* ── Arms ── */
+            s.leftArm.rotation.z  =  swing * 1.55;
+            s.leftArm.rotation.x  =  Math.max(0,  swing) * -1.28;  /* forward when crossing right */
             s.leftArm.rotation.y  = 0;
-            s.rightArm.rotation.x = lerp(kA.rAx, kB.rAx);
-            s.rightArm.rotation.z = lerp(kA.rAz, kB.rAz);
+
+            s.rightArm.rotation.z =  swing * 1.55;
+            s.rightArm.rotation.x =  Math.max(0, -swing) * -1.28;  /* forward when crossing left  */
             s.rightArm.rotation.y = 0;
 
-            /* Body: hip sway + slight forward lean */
-            const t2 = progress * SPEED * Math.PI * 2;
-            s.body.rotation.z = lerp(kA.bz, kB.bz);
-            s.body.rotation.y = Math.sin(t2 * 2) * 0.07;
-            s.body.rotation.x = 0.06;
+            /* ── Body: hip counter-sway + gentle forward lean ── */
+            s.body.rotation.z = -swing * 0.13;
+            s.body.rotation.y =  swing * 0.06;
+            s.body.rotation.x =  0.06;
 
-            /* Head: subtle bob & look in rhythm */
+            /* ── Head: follows the sway softly ── */
             if (s.head) {
-              s.head.rotation.x = -0.05 + Math.sin(t2) * 0.07;
-              s.head.rotation.y = Math.sin(t2) * 0.10;
+              s.head.rotation.y = swing * 0.10;
+              s.head.rotation.x = -0.04 + Math.cos(t) * 0.04;
               s.head.rotation.z = 0;
             }
 
-            /* Legs: spread + small alternating swing matching hip */
-            s.leftLeg.rotation.x  = -Math.sin(t2 * 2) * 0.07;
+            /* ── Legs: slight weight-shift with each swing ── */
+            s.leftLeg.rotation.x  =  swing * 0.07;
             s.leftLeg.rotation.z  =  0.14;
             s.leftLeg.rotation.y  = 0;
-            s.rightLeg.rotation.x =  Math.sin(t2 * 2) * 0.07;
+            s.rightLeg.rotation.x = -swing * 0.07;
             s.rightLeg.rotation.z = -0.14;
             s.rightLeg.rotation.y = 0;
           } catch (_) {}
