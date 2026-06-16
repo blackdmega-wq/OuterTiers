@@ -2307,112 +2307,118 @@ img { display: block; }
 }
 /* Minecraft bottle rocket: white tip → gray body → orange flame trail */
 /* ── Minecraft firework rocket: rises then EXPLODES at top ── */
+/* --fh controls max height (set per-rocket in JSX for variety) */
 .lb-fire-rocket {
   position: absolute;
   bottom: 4px;
-  width: 5px;
-  height: 32px;
-  /* pointed tip shape */
-  border-radius: 50% 50% 20% 20% / 8px 8px 4px 4px;
+  width: 4px;
+  height: 26px;
+  border-radius: 2px 2px 0 0;
   opacity: 0;
-  transform-origin: bottom center;
-  /* Minecraft rocket: white tip, gray body, orange/red flame trail */
   background: linear-gradient(
     180deg,
     #ffffff 0%,
-    #eeeeee 14%,
-    #cccccc 28%,
-    #FF9900 48%,
-    #FF4400 68%,
-    rgba(255,80,0,0.25) 88%,
-    transparent 100%
+    #dddddd 18%,
+    #aaaaaa 32%,
+    #FF9900 52%,
+    #FF3300 74%,
+    rgba(255,50,0,0.12) 100%
   );
-  box-shadow:
-    0 0 5px 2px rgba(255,140,0,0.65),
-    0 10px 12px rgba(255,60,0,0.40);
-  animation: lb-mc-rocket var(--fdur, 3s) var(--fdelay, 0s) cubic-bezier(0.15,0.5,0.35,1) infinite;
-}
-/* Explosion flash using ::before */
-.lb-fire-rocket::before {
-  content: '';
-  position: absolute;
-  /* centered on rocket tip */
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
-  width: 0; height: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0%, #ffee44 28%, #ff8800 55%, rgba(255,60,0,0.3) 78%, transparent 100%);
-  box-shadow: 0 0 0 0 rgba(255,200,50,0);
-  animation: lb-mc-explode var(--fdur, 3s) var(--fdelay, 0s) cubic-bezier(0.15,0.5,0.35,1) infinite;
-  pointer-events: none;
+  box-shadow: 0 0 4px 2px rgba(255,130,0,0.55);
+  animation: lb-mc-rocket var(--fdur, 3s) var(--fdelay, 0s) ease-in infinite;
 }
 @keyframes lb-mc-rocket {
-  /* ── LAUNCH PHASE (0-66%): rocket travels upward ── */
+  /* ── RISE phase (0 → 63%): rocket flies up ── */
   0% {
-    transform: translateY(0px) scaleX(1.0);
+    transform: translateY(0px);
+    width: 4px; height: 26px;
+    border-radius: 2px 2px 0 0;
     opacity: 0;
-    width: 5px; height: 32px;
-    border-radius: 50% 50% 20% 20% / 8px 8px 4px 4px;
-    background: linear-gradient(180deg,#fff 0%,#eee 14%,#ccc 28%,#FF9900 48%,#FF4400 68%,rgba(255,80,0,0.25) 88%,transparent 100%);
-    box-shadow: 0 0 5px 2px rgba(255,140,0,0.65), 0 10px 12px rgba(255,60,0,0.40);
+    background: linear-gradient(180deg,#fff 0%,#ddd 18%,#aaa 32%,#FF9900 52%,#FF3300 74%,rgba(255,50,0,0.12) 100%);
+    box-shadow: 0 0 4px 2px rgba(255,130,0,0.55);
   }
-  5%  { opacity: 0.95; }
-  55% {
-    transform: translateY(-145px) scaleX(0.75);
-    opacity: 0.85;
-    width: 4px; height: 24px;
-    border-radius: 50% 50% 20% 20% / 6px 6px 3px 3px;
-    background: linear-gradient(180deg,#fff 0%,#eee 18%,#FF9900 50%,#FF4400 78%,transparent 100%);
-    box-shadow: 0 0 7px 3px rgba(255,160,0,0.70), 0 12px 16px rgba(255,60,0,0.45);
+  5%  { opacity: 1; }
+  58% {
+    transform: translateY(calc(-1 * var(--fh, 172px)));
+    width: 3px; height: 18px;
+    border-radius: 2px 2px 0 0;
+    opacity: 0.90;
+    background: linear-gradient(180deg,#fff 0%,#eee 22%,#FF9900 50%,#FF3300 80%,transparent 100%);
+    box-shadow: 0 0 6px 3px rgba(255,160,0,0.70);
   }
-  /* Flash: rocket shrinks to bright point just before exploding */
-  66% {
-    transform: translateY(-188px) scaleX(0.4);
-    opacity: 1;
-    width: 6px; height: 10px;
+  /* Flash before explosion */
+  64% {
+    transform: translateY(calc(-1 * var(--fh, 172px) - 5px));
+    width: 7px; height: 7px;
     border-radius: 50%;
+    opacity: 1;
     background: #ffffff;
-    box-shadow: 0 0 10px 5px rgba(255,240,100,1.0), 0 0 22px 8px rgba(255,160,0,0.70);
+    box-shadow: 0 0 10px 5px rgba(255,250,150,0.95);
   }
-  /* ── EXPLOSION PHASE (68-100%): element becomes the burst ── */
-  68% {
-    transform: translateY(-196px) translateX(-15px) scaleX(1);
+  /* ── EXPLOSION phase (67%): Minecraft starburst via box-shadow ──
+     Element shrinks to a tiny center dot.
+     Multiple box-shadow offsets = sparkle lines radiating outward.
+     8 cardinal/diagonal sparkles + 8 inner sparkles = classic MC burst. */
+  67% {
+    transform: translateY(calc(-1 * var(--fh, 172px) - 7px)) translateX(-1.5px);
+    width: 5px; height: 5px;
+    border-radius: 50%;
     opacity: 1;
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #ffffff 0%, #ffff66 22%, #ffaa00 50%, rgba(255,60,0,0.35) 78%, transparent 100%);
+    background: #ffff99;
     box-shadow:
-      0 0 18px 9px rgba(255,220,60,0.80),
-      0 0 45px 16px rgba(255,100,0,0.40),
-      inset 0 0 8px rgba(255,255,200,0.50);
+      /* outer ring — 8 sparkle points */
+      0px   -22px 0 2.5px #ffff00,
+      15px  -15px 0 2.5px #ffee00,
+      22px    0px 0 2.5px #ffcc00,
+      15px   15px 0 2.5px #ffaa00,
+      0px    22px 0 2.5px #ff8800,
+      -15px  15px 0 2.5px #ffaa00,
+      -22px   0px 0 2.5px #ffcc00,
+      -15px -15px 0 2.5px #ffee00,
+      /* inner ring — 8 brighter sparkle points */
+      0px   -11px 0 1.5px #ffffff,
+      8px    -8px 0 1.5px #ffffff,
+      11px    0px 0 1.5px #ffff88,
+      8px     8px 0 1.5px #ffdd44,
+      0px    11px 0 1.5px #ffbb22,
+      -8px    8px 0 1.5px #ffdd44,
+      -11px   0px 0 1.5px #ffff88,
+      -8px   -8px 0 1.5px #ffffff;
   }
+  /* ── Sparkles expand outward (Minecraft drift) ── */
   80% {
-    transform: translateY(-200px) translateX(-22px) scaleX(1);
-    opacity: 0.60;
-    width: 52px; height: 52px;
+    transform: translateY(calc(-1 * var(--fh, 172px) - 8px)) translateX(-2px);
+    width: 5px; height: 5px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,120,0.55) 0%, rgba(255,120,0,0.30) 55%, transparent 85%);
-    box-shadow: 0 0 28px 14px rgba(255,180,0,0.35), 0 0 60px 22px rgba(255,80,0,0.12);
+    opacity: 0.62;
+    background: transparent;
+    box-shadow:
+      0px   -40px 0 2px rgba(255,255,0,0.5),
+      28px  -28px 0 2px rgba(255,230,0,0.45),
+      40px    0px 0 2px rgba(255,190,0,0.40),
+      28px   28px 0 2px rgba(255,140,0,0.35),
+      0px    40px 0 2px rgba(255,100,0,0.28),
+      -28px  28px 0 2px rgba(255,140,0,0.35),
+      -40px   0px 0 2px rgba(255,190,0,0.40),
+      -28px -28px 0 2px rgba(255,230,0,0.45),
+      /* inner ring fading */
+      0px   -20px 0 1.5px rgba(255,255,180,0.30),
+      14px  -14px 0 1.5px rgba(255,255,100,0.25),
+      20px    0px 0 1.5px rgba(255,220,50,0.22),
+      14px   14px 0 1.5px rgba(255,170,0,0.18),
+      0px    20px 0 1px   rgba(255,110,0,0.15),
+      -14px  14px 0 1px   rgba(255,170,0,0.18),
+      -20px   0px 0 1.5px rgba(255,220,50,0.22),
+      -14px -14px 0 1.5px rgba(255,255,100,0.25);
   }
-  93% {
-    transform: translateY(-204px) translateX(-28px) scaleX(1);
-    opacity: 0.12;
-    width: 64px; height: 64px;
-  }
+  /* ── Fade out ── */
+  94% { opacity: 0.08; }
   100% {
-    transform: translateY(-206px) translateX(-30px) scaleX(1);
+    transform: translateY(calc(-1 * var(--fh, 172px) - 9px)) translateX(-2px);
     opacity: 0;
-    width: 68px; height: 68px;
   }
 }
-@keyframes lb-mc-explode {
-  0%,60% { transform: translateX(-50%) scale(0); opacity: 0; width: 0; height: 0; }
-  67% { transform: translateX(-50%) scale(1); opacity: 1; width: 28px; height: 28px; box-shadow: 0 0 14px 7px rgba(255,220,60,0.85); }
-  75% { transform: translateX(-50%) scale(1.4); opacity: 0.70; width: 36px; height: 36px; }
-  88% { transform: translateX(-50%) scale(1.8); opacity: 0.20; }
-  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
-}
+
 
 /* Confetti rocket particles above fire */
 .lb-confetti-wrap {
