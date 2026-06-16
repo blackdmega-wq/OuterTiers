@@ -2306,34 +2306,112 @@ img { display: block; }
   z-index: 0;
 }
 /* Minecraft bottle rocket: white tip → gray body → orange flame trail */
+/* ── Minecraft firework rocket: rises then EXPLODES at top ── */
 .lb-fire-rocket {
   position: absolute;
-  bottom: 0;
+  bottom: 4px;
   width: 5px;
-  height: 36px;
-  border-radius: 50% 50% 0 0 / 8px 8px 0 0;   /* pointed tip at top */
+  height: 32px;
+  /* pointed tip shape */
+  border-radius: 50% 50% 20% 20% / 8px 8px 4px 4px;
   opacity: 0;
+  transform-origin: bottom center;
+  /* Minecraft rocket: white tip, gray body, orange/red flame trail */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,       /* rocket tip  */
-    #dddddd 18%,      /* rocket body */
-    #aaaaaa 34%,      /* body base   */
-    #FF8C00 50%,      /* flame start */
-    #FF3300 68%,      /* flame core  */
-    transparent 100%  /* trail fade  */
+    #ffffff 0%,
+    #eeeeee 14%,
+    #cccccc 28%,
+    #FF9900 48%,
+    #FF4400 68%,
+    rgba(255,80,0,0.25) 88%,
+    transparent 100%
   );
   box-shadow:
-    0 0 4px 1px rgba(255,120,0,0.55),
-    0 8px 8px 0px rgba(255,60,0,0.35);
-  animation: lb-fire-rise var(--fdur, 3s) var(--fdelay, 0s) ease-in infinite;
+    0 0 5px 2px rgba(255,140,0,0.65),
+    0 10px 12px rgba(255,60,0,0.40);
+  animation: lb-mc-rocket var(--fdur, 3s) var(--fdelay, 0s) cubic-bezier(0.15,0.5,0.35,1) infinite;
 }
-@keyframes lb-fire-rise {
-  0%   { transform: translateY(0)     scaleX(1.0); opacity: 0;    }
-  5%   { opacity: 0.40; }
-  40%  { transform: translateY(-38%)  scaleX(0.85); opacity: 0.32; }
-  70%  { transform: translateY(-75%)  scaleX(0.65); opacity: 0.22; }
-  90%  { opacity: 0.08; }
-  100% { transform: translateY(-108%) scaleX(0.3);  opacity: 0;    }
+/* Explosion flash using ::before */
+.lb-fire-rocket::before {
+  content: '';
+  position: absolute;
+  /* centered on rocket tip */
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, #ffee44 28%, #ff8800 55%, rgba(255,60,0,0.3) 78%, transparent 100%);
+  box-shadow: 0 0 0 0 rgba(255,200,50,0);
+  animation: lb-mc-explode var(--fdur, 3s) var(--fdelay, 0s) cubic-bezier(0.15,0.5,0.35,1) infinite;
+  pointer-events: none;
+}
+@keyframes lb-mc-rocket {
+  /* ── LAUNCH PHASE (0-66%): rocket travels upward ── */
+  0% {
+    transform: translateY(0px) scaleX(1.0);
+    opacity: 0;
+    width: 5px; height: 32px;
+    border-radius: 50% 50% 20% 20% / 8px 8px 4px 4px;
+    background: linear-gradient(180deg,#fff 0%,#eee 14%,#ccc 28%,#FF9900 48%,#FF4400 68%,rgba(255,80,0,0.25) 88%,transparent 100%);
+    box-shadow: 0 0 5px 2px rgba(255,140,0,0.65), 0 10px 12px rgba(255,60,0,0.40);
+  }
+  5%  { opacity: 0.95; }
+  55% {
+    transform: translateY(-145px) scaleX(0.75);
+    opacity: 0.85;
+    width: 4px; height: 24px;
+    border-radius: 50% 50% 20% 20% / 6px 6px 3px 3px;
+    background: linear-gradient(180deg,#fff 0%,#eee 18%,#FF9900 50%,#FF4400 78%,transparent 100%);
+    box-shadow: 0 0 7px 3px rgba(255,160,0,0.70), 0 12px 16px rgba(255,60,0,0.45);
+  }
+  /* Flash: rocket shrinks to bright point just before exploding */
+  66% {
+    transform: translateY(-188px) scaleX(0.4);
+    opacity: 1;
+    width: 6px; height: 10px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 10px 5px rgba(255,240,100,1.0), 0 0 22px 8px rgba(255,160,0,0.70);
+  }
+  /* ── EXPLOSION PHASE (68-100%): element becomes the burst ── */
+  68% {
+    transform: translateY(-196px) translateX(-15px) scaleX(1);
+    opacity: 1;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #ffff66 22%, #ffaa00 50%, rgba(255,60,0,0.35) 78%, transparent 100%);
+    box-shadow:
+      0 0 18px 9px rgba(255,220,60,0.80),
+      0 0 45px 16px rgba(255,100,0,0.40),
+      inset 0 0 8px rgba(255,255,200,0.50);
+  }
+  80% {
+    transform: translateY(-200px) translateX(-22px) scaleX(1);
+    opacity: 0.60;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,120,0.55) 0%, rgba(255,120,0,0.30) 55%, transparent 85%);
+    box-shadow: 0 0 28px 14px rgba(255,180,0,0.35), 0 0 60px 22px rgba(255,80,0,0.12);
+  }
+  93% {
+    transform: translateY(-204px) translateX(-28px) scaleX(1);
+    opacity: 0.12;
+    width: 64px; height: 64px;
+  }
+  100% {
+    transform: translateY(-206px) translateX(-30px) scaleX(1);
+    opacity: 0;
+    width: 68px; height: 68px;
+  }
+}
+@keyframes lb-mc-explode {
+  0%,60% { transform: translateX(-50%) scale(0); opacity: 0; width: 0; height: 0; }
+  67% { transform: translateX(-50%) scale(1); opacity: 1; width: 28px; height: 28px; box-shadow: 0 0 14px 7px rgba(255,220,60,0.85); }
+  75% { transform: translateX(-50%) scale(1.4); opacity: 0.70; width: 36px; height: 36px; }
+  88% { transform: translateX(-50%) scale(1.8); opacity: 0.20; }
+  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
 }
 
 /* Confetti rocket particles above fire */
