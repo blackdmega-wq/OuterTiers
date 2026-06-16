@@ -2250,9 +2250,9 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 140px; height: 220px; margin-top: 20px; }
-.lb-pod--rank2 .lb-pod-skin-wrap { width: 110px; height: 175px; }
-.lb-pod--rank3 .lb-pod-skin-wrap { width: 100px; height: 165px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 130px; height: 200px; margin-top: 20px; }
+.lb-pod--rank2 .lb-pod-skin-wrap { width: 100px; height: 160px; }
+.lb-pod--rank3 .lb-pod-skin-wrap { width: 90px; height: 148px; }
 .lb-pod-skin {
   width: 100%;
   height: 100%;
@@ -2526,9 +2526,9 @@ img { display: block; }
 /* ── Mobile responsive ── */
 @media (max-width: 580px) {
   .lb-podium { padding: 24px 0 0; }
-  .lb-pod--rank1 .lb-pod-skin-wrap { width: 80px; height: 110px; }
-  .lb-pod--rank2 .lb-pod-skin-wrap { width: 64px; height: 90px; }
-  .lb-pod--rank3 .lb-pod-skin-wrap { width: 60px; height: 84px; }
+  .lb-pod--rank1 .lb-pod-skin-wrap { width: 76px; height: 100px; }
+  .lb-pod--rank2 .lb-pod-skin-wrap { width: 60px; height: 84px; }
+  .lb-pod--rank3 .lb-pod-skin-wrap { width: 56px; height: 76px; }
   .lb-trophy--gold   { width: 30px; height: 30px; }
   .lb-trophy--silver { width: 24px; height: 24px; }
   .lb-trophy--bronze { width: 22px; height: 22px; }
