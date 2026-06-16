@@ -111,15 +111,29 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const lerp = (a: number, b: number) => a + (b - a) * ef;
 
             /* ── 4 keyframe poses ── */
+            /* ── ARM AXIS KEY ──────────────────────────────────────────────
+               rightArm = character's RIGHT arm = appears SCREEN-LEFT (viewer's left)
+               leftArm  = character's LEFT arm  = appears SCREEN-RIGHT (viewer's right)
+
+               rotation.z  leftArm:   NEGATIVE = extends SCREEN-RIGHT  POSITIVE = crosses SCREEN-LEFT
+               rotation.z  rightArm:  NEGATIVE = extends SCREEN-LEFT   POSITIVE = crosses SCREEN-RIGHT
+               rotation.x  both:      NEGATIVE = forward (belly)        POSITIVE = backward (behind)
+
+               4 poses (viewer perspective):
+                 1: SCREEN-LEFT arm extends, SCREEN-RIGHT arm behind
+                 2: SCREEN-RIGHT arm extends, SCREEN-LEFT arm forward + crosses screen-right
+                 3: BOTH arms SCREEN-LEFT (right extends, left crosses left)
+                 4: SCREEN-RIGHT arm extends, SCREEN-LEFT arm behind
+               ──────────────────────────────────────────────────────────── */
             const KEYS = [
-              /* Pose 1 — L arm OUT-LEFT (horizontal), R arm BEHIND back */
-              { lAx:  0.00, lAz: -1.55, rAx:  0.80, rAz:  0.18, bz: -0.16 },
-              /* Pose 2 — R arm OUT-RIGHT, L arm FORWARD + crossing RIGHT (vor dem Bauch) */
-              { lAx: -0.88, lAz:  1.10, rAx:  0.00, rAz: -1.55, bz:  0.16 },
-              /* Pose 3 — BOTH arms to the LEFT */
-              { lAx:  0.00, lAz: -1.55, rAx: -0.55, rAz:  1.25, bz: -0.16 },
-              /* Pose 4 — R arm OUT-RIGHT, L arm BEHIND back */
-              { lAx:  0.80, lAz: -0.18, rAx:  0.00, rAz: -1.55, bz:  0.16 },
+              /* Pose 1 — rightArm extends SCREEN-LEFT, leftArm BEHIND */
+              { lAx:  0.80, lAz: -0.15, rAx:  0.00, rAz: -1.55, bz: -0.14 },
+              /* Pose 2 — leftArm extends SCREEN-RIGHT, rightArm FORWARD + crosses SCREEN-RIGHT */
+              { lAx:  0.00, lAz: -1.55, rAx: -0.88, rAz:  1.10, bz:  0.14 },
+              /* Pose 3 — BOTH arms SCREEN-LEFT: rightArm extends, leftArm crosses */
+              { lAx: -0.55, lAz:  1.10, rAx:  0.00, rAz: -1.55, bz: -0.14 },
+              /* Pose 4 — leftArm extends SCREEN-RIGHT, rightArm BEHIND */
+              { lAx:  0.00, lAz: -1.55, rAx:  0.80, rAz:  0.15, bz:  0.14 },
             ];
 
             const kA = KEYS[ki % 4];
