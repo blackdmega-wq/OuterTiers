@@ -19,7 +19,7 @@ const SIZES = {
 
 /* zoom: smaller = camera farther away = character appears smaller.
  * With controls.target at y=-8 and zoom≈0.88 the full body fills ~75% of canvas. */
-const ZOOM: Record<1|2|3, number> = { 1: 0.88, 2: 0.88, 3: 0.80 };
+const ZOOM: Record<1|2|3, number> = { 1: 0.55, 2: 0.55, 3: 0.52 };
 
 export default function PodiumSkin3D({ username, rank }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
