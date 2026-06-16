@@ -119,17 +119,25 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const swing = Math.sin(t);   /* −1 (full-left) → +1 (full-right) */
 
             /* ── Arms ── */
-            /* Both arms swing together (same z-sign).
-               The crossing arm goes BEHIND THE BACK (positive x = backward).
-               Arms-LEFT:  leftArm extends horizontally, rightArm crosses behind back.
-               Arms-RIGHT: rightArm extends horizontally, leftArm crosses behind back. */
-            s.leftArm.rotation.z  =  swing * 1.55;
-            s.leftArm.rotation.x  =  Math.max(0,  swing) * 1.38;  /* behind back when crossing right */
-            s.leftArm.rotation.y  = 0;
+            /* Both arms swing together (same z-sign = same direction).
+               Extending arm:  z = ±1.55, x = 0, y = 0  →  horizontal, out to the side.
+               Crossing arm goes BEHIND THE BACK:
+                 x = +1.40  (backward — behind the chest plane)
+                 y = ±0.65  (Y-axis tuck pulls arm around behind body, not through chest)
+                             leftArm: positive y = behind; rightArm: negative y = behind */
+            const sw = Math.abs(swing);
+            const goRight = Math.max(0,  swing);  /* 0→1 as swing goes 0→+1 */
+            const goLeft  = Math.max(0, -swing);  /* 0→1 as swing goes 0→−1 */
 
+            /* left arm: extends when swing<0, crosses behind when swing>0 */
+            s.leftArm.rotation.z  =  swing * 1.55;
+            s.leftArm.rotation.x  =  goRight * 1.40;
+            s.leftArm.rotation.y  =  goRight * 0.65;   /* positive y = behind for leftArm  */
+
+            /* right arm: extends when swing>0, crosses behind when swing<0 */
             s.rightArm.rotation.z =  swing * 1.55;
-            s.rightArm.rotation.x =  Math.max(0, -swing) * 1.38;  /* behind back when crossing left  */
-            s.rightArm.rotation.y = 0;
+            s.rightArm.rotation.x =  goLeft  * 1.40;
+            s.rightArm.rotation.y = -goLeft  * 0.65;   /* negative y = behind for rightArm */
 
             /* ── Body: hip counter-sway + gentle forward lean ── */
             s.body.rotation.z = -swing * 0.13;
