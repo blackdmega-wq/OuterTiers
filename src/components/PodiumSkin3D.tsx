@@ -173,10 +173,15 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* ── KÖRPER / SCHULTERN — gegenseitig zu den Armen ─────────────
                Frame 1 (swing=+1, rechts): Oberkörper dreht LINKS  +10°
                Frame 3 (swing=−1, links):  Oberkörper dreht RECHTS −10°
-               + minimales Hüft-Kippen ±2° (Weight Shift)                        */
+
+               Hüfte: GLEICHE Richtung wie Arme (1–2 Pixel verschieben)
+               Frame 1 (Arme RECHTS) → Hüfte position +x (RECHTS) ✓
+               Frame 3 (Arme LINKS)  → Hüfte position −x (LINKS)  ✓
+               → body.position.x statt rotation.z (Translation, nicht Rotation) */
             s.body.rotation.y =  swing * 0.175;   /* ±10° Körper-Rotation */
-            s.body.rotation.z = -swing * 0.035;   /* ±2°  Hüfte subtil    */
+            s.body.rotation.z =  0;
             s.body.rotation.x =  0;
+            s.body.position.x =  swing * 0.30;    /* ±1–2 Pixel Hüft-Shift */
 
             /* ── KOPF — Micro-Movement 3° in Gegenrichtung (Anti-stiff) ────
                Profi-Tipp: Kopf kippt ENTGEGEN der Körperdrehung               */
