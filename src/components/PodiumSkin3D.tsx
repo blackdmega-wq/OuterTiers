@@ -55,39 +55,38 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  FORTNITE FLOSS DANCE — korrekte Implementierung
+         #2  MINECRAFT FLOSS DANCE — korrekte Minecraft-Version
 
-         Das richtige Floss-Muster:
-         - BEIDE Arme schwingen GLEICHZEITIG zur GLEICHEN Seite
-         - Arme → RECHTS (vor dem Körper): Hüfte ← LINKS
-         - Arme ← LINKS (hinter dem Körper): Hüfte → RECHTS
-         - Arme bleiben möglichst gestreckt
-         - Oberkörper bleibt relativ ruhig
+         Das Minecraft-Floss-Muster (für steife Blockmodelle):
+
+         Frame 1 (Arme → RECHTS, Hüfte ← LINKS):
+           Rechter Arm: VOR dem Körper nach rechts schwingen (~45°)
+           Linker Arm:  HINTER dem Körper nach rechts schwingen
+           Hüfte/Oberkörper: leicht nach links drehen
+
+         Frame 3 (Arme ← LINKS, Hüfte → RECHTS):
+           Linker Arm:  VOR dem Körper nach links schwingen (~45°)
+           Rechter Arm: HINTER dem Körper nach links schwingen
+           Hüfte/Oberkörper: leicht nach rechts drehen
+
+         Die Arme wechseln bei jedem Schwung zwischen VORNE und HINTEN.
+         Das ist das charakteristische Minecraft-Floss-Muster.
 
          skinview3d Achsen (Charakter schaut +Z = zur Kamera):
-           leftArm.rotation.x:  NEGATIV  = Arm nach VORNE (vor den Körper)
-                                POSITIV  = Arm nach HINTEN (hinter den Körper)
-           leftArm.rotation.z:  NEGATIV  = Arm nach außen LINKS gestreckt
-                                POSITIV  = Arm kreuzt nach RECHTS
-           rightArm.rotation.x: NEGATIV  = Arm nach VORNE
-                                POSITIV  = Arm nach HINTEN
-           rightArm.rotation.z: NEGATIV  = Arm nach außen RECHTS gestreckt
-                                POSITIV  = Arm kreuzt nach LINKS
+           rotation.x: negativ = nach VORNE   positiv = nach HINTEN
+           leftArm.z:  negativ = außen LINKS   positiv = kreuzt RECHTS
+           rightArm.z: negativ = außen RECHTS  positiv = kreuzt LINKS
 
-         swing = sin(t):  +1 = Arme RECHTS/VORNE   -1 = Arme LINKS/HINTEN
-         ph = (swing+1)/2: 0 = Arme LINKS/hinten    1 = Arme RECHTS/vorne
+         swing = sin(t): +1 = Frame 1 (rechts)   −1 = Frame 3 (links)
+         ph = (swing+1)/2:  0 = Arme LINKS   1 = Arme RECHTS
 
-         ph=0 (Arme LINKS, hinter dem Körper):
-           leftArm:  z=−1.30 (streckt nach links außen), x=+0.65 (nach hinten)
-           rightArm: z=+1.20 (kreuzt nach links),        x=+0.45 (nach hinten)
+         ph=0 (Arme LINKS, Frame 3):
+           leftArm:  VOR  dem Körper, nach links  → x=−0.65, z=−0.78
+           rightArm: HINTER dem Körper, nach links → x=+0.65, z=+0.78
 
-         ph=1 (Arme RECHTS, vor dem Körper):
-           leftArm:  z=+1.10 (kreuzt nach rechts),       x=−0.55 (nach vorne)
-           rightArm: z=−1.20 (streckt nach rechts außen),x=−0.35 (nach vorne)
-
-         Zusammenfassung:
-           Arme →     Hüfte ←
-           Arme ←     Hüfte →
+         ph=1 (Arme RECHTS, Frame 1):
+           rightArm: VOR  dem Körper, nach rechts → x=−0.65, z=−0.78
+           leftArm:  HINTER dem Körper, nach rechts → x=+0.65, z=+0.78
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -95,55 +94,64 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
+            /* 12–16 FPS Rhythmus — Hauptposen werden kurz gehalten */
             const SPEED = 2.8;
             const t     = progress * SPEED;
             const swing = Math.sin(t);
             const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ph: 0 = Arme LINKS/hinten   1 = Arme RECHTS/vorne */
+            /* ph: 0 = Arme LINKS (Frame 3)   1 = Arme RECHTS (Frame 1) */
             const ph = (swing + 1) * 0.5;
 
             /* ── LINKER ARM ────────────────────────────────────────────────
-               ph=0 (links/hinten): streckt nach außen links (z=−1.30), nach hinten (x=+0.65)
-               ph=1 (rechts/vorne): kreuzt nach rechts (z=+1.10),       nach vorne  (x=−0.55) */
-            s.leftArm.rotation.z = lerp(-1.30, +1.10, ph);
-            s.leftArm.rotation.x = lerp(+0.65, -0.55, ph);
+               ph=0 (Frame 3, Arme LINKS):
+                 VOR dem Körper nach links → x=−0.65 (vorne), z=−0.78 (außen links)
+               ph=1 (Frame 1, Arme RECHTS):
+                 HINTER dem Körper nach rechts → x=+0.65 (hinten), z=+0.78 (kreuzt rechts)
+            ────────────────────────────────────────────────────────────── */
+            s.leftArm.rotation.x = lerp(-0.65, +0.65, ph);
+            s.leftArm.rotation.z = lerp(-0.78, +0.78, ph);
             s.leftArm.rotation.y = 0;
 
             /* ── RECHTER ARM ───────────────────────────────────────────────
-               ph=0 (links/hinten): kreuzt nach links (z=+1.20),          nach hinten (x=+0.45)
-               ph=1 (rechts/vorne): streckt nach außen rechts (z=−1.20),  nach vorne  (x=−0.35) */
-            s.rightArm.rotation.z = lerp(+1.20, -1.20, ph);
-            s.rightArm.rotation.x = lerp(+0.45, -0.35, ph);
+               ph=0 (Frame 3, Arme LINKS):
+                 HINTER dem Körper nach links → x=+0.65 (hinten), z=+0.78 (kreuzt links)
+               ph=1 (Frame 1, Arme RECHTS):
+                 VOR dem Körper nach rechts → x=−0.65 (vorne), z=−0.78 (außen rechts)
+            ────────────────────────────────────────────────────────────── */
+            s.rightArm.rotation.x = lerp(+0.65, -0.65, ph);
+            s.rightArm.rotation.z = lerp(+0.78, -0.78, ph);
             s.rightArm.rotation.y = 0;
 
-            /* ── KÖRPER / HÜFTE — gegenseitig zu den Armen ────────────────
-               Arme rechts (swing=+1) → Hüfte links (body.rotation.z negativ) */
-            s.body.rotation.z = -swing * 0.20;
-            s.body.rotation.y =  0;
-            s.body.rotation.x =  0.04;
+            /* ── HÜFTE / OBERKÖRPER — gegenseitig zu den Armen ────────────
+               Arme rechts (Frame 1) → Hüfte dreht leicht nach links
+               Arme links  (Frame 3) → Hüfte dreht leicht nach rechts
+               body.rotation.y: Drehung um Y-Achse (links/rechts drehen)
+               body.rotation.z: Seitliches Kippen (sehr minimal)           */
+            s.body.rotation.y = -swing * 0.12;
+            s.body.rotation.z = -swing * 0.06;
+            s.body.rotation.x =  0;
 
-            /* ── KOPF — bleibt relativ ruhig, leichte Mitbewegung ─────────
-               "Der Oberkörper bleibt relativ ruhig" */
+            /* ── KOPF — leicht mitwippen (±5° = ±0.087 rad) ────────────── */
             if (s.head) {
-              s.head.rotation.y =  swing * 0.07;
-              s.head.rotation.x = -0.03;
+              s.head.rotation.y =  swing * 0.087;
+              s.head.rotation.x =  0;
               s.head.rotation.z =  0;
             }
 
-            /* ── BEINE — leichte Gewichtsverlagerung mit jedem Schwung ─── */
-            s.leftLeg.rotation.x  =  swing * 0.07;
-            s.leftLeg.rotation.z  =  0.10;
+            /* ── BEINE — minimale Bewegung (Floss ist hauptsächlich Arme) ─ */
+            s.leftLeg.rotation.x  =  swing * 0.04;
+            s.leftLeg.rotation.z  =  0.06;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.x = -swing * 0.07;
-            s.rightLeg.rotation.z = -0.10;
+            s.rightLeg.rotation.x = -swing * 0.04;
+            s.rightLeg.rotation.z = -0.06;
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
         });
 
       /* ═══════════════════════════════════════════════════════════════
-         #1  VICTORY POSE + MINECRAFT CASTLE CROWN — REVAMPED
+         #1  VICTORY POSE + MINECRAFT CASTLE CROWN
          ═══════════════════════════════════════════════════════════════ */
       } else {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -171,9 +179,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   emissive: 0x110E00, emissiveIntensity: 0.15,
                 });
 
-                const facesWall    = [yMid,  yMid,  yTop,  yDark, yMid,  yMid ];
-                const facesTop     = [yMid,  yMid,  yTop,  yDark, yTop,  yMid ];
-                const facesCenter  = [yMid,  yMid,  yTop,  yDark, yTop,  yMid ];
+                const facesWall   = [yMid, yMid, yTop, yDark, yMid, yMid];
+                const facesTop    = [yMid, yMid, yTop, yDark, yTop, yMid];
+                const facesCenter = [yMid, yMid, yTop, yDark, yTop, yMid];
 
                 const gemPurple = new T.MeshPhongMaterial({
                   color: 0xDD44FF, specular: 0xFFCCFF, shininess: 200,
@@ -193,70 +201,47 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 });
 
                 const g = new T.Group();
-
-                const bx = (
-                  mat: any,
-                  w: number, h: number, d: number,
-                  x: number, y: number, z: number,
-                ) => {
+                const bx = (mat: any, w: number, h: number, d: number, x: number, y: number, z: number) => {
                   const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
                   m.position.set(x, y, z);
                   g.add(m);
                 };
 
-                const BW    = 10.0;
-                const BH    = 1.0;
-                const BT    = 0.80;
+                const BW = 10.0, BH = 1.0, BT = 0.80;
                 const inner = BW - BT * 2;
-
                 const FZ  =  (BW / 2 - BT / 2);
                 const BKZ = -(BW / 2 - BT / 2);
                 const LX  = -(BW / 2 - BT / 2);
                 const RX  =  (BW / 2 - BT / 2);
 
-                bx(facesWall, BW, BH, BT, 0,  BH/2, FZ );
-                bx(facesWall, BW, BH, BT, 0,  BH/2, BKZ);
+                bx(facesWall, BW, BH, BT, 0, BH/2, FZ);
+                bx(facesWall, BW, BH, BT, 0, BH/2, BKZ);
                 bx(facesWall, BT, BH, inner, LX, BH/2, 0);
                 bx(facesWall, BT, BH, inner, RX, BH/2, 0);
 
-                const MW  = 0.88;
-                const MD  = BT;
-                const MH  = 1.45;
-                const MHC = 2.20;
-                const yB  = BH;
-
+                const MW = 0.88, MD = BT, MH = 1.45, MHC = 2.20, yB = BH;
                 const xs7 = [-3.4, -2.26, -1.13, 0, 1.13, 2.26, 3.4];
-
                 xs7.forEach((x, i) => {
-                  const h   = i === 3 ? MHC : MH;
+                  const h = i === 3 ? MHC : MH;
                   const mat = i === 3 ? facesCenter : facesTop;
-                  bx(mat, MW, h, MD, x, yB + h/2, FZ );
+                  bx(mat, MW, h, MD, x, yB + h/2, FZ);
                   bx(mat, MW, h, MD, x, yB + h/2, BKZ);
                 });
-
                 [-2.0, 0, 2.0].forEach((z) => {
                   bx(facesTop, MD, MH, MW, LX, yB + MH/2, z);
                   bx(facesTop, MD, MH, MW, RX, yB + MH/2, z);
                 });
-
                 ([[LX,FZ],[RX,FZ],[LX,BKZ],[RX,BKZ]] as [number,number][])
                   .forEach(([cx, cz]) => bx(facesTop, BT, MH, BT, cx, yB+MH/2, cz));
 
-                const GS = 1.30;
-                const GD = 0.80;
-                const GY = BH / 2;
-                const GZ = FZ + BT/2 + GD/2;
-
-                ([
-                  [-2.8, gemPurple],
-                  [-0.9, gemCyan  ],
-                  [ 0.9, gemBlue  ],
-                  [ 2.8, gemGreen ],
-                ] as [number, any][]).forEach(([x, mat]) => {
-                  const gem = new T.Mesh(new T.BoxGeometry(GS, GS, GD), mat);
-                  gem.position.set(x, GY, GZ);
-                  g.add(gem);
-                });
+                const GS = 1.30, GD = 0.80;
+                const GY = BH / 2, GZ = FZ + BT/2 + GD/2;
+                ([[-2.8, gemPurple], [-0.9, gemCyan], [0.9, gemBlue], [2.8, gemGreen]] as [number, any][])
+                  .forEach(([x, mat]) => {
+                    const gem = new T.Mesh(new T.BoxGeometry(GS, GS, GD), mat);
+                    gem.position.set(x, GY, GZ);
+                    g.add(gem);
+                  });
 
                 g.position.set(0, 6.0, 0);
                 s.head.add(g);
