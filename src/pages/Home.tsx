@@ -317,16 +317,28 @@ export default function Home() {
                         {rank === 1 && (
                           <div className="lb-confetti-wrap">
                             {[
-                              {l:'18%',c:'#ff4e50',dur:'1.3s',delay:'0s'},
-                              {l:'35%',c:'#ffd700',dur:'1.6s',delay:'0.25s'},
-                              {l:'50%',c:'#fff',dur:'1.1s',delay:'0.5s'},
-                              {l:'65%',c:'#fc913a',dur:'1.5s',delay:'0.1s'},
-                              {l:'80%',c:'#00c9ff',dur:'1.2s',delay:'0.7s'},
-                              {l:'28%',c:'#f7ff00',dur:'1.8s',delay:'0.9s'},
-                              {l:'72%',c:'#ff6ec7',dur:'1.0s',delay:'0.35s'},
-                              {l:'55%',c:'#39ff14',dur:'1.4s',delay:'0.6s'},
+                              {l:'5%', c:'#ff4e50',dur:'1.1s',delay:'0s',   sx:'-5px', sz:'10px'},
+                              {l:'12%',c:'#ffd700',dur:'1.4s',delay:'0.2s', sx:'6px',  sz:'8px'},
+                              {l:'20%',c:'#00c9ff',dur:'1.0s',delay:'0.45s',sx:'-7px', sz:'9px'},
+                              {l:'28%',c:'#ff6ec7',dur:'1.6s',delay:'0.1s', sx:'5px',  sz:'7px'},
+                              {l:'36%',c:'#fff',   dur:'0.9s',delay:'0.6s', sx:'-4px', sz:'10px'},
+                              {l:'44%',c:'#39ff14',dur:'1.2s',delay:'0.3s', sx:'8px',  sz:'8px'},
+                              {l:'52%',c:'#fc913a',dur:'1.5s',delay:'0.75s',sx:'-6px', sz:'9px'},
+                              {l:'60%',c:'#f7ff00',dur:'1.1s',delay:'0.5s', sx:'4px',  sz:'7px'},
+                              {l:'68%',c:'#ff4e50',dur:'1.3s',delay:'0.15s',sx:'-8px', sz:'10px'},
+                              {l:'76%',c:'#00c9ff',dur:'1.0s',delay:'0.7s', sx:'6px',  sz:'8px'},
+                              {l:'84%',c:'#ffd700',dur:'1.6s',delay:'0.35s',sx:'-5px', sz:'9px'},
+                              {l:'92%',c:'#ff6ec7',dur:'1.2s',delay:'0.9s', sx:'7px',  sz:'7px'},
+                              {l:'8%', c:'#39ff14',dur:'1.4s',delay:'0.55s',sx:'5px',  sz:'6px'},
+                              {l:'16%',c:'#fc913a',dur:'0.9s',delay:'0.8s', sx:'-6px', sz:'11px'},
+                              {l:'25%',c:'#fff',   dur:'1.3s',delay:'0.25s',sx:'7px',  sz:'8px'},
+                              {l:'40%',c:'#ff4e50',dur:'1.5s',delay:'0.65s',sx:'-4px', sz:'9px'},
+                              {l:'56%',c:'#ffd700',dur:'1.1s',delay:'0.4s', sx:'6px',  sz:'7px'},
+                              {l:'72%',c:'#00c9ff',dur:'1.4s',delay:'0.85s',sx:'-7px', sz:'10px'},
+                              {l:'80%',c:'#ff6ec7',dur:'1.0s',delay:'0.1s', sx:'5px',  sz:'8px'},
+                              {l:'88%',c:'#39ff14',dur:'1.6s',delay:'0.6s', sx:'-5px', sz:'9px'},
                             ].map((r,i) => (
-                              <div key={i} className="lb-rocket" style={{left:r.l,background:r.c,'--dur':r.dur,'--delay':r.delay} as React.CSSProperties} />
+                              <div key={i} className="lb-rocket" style={{left:r.l,background:r.c,'--dur':r.dur,'--delay':r.delay,'--sx':r.sx,width:r.sz,height:r.sz,borderRadius:i%4===0?'2px':'50%'} as React.CSSProperties} />
                             ))}
                           </div>
                         )}
