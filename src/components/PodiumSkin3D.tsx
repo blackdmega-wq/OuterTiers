@@ -100,7 +100,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
               Legs: no movement (user request)
               ─────────────────────────────────────────────────────────────
             */
-            const SPEED = 1.5;
+            const SPEED = 0.85;
             const raw = ((progress * SPEED * 4) % 4 + 4) % 4;
             const ki  = Math.floor(raw);
             const frac = raw - ki;
@@ -110,16 +110,23 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const ef   = ease(frac);
             const lerp = (a: number, b: number) => a + (b - a) * ef;
 
-            /*  lAx  lAz   rAx   rAz   by  */
+            /*
+              Chest (body.rotation.y) = 0 always — stays still, faces forward.
+              Hips simulated via body.rotation.z (slight lateral tilt):
+                Beat 1 → hips RIGHT (hz = -0.13)
+                Beat 2 → hips LEFT  (hz = +0.13)
+                Beat 3 → hips RIGHT (hz = -0.13)
+                Beat 4 → hips LEFT  (hz = +0.13)
+            */
             const KEYS = [
-              /* Beat 1 — L out-LEFT,  R behind      */
-              { lAx:  0.10, lAz: -1.30, rAx:  1.20, rAz:  0.10, by:  0.35 },
-              /* Beat 2 — Both arms RIGHT             */
-              { lAx:  0.10, lAz:  1.30, rAx:  0.10, rAz: -1.30, by: -0.45 },
-              /* Beat 3 — Both arms LEFT              */
-              { lAx:  0.10, lAz: -1.30, rAx:  0.10, rAz:  1.30, by:  0.45 },
-              /* Beat 4 — L behind,    R out-RIGHT    */
-              { lAx:  1.20, lAz: -0.10, rAx:  0.10, rAz: -1.30, by: -0.35 },
+              /* Beat 1 — L out-LEFT,  R behind,  hips RIGHT */
+              { lAx:  0.10, lAz: -1.30, rAx:  1.20, rAz:  0.10, hz: -0.13 },
+              /* Beat 2 — Both arms RIGHT,         hips LEFT  */
+              { lAx:  0.10, lAz:  1.30, rAx:  0.10, rAz: -1.30, hz:  0.13 },
+              /* Beat 3 — Both arms LEFT,          hips RIGHT */
+              { lAx:  0.10, lAz: -1.30, rAx:  0.10, rAz:  1.30, hz: -0.13 },
+              /* Beat 4 — L behind,    R out-RIGHT, hips LEFT */
+              { lAx:  1.20, lAz: -0.10, rAx:  0.10, rAz: -1.30, hz:  0.13 },
             ];
 
             const kA = KEYS[ki % 4];
@@ -132,9 +139,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.rightArm.rotation.z = lerp(kA.rAz, kB.rAz);
             s.rightArm.rotation.y = 0;
 
-            s.body.rotation.y = lerp(kA.by, kB.by);
+            s.body.rotation.y = 0;                   /* chest stays still */
             s.body.rotation.x = 0;
-            s.body.rotation.z = 0;
+            s.body.rotation.z = lerp(kA.hz, kB.hz); /* hips R/L/R/L tilt */
 
             /* Legs: no movement */
             s.leftLeg.rotation.x  = 0; s.leftLeg.rotation.z  = 0; s.leftLeg.rotation.y  = 0;
@@ -264,9 +271,8 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   g.add(gem);
                 });
 
-                /* Lower the crown so it sits ON the head (not floating above).
-                   y=8 = head top. y=7 sinks the crown 1 unit into head — looks worn. */
-                g.position.set(0, 7.0, 0);
+                /* Crown deeper into head — y=6 sinks 2 units, looks properly seated. */
+                g.position.set(0, 6.0, 0);
                 s.head.add(g);
               }).catch(() => {});
             }
