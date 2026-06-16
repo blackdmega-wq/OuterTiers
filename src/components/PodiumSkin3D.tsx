@@ -55,46 +55,24 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  MINECRAFT FLOSS EMOTE — vollständige Blockbench-Keyframes
+         #2  MINECRAFT FLOSS DANCE
 
-         Startpose:
-           Arme: locker nach unten (0°)
-           Beine: leicht auseinander (10–15° = 0.20 rad)
-           Kopf:  gerade nach vorne
+         !! KERN-REGEL !!  Beide Arme schwingen zur GLEICHEN Seite.
+         Das unterscheidet Floss von Walk (wo Arme entgegengesetzt sind).
 
-         FRAME 1 — „Rechte Seite vorne" (swing = +1)
-           Rechter Oberarm: VOR dem Körper     → x = −25° (−0.436 rad)
-           Rechter Unterarm: leicht nach innen → forearm z = −10° (−0.175 rad)  [Delay 1 Frame]
-           Schulter rechts: minimal mitdrehen  → arm.y = +8° (+0.140 rad)
-           Linker Oberarm: HINTER dem Körper   → x = +25° (+0.436 rad)
-           Linker Unterarm: leicht nach außen  → forearm z = +10° (+0.175 rad)  [Delay 1 Frame]
-           Schulter links: minimal mitdrehen   → arm.y = −8° (−0.140 rad)
-           Körper: leicht nach LINKS drehen    → body.y = +10° (+0.175 rad)
-           Hüfte: minimal nach rechts          → body.z = −2° (−0.035 rad)
+         skinview3d Achsen (Charakter schaut zur Kamera):
+           arm.rotation.x  NEGATIV=vorne   POSITIV=hinten
+           leftArm.z       NEGATIV=außen-links   POSITIV=kreuzt-rechts
+           rightArm.z      NEGATIV=außen-rechts  POSITIV=kreuzt-links
+           body.rotation.y POSITIV=Oberkörper dreht links
 
-         FRAME 2 — ease-in-out Übergang (Mitte / Neutralposition)
+         Frame RECHTS (swing=+1, ph=1):
+           leftArm  → kreuzt nach RECHTS vorne:  z=+1.20, x=−0.25
+           rightArm → hängt RECHTS hinten:       z=−0.50, x=+0.40
 
-         FRAME 3 — „Linke Seite vorne" (swing = −1)
-           Linker Oberarm: VOR dem Körper      → x = −25°
-           Rechter Oberarm: HINTER dem Körper  → x = +25°
-           Körper: leicht nach RECHTS drehen   → body.y = −10°
-           [Alles spiegelverkehrt zu Frame 1]
-
-         FRAME 4 — ease-in-out zurück zu Mitte
-
-         Profi-Tipps (alle implementiert):
-           ✔ Schulter mitrotieren (arm.rotation.y ≠ 0)
-           ✔ Unterarm 1 Frame verzögert (phase offset −0.35 rad)
-           ✔ Kopf 3° Gegenbewegung (Anti-stiff)
-           ✔ Beine 10–15° auseinander + minimaler Weight-Shift (1–2°)
-           ✔ Sinuswelle = automatisches ease-in-out (12–16 FPS Effekt)
-
-         skinview3d Achsen (Charakter schaut +Z = zur Kamera):
-           arm.rotation.x: NEGATIV = nach VORNE  POSITIV = nach HINTEN
-           leftArm.rotation.z:  NEGATIV = außen LINKS  POSITIV = kreuzt RECHTS
-           rightArm.rotation.z: NEGATIV = außen RECHTS POSITIV = kreuzt LINKS
-           arm.rotation.y: leichte Schulter-Rotation um eigene Achse
-           body.rotation.y: POSITIV = dreht Oberkörper nach LINKS
+         Frame LINKS (swing=−1, ph=0):
+           leftArm  → hängt LINKS hinten:        z=−0.50, x=+0.40
+           rightArm → kreuzt nach LINKS vorne:   z=+1.20, x=−0.25
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -102,103 +80,44 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* 12–16 FPS Rhythmus — Sinuswelle hält Extremposen länger */
-            const SPEED = 2.8;
-            const t     = progress * SPEED;
+            const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
+            const t     = progress * 3.0;
+            const swing = Math.sin(t);           /* +1 = RECHTS  −1 = LINKS */
+            const ph    = (swing + 1) * 0.5;    /* 0 = links  1 = rechts  */
 
-            /* Oberarm-Swing (Hauptbewegung) */
-            const swing = Math.sin(t);
+            /* ── LINKER ARM ──────────────────────────────────────────────────
+               ph=0 (LINKS): Arm hängt LINKS HINTEN   z=−0.50  x=+0.40
+               ph=1 (RECHTS): Arm KREUZT nach RECHTS  z=+1.20  x=−0.25   */
+            s.leftArm.rotation.z = lerp(-0.50, +1.20, ph);
+            s.leftArm.rotation.x = lerp(+0.40, -0.25, ph);
+            s.leftArm.rotation.y = -swing * 0.10;
 
-            /* Unterarm-Swing: 1 Frame Delay ≈ 0.35 rad Phasenversatz */
-            const swingFore = Math.sin(t - 0.35);
+            /* ── RECHTER ARM ─────────────────────────────────────────────────
+               ph=0 (LINKS): Arm KREUZT nach LINKS    z=+1.20  x=−0.25
+               ph=1 (RECHTS): Arm hängt RECHTS HINTEN z=−0.50  x=+0.40   */
+            s.rightArm.rotation.z = lerp(+1.20, -0.50, ph);
+            s.rightArm.rotation.x = lerp(-0.25, +0.40, ph);
+            s.rightArm.rotation.y =  swing * 0.10;
 
-            const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
-
-            /* ph: 0 = Frame 3 (Arme LINKS)   1 = Frame 1 (Arme RECHTS) */
-            const ph     = (swing     + 1) * 0.5;
-            const phFore = (swingFore + 1) * 0.5;
-
-            /* ── LINKER OBERARM ─────────────────────────────────────────────
-               Frame 3 (ph=0, links): VOR dem Körper nach links
-                 x=−25°=−0.436 (vorne),  z=−30°=−0.524 (außen links)
-               Frame 1 (ph=1, rechts): HINTER dem Körper nach rechts
-                 x=+25°=+0.436 (hinten), z=+20°=+0.349 (kreuzt rechts, hinten)
-
-               Schulter mitrotieren: y bewegt sich gegenseitig zum swing
-                 swing=+1 (rechts) → linker Arm hinten → Schulter dreht −8°
-                 swing=−1 (links)  → linker Arm vorne  → Schulter dreht +8°     */
-            s.leftArm.rotation.x = lerp(-0.436, +0.436, ph);
-            s.leftArm.rotation.z = lerp(-0.524, +0.349, ph);
-            s.leftArm.rotation.y = -swing * 0.140;   /* ±8° Schulter-Rotation */
-
-            /* ── LINKER UNTERARM (forearm) — 1 Frame verzögert ─────────────
-               Vorne (links): leicht nach außen  → z = +0.175
-               Hinten (rechts): leicht nach innen → z = −0.175
-               skinview3d: versuche leftArm.leftForeArm oder leftForeArm         */
-            try {
-              const lFore = s.leftArm?.leftForeArm ?? s.leftForeArm ?? null;
-              if (lFore) {
-                /* Wenn vorne (phFore→0): außen +10°;  wenn hinten (phFore→1): innen −10° */
-                lFore.rotation.z = lerp(+0.175, -0.175, phFore);
-                lFore.rotation.x = 0;
-                lFore.rotation.y = 0;
-              }
-            } catch (_) {}
-
-            /* ── RECHTER OBERARM ────────────────────────────────────────────
-               Frame 3 (ph=0, links): HINTER dem Körper nach links
-                 x=+25°=+0.436 (hinten), z=+20°=+0.349 (kreuzt links, hinten)
-               Frame 1 (ph=1, rechts): VOR dem Körper nach rechts
-                 x=−25°=−0.436 (vorne),  z=−30°=−0.524 (außen rechts)
-
-               Schulter mitrotieren: y bewegt sich mit swing
-                 swing=+1 (rechts) → rechter Arm vorne → Schulter dreht +8°      */
-            s.rightArm.rotation.x = lerp(+0.436, -0.436, ph);
-            s.rightArm.rotation.z = lerp(+0.349, -0.524, ph);
-            s.rightArm.rotation.y =  swing * 0.140;   /* ±8° Schulter-Rotation */
-
-            /* ── RECHTER UNTERARM (forearm) — 1 Frame verzögert ────────────
-               Vorne (rechts): leicht nach innen → z = −0.175
-               Hinten (links): leicht nach außen → z = +0.175                    */
-            try {
-              const rFore = s.rightArm?.rightForeArm ?? s.rightForeArm ?? null;
-              if (rFore) {
-                /* Wenn vorne (phFore→1): innen −10°;  wenn hinten (phFore→0): außen +10° */
-                rFore.rotation.z = lerp(+0.175, -0.175, phFore);
-                rFore.rotation.x = 0;
-                rFore.rotation.y = 0;
-              }
-            } catch (_) {}
-
-            /* ── KÖRPER / SCHULTERN — gegenseitig zu den Armen ─────────────
-               Frame 1 (swing=+1, rechts): Oberkörper dreht LINKS  +10°
-               Frame 3 (swing=−1, links):  Oberkörper dreht RECHTS −10°
-
-               Hüfte: GLEICHE Richtung wie Arme (1–2 Pixel verschieben)
-               Frame 1 (Arme RECHTS) → Hüfte position +x (RECHTS) ✓
-               Frame 3 (Arme LINKS)  → Hüfte position −x (LINKS)  ✓
-               → body.position.x statt rotation.z (Translation, nicht Rotation) */
-            s.body.rotation.y =  swing * 0.175;   /* ±10° Körper-Rotation */
-            s.body.rotation.z =  0;
+            /* ── KÖRPER — Gegenbewegung zu den Armen ────────────────────── */
+            s.body.rotation.y = -swing * 0.22;
             s.body.rotation.x =  0;
-            s.body.position.x =  swing * 0.30;    /* ±1–2 Pixel Hüft-Shift */
+            s.body.rotation.z =  0;
+            s.body.position.x =  swing * 0.35;  /* Hüft-Shift gleiche Richtung */
 
-            /* ── KOPF — Micro-Movement 3° in Gegenrichtung (Anti-stiff) ────
-               Profi-Tipp: Kopf kippt ENTGEGEN der Körperdrehung               */
+            /* ── KOPF ────────────────────────────────────────────────────── */
             if (s.head) {
-              s.head.rotation.y = -swing * 0.052;  /* ±3° Gegenbewegung */
+              s.head.rotation.y =  swing * 0.10;
               s.head.rotation.x =  0;
               s.head.rotation.z =  0;
             }
 
-            /* ── BEINE — 10–15° auseinander + minimaler Weight-Shift ────────
-               Startpose: Beine leicht auseinander (0.20 rad ≈ 11.5°)
-               Weight-Shift: ±1–2° links/rechts mit jedem Schwung               */
-            s.leftLeg.rotation.x  =  swing * 0.03;   /* ±1.7° Weight-Shift */
-            s.leftLeg.rotation.z  =  0.20;            /* 11.5° auseinander  */
+            /* ── BEINE — leicht auseinander + Weight-Shift ───────────────── */
+            s.leftLeg.rotation.z  =  0.18;
+            s.leftLeg.rotation.x  =  swing * 0.06;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.x = -swing * 0.03;
-            s.rightLeg.rotation.z = -0.20;            /* 11.5° auseinander  */
+            s.rightLeg.rotation.z = -0.18;
+            s.rightLeg.rotation.x = -swing * 0.06;
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
