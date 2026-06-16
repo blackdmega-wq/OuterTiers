@@ -55,42 +55,39 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  FORTNITE FLOSS DANCE — exact 4-frame analysis
+         #2  FORTNITE FLOSS DANCE — korrekte Implementierung
 
-         skinview3d axis reference (character faces +Z = toward camera):
-           leftArm.rotation.x:
-             NEGATIVE  → arm swings FORWARD (toward camera/in front of body)
-             POSITIVE  → arm swings BACKWARD (behind body)
-           leftArm.rotation.z:
-             NEGATIVE  → arm extends outward to the LEFT
-             POSITIVE  → arm crosses body to the RIGHT
-           rightArm.rotation.x:
-             NEGATIVE  → arm swings FORWARD (toward camera)
-             POSITIVE  → arm swings BACKWARD (behind body)
-           rightArm.rotation.z:
-             NEGATIVE  → arm extends outward to the RIGHT
-             POSITIVE  → arm crosses body to the LEFT
+         Das richtige Floss-Muster:
+         - BEIDE Arme schwingen GLEICHZEITIG zur GLEICHEN Seite
+         - Arme → RECHTS (vor dem Körper): Hüfte ← LINKS
+         - Arme ← LINKS (hinter dem Körper): Hüfte → RECHTS
+         - Arme bleiben möglichst gestreckt
+         - Oberkörper bleibt relativ ruhig
 
-         4 POSES mapped from reference images:
-         ┌────────────────────────────────────────────────────────────┐
-         │ Pose 1: L arm horizontal LEFT,  R arm BEHIND back         │
-         │         lAz=-1.55 (outward left)                          │
-         │         rAx=+0.80 (backward), rAz=+0.18 (near body)      │
-         │                                                            │
-         │ Pose 2: R arm horizontal RIGHT, L arm FORWARD+crossing    │
-         │         (left arm in FRONT of belly, sweeping to RIGHT)   │
-         │         lAx=-0.88 (strongly forward), lAz=+1.10 (crosses)│
-         │         rAz=-1.55 (outward right)                         │
-         │                                                            │
-         │ Pose 3: BOTH arms to the LEFT                             │
-         │         L arm: lAz=-1.55 (outward left)                   │
-         │         R arm: rAx=-0.55 (forward/crossing height),       │
-         │                rAz=+1.32 (crosses body to LEFT)           │
-         │                                                            │
-         │ Pose 4: R arm horizontal RIGHT, L arm BEHIND back         │
-         │         lAx=+0.80 (backward), lAz=-0.18 (near body)      │
-         │         rAz=-1.55 (outward right)                         │
-         └────────────────────────────────────────────────────────────┘
+         skinview3d Achsen (Charakter schaut +Z = zur Kamera):
+           leftArm.rotation.x:  NEGATIV  = Arm nach VORNE (vor den Körper)
+                                POSITIV  = Arm nach HINTEN (hinter den Körper)
+           leftArm.rotation.z:  NEGATIV  = Arm nach außen LINKS gestreckt
+                                POSITIV  = Arm kreuzt nach RECHTS
+           rightArm.rotation.x: NEGATIV  = Arm nach VORNE
+                                POSITIV  = Arm nach HINTEN
+           rightArm.rotation.z: NEGATIV  = Arm nach außen RECHTS gestreckt
+                                POSITIV  = Arm kreuzt nach LINKS
+
+         swing = sin(t):  +1 = Arme RECHTS/VORNE   -1 = Arme LINKS/HINTEN
+         ph = (swing+1)/2: 0 = Arme LINKS/hinten    1 = Arme RECHTS/vorne
+
+         ph=0 (Arme LINKS, hinter dem Körper):
+           leftArm:  z=−1.30 (streckt nach links außen), x=+0.65 (nach hinten)
+           rightArm: z=+1.20 (kreuzt nach links),        x=+0.45 (nach hinten)
+
+         ph=1 (Arme RECHTS, vor dem Körper):
+           leftArm:  z=+1.10 (kreuzt nach rechts),       x=−0.55 (nach vorne)
+           rightArm: z=−1.20 (streckt nach rechts außen),x=−0.35 (nach vorne)
+
+         Zusammenfassung:
+           Arme →     Hüfte ←
+           Arme ←     Hüfte →
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -98,82 +95,55 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE — COMPLETE REWRITE: korrekte Floss-Bewegung ──────
-               Richtiges Floss-Muster:
-               - BEIDE Arme schwingen GLEICHZEITIG zur GLEICHEN Seite
-               - "Streck-Arm": horizontal nach außen (wie eine T-Pose)
-               - "Kreuz-Arm": schwingt VOR dem Bauch diagonal zur selben Seite
-               - HÜFTE: gegenseitig
-
-               swing=+1 (Arme RECHTS):
-                 rightArm = Streck-Arm → z=+1.57, x=0  (gerade horizontal rechts)
-                 leftArm  = Kreuz-Arm  → z=+0.80, x=-0.50  (vor dem Bauch nach rechts)
-
-               swing=-1 (Arme LINKS):
-                 leftArm  = Streck-Arm → z=-1.57, x=0  (gerade horizontal links)
-                 rightArm = Kreuz-Arm  → z=-0.80, x=-0.50  (vor dem Bauch nach links)
-
-               x NEGATIV = Arm kommt nach VORNE/unten (sichtbar vor dem Körper).
-               Der Kreuz-Arm geht VOR dem Körper, nicht durch die Brust.
-               ph = (swing+1)/2  →  0 = Arme links, 1 = Arme rechts.
-            ──────────────────────────────────────────────────────────────── */
-            const SPEED = 2.0;
+            const SPEED = 2.8;
             const t     = progress * SPEED;
             const swing = Math.sin(t);
             const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ph: 0 = Arme ganz LINKS (swing=-1),  1 = Arme ganz RECHTS (swing=+1) */
+            /* ph: 0 = Arme LINKS/hinten   1 = Arme RECHTS/vorne */
             const ph = (swing + 1) * 0.5;
 
             /* ── LINKER ARM ────────────────────────────────────────────────
-               ph=0 (links): Streck-Arm  → horizontal links  (z=-1.57, x=0)
-               ph=1 (rechts): Kreuz-Arm → vor Bauch rechts  (z=+0.80, x=-0.50) */
-            s.leftArm.rotation.z =  lerp(-1.57,  0.80, ph);
-            s.leftArm.rotation.x =  lerp( 0.00, -0.50, ph);
-            s.leftArm.rotation.y =  0;
+               ph=0 (links/hinten): streckt nach außen links (z=−1.30), nach hinten (x=+0.65)
+               ph=1 (rechts/vorne): kreuzt nach rechts (z=+1.10),       nach vorne  (x=−0.55) */
+            s.leftArm.rotation.z = lerp(-1.30, +1.10, ph);
+            s.leftArm.rotation.x = lerp(+0.65, -0.55, ph);
+            s.leftArm.rotation.y = 0;
 
             /* ── RECHTER ARM ───────────────────────────────────────────────
-               ph=0 (links): Kreuz-Arm  → vor Bauch links   (z=-0.80, x=-0.50)
-               ph=1 (rechts): Streck-Arm → horizontal rechts (z=+1.57, x=0) */
-            s.rightArm.rotation.z =  lerp(-0.80,  1.57, ph);
-            s.rightArm.rotation.x =  lerp(-0.50,  0.00, ph);
-            s.rightArm.rotation.y =  0;
+               ph=0 (links/hinten): kreuzt nach links (z=+1.20),          nach hinten (x=+0.45)
+               ph=1 (rechts/vorne): streckt nach außen rechts (z=−1.20),  nach vorne  (x=−0.35) */
+            s.rightArm.rotation.z = lerp(+1.20, -1.20, ph);
+            s.rightArm.rotation.x = lerp(+0.45, -0.35, ph);
+            s.rightArm.rotation.y = 0;
 
-            /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
-            s.body.rotation.z = -swing * 0.18;
-            s.body.rotation.y =  swing * 0.08;
-            s.body.rotation.x =  0.06;
+            /* ── KÖRPER / HÜFTE — gegenseitig zu den Armen ────────────────
+               Arme rechts (swing=+1) → Hüfte links (body.rotation.z negativ) */
+            s.body.rotation.z = -swing * 0.20;
+            s.body.rotation.y =  0;
+            s.body.rotation.x =  0.04;
 
-            /* ── Head: follows the sway softly ── */
+            /* ── KOPF — bleibt relativ ruhig, leichte Mitbewegung ─────────
+               "Der Oberkörper bleibt relativ ruhig" */
             if (s.head) {
-              s.head.rotation.y = swing * 0.10;
-              s.head.rotation.x = -0.04 + Math.cos(t) * 0.04;
-              s.head.rotation.z = 0;
+              s.head.rotation.y =  swing * 0.07;
+              s.head.rotation.x = -0.03;
+              s.head.rotation.z =  0;
             }
 
-            /* ── Legs: slight weight-shift with each swing ── */
-            s.leftLeg.rotation.x  =  swing * 0.08;
-            s.leftLeg.rotation.z  =  0.14;
+            /* ── BEINE — leichte Gewichtsverlagerung mit jedem Schwung ─── */
+            s.leftLeg.rotation.x  =  swing * 0.07;
+            s.leftLeg.rotation.z  =  0.10;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.x = -swing * 0.08;
-            s.rightLeg.rotation.z = -0.14;
+            s.rightLeg.rotation.x = -swing * 0.07;
+            s.rightLeg.rotation.z = -0.10;
             s.rightLeg.rotation.y =  0;
+
           } catch (_) {}
         });
 
       /* ═══════════════════════════════════════════════════════════════
          #1  VICTORY POSE + MINECRAFT CASTLE CROWN — REVAMPED
-
-         Crown redesign goals:
-         ✓ Clearly YELLOW (not gold-metal-gray) — MeshPhongMaterial
-           with emissive so it reads as yellow in the 3D scene
-         ✓ Proper shading: 3 material variants (bright top, mid front,
-           dark inner/bottom) → face-wise lighting differentiates depth
-         ✓ Slimmer proportions: thinner walls, more elegant merlons
-         ✓ 7 front merlons (center clearly taller)
-         ✓ 4 gem types on the front face with strong emissive glow
-         ✓ Multi-material BoxGeometry [right,left,top,bottom,front,back]
-           so each face has a different shade for depth illusion
          ═══════════════════════════════════════════════════════════════ */
       } else {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -188,9 +158,6 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 if (disposed || s.head.userData.crownBuilt) return;
                 s.head.userData.crownBuilt = true;
 
-                /* ── YELLOW materials — 3 shades for face-level shading ──
-                   MeshPhongMaterial: responds to scene light, gives specular
-                   highlights that read clearly as shiny YELLOW, not metallic gray. */
                 const yTop  = new T.MeshPhongMaterial({
                   color: 0xFFEE00, specular: 0xFFFF88, shininess: 140,
                   emissive: 0x332200, emissiveIntensity: 0.30,
@@ -204,17 +171,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   emissive: 0x110E00, emissiveIntensity: 0.15,
                 });
 
-                /*
-                  Per-face material array for BoxGeometry:
-                  index 0 = +X (right), 1 = -X (left), 2 = +Y (top),
-                  3 = -Y (bottom), 4 = +Z (front/toward camera), 5 = -Z (back)
-                  → top face = yTop (brightest), front = yMid, sides = yMid, bottom = yDark
-                */
                 const facesWall    = [yMid,  yMid,  yTop,  yDark, yMid,  yMid ];
                 const facesTop     = [yMid,  yMid,  yTop,  yDark, yTop,  yMid ];
                 const facesCenter  = [yMid,  yMid,  yTop,  yDark, yTop,  yMid ];
 
-                /* ── Gem materials — strong emissive glow ── */
                 const gemPurple = new T.MeshPhongMaterial({
                   color: 0xDD44FF, specular: 0xFFCCFF, shininess: 200,
                   emissive: 0x9900CC, emissiveIntensity: 0.90,
@@ -234,7 +194,6 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
                 const g = new T.Group();
 
-                /* Helper: add box with per-face materials or single material */
                 const bx = (
                   mat: any,
                   w: number, h: number, d: number,
@@ -245,66 +204,48 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   g.add(m);
                 };
 
-                /*
-                  SLIMMER crown proportions:
-                  Head = 8×8×8 units. Crown sits at g.position.y = 6.0
-                  (properly seated on head — lower, more weighted look).
-
-                  BW  = total width (slightly wider than 8-unit head)
-                  BH  = base band height  → slimmer = 1.0
-                  BT  = wall thickness   → thinner = 0.80
-                */
                 const BW    = 10.0;
                 const BH    = 1.0;
                 const BT    = 0.80;
                 const inner = BW - BT * 2;
 
-                const FZ  =  (BW / 2 - BT / 2);   /* front wall center (+Z, toward camera) */
-                const BKZ = -(BW / 2 - BT / 2);   /* back wall center */
-                const LX  = -(BW / 2 - BT / 2);   /* left wall center */
-                const RX  =  (BW / 2 - BT / 2);   /* right wall center */
+                const FZ  =  (BW / 2 - BT / 2);
+                const BKZ = -(BW / 2 - BT / 2);
+                const LX  = -(BW / 2 - BT / 2);
+                const RX  =  (BW / 2 - BT / 2);
 
-                /* ── BASE BAND — 4 walls ── */
-                bx(facesWall, BW, BH, BT, 0,  BH/2, FZ );  /* front */
-                bx(facesWall, BW, BH, BT, 0,  BH/2, BKZ);  /* back  */
-                bx(facesWall, BT, BH, inner, LX, BH/2, 0); /* left  */
-                bx(facesWall, BT, BH, inner, RX, BH/2, 0); /* right */
+                bx(facesWall, BW, BH, BT, 0,  BH/2, FZ );
+                bx(facesWall, BW, BH, BT, 0,  BH/2, BKZ);
+                bx(facesWall, BT, BH, inner, LX, BH/2, 0);
+                bx(facesWall, BT, BH, inner, RX, BH/2, 0);
 
-                /* ── MERLONS (castle battlements) ──
-                   7 across front & back. Center is distinctly taller.
-                   Slim merlons for an elegant, not-chunky look. */
-                const MW  = 0.88;   /* merlon width — slim */
+                const MW  = 0.88;
                 const MD  = BT;
-                const MH  = 1.45;  /* standard merlon height */
-                const MHC = 2.20;  /* center merlon — clearly taller */
-                const yB  = BH;    /* merlons rest on top of base band */
+                const MH  = 1.45;
+                const MHC = 2.20;
+                const yB  = BH;
 
                 const xs7 = [-3.4, -2.26, -1.13, 0, 1.13, 2.26, 3.4];
 
                 xs7.forEach((x, i) => {
                   const h   = i === 3 ? MHC : MH;
                   const mat = i === 3 ? facesCenter : facesTop;
-                  bx(mat, MW, h, MD, x, yB + h/2, FZ );  /* front merlon */
-                  bx(mat, MW, h, MD, x, yB + h/2, BKZ);  /* back  merlon */
+                  bx(mat, MW, h, MD, x, yB + h/2, FZ );
+                  bx(mat, MW, h, MD, x, yB + h/2, BKZ);
                 });
 
-                /* Side merlons: 3 per side */
                 [-2.0, 0, 2.0].forEach((z) => {
                   bx(facesTop, MD, MH, MW, LX, yB + MH/2, z);
                   bx(facesTop, MD, MH, MW, RX, yB + MH/2, z);
                 });
 
-                /* Corner caps */
                 ([[LX,FZ],[RX,FZ],[LX,BKZ],[RX,BKZ]] as [number,number][])
                   .forEach(([cx, cz]) => bx(facesTop, BT, MH, BT, cx, yB+MH/2, cz));
 
-                /* ── GEMS on FRONT face — protrude outward so clearly visible ──
-                   Front wall outer surface = FZ + BT/2
-                   Gem center              = FZ + BT/2 + GD/2                    */
-                const GS = 1.30;                   /* gem face size */
-                const GD = 0.80;                   /* protrusion depth */
-                const GY = BH / 2;                 /* vertically centred in band */
-                const GZ = FZ + BT/2 + GD/2;       /* protrudes forward */
+                const GS = 1.30;
+                const GD = 0.80;
+                const GY = BH / 2;
+                const GZ = FZ + BT/2 + GD/2;
 
                 ([
                   [-2.8, gemPurple],
@@ -317,13 +258,11 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   g.add(gem);
                 });
 
-                /* Seat the crown on head top */
                 g.position.set(0, 6.0, 0);
                 s.head.add(g);
               }).catch(() => {});
             }
 
-            /* Victory pose — arms wide open, gentle wave */
             const t = progress * 2.5;
             s.leftArm.rotation.z  = -(1.45 + Math.sin(t * 1.5) * 0.30);
             s.rightArm.rotation.z =   1.45 + Math.sin(t * 1.5 + Math.PI) * 0.30;
