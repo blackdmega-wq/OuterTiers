@@ -2250,9 +2250,9 @@ img { display: block; }
   overflow: visible;
   flex-shrink: 0;
 }
-.lb-pod--rank1 .lb-pod-skin-wrap { width: 130px; height: 200px; margin-top: 20px; }
-.lb-pod--rank2 .lb-pod-skin-wrap { width: 100px; height: 160px; }
-.lb-pod--rank3 .lb-pod-skin-wrap { width: 90px; height: 148px; }
+.lb-pod--rank1 .lb-pod-skin-wrap { width: 100px; height: 152px; margin-top: 12px; }
+.lb-pod--rank2 .lb-pod-skin-wrap { width: 82px; height: 128px; }
+.lb-pod--rank3 .lb-pod-skin-wrap { width: 76px; height: 118px; }
 .lb-pod-skin {
   width: 100%;
   height: 100%;
