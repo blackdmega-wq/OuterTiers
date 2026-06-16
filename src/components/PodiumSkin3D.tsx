@@ -55,26 +55,26 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  MINECRAFT FLOSS DANCE  — v10 (fixed)
+         #2  MINECRAFT FLOSS DANCE  — v11
 
-         ACHSEN (skinview3d):
-           arm.x  NEGATIV=vorne(zur Kamera)  POSITIV=hinten(von Kamera weg)
-           leftArm.z   NEGATIV=außen-links   POSITIV=kreuzt-rechts
-           rightArm.z  NEGATIV=außen-rechts  POSITIV=kreuzt-links
+         ACHSEN (aus WalkingAnimation source verifiziert):
+           arm.x   NEGATIV=vorne(Kamera)  POSITIV=hinten
+           leftArm.z   POSITIV=außen-links(Char)  NEGATIV=kreuzt-rechts(Char)
+           rightArm.z  NEGATIV=außen-rechts(Char) POSITIV=kreuzt-links(Char)
            body.y  POSITIV=Körper dreht LINKS
 
-         FRAME 1 — Rechter Arm VORNE (swing=+1, ph=1):
-           rightArm  VORNE+outward-right : x=−0.45 (~25°), z=−0.40
-           leftArm   HINTEN+crosses-right: x=+0.45 (~25°), z=+1.55
-           body.y = +0.18 (dreht LINKS)
+         DER ECHTE FLOSS: beide Arme schwingen GLEICHZEITIG zur GLEICHEN Seite.
+         Ein Arm kreuzt VORNE vor dem Körper, der andere schwingt HINTEN heraus.
 
-         FRAME 3 — Linker Arm VORNE (swing=−1, ph=0):
-           leftArm   VORNE+outward-left  : x=−0.45, z=−0.40
-           rightArm  HINTEN+crosses-left : x=+0.45, z=+1.55
+         ph=1 (swing=+1) → Arme zu Char-LINKS:
+           rightArm = VORDER-Arm, kreuzt nach links  → x=−0.18, z=+1.55
+           leftArm  = HINTER-Arm, außen nach links   → x=+0.32, z=+1.10
+           body.y = +0.18 (dreht LINKS, folgt der Bewegung)
+
+         ph=0 (swing=−1) → Arme zu Char-RECHTS:
+           leftArm  = VORDER-Arm, kreuzt nach rechts → x=−0.18, z=−1.55
+           rightArm = HINTER-Arm, außen nach rechts  → x=+0.32, z=−1.10
            body.y = −0.18 (dreht RECHTS)
-
-         EASING: power-curve hält an Extremen länger (echte Pose-Holds),
-                 schnelle Übergänge in der Mitte — wie im echten Floss-Emote.
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -84,35 +84,35 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
             const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ~1.15 Zyklen/sec — echtes Floss-Tempo (ca. 14–15 FPS @ 5-Tick-Hold) */
-            const t    = progress * 7.2;
+            /* ~1.0 Zyklen/sec — authentisches Floss-Emote-Tempo */
+            const t    = progress * 6.3;
             const raw  = Math.sin(t);
 
-            /* Power-Easing: verbringt mehr Zeit an den Extremen (Pose-Hold)
-               und weniger in der Mitte (schneller Übergang)                */
+            /* Power-Easing: Posen halten länger, Übergänge schnell */
             const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.38);
-            const ph    = (swing + 1) * 0.5; /* 0=Frame-LINKS  1=Frame-RECHTS */
+            const ph    = (swing + 1) * 0.5;
+            /* ph=0 → Arme zu Char-RECHTS  |  ph=1 → Arme zu Char-LINKS */
 
             /* ── RECHTER ARM ─────────────────────────────────────────────────
-               ph=0 (LINKS-Pose): HINTEN+crosses-left  x=+0.45  z=+1.55
-               ph=1 (RECHTS-Pose): VORNE+outward-right x=−0.45  z=−0.40     */
-            s.rightArm.rotation.x = lerp(+0.45, -0.45, ph);
-            s.rightArm.rotation.z = lerp(+1.55, -0.40, ph);
-            s.rightArm.rotation.y =  swing * 0.06;
+               ph=0 → HINTER-Arm, außen-rechts:  x=+0.32, z=−1.10
+               ph=1 → VORDER-Arm, kreuzt-links:  x=−0.18, z=+1.55          */
+            s.rightArm.rotation.x = lerp(+0.32, -0.18, ph);
+            s.rightArm.rotation.z = lerp(-1.10, +1.55, ph);
+            s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ──────────────────────────────────────────────────
-               ph=0 (LINKS-Pose): VORNE+outward-left   x=−0.45  z=−0.40
-               ph=1 (RECHTS-Pose): HINTEN+crosses-right x=+0.45  z=+1.55    */
-            s.leftArm.rotation.x  = lerp(-0.45, +0.45, ph);
-            s.leftArm.rotation.z  = lerp(-0.40, +1.55, ph);
-            s.leftArm.rotation.y  = -swing * 0.06;
+               ph=0 → VORDER-Arm, kreuzt-rechts: x=−0.18, z=−1.55
+               ph=1 → HINTER-Arm, außen-links:   x=+0.32, z=+1.10          */
+            s.leftArm.rotation.x = lerp(-0.18, +0.32, ph);
+            s.leftArm.rotation.z = lerp(-1.55, +1.10, ph);
+            s.leftArm.rotation.y = 0;
 
-            /* ── KÖRPER — dreht LINKS wenn rechter Arm vorne ─────────────── */
+            /* ── KÖRPER — folgt der Armbewegung, Hüften entgegen ─────────── */
             s.body.rotation.y =  swing * 0.18;
             s.body.rotation.x =  0;
-            s.body.rotation.z =  0;
+            s.body.rotation.z = -swing * 0.06;
 
-            /* ── KOPF — leichte Gegenrotation (Profi-Trick) ──────────────── */
+            /* ── KOPF — leichte Mikro-Gegenrotation ──────────────────────── */
             if (s.head) {
               s.head.rotation.y = -swing * 0.07;
               s.head.rotation.x =  0;
@@ -120,11 +120,11 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             }
 
             /* ── BEINE — fast statisch, minimaler Weight-Shift ───────────── */
-            s.leftLeg.rotation.z  =  0.16;
-            s.leftLeg.rotation.x  =  swing * 0.05;
+            s.leftLeg.rotation.z  =  0.12;
+            s.leftLeg.rotation.x  =  swing * 0.04;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z = -0.16;
-            s.rightLeg.rotation.x = -swing * 0.05;
+            s.rightLeg.rotation.z = -0.12;
+            s.rightLeg.rotation.x = -swing * 0.04;
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
