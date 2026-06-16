@@ -119,12 +119,16 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const swing = Math.sin(t);   /* −1 (full-left) → +1 (full-right) */
 
             /* ── Arms ── */
+            /* Both arms swing together (same z-sign).
+               The crossing arm goes BEHIND THE BACK (positive x = backward).
+               Arms-LEFT:  leftArm extends horizontally, rightArm crosses behind back.
+               Arms-RIGHT: rightArm extends horizontally, leftArm crosses behind back. */
             s.leftArm.rotation.z  =  swing * 1.55;
-            s.leftArm.rotation.x  =  Math.max(0,  swing) * -1.28;  /* forward when crossing right */
+            s.leftArm.rotation.x  =  Math.max(0,  swing) * 1.38;  /* behind back when crossing right */
             s.leftArm.rotation.y  = 0;
 
             s.rightArm.rotation.z =  swing * 1.55;
-            s.rightArm.rotation.x =  Math.max(0, -swing) * -1.28;  /* forward when crossing left  */
+            s.rightArm.rotation.x =  Math.max(0, -swing) * 1.38;  /* behind back when crossing left  */
             s.rightArm.rotation.y = 0;
 
             /* ── Body: hip counter-sway + gentle forward lean ── */
