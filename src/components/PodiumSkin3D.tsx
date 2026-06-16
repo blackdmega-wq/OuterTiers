@@ -111,29 +111,26 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const lerp = (a: number, b: number) => a + (b - a) * ef;
 
             /* ── 4 keyframe poses ── */
-            /* ── ARM AXIS KEY ──────────────────────────────────────────────
-               rightArm = character's RIGHT arm = appears SCREEN-LEFT (viewer's left)
-               leftArm  = character's LEFT arm  = appears SCREEN-RIGHT (viewer's right)
-
-               rotation.z  leftArm:   NEGATIVE = extends SCREEN-RIGHT  POSITIVE = crosses SCREEN-LEFT
-               rotation.z  rightArm:  NEGATIVE = extends SCREEN-LEFT   POSITIVE = crosses SCREEN-RIGHT
-               rotation.x  both:      NEGATIVE = forward (belly)        POSITIVE = backward (behind)
-
-               4 poses (viewer perspective):
-                 1: SCREEN-LEFT arm extends, SCREEN-RIGHT arm behind
-                 2: SCREEN-RIGHT arm extends, SCREEN-LEFT arm forward + crosses screen-right
-                 3: BOTH arms SCREEN-LEFT (right extends, left crosses left)
-                 4: SCREEN-RIGHT arm extends, SCREEN-LEFT arm behind
-               ──────────────────────────────────────────────────────────── */
+            /* see KEYS block below for axis reference */
+            /* ─────────────────────────────────────────────────────────────
+               CORRECTED 4-POSE FLOSS KEYFRAMES
+               skinview3d axis (character faces +Z = toward camera):
+                 leftArm.z  NEGATIVE → extends character's LEFT  (screen-right)
+                 leftArm.z  POSITIVE → crosses character's RIGHT (screen-left)
+                 rightArm.z NEGATIVE → extends character's RIGHT (screen-left)
+                 rightArm.z POSITIVE → crosses character's LEFT  (screen-right)
+                 .x NEGATIVE → arm FORWARD (belly)  .x POSITIVE → arm BACKWARD (behind)
+               ───────────────────────────────────────────────────────────── */
             const KEYS = [
-              /* Pose 1 — rightArm extends SCREEN-LEFT, leftArm BEHIND */
-              { lAx:  0.80, lAz: -0.15, rAx:  0.00, rAz: -1.55, bz: -0.14 },
-              /* Pose 2 — leftArm extends SCREEN-RIGHT, rightArm FORWARD + crosses SCREEN-RIGHT */
-              { lAx:  0.00, lAz: -1.55, rAx: -0.88, rAz:  1.10, bz:  0.14 },
-              /* Pose 3 — BOTH arms SCREEN-LEFT: rightArm extends, leftArm crosses */
-              { lAx: -0.55, lAz:  1.10, rAx:  0.00, rAz: -1.55, bz: -0.14 },
-              /* Pose 4 — leftArm extends SCREEN-RIGHT, rightArm BEHIND */
-              { lAx:  0.00, lAz: -1.55, rAx:  0.80, rAz:  0.15, bz:  0.14 },
+              /* Frame 1: L-arm extends CHARACTER-LEFT, R-arm BEHIND BACK */
+              { lAx:  0.00, lAz: -1.55, rAx:  0.78, rAz:  0.12, bz: -0.13 },
+              /* Frame 2: R-arm extends CHARACTER-RIGHT, L-arm FORWARD in front of belly */
+              /*          lAx strongly negative = arm pushed out forward (no chest-clip)   */
+              { lAx: -1.42, lAz:  1.05, rAx:  0.00, rAz: -1.55, bz:  0.13 },
+              /* Frame 3: BOTH arms to CHARACTER-LEFT (L extends, R crosses over)          */
+              { lAx:  0.00, lAz: -1.55, rAx: -0.28, rAz:  1.45, bz: -0.13 },
+              /* Frame 4: R-arm extends CHARACTER-RIGHT, L-arm BEHIND BACK                 */
+              { lAx:  0.78, lAz: -0.12, rAx:  0.00, rAz: -1.55, bz:  0.13 },
             ];
 
             const kA = KEYS[ki % 4];
@@ -152,9 +149,13 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.body.rotation.x = 0;
             s.body.rotation.z = lerp(kA.bz, kB.bz);
 
-            /* Legs: stationary (authentic floss) */
-            s.leftLeg.rotation.x  = 0; s.leftLeg.rotation.z  = 0; s.leftLeg.rotation.y  = 0;
-            s.rightLeg.rotation.x = 0; s.rightLeg.rotation.z = 0; s.rightLeg.rotation.y = 0;
+            /* Legs: slightly spread apart for authentic floss stance */
+            s.leftLeg.rotation.x  = 0.05;
+            s.leftLeg.rotation.z  =  0.14;
+            s.leftLeg.rotation.y  = 0;
+            s.rightLeg.rotation.x = 0.05;
+            s.rightLeg.rotation.z = -0.14;
+            s.rightLeg.rotation.y = 0;
           } catch (_) {}
         });
 
