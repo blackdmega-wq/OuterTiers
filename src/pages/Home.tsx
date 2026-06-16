@@ -314,18 +314,23 @@ export default function Home() {
                     >
                       {rank === 1 && (
                         <div className="lb-fire-wrap">
-                          {/* Minecraft bottle rockets — styling from CSS, only position+timing inline */}
-                          {[
-                            {l:'7%',  dur:'2.8s',delay:'0s',   fh:'168px'},
-                            {l:'22%', dur:'3.2s',delay:'0.75s',fh:'178px'},
-                            {l:'37%', dur:'2.6s',delay:'1.45s',fh:'162px'},
-                            {l:'52%', dur:'3.0s',delay:'0.4s', fh:'173px'},
-                            {l:'65%', dur:'2.7s',delay:'1.1s', fh:'165px'},
-                            {l:'79%', dur:'3.4s',delay:'0.6s', fh:'180px'},
-                            {l:'16%', dur:'2.9s',delay:'1.9s', fh:'158px'},
-                          ].map((r,i) => (
+                          {/* Revamped multi-color Minecraft firework rockets */}
+                          {([
+                            {l:'4%',  dur:'2.4s',delay:'0s',    fh:'152px',fc:'#FFD700',fe:'#FFFF44',fs:'255,220,0'},
+                            {l:'13%', dur:'3.0s',delay:'0.55s', fh:'174px',fc:'#FF4455',fe:'#FF8899',fs:'255,80,80'},
+                            {l:'23%', dur:'2.65s',delay:'1.25s',fh:'158px',fc:'#44AAFF',fe:'#88CCFF',fs:'80,160,255'},
+                            {l:'33%', dur:'3.25s',delay:'0.3s', fh:'182px',fc:'#FFD700',fe:'#FFFF88',fs:'255,220,0'},
+                            {l:'43%', dur:'2.5s', delay:'1.85s',fh:'148px',fc:'#BB44FF',fe:'#DD88FF',fs:'180,80,255'},
+                            {l:'53%', dur:'2.8s', delay:'0.85s',fh:'166px',fc:'#22EE66',fe:'#88FFAA',fs:'50,220,100'},
+                            {l:'62%', dur:'3.1s', delay:'1.5s', fh:'170px',fc:'#FF4455',fe:'#FF7788',fs:'255,80,80'},
+                            {l:'71%', dur:'2.6s', delay:'0.2s', fh:'156px',fc:'#44AAFF',fe:'#AADDFF',fs:'80,160,255'},
+                            {l:'80%', dur:'3.45s',delay:'1.05s',fh:'184px',fc:'#FFD700',fe:'#FFFF44',fs:'255,220,0'},
+                            {l:'89%', dur:'2.75s',delay:'0.65s',fh:'162px',fc:'#BB44FF',fe:'#EE99FF',fs:'180,80,255'},
+                            {l:'18%', dur:'2.9s', delay:'2.15s',fh:'145px',fc:'#22EE66',fe:'#66FFBB',fs:'50,220,100'},
+                            {l:'58%', dur:'2.35s',delay:'1.7s', fh:'160px',fc:'#FFD700',fe:'#FFEE88',fs:'255,220,0'},
+                          ] as {l:string;dur:string;delay:string;fh:string;fc:string;fe:string;fs:string}[]).map((r,i) => (
                             <div key={i} className="lb-fire-rocket"
-                              style={{'--fdur':r.dur,'--fdelay':r.delay,'--fh':r.fh,left:r.l} as React.CSSProperties}
+                              style={{'--fdur':r.dur,'--fdelay':r.delay,'--fh':r.fh,'--fc':r.fc,'--fe':r.fe,'--fs':r.fs,left:r.l} as React.CSSProperties}
                             />
                           ))}
                         </div>
