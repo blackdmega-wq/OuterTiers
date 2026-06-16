@@ -313,6 +313,28 @@ export default function Home() {
                       onClick={() => navigate(`/player/${player.username}`)}
                     >
                       {rank === 1 && (
+                        <div className="lb-fire-wrap">
+                          {[
+                            {l:'8%', c:'#FF4500',dur:'2.8s',delay:'0s'},
+                            {l:'18%',c:'#FF6B00',dur:'3.2s',delay:'0.4s'},
+                            {l:'28%',c:'#FF3300',dur:'2.5s',delay:'0.9s'},
+                            {l:'38%',c:'#FF8C00',dur:'3.0s',delay:'0.2s'},
+                            {l:'48%',c:'#FF4500',dur:'2.7s',delay:'1.1s'},
+                            {l:'58%',c:'#FF6B00',dur:'3.4s',delay:'0.6s'},
+                            {l:'68%',c:'#FF3300',dur:'2.6s',delay:'1.4s'},
+                            {l:'78%',c:'#FF8C00',dur:'3.1s',delay:'0.3s'},
+                            {l:'88%',c:'#FF4500',dur:'2.9s',delay:'0.8s'},
+                            {l:'13%',c:'#FFAA00',dur:'3.3s',delay:'1.6s'},
+                            {l:'33%',c:'#FF6B00',dur:'2.4s',delay:'0.7s'},
+                            {l:'53%',c:'#FF3300',dur:'3.0s',delay:'1.3s'},
+                            {l:'73%',c:'#FFAA00',dur:'2.8s',delay:'0.5s'},
+                            {l:'93%',c:'#FF4500',dur:'3.2s',delay:'1.0s'},
+                          ].map((r,i) => (
+                            <div key={i} className="lb-fire-rocket" style={{'--fdur':r.dur,'--fdelay':r.delay,left:r.l,background:`linear-gradient(180deg,${r.c} 0%,${r.c}88 40%,transparent 100%)`} as React.CSSProperties} />
+                          ))}
+                        </div>
+                      )}
+                      {rank === 1 && (
                         <div className="lb-confetti-wrap lb-confetti-full">
                           {[
                             {l:'5%', c:'#ff4e50',dur:'1.1s',delay:'0s',   sx:'-5px', sz:'10px'},
