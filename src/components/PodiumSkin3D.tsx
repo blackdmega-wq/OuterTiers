@@ -107,10 +107,16 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.leftArm.rotation.z = lerp(-1.55, +1.10, ph);
             s.leftArm.rotation.y = 0;
 
-            /* ── KÖRPER — folgt der Armbewegung, Hüften entgegen ─────────── */
+            /* ── KÖRPER — dreht zur Seite des Vorderarms ────────────────── */
             s.body.rotation.y =  swing * 0.18;
             s.body.rotation.x =  0;
             s.body.rotation.z = -swing * 0.06;
+
+            /* ── GANZKÖRPER LATERAL-SHIFT — Hüfte gegenläufig zu Armen ─── */
+            /* Arme gehen zu Char-LINKS (+X) → Hüfte geht Char-RECHTS (−X)  */
+            player.position.x = -swing * 0.42;
+            /* Leichtes Hochfedern in der Mitte, minimal nach unten an Extremen */
+            player.position.y = (1 - Math.abs(swing)) * 0.30 - 0.15;
 
             /* ── KOPF — leichte Mikro-Gegenrotation ──────────────────────── */
             if (s.head) {
