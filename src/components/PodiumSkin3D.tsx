@@ -129,20 +129,28 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const goLeft  = Math.max(0, -swing);  /* 0→1 as swing goes 0→−1 */
 
             /* ── LEFT arm ────────────────────────────────────────────────
-               Extends LEFT (goLeft):  z=-1.55, x=-0.15 (forward), y=0
-               Crosses BEHIND (goRight): z=+0.30, x=+1.40 (backward), y=-1.20
-                 y NEGATIVE = sweeps arm tip toward +X = rightward behind body ✓ */
-            s.leftArm.rotation.z = -goLeft * 1.55 + goRight * 0.30;
-            s.leftArm.rotation.x = -goLeft * 0.15 + goRight * 1.40;
-            s.leftArm.rotation.y = -goRight * 1.20;   /* NEGATIVE → sweeps rightward ✓ */
+               Extends LEFT (goLeft):
+                 z = -1.10  →  63° from vertical = diagonal downward (not horizontal)
+                 x = -0.20  →  slightly forward/in-front for depth contrast
+               Crosses BEHIND to right (goRight):
+                 z = +0.80  →  wider lateral swing → more clearance from chest side
+                 x = +1.20  →  backward past the chest plane
+                 y = -1.20  →  NEGATIVE sweeps backward arm toward +X (rightward) ✓ */
+            s.leftArm.rotation.z = -goLeft * 1.10 + goRight * 0.80;
+            s.leftArm.rotation.x = -goLeft * 0.20 + goRight * 1.20;
+            s.leftArm.rotation.y = -goRight * 1.20;   /* NEGATIVE → rightward behind ✓ */
 
             /* ── RIGHT arm ───────────────────────────────────────────────
-               Extends RIGHT (goRight): z=+1.55, x=-0.15 (forward), y=0
-               Crosses BEHIND (goLeft):  z=-0.30, x=+1.40 (backward), y=+1.20
-                 y POSITIVE = sweeps arm tip toward -X = leftward behind body ✓ */
-            s.rightArm.rotation.z =  goRight * 1.55 - goLeft * 0.30;
-            s.rightArm.rotation.x = -goRight * 0.15 + goLeft * 1.40;
-            s.rightArm.rotation.y =  goLeft  * 1.20;   /* POSITIVE → sweeps leftward ✓ */
+               Extends RIGHT (goRight):
+                 z = +1.10  →  63° from vertical = diagonal downward (schräg nach unten)
+                 x = -0.20  →  slightly forward/in-front for depth contrast
+               Crosses BEHIND to left (goLeft):
+                 z = -0.80  →  wider lateral swing → arm clears right side of chest
+                 x = +1.20  →  backward past the chest plane
+                 y = +1.20  →  POSITIVE sweeps backward arm toward -X (leftward) ✓ */
+            s.rightArm.rotation.z =  goRight * 1.10 - goLeft * 0.80;
+            s.rightArm.rotation.x = -goRight * 0.20 + goLeft * 1.20;
+            s.rightArm.rotation.y =  goLeft  * 1.20;  /* POSITIVE → leftward behind ✓ */
 
             /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
             s.body.rotation.z = -swing * 0.18;
