@@ -2302,7 +2302,7 @@ img { display: block; }
   inset: 0;
   pointer-events: none;
   overflow: visible;
-  z-index: 2;
+  z-index: 0;
 }
 .lb-confetti-wrap .lb-rocket {
   position: absolute;
