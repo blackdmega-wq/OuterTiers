@@ -98,56 +98,68 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE — REVAMPED v4: sequential behind-back motion ──
-               The key visual: arm must clearly go BEHIND the chest, not beside it.
+            /* ── FLOSS DANCE — REVAMPED v5: circular arc around body ────────
+               Problem with v4: extension phase went BEHIND(x=1.57) → DOWN(x=0)
+               → FRONT(x=-0.20) linearly, which passes THROUGH the chest at x≈0.
 
-               New approach: at swing=0 the arm points STRAIGHT BACKWARD (x=π/2).
-               The chest geometry then occludes the arm → it visually disappears
-               behind the torso. This is the frame where the arm is "hinter der Brust".
+               Fix: split extension into two sub-phases so the arm travels AROUND
+               the outside of the body via the SIDE — never through the chest:
 
-               Full motion sequence for LEFT arm (right arm is mirrored):
-                 swing = −1 : extends LEFT  (z=−1.10, x=−0.20, y=0)  ← in front, visible
-                 swing =  0 : straight BACK (z=0,     x=1.57,  y=0)  ← behind chest, hidden
-                 swing = +1 : crossed RIGHT (z=+0.80, x=+1.20, y=−1.20) ← behind, rightward
+               Sub-phase 1 (first half of extension, p=0→0.5):
+                 BEHIND (x=1.57, z=0) → SIDE (x=0, z=±1.50 max lateral)
+                 Arm sweeps from pointing backward to pointing straight sideways.
+                 Arm is always either behind or beside the body — never in front.
 
-               Interpolation is linear in swing (which is sinusoidal in time),
-               so the arm SLOWS at the endpoints (natural) and SNAPS quickly
-               through the behind-back position (floss-style whip motion).
+               Sub-phase 2 (second half of extension, p=0.5→1):
+                 SIDE (x=0, z=±1.50) → FRONT-DIAGONAL (x=−0.20, z=±1.10)
+                 Arm comes slightly forward from horizontal while retracting slightly.
+                 Arm is clearly outside the body (z is large) when coming forward.
 
-               Continuity at swing=0 is guaranteed because both branches
-               evaluate to (z=0, x=1.57, y=0) when swing=0.
+               Crossing phase (arm stays behind throughout):
+                 x stays ≈1.57→1.20 (always > 1.0 rad backward), sweeps with z and y.
+                 Arm NEVER crosses through the chest in this phase.
+
+               Continuity: all branches evaluate to (x=1.57, z=0, y=0) at swing=0.
             ──────────────────────────────────────────────────────────────── */
             const SPEED = 2.2;
             const t     = progress * SPEED;
             const swing = Math.sin(t);
 
-            /* linear interpolation helper */
             const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ── LEFT arm ──────────────────────────────────────────────── */
+            /* ── LEFT arm ──────────────────────────────────────────────────
+               swing ≥ 0  →  CROSSING phase: arm stays behind, sweeps right
+               swing < 0  →  EXTENSION phase: arm goes from behind → side → front-left */
             if (swing >= 0) {
-              /* arm comes from straight-back and crosses rightward behind body */
-              s.leftArm.rotation.z = lerp(0,     0.80, swing);   /* 0 → +0.80 rightward */
-              s.leftArm.rotation.x = lerp(1.57,  1.20, swing);   /* π/2 → 1.20 backward */
-              s.leftArm.rotation.y = lerp(0,    -1.20, swing);   /* 0 → −1.20 sweeps right */
+              /* CROSSING: arm stays behind the body and sweeps rightward */
+              s.leftArm.rotation.z = lerp(0,    0.80, swing);   /* behind → behind-right  */
+              s.leftArm.rotation.x = lerp(1.57, 1.20, swing);   /* stays strongly backward */
+              s.leftArm.rotation.y = lerp(0,   -1.20, swing);   /* sweeps arm rightward    */
             } else {
-              const p = -swing;                                    /* 0→1 as swing goes 0→−1 */
-              s.leftArm.rotation.z = lerp(0,    -1.10, p);       /* 0 → −1.10 extends left */
-              s.leftArm.rotation.x = lerp(1.57, -0.20, p);       /* π/2 → −0.20 comes forward */
+              const p  = -swing;                            /* 0→1 as swing goes 0→−1 */
+              const p1 = Math.min(1.0, p * 2.0);           /* 0→1 for first half  (sub-phase 1) */
+              const p2 = Math.max(0.0, p * 2.0 - 1.0);    /* 0→1 for second half (sub-phase 2) */
+              /* Sub-phase 1: arm sweeps from behind to full lateral (outside of body) */
+              /* Sub-phase 2: arm comes slightly forward from lateral to extended-left  */
+              s.leftArm.rotation.z = lerp(0,    -1.50, p1) + lerp(0,  0.40, p2); /* 0→-1.50→-1.10 */
+              s.leftArm.rotation.x = lerp(1.57,  0.00, p1) + lerp(0, -0.20, p2); /* 1.57→0→-0.20  */
               s.leftArm.rotation.y = 0;
             }
 
-            /* ── RIGHT arm (mirror of left) ────────────────────────────── */
+            /* ── RIGHT arm (mirror of left) ──────────────────────────────── */
             if (swing <= 0) {
-              /* arm comes from straight-back and crosses leftward behind body */
-              const p = -swing;                                    /* 0→1 as swing goes 0→−1 */
-              s.rightArm.rotation.z = lerp(0,    -0.80, p);      /* 0 → −0.80 leftward */
-              s.rightArm.rotation.x = lerp(1.57,  1.20, p);      /* π/2 → 1.20 backward */
-              s.rightArm.rotation.y = lerp(0,     1.20, p);      /* 0 → +1.20 sweeps left */
-            } else {
-              s.rightArm.rotation.z = lerp(0,     1.10, swing);  /* 0 → +1.10 extends right */
-              s.rightArm.rotation.x = lerp(1.57, -0.20, swing);  /* π/2 → −0.20 comes forward */
+              /* CROSSING: arm stays behind, sweeps leftward */
+              const p  = -swing;
+              const p1 = Math.min(1.0, p * 2.0);
+              const p2 = Math.max(0.0, p * 2.0 - 1.0);
+              s.rightArm.rotation.z = lerp(0,    1.50, p1) + lerp(0, -0.40, p2); /* 0→+1.50→+1.10 */
+              s.rightArm.rotation.x = lerp(1.57, 0.00, p1) + lerp(0, -0.20, p2); /* 1.57→0→-0.20  */
               s.rightArm.rotation.y = 0;
+            } else {
+              /* CROSSING: arm stays behind, sweeps leftward */
+              s.rightArm.rotation.z = lerp(0,    -0.80, swing);
+              s.rightArm.rotation.x = lerp(1.57,  1.20, swing);
+              s.rightArm.rotation.y = lerp(0,     1.20, swing);
             }
 
             /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
