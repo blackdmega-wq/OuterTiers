@@ -2304,6 +2304,14 @@ img { display: block; }
   overflow: visible;
   z-index: 0;
 }
+/* Full-pod confetti: covers trophy + skin (placed at lb-pod level) */
+.lb-confetti-full {
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  right: -12px;
+  z-index: 0;
+}
 .lb-confetti-wrap .lb-rocket {
   position: absolute;
   bottom: 0px;
