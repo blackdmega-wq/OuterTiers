@@ -98,28 +98,28 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE — REVAMPED: proper 3-axis arm arc ────────────
-               Axes (verified from victory-pose ground truth):
-                 leftArm.z:  NEGATIVE → extends LEFT,  POSITIVE → crosses RIGHT
-                 rightArm.z: POSITIVE → extends RIGHT, NEGATIVE → crosses LEFT
-                 arm.x:      POSITIVE → tilts BACKWARD (behind body plane)
-                 arm.y:      leftArm  POSITIVE → sweeps arm tip behind body
-                             rightArm NEGATIVE → sweeps arm tip behind body
+            /* ── FLOSS DANCE — REVAMPED v2: corrected Y-axis direction ────
+               Three.js XYZ Euler rotation — arm starts at (0,-1,0) local.
 
-               The crossing arm requires ALL THREE axes to go AROUND the body:
-                 Z — direction toward the crossing side (reduced, arm arcs back)
-                 X — strong backward tilt (>90°) puts arm behind the chest plane
-                 Y — strong horizontal sweep arcs the arm AROUND the body side
+               Verified axis directions (from victory-pose ground truth):
+                 arm.x POSITIVE → tilts arm BACKWARD (away from camera)
+                 arm.x NEGATIVE → tilts arm FORWARD  (toward camera / in front)
+                 arm.z for leftArm:  NEGATIVE → extends LEFT, POSITIVE → crosses RIGHT
+                 arm.z for rightArm: POSITIVE → extends RIGHT, NEGATIVE → crosses LEFT
 
-               Without strong Y the arm tilts back but stays in the chest plane
-               and clips through the torso. Y rotation at the shoulder pulls the
-               arm tip behind the body's side — this is the missing axis.
+               Y-axis math for leftArm crossing BEHIND to the RIGHT
+               -------------------------------------------------------
+               After X (+1.40 rad): arm direction ≈ (0, -0.170, -0.985) — mostly backward.
+               After Y (-1.20 rad): x-component = sin(-1.20) * (-0.985) ≈ +0.918 → RIGHT ✓
+                                    Y NEGATIVE sweeps the backward arm toward +X (rightward).
+                                    Y POSITIVE (previous bug) swept it toward -X (leftward = WRONG).
+               Final result with Z+0.30: arm tip at ≈ (0.93, +0.11, -0.36) — clearly right+behind ✓
 
-               4-frame reference (from images):
-                 Frame 1: L arm extends LEFT   — R arm behind, tucked to left
-                 Frame 2: R arm extends RIGHT  — L arm sweeps BEHIND to right
-                 Frame 3: Both arms LEFT       — L extends, R arcs behind-left
-                 Frame 4: R arm extends RIGHT  — L arm behind, tucked to right
+               Y-axis for rightArm crossing BEHIND to the LEFT: opposite sign (+1.20).
+
+               Extending arm gets slight forward tilt (x = -0.15) so it stands
+               clearly in FRONT of the body while the crossing arm goes BEHIND —
+               this depth contrast is what makes the behind/in-front visible.
             ──────────────────────────────────────────────────────────────── */
             const SPEED = 2.2;
             const t     = progress * SPEED;
@@ -129,25 +129,20 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const goLeft  = Math.max(0, -swing);  /* 0→1 as swing goes 0→−1 */
 
             /* ── LEFT arm ────────────────────────────────────────────────
-               Extends LEFT when goLeft → 1  (z negative, x=0, y=0)
-               Crosses BEHIND to right when goRight → 1
-                 z: slight rightward lean (reduced — arm arcs backward, not sideways)
-                 x: strong backward tilt (1.68 rad ≈ 96°, past the body plane)
-                 y: large positive sweep — arcs arm tip AROUND behind the body
-                    (this is the key axis that prevents the arm going through the chest) */
-            s.leftArm.rotation.z = -goLeft * 1.55 + goRight * 0.40;
-            s.leftArm.rotation.x =  goRight * 1.68;
-            s.leftArm.rotation.y =  goRight * 1.40;
+               Extends LEFT (goLeft):  z=-1.55, x=-0.15 (forward), y=0
+               Crosses BEHIND (goRight): z=+0.30, x=+1.40 (backward), y=-1.20
+                 y NEGATIVE = sweeps arm tip toward +X = rightward behind body ✓ */
+            s.leftArm.rotation.z = -goLeft * 1.55 + goRight * 0.30;
+            s.leftArm.rotation.x = -goLeft * 0.15 + goRight * 1.40;
+            s.leftArm.rotation.y = -goRight * 1.20;   /* NEGATIVE → sweeps rightward ✓ */
 
             /* ── RIGHT arm ───────────────────────────────────────────────
-               Extends RIGHT when goRight → 1  (z positive, x=0, y=0)
-               Crosses BEHIND to left when goLeft → 1
-                 z: slight leftward lean (reduced)
-                 x: strong backward tilt
-                 y: large negative sweep — arcs arm tip AROUND behind the body */
-            s.rightArm.rotation.z =  goRight * 1.55 - goLeft * 0.40;
-            s.rightArm.rotation.x =  goLeft  * 1.68;
-            s.rightArm.rotation.y = -goLeft  * 1.40;
+               Extends RIGHT (goRight): z=+1.55, x=-0.15 (forward), y=0
+               Crosses BEHIND (goLeft):  z=-0.30, x=+1.40 (backward), y=+1.20
+                 y POSITIVE = sweeps arm tip toward -X = leftward behind body ✓ */
+            s.rightArm.rotation.z =  goRight * 1.55 - goLeft * 0.30;
+            s.rightArm.rotation.x = -goRight * 0.15 + goLeft * 1.40;
+            s.rightArm.rotation.y =  goLeft  * 1.20;   /* POSITIVE → sweeps leftward ✓ */
 
             /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
             s.body.rotation.z = -swing * 0.18;
