@@ -55,22 +55,23 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ── #2 FORTNITE FLOSS ─────────────────────────────────────────
-         Correct floss sequence (looping):
-           Phase 1: Both arms swing to the RIGHT (in front), hips go LEFT
-           Phase 2: Arms swing BEHIND the back (diagonal)
-           Phase 3: Both arms swing to the LEFT (in front), hips go RIGHT
-           Repeat
+         Full cycle (loop):
+           1. Arms RIGHT + FORWARD (vorne vordergrund), hips LEFT
+           2. Arms swing DIAGONALLY BEHIND the back
+           3. Arms BEHIND moving LEFT, hips RIGHT
+           4. Arms swing forward again back to RIGHT
 
-         Implementation:
-           ph = sin(t)  →  drives left/right arm swing
-           armX = cos(2t) →  behind at zero-crossings (cos=+1),
-                              forward at left/right extreme (cos=−1)
+         Key: ph = sin(t)
+           • z = +ph  → arms swing RIGHT (ph>0) / LEFT (ph<0)
+           • x = -ph  → FORWARD when going RIGHT (ph>0, x<0 = front)
+                        BEHIND when going LEFT   (ph<0, x>0 = behind back)
+           Both arms move as ONE UNIT (same values = parallel motion).
+           Legs stay still.
 
-         Sign conventions in skinview3d:
-           rotation.z positive on leftArm & rightArm → tips go VIEWER'S RIGHT
-           rotation.z negative on both                → tips go VIEWER'S LEFT
-           rotation.x positive                        → tips go BACKWARD (behind body)
-           body.rotation.y positive                   → hips go VIEWER'S LEFT
+         Sign conventions (skinview3d):
+           rotation.z positive on left/rightArm → tips go VIEWER'S RIGHT
+           rotation.x positive                  → tips go BACKWARD (behind)
+           body.rotation.y positive             → hips go VIEWER'S LEFT
          ─────────────────────────────────────────────────────────────── */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -78,29 +79,27 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            const t  = progress * 4.5;   // floss tempo
-            const ph = Math.sin(t);       // −1 to 1: left/right swing driver
+            const t  = progress * 4.0;
+            const ph = Math.sin(t);
 
-            /* Both arms move as ONE UNIT (parallel, same values) */
-            /* ph > 0 → arms go VIEWER'S RIGHT; ph < 0 → VIEWER'S LEFT */
-            s.leftArm.rotation.z  = ph * 1.1;
-            s.rightArm.rotation.z = ph * 1.1;
+            /* LEFT / RIGHT swing — both arms move as one parallel unit */
+            s.leftArm.rotation.z  = ph * 1.15;
+            s.rightArm.rotation.z = ph * 1.15;
 
-            /* cos(2t):
-                 = +1 when t = 0, π   → arms at center crossing → BEHIND (+x)
-                 = −1 when t = π/2, 3π/2 → arms at left/right extreme → IN FRONT (−x) */
-            const armX = Math.cos(2 * t) * 1.25;
-            s.leftArm.rotation.x  = armX;
-            s.rightArm.rotation.x = armX;
+            /* FORWARD / BEHIND — oval arc:
+               ph > 0 (arms RIGHT) → x negative = tips forward/front ✓
+               ph < 0 (arms LEFT)  → x positive = tips backward/behind ✓ */
+            s.leftArm.rotation.x  = -ph * 1.30;
+            s.rightArm.rotation.x = -ph * 1.30;
 
-            /* Hips OPPOSITE to arms:
-               ph > 0 (arms RIGHT) → hips LEFT (+y)
-               ph < 0 (arms LEFT)  → hips RIGHT (−y) */
-            s.body.rotation.y = ph * 0.70;
-            s.body.rotation.z = -ph * 0.12;
+            /* Hips opposite to arms:
+               arms RIGHT (ph>0) → hips LEFT  (+y)
+               arms LEFT  (ph<0) → hips RIGHT (−y) */
+            s.body.rotation.y = ph * 0.75;
+            s.body.rotation.z = -ph * 0.10;
             s.body.rotation.x = 0;
 
-            /* Legs: NO movement — feet stay planted */
+            /* Legs: completely still */
             s.leftLeg.rotation.x  = 0;
             s.rightLeg.rotation.x = 0;
             s.leftLeg.rotation.z  = 0;
@@ -110,54 +109,101 @@ export default function PodiumSkin3D({ username, rank }: Props) {
           } catch (_) {}
         });
 
-      /* ── #1 VICTORY + TECHNOBLADE CROWN ── */
+      /* ── #1 VICTORY + MINECRAFT TECHNOBLADE CROWN ── */
       } else {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin;
             if (!s?.head) return;
 
-            /* Attach Technoblade crown on first frame */
+            /* Build Minecraft-style blocky Technoblade crown on first frame */
             if (!s.head.userData.crownDone) {
               s.head.userData.crownDone = true;
               import('three').then((T: any) => {
                 if (disposed || s.head.userData.crownBuilt) return;
                 s.head.userData.crownBuilt = true;
 
-                /* Technoblade's crown: gold, wide to match head, tall spikes */
-                const gold     = new T.MeshBasicMaterial({ color: 0xFFD700, side: T.DoubleSide });
-                const darkGold = new T.MeshBasicMaterial({ color: 0xB8860B });
+                const matGold    = new T.MeshBasicMaterial({ color: 0xFFB800 });
+                const matGoldDk  = new T.MeshBasicMaterial({ color: 0xCC8800 });
+                const matMaroon  = new T.MeshBasicMaterial({ color: 0x6B0A0A });
+                const matRed     = new T.MeshBasicMaterial({ color: 0xFF2222 });
+                const matGreen   = new T.MeshBasicMaterial({ color: 0x22EE44 });
+                const matBlue    = new T.MeshBasicMaterial({ color: 0x4488FF });
 
                 const g = new T.Group();
 
-                /* Crown band — matches head width (head = 8 units wide, r ≈ 4).
-                   Top radius 4.4, bottom 5.0 so it sits flush on the head.     */
-                const band = new T.Mesh(
-                  new T.CylinderGeometry(4.4, 5.0, 2.4, 8, 1, false),
-                  gold
-                );
-                band.position.y = 1.2;
-                g.add(band);
+                /* ── BAND (bottom ring) ──
+                   Head = 8 units wide. Band extends slightly beyond (W=9.6).
+                   4 rectangular box segments form a square ring.             */
+                const BW = 9.6;   // band outer width
+                const BH = 2.6;   // band height
+                const BT = 1.8;   // band thickness
 
-                /* 4 spikes evenly spaced — classic Technoblade crown shape */
-                for (let i = 0; i < 4; i++) {
-                  const a = (i / 4) * Math.PI * 2;
-                  const spike = new T.Mesh(
-                    new T.ConeGeometry(0.9, 5.8, 5),
-                    gold
-                  );
-                  spike.position.set(Math.cos(a) * 3.9, 5.1, Math.sin(a) * 3.9);
-                  g.add(spike);
+                const addBox = (mat: any, w: number, h: number, d: number, x: number, y: number, z: number) => {
+                  const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+                  m.position.set(x, y, z);
+                  g.add(m);
+                };
 
-                  /* Gold gem at spike base */
-                  const gem = new T.Mesh(new T.SphereGeometry(0.6, 6, 4), darkGold);
-                  gem.position.set(Math.cos(a) * 3.9, 2.4, Math.sin(a) * 3.9);
-                  g.add(gem);
-                }
+                // Front band
+                addBox(matGold, BW, BH, BT, 0, BH / 2, -(BW / 2 - BT / 2));
+                // Back band
+                addBox(matGold, BW, BH, BT, 0, BH / 2,  (BW / 2 - BT / 2));
+                // Left band
+                addBox(matGold, BT, BH, BW - BT * 2, -(BW / 2 - BT / 2), BH / 2, 0);
+                // Right band
+                addBox(matGold, BT, BH, BW - BT * 2,  (BW / 2 - BT / 2), BH / 2, 0);
 
-                /* y=8: top of head in local space (head y=0 neck → y=8 top) */
+                // Thin gold top-rim on band
+                const RW = BW + 0.4;
+                addBox(matGoldDk, RW, 0.6, BT,    0,  BH + 0.3, -(RW / 2 - BT / 2));
+                addBox(matGoldDk, RW, 0.6, BT,    0,  BH + 0.3,  (RW / 2 - BT / 2));
+                addBox(matGoldDk, BT, 0.6, RW - BT * 2, -(RW / 2 - BT / 2), BH + 0.3, 0);
+                addBox(matGoldDk, BT, 0.6, RW - BT * 2,  (RW / 2 - BT / 2), BH + 0.3, 0);
+
+                /* ── INNER CAP (maroon fill inside the band, top section) ── */
+                const CW = BW - BT * 2;
+                const capY = BH + 1.8;
+                addBox(matMaroon, CW, 3.2, CW, 0, capY, 0);
+
+                /* ── SECOND GOLD BAND on top of cap ── */
+                const B2W = BW - 1.6;
+                const b2Y = BH + 3.2 + 1.0;
+                addBox(matGold, B2W, 1.8, BT, 0, b2Y, -(B2W / 2 - BT / 2));
+                addBox(matGold, B2W, 1.8, BT, 0, b2Y,  (B2W / 2 - BT / 2));
+                addBox(matGold, BT, 1.8, B2W - BT * 2, -(B2W / 2 - BT / 2), b2Y, 0);
+                addBox(matGold, BT, 1.8, B2W - BT * 2,  (B2W / 2 - BT / 2), b2Y, 0);
+
+                /* ── PRONGS (rectangular gold pillars rising from top) ── */
+                const pY  = b2Y + 1.8 / 2;
+                const PSZ = 2.0;  // prong size (width/depth)
+                // Center tall prong
+                addBox(matGold, PSZ, 6.5, PSZ, 0, pY + 3.25, 0);
+                // 4 corner prongs (shorter)
+                const off = 3.0;
+                addBox(matGold, PSZ, 4.5, PSZ, -off, pY + 2.25, -off);
+                addBox(matGold, PSZ, 4.5, PSZ,  off, pY + 2.25, -off);
+                addBox(matGold, PSZ, 4.5, PSZ, -off, pY + 2.25,  off);
+                addBox(matGold, PSZ, 4.5, PSZ,  off, pY + 2.25,  off);
+
+                /* ── GEMS on front band (colored cubes) ── */
+                const GZ   = -(BW / 2 - BT / 2) - 1.0;
+                const GY   = BH / 2;
+                const GS   = 1.3;
+                const gems: [number, any][] = [
+                  [-3.5, matRed], [-1.7, matBlue], [0, matGreen], [1.7, matBlue], [3.5, matRed],
+                ];
+                gems.forEach(([gx, mat]) => {
+                  addBox(mat, GS, GS, GS, gx as number, GY, GZ);
+                });
+
+                /* Also add a few gems on the back band */
+                const GZB = (BW / 2 - BT / 2) + 1.0;
+                addBox(matGreen, GS, GS, GS, -1.8, GY, GZB);
+                addBox(matRed,   GS, GS, GS,  1.8, GY, GZB);
+
+                /* Place crown at top of head (y=8 = top of head in local space) */
                 g.position.set(0, 8, 0);
-                g.rotation.y = Math.PI / 4;   /* slight rotation for aesthetics */
 
                 s.head.add(g);
               }).catch(() => {});
