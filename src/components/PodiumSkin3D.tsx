@@ -19,7 +19,7 @@ const SIZES = {
 
 /* zoom: smaller = camera farther away = character appears smaller.
  * With controls.target at y=-8 and zoom≈0.88 the full body fills ~75% of canvas. */
-const ZOOM: Record<1|2|3, number> = { 1: 0.55, 2: 0.55, 3: 0.52 };
+const ZOOM: Record<1|2|3, number> = { 1: 0.68, 2: 0.68, 3: 0.64 };
 
 export default function PodiumSkin3D({ username, rank }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -77,20 +77,30 @@ export default function PodiumSkin3D({ username, rank }: Props) {
           try {
             const s = player?.skin;
             if (!s?.leftArm) return;
-            const t = progress * 4.5;
+            const t = progress * 4.0;
             const phase = Math.sin(t);
-            /* Forward/back arm swing — the actual floss motion */
-            s.leftArm.rotation.x  = -phase * 1.2;
-            s.rightArm.rotation.x =  phase * 1.2;
-            /* Slight outward angle — arms not fully at sides */
-            s.leftArm.rotation.z  =  0.15;
-            s.rightArm.rotation.z = -0.15;
-            /* Hip counter-rotation — the signature floss element */
-            s.body.rotation.y = phase * 0.55;
-            s.body.rotation.z = Math.cos(t) * 0.06;
-            /* Legs: slight weight-shift bounce */
-            s.leftLeg.rotation.x  =  phase * 0.15;
-            s.rightLeg.rotation.x = -phase * 0.15;
+            /*
+             * FLOSS: hips go LEFT → both arms go RIGHT + BEHIND (behind back on right side)
+             *        hips go RIGHT → both arms go LEFT + FORWARD (in front on left side)
+             * Arms are PARALLEL: both have the SAME rotation values.
+             * In THREE.js axes (front-facing player):
+             *   rotation.z positive → arm tips swing to camera-right (arms go right)
+             *   rotation.x positive → arm tips swing backward (behind the back)
+             *   body.rotation.y positive → hips go LEFT (from viewer)
+             */
+            // Hips: left when phase>0, right when phase<0
+            s.body.rotation.y = phase * 0.65;
+            s.body.rotation.z = Math.cos(t) * 0.05;
+
+            // Both arms parallel — SAME z and x values (not mirrored!)
+            s.leftArm.rotation.z  = phase * 0.85;  // both swing RIGHT when phase>0
+            s.rightArm.rotation.z = phase * 0.85;  // identical = parallel
+            s.leftArm.rotation.x  = phase * 1.1;   // both go BEHIND when phase>0
+            s.rightArm.rotation.x = phase * 1.1;   // identical = parallel
+
+            // Legs: small counter weight-shift
+            s.leftLeg.rotation.x  =  phase * 0.12;
+            s.rightLeg.rotation.x = -phase * 0.12;
           } catch (_) {}
         });
 
@@ -129,7 +139,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
   return (
     <div
       ref={wrapRef}
-      style={{ width, height, position: 'relative', zIndex: 1, flexShrink: 0 }}
+      style={{ width, height, position: 'relative', zIndex: 1, flexShrink: 0, margin: '0 auto' }}
     />
   );
 }
