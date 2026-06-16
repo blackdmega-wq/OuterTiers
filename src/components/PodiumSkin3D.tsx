@@ -5,20 +5,12 @@ interface Props {
   rank: 1 | 2 | 3;
 }
 
-/*
- * Canvas sizes — match lb-pod-skin-wrap CSS below.
- * Player model in skinview3d: head-top=y+8, feet-bottom=y-24.
- * Center at y=-8. We aim controls.target at (0,-8,0) so the character
- * is properly centered in the viewport.
- */
 const SIZES = {
   1: { width: 100, height: 152 },
   2: { width: 82,  height: 128 },
   3: { width: 76,  height: 118 },
 } as const;
 
-/* zoom: smaller = camera farther away = character appears smaller.
- * With controls.target at y=-8 and zoom≈0.88 the full body fills ~75% of canvas. */
 const ZOOM: Record<1|2|3, number> = { 1: 0.68, 2: 0.68, 3: 0.64 };
 
 export default function PodiumSkin3D({ username, rank }: Props) {
@@ -36,7 +28,6 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
 
-      /* Fresh canvas each mount — avoids WebGL context-reuse issue in React StrictMode */
       canvas = document.createElement('canvas');
       canvas.style.cssText = 'display:block;background:transparent;';
       wrap.appendChild(canvas);
@@ -48,12 +39,8 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         skin: `https://mc-heads.net/skin/${username}`,
       });
 
-      /* Transparent background */
       try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
 
-      /* Center camera on the player model.
-       * skinview3d player: head top y=+8, feet bottom y=-24 → center y=-8.
-       * Setting controls.target to (0,-8,0) makes the full body fill the canvas. */
       try {
         viewer.controls.target.set(0, -8, 0);
         viewer.controls.update();
@@ -63,65 +50,105 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
 
-      /* ── #3 SPRINT: built-in RunningAnimation ── */
+      /* ── #3 SPRINT ── */
       if (rank === 3) {
         const anim = new sv3d.RunningAnimation();
         (anim as any).speed = 2.2;
         viewer.animation = anim;
 
       /* ── #2 FORTNITE FLOSS ──
-         Real floss: arms swing alternately FORWARD/BACKWARD (not sideways!),
-         hips twist in the opposite direction — the signature Fortnite floss move. */
+         Arms swing FORWARD (in front) / BACKWARD (behind back).
+         BOTH arms identical rotation = parallel.
+         NO Z oscillation = no diagonal motion.
+         Hips go OPPOSITE direction to arms.
+         When hips RIGHT → both arms IN FRONT (= appear to the LEFT of body).
+         When hips LEFT  → both arms BEHIND BACK (= appear to the RIGHT of body).
+      ── */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin;
             if (!s?.leftArm) return;
-            const t = progress * 4.0;
+            const t = progress * 7.0;        // fast floss!
             const phase = Math.sin(t);
-            /*
-             * FLOSS: hips go LEFT → both arms go RIGHT + BEHIND (behind back on right side)
-             *        hips go RIGHT → both arms go LEFT + FORWARD (in front on left side)
-             * Arms are PARALLEL: both have the SAME rotation values.
-             * In THREE.js axes (front-facing player):
-             *   rotation.z positive → arm tips swing to camera-right (arms go right)
-             *   rotation.x positive → arm tips swing backward (behind the back)
-             *   body.rotation.y positive → hips go LEFT (from viewer)
-             */
-            // Hips: left when phase>0, right when phase<0
-            s.body.rotation.y = phase * 0.65;
-            s.body.rotation.z = Math.cos(t) * 0.05;
 
-            // Both arms parallel — SAME z and x values (not mirrored!)
-            s.leftArm.rotation.z  = phase * 0.85;  // both swing RIGHT when phase>0
-            s.rightArm.rotation.z = phase * 0.85;  // identical = parallel
-            s.leftArm.rotation.x  = phase * 1.1;   // both go BEHIND when phase>0
-            s.rightArm.rotation.x = phase * 1.1;   // identical = parallel
+            // Hips: negative Y = RIGHT, positive Y = LEFT
+            s.body.rotation.y = -phase * 0.75;
+            s.body.rotation.z = 0;
 
-            // Legs: small counter weight-shift
-            s.leftLeg.rotation.x  =  phase * 0.12;
-            s.rightLeg.rotation.x = -phase * 0.12;
+            // Both arms PARALLEL — identical X rotation only (forward/backward swing).
+            // rotation.x negative = arm tips go FORWARD (in front of body).
+            // When hips RIGHT (phase>0): arms IN FRONT (negative X) → appear LEFT from viewer.
+            s.leftArm.rotation.x  = -phase * 1.4;
+            s.rightArm.rotation.x = -phase * 1.4;  // same = parallel!
+
+            // Tiny static outward angle only — NO oscillating Z (no diagonal!)
+            s.leftArm.rotation.z  =  0.12;
+            s.rightArm.rotation.z = -0.12;
+
+            // Legs counter-bounce
+            s.leftLeg.rotation.x  = -phase * 0.15;
+            s.rightLeg.rotation.x =  phase * 0.15;
           } catch (_) {}
         });
 
-      /* ── #1 VICTORY: arms raised high, waving, excited head ── */
+      /* ── #1 VICTORY + 3D CROWN ── */
       } else {
+        let crownAdded = false;
+
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin;
             if (!s?.leftArm) return;
+
+            // Add 3D crown to head bone on first frame
+            if (!crownAdded && s.head) {
+              crownAdded = true;
+              import('three').then((THREE) => {
+                const mat = new THREE.MeshPhongMaterial({
+                  color: 0xFFD700,
+                  emissive: 0xAA6600,
+                  emissiveIntensity: 0.35,
+                  shininess: 150,
+                });
+
+                const g = new THREE.Group();
+
+                // Crown band (ring)
+                const band = new THREE.Mesh(
+                  new THREE.CylinderGeometry(4.2, 4.8, 2.5, 8),
+                  mat
+                );
+                band.position.y = 1.25;
+                g.add(band);
+
+                // 5 spikes
+                for (let i = 0; i < 5; i++) {
+                  const a = (i / 5) * Math.PI * 2;
+                  const spike = new THREE.Mesh(
+                    new THREE.ConeGeometry(1.0, 5.5, 5),
+                    mat
+                  );
+                  spike.position.set(Math.cos(a) * 3.6, 5.25, Math.sin(a) * 3.6);
+                  g.add(spike);
+                }
+
+                // Position above head top (head local y=0 at neck, y=8 at top)
+                g.position.y = 9;
+                g.rotation.y = Math.PI / 10;
+
+                s.head.add(g);
+              }).catch(() => {});
+            }
+
             const t = progress * 2.5;
-            /* Arms up in victory — slight waving oscillation */
             s.leftArm.rotation.z  = -(1.4 + Math.sin(t * 1.5) * 0.4);
             s.rightArm.rotation.z =   1.4 + Math.sin(t * 1.5 + Math.PI) * 0.4;
             s.leftArm.rotation.x  = -0.2 + Math.sin(t) * 0.2;
             s.rightArm.rotation.x = -0.2 - Math.sin(t) * 0.2;
-            /* Excited head */
             s.head.rotation.y = Math.sin(t * 0.8) * 0.3;
             s.head.rotation.x = -0.1 + Math.sin(t * 1.1) * 0.1;
-            /* Body celebratory sway */
             s.body.rotation.y = Math.sin(t * 0.5) * 0.1;
-            /* Bounce legs */
             s.leftLeg.rotation.x  =  Math.sin(t * 1.8) * 0.08;
             s.rightLeg.rotation.x = -Math.sin(t * 1.8) * 0.08;
           } catch (_) {}
