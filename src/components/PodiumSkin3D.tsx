@@ -85,92 +85,60 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             if (!s?.leftArm) return;
 
             /*
-              ─── FLOSS ANALYSIS (from reference screenshot) ───────────────
-              The body/chest is VISIBLY TWISTED ~45° to one side (not subtle).
-              One arm is raised HIGH & FORWARD crossing the body (up + across).
-              The other arm hangs DOWN & BACKWARD behind the body.
-              Legs are in a wide STRIDE STANCE — one forward, one back,
-              slightly spread apart. This is the full Fortnite floss.
+              ─── FLOSS — 4-BEAT KEYFRAME CYCLE ──────────────────────────
+              Beat 1: L-arm OUT-LEFT,  R-arm BEHIND
+              Beat 2: L-arm OUT-RIGHT, R-arm OUT-RIGHT  (both arms RIGHT)
+              Beat 3: L-arm OUT-LEFT,  R-arm OUT-LEFT   (both arms LEFT)
+              Beat 4: L-arm BEHIND,    R-arm OUT-RIGHT
 
-              PHASE_R  (twist right, arms go toward right side):
-                Body:     big twist to right  (body.y = −0.65)
-                Left arm: UP + FORWARD + crosses body right
-                          (lAx = −1.30 = very forward/up, lAz = +1.00 = crosses right)
-                Right arm: DOWN + BACKWARD + behind body
-                          (rAx = +0.75 = backward, rAz = +0.40 = hangs naturally right)
-                Legs:     left leg FORWARD (lLx = −0.35), right leg BACK (rLx = +0.35)
-                          wide stance spread (lLz = +0.15, rLz = −0.15)
+              Rotation.z sign rule (Three.js, char faces +Z):
+                leftArm  .z POSITIVE → crosses body to char-RIGHT
+                leftArm  .z NEGATIVE → points outward char-LEFT
+                rightArm .z POSITIVE → crosses body to char-LEFT
+                rightArm .z NEGATIVE → points outward char-RIGHT
 
-              PHASE_L  (twist left, exact mirror):
-                Body:     big twist to left   (body.y = +0.65)
-                Right arm: UP + FORWARD + crosses body left
-                          (rAx = −1.30, rAz = −1.00)
-                Left arm:  DOWN + BACKWARD + behind body
-                          (lAx = +0.75, lAz = −0.40)
-                Legs:     right leg FORWARD (rLx = −0.35), left leg BACK (lLx = +0.35)
-              ──────────────────────────────────────────────────────────────
+              Legs: no movement (user request)
+              ─────────────────────────────────────────────────────────────
             */
-            const SPEED = 2.3;
-            const raw   = ((progress * SPEED) % 2.0 + 2.0) % 2.0;
-            const beat  = raw % 1.0;
-            const toRight = raw < 1.0;
+            const SPEED = 1.5;
+            const raw = ((progress * SPEED * 4) % 4 + 4) % 4;
+            const ki  = Math.floor(raw);
+            const frac = raw - ki;
 
-            /* cubic ease-in-out — snappy pop at both extremes */
             const ease = (t: number) =>
               t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-            const f    = ease(beat);
-            const lerp = (a: number, b: number) => a + (b - a) * f;
+            const ef   = ease(frac);
+            const lerp = (a: number, b: number) => a + (b - a) * ef;
 
-            /*
-              ROTATION.Z SIGN RULE (Three.js right-hand, char faces +Z):
-                leftArm  rotation.z POSITIVE  → tip goes toward +X (char RIGHT) = CROSSES body
-                leftArm  rotation.z NEGATIVE  → tip goes toward -X (char LEFT)  = outward left
-                rightArm rotation.z POSITIVE  → tip goes toward -X (char LEFT)  = CROSSES body
-                rightArm rotation.z NEGATIVE  → tip goes toward +X (char RIGHT) = outward right
+            /*  lAx  lAz   rAx   rAz   by  */
+            const KEYS = [
+              /* Beat 1 — L out-LEFT,  R behind      */
+              { lAx:  0.10, lAz: -1.30, rAx:  1.20, rAz:  0.10, by:  0.35 },
+              /* Beat 2 — Both arms RIGHT             */
+              { lAx:  0.10, lAz:  1.30, rAx:  0.10, rAz: -1.30, by: -0.45 },
+              /* Beat 3 — Both arms LEFT              */
+              { lAx:  0.10, lAz: -1.30, rAx:  0.10, rAz:  1.30, by:  0.45 },
+              /* Beat 4 — L behind,    R out-RIGHT    */
+              { lAx:  1.20, lAz: -0.10, rAx:  0.10, rAz: -1.30, by: -0.35 },
+            ];
 
-              So for PHASE_R (arms toward char's RIGHT):
-                left arm  crosses RIGHT  → lAz POSITIVE ✓
-                right arm outward RIGHT  → rAz NEGATIVE  ← this was the bug (+0.40 wrong)
+            const kA = KEYS[ki % 4];
+            const kB = KEYS[(ki + 1) % 4];
 
-              For PHASE_L (arms toward char's LEFT):
-                right arm crosses LEFT   → rAz POSITIVE  ← this was wrong (-1.00)
-                left arm  outward LEFT   → lAz NEGATIVE ✓
-            */
-            const PHASE_R = {
-              by:  -0.72,                          // big body twist RIGHT
-              lAx: -1.40, lAz:  1.10,             // left arm: UP-FORWARD + CROSSES RIGHT
-              rAx:  0.80, rAz: -0.55,             // right arm: DOWN-BACKWARD + OUTWARD RIGHT
-              lLx: -0.40, lLz:  0.20,             // left leg forward + spread
-              rLx:  0.40, rLz: -0.20,             // right leg back   + spread
-            };
-            const PHASE_L = {
-              by:   0.72,                          // big body twist LEFT
-              lAx:  0.80, lAz: -0.55,             // left arm: DOWN-BACKWARD + OUTWARD LEFT
-              rAx: -1.40, rAz:  1.10,             // right arm: UP-FORWARD + CROSSES LEFT
-              lLx:  0.40, lLz: -0.20,             // left leg back   + spread
-              rLx: -0.40, rLz:  0.20,             // right leg forward + spread
-            };
+            s.leftArm.rotation.x  = lerp(kA.lAx, kB.lAx);
+            s.leftArm.rotation.z  = lerp(kA.lAz, kB.lAz);
+            s.leftArm.rotation.y  = 0;
+            s.rightArm.rotation.x = lerp(kA.rAx, kB.rAx);
+            s.rightArm.rotation.z = lerp(kA.rAz, kB.rAz);
+            s.rightArm.rotation.y = 0;
 
-            const from = toRight ? PHASE_L : PHASE_R;
-            const to   = toRight ? PHASE_R : PHASE_L;
-
-            s.body.rotation.y = lerp(from.by, to.by);
+            s.body.rotation.y = lerp(kA.by, kB.by);
             s.body.rotation.x = 0;
             s.body.rotation.z = 0;
 
-            s.leftArm.rotation.x  = lerp(from.lAx, to.lAx);
-            s.leftArm.rotation.z  = lerp(from.lAz, to.lAz);
-            s.leftArm.rotation.y  = 0;
-            s.rightArm.rotation.x = lerp(from.rAx, to.rAx);
-            s.rightArm.rotation.z = lerp(from.rAz, to.rAz);
-            s.rightArm.rotation.y = 0;
-
-            s.leftLeg.rotation.x  = lerp(from.lLx, to.lLx);
-            s.leftLeg.rotation.z  = lerp(from.lLz, to.lLz);
-            s.leftLeg.rotation.y  = 0;
-            s.rightLeg.rotation.x = lerp(from.rLx, to.rLx);
-            s.rightLeg.rotation.z = lerp(from.rLz, to.rLz);
-            s.rightLeg.rotation.y = 0;
+            /* Legs: no movement */
+            s.leftLeg.rotation.x  = 0; s.leftLeg.rotation.z  = 0; s.leftLeg.rotation.y  = 0;
+            s.rightLeg.rotation.x = 0; s.rightLeg.rotation.z = 0; s.rightLeg.rotation.y = 0;
           } catch (_) {}
         });
 
@@ -296,9 +264,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                   g.add(gem);
                 });
 
-                /* Crown group sits exactly at the TOP of the head.
-                   In head-local space: head bottom = y 0, head top = y 8. */
-                g.position.set(0, 8, 0);
+                /* Lower the crown so it sits ON the head (not floating above).
+                   y=8 = head top. y=7 sinks the crown 1 unit into head — looks worn. */
+                g.position.set(0, 7.0, 0);
                 s.head.add(g);
               }).catch(() => {});
             }
