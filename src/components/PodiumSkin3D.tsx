@@ -55,28 +55,24 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  MINECRAFT FLOSS DANCE  — v8
+         #2  MINECRAFT FLOSS DANCE  — v9
 
-         REFERENZBILD analysiert: "right arm front-right, left arm behind-right"
-         Das bedeutet in Frame 1 (beide Arme Richtung RECHTS):
+         SPEED: skinview3d progress ≈ Sekunden, SPEED=10 → ~1.6 Zyklen/sec
+                Walking nutzt t=progress*8 → ~1.3 Zyklen/sec
+                Vorherige Versionen hatten SPEED=2.8 → 0.45 Zyklen/sec (viel zu langsam!)
 
-           RECHTER Arm = VORNE + zur eigenen Seite (outward-right):
-             rightArm.x = NEGATIV (vorne)
-             rightArm.z = NEGATIV (outward-right, eigene Seite)
+         ACHSEN (skinview3d, verifiziert aus source):
+           arm.x  NEGATIV=vorne(zur Kamera)  POSITIV=hinten(von Kamera weg)
+           leftArm.z   NEGATIV=außen-links   POSITIV=kreuzt-rechts
+           rightArm.z  NEGATIV=außen-rechts  POSITIV=kreuzt-links
+           body.y  POSITIV=Körper dreht LINKS
 
-           LINKER Arm = HINTEN + kreuzt zur anderen Seite (crosses-right):
-             leftArm.x  = POSITIV (hinten)
-             leftArm.z  = POSITIV (crosses-right, zur anderen Seite)
-
-         Frame 3 (beide Arme LINKS) = gespiegelt:
-           LINKER Arm = VORNE + outward-left (z negativ, eigene Seite)
-           RECHTER Arm = HINTEN + crosses-left (z positiv, andere Seite)
-
-         skinview3d Achsen:
-           leftArm.z  NEGATIV=außen-links   POSITIV=kreuzt-rechts
-           rightArm.z NEGATIV=außen-rechts  POSITIV=kreuzt-links
-           arm.x      NEGATIV=vorne         POSITIV=hinten
-           body.y     POSITIV=Körper dreht LINKS
+         FLOSS Frame RECHTS (swing=+1, ph=1):
+           rightArm = VORNE + OUTWARD-RIGHT: x=−0.25, z=−0.45
+           leftArm  = HINTEN + CROSSES-RIGHT: x=+0.25, z=+1.40
+         FLOSS Frame LINKS (swing=−1, ph=0):
+           leftArm  = VORNE + OUTWARD-LEFT: x=−0.25, z=−0.45
+           rightArm = HINTEN + CROSSES-LEFT: x=+0.25, z=+1.40
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -85,29 +81,28 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             if (!s?.leftArm) return;
 
             const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
-            const t     = progress * 2.8;
+            const t     = progress * 10.0;   /* ~1.6 Zyklen/sec — Floss-Tempo */
             const swing = Math.sin(t);
-            const ph    = (swing + 1) * 0.5;  /* 0=Frame-LINKS  1=Frame-RECHTS */
+            const ph    = (swing + 1) * 0.5; /* 0=Frame-LINKS  1=Frame-RECHTS */
 
             /* ── RECHTER ARM ─────────────────────────────────────────────────
-               ph=1 (RECHTS): VORNE+outward-right  x=−0.85  z=−0.55
-               ph=0 (LINKS):  HINTEN+crosses-left  x=+0.60  z=+1.05          */
-            s.rightArm.rotation.x = lerp(+0.60, -0.85, ph);
-            s.rightArm.rotation.z = lerp(+1.05, -0.55, ph);
+               ph=0 (LINKS): HINTEN+crosses-left   x=+0.25  z=+1.40
+               ph=1 (RECHTS): VORNE+outward-right  x=−0.25  z=−0.45          */
+            s.rightArm.rotation.x = lerp(+0.25, -0.25, ph);
+            s.rightArm.rotation.z = lerp(+1.40, -0.45, ph);
             s.rightArm.rotation.y =  swing * 0.08;
 
             /* ── LINKER ARM ──────────────────────────────────────────────────
-               ph=0 (LINKS):  VORNE+outward-left   x=−0.85  z=−0.55
-               ph=1 (RECHTS): HINTEN+crosses-right x=+0.60  z=+1.05          */
-            s.leftArm.rotation.x  = lerp(-0.85, +0.60, ph);
-            s.leftArm.rotation.z  = lerp(-0.55, +1.05, ph);
+               ph=0 (LINKS): VORNE+outward-left    x=−0.25  z=−0.45
+               ph=1 (RECHTS): HINTEN+crosses-right x=+0.25  z=+1.40          */
+            s.leftArm.rotation.x  = lerp(-0.25, +0.25, ph);
+            s.leftArm.rotation.z  = lerp(-0.45, +1.40, ph);
             s.leftArm.rotation.y  = -swing * 0.08;
 
             /* ── KÖRPER — dreht LINKS wenn rechte Seite vorne ────────────── */
             s.body.rotation.y =  swing * 0.20;
             s.body.rotation.x =  0;
             s.body.rotation.z =  0;
-            s.body.position.x =  swing * 0.30;
 
             /* ── KOPF ─────────────────────────────────────────────────────── */
             if (s.head) {
