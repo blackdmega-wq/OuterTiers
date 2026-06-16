@@ -79,12 +79,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
          │                                                            │
          │ Pose 2: R arm horizontal RIGHT, L arm FORWARD+crossing    │
          │         (left arm in FRONT of belly, sweeping to RIGHT)   │
-         │         lAx=-0.50 (forward), lAz=+1.28 (crosses right)   │
+         │         lAx=-0.88 (strongly forward), lAz=+1.10 (crosses)│
          │         rAz=-1.55 (outward right)                         │
          │                                                            │
          │ Pose 3: BOTH arms to the LEFT                             │
          │         L arm: lAz=-1.55 (outward left)                   │
-         │         R arm: rAx=-0.30 (forward/crossing height),       │
+         │         R arm: rAx=-0.55 (forward/crossing height),       │
          │                rAz=+1.32 (crosses body to LEFT)           │
          │                                                            │
          │ Pose 4: R arm horizontal RIGHT, L arm BEHIND back         │
@@ -115,9 +115,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
               /* Pose 1 — L arm OUT-LEFT (horizontal), R arm BEHIND back */
               { lAx:  0.00, lAz: -1.55, rAx:  0.80, rAz:  0.18, bz: -0.16 },
               /* Pose 2 — R arm OUT-RIGHT, L arm FORWARD + crossing RIGHT (vor dem Bauch) */
-              { lAx: -0.50, lAz:  1.28, rAx:  0.00, rAz: -1.55, bz:  0.16 },
+              { lAx: -0.88, lAz:  1.10, rAx:  0.00, rAz: -1.55, bz:  0.16 },
               /* Pose 3 — BOTH arms to the LEFT */
-              { lAx:  0.00, lAz: -1.55, rAx: -0.30, rAz:  1.32, bz: -0.16 },
+              { lAx:  0.00, lAz: -1.55, rAx: -0.55, rAz:  1.25, bz: -0.16 },
               /* Pose 4 — R arm OUT-RIGHT, L arm BEHIND back */
               { lAx:  0.80, lAz: -0.18, rAx:  0.00, rAz: -1.55, bz:  0.16 },
             ];
@@ -230,14 +230,14 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
                 /*
                   SLIMMER crown proportions:
-                  Head = 8×8×8 units. Crown sits at g.position.y = 7.8
-                  (slightly inset so it looks seated on head top, not floating).
+                  Head = 8×8×8 units. Crown sits at g.position.y = 6.0
+                  (properly seated on head — lower, more weighted look).
 
                   BW  = total width (slightly wider than 8-unit head)
                   BH  = base band height  → slimmer = 1.0
                   BT  = wall thickness   → thinner = 0.80
                 */
-                const BW    = 9.0;
+                const BW    = 10.0;
                 const BH    = 1.0;
                 const BT    = 0.80;
                 const inner = BW - BT * 2;
@@ -301,7 +301,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 });
 
                 /* Seat the crown on head top */
-                g.position.set(0, 7.8, 0);
+                g.position.set(0, 6.0, 0);
                 s.head.add(g);
               }).catch(() => {});
             }
