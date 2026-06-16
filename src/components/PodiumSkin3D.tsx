@@ -84,33 +84,64 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            const SPEED = 2.5;
+            /*
+              ─── FLOSS ANALYSIS (from reference screenshot) ───────────────
+              The body/chest is VISIBLY TWISTED ~45° to one side (not subtle).
+              One arm is raised HIGH & FORWARD crossing the body (up + across).
+              The other arm hangs DOWN & BACKWARD behind the body.
+              Legs are in a wide STRIDE STANCE — one forward, one back,
+              slightly spread apart. This is the full Fortnite floss.
+
+              PHASE_R  (twist right, arms go toward right side):
+                Body:     big twist to right  (body.y = −0.65)
+                Left arm: UP + FORWARD + crosses body right
+                          (lAx = −1.30 = very forward/up, lAz = +1.00 = crosses right)
+                Right arm: DOWN + BACKWARD + behind body
+                          (rAx = +0.75 = backward, rAz = +0.40 = hangs naturally right)
+                Legs:     left leg FORWARD (lLx = −0.35), right leg BACK (rLx = +0.35)
+                          wide stance spread (lLz = +0.15, rLz = −0.15)
+
+              PHASE_L  (twist left, exact mirror):
+                Body:     big twist to left   (body.y = +0.65)
+                Right arm: UP + FORWARD + crosses body left
+                          (rAx = −1.30, rAz = −1.00)
+                Left arm:  DOWN + BACKWARD + behind body
+                          (lAx = +0.75, lAz = −0.40)
+                Legs:     right leg FORWARD (rLx = −0.35), left leg BACK (lLx = +0.35)
+              ──────────────────────────────────────────────────────────────
+            */
+            const SPEED = 2.3;
             const raw   = ((progress * SPEED) % 2.0 + 2.0) % 2.0;
             const beat  = raw % 1.0;
             const toRight = raw < 1.0;
 
-            /* cubic ease-in-out: snappy pop at extremes */
+            /* cubic ease-in-out — snappy pop at both extremes */
             const ease = (t: number) =>
               t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
             const f    = ease(beat);
             const lerp = (a: number, b: number) => a + (b - a) * f;
 
-            /*
-              PHASE_R: arms RIGHT
-                leftArm:  forward (lAx neg) + crosses body right (lAz pos)
-                rightArm: backward (rAx pos) + outward right (rAz pos)
-                hips counter-twist LEFT (body.y neg)
-
-              PHASE_L: arms LEFT (exact mirror)
-                rightArm: forward (rAx neg) + crosses body left (rAz neg)
-                leftArm:  backward (lAx pos) + outward left (lAz neg)
-                hips counter-twist RIGHT (body.y pos)
-            */
-            const PHASE_R = { lAx: -0.95, lAz:  1.10, rAx:  0.95, rAz:  0.80, by: -0.38 };
-            const PHASE_L = { lAx:  0.95, lAz: -0.80, rAx: -0.95, rAz: -1.10, by:  0.38 };
+            const PHASE_R = {
+              by:  -0.65,                          // big body twist RIGHT
+              lAx: -1.30, lAz:  1.00,             // left arm: UP-FORWARD + crosses right
+              rAx:  0.75, rAz:  0.40,             // right arm: DOWN-BACKWARD behind
+              lLx: -0.35, lLz:  0.15,             // left leg forward + slight spread
+              rLx:  0.35, rLz: -0.15,             // right leg back  + slight spread
+            };
+            const PHASE_L = {
+              by:   0.65,                          // big body twist LEFT
+              lAx:  0.75, lAz: -0.40,             // left arm: DOWN-BACKWARD behind
+              rAx: -1.30, rAz: -1.00,             // right arm: UP-FORWARD + crosses left
+              lLx:  0.35, lLz: -0.15,             // left leg back  + slight spread
+              rLx: -0.35, rLz:  0.15,             // right leg forward + slight spread
+            };
 
             const from = toRight ? PHASE_L : PHASE_R;
             const to   = toRight ? PHASE_R : PHASE_L;
+
+            s.body.rotation.y = lerp(from.by, to.by);
+            s.body.rotation.x = 0;
+            s.body.rotation.z = 0;
 
             s.leftArm.rotation.x  = lerp(from.lAx, to.lAx);
             s.leftArm.rotation.z  = lerp(from.lAz, to.lAz);
@@ -119,17 +150,11 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.rightArm.rotation.z = lerp(from.rAz, to.rAz);
             s.rightArm.rotation.y = 0;
 
-            s.body.rotation.y = lerp(from.by, to.by);
-            s.body.rotation.x = 0;
-            s.body.rotation.z = 0;
-
-            /* hip dip / knee bounce on each beat */
-            const bounce = Math.sin(raw * Math.PI) * 0.12;
-            s.leftLeg.rotation.x  =  bounce;
-            s.rightLeg.rotation.x = -bounce;
-            s.leftLeg.rotation.z  = 0;
-            s.rightLeg.rotation.z = 0;
+            s.leftLeg.rotation.x  = lerp(from.lLx, to.lLx);
+            s.leftLeg.rotation.z  = lerp(from.lLz, to.lLz);
             s.leftLeg.rotation.y  = 0;
+            s.rightLeg.rotation.x = lerp(from.rLx, to.rLx);
+            s.rightLeg.rotation.z = lerp(from.rLz, to.rLz);
             s.rightLeg.rotation.y = 0;
           } catch (_) {}
         });
