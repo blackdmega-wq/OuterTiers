@@ -55,18 +55,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ── #2 FORTNITE FLOSS ─────────────────────────────────────────
-         4-PHASE KEYFRAME ANIMATION — explicit hold + transition phases:
+         Real floss (Backpack Kid) — 4-beat pattern:
+           Beat 1: Arms FRONT-RIGHT  + hips LEFT   (HOLD)
+           Beat 2: Arms BEHIND-RIGHT               (HOLD)
+           Beat 3: Arms FRONT-LEFT   + hips RIGHT  (HOLD)
+           Beat 4: Arms BEHIND-LEFT                (HOLD)
+           Repeat
 
-         Phase 0 (HOLD): Arms FRONT-RIGHT,       hips LEFT
-         Phase 1 (TRANS): Arms swing BEHIND       (diagonal behind)
-         Phase 2 (HOLD): Arms BEHIND-LEFT,        hips RIGHT
-         Phase 3 (TRANS): Arms come FORWARD       (back to front-right)
-
-         Sign conventions (skinview3d):
-           rotation.z positive on left/rightArm  → tips go VIEWER'S RIGHT
-           rotation.x positive                   → tips go BACKWARD (behind body)
-           rotation.x negative                   → tips go FORWARD (in front)
-           body.rotation.y positive              → hips go VIEWER'S LEFT
+         skinview3d sign conventions:
+           armZ positive  → arms swing toward VIEWER'S RIGHT
+           armX negative  → arm tips go FORWARD  (toward viewer)
+           armX positive  → arm tips go BACKWARD (behind body)
+           hipY positive  → hips shift VIEWER'S LEFT
          ─────────────────────────────────────────────────────────────── */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -74,23 +74,23 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* Smooth step ease-in/out (S-curve for each phase) */
+            /* Smooth ease-in/out (S-curve) */
             const smooth = (t: number) => t * t * (3 - 2 * t);
 
-            /* Cycle 0→1, speed controls tempo */
-            const SPEED = 1.6;
+            /* 4 beats. Each beat takes equal time (25% each), but we use
+               a tanh-shaped snap so the arms POP into position and hold. */
+            const SPEED = 1.5;  // full cycles per second
             const cycle = ((progress * SPEED) % 1.0 + 1.0) % 1.0;
 
-            /* 4 explicit keyframes:
-                 armZ: left/right arm swing  (+ = viewer's right)
-                 armX: forward/behind        (- = forward, + = behind)
-                 hipY: hips direction        (+ = viewer's left)
-                 hipZ: body tilt             (small counter-tilt) */
+            /* Keyframes for each beat position:
+                 armZ : left/right swing  (+ = viewer's RIGHT)
+                 armX : forward/behind    (- = FORWARD, + = BEHIND)
+                 hipY : hip counter-move  (+ = viewer's LEFT)            */
             const K = [
-              { z:  1.20, x: -1.10, hy:  0.80, hz: -0.08 },   // FRONT-RIGHT  + hips LEFT
-              { z:  0.30, x:  1.25, hy:  0.15, hz:  0.00 },   // DIAGONAL BEHIND (transition)
-              { z: -1.20, x:  1.10, hy: -0.80, hz:  0.08 },   // BEHIND-LEFT  + hips RIGHT
-              { z: -0.30, x: -1.25, hy: -0.15, hz:  0.00 },   // FORWARD CENTER (transition)
+              { z:  1.30, x: -1.50, hy:  0.85 },  // Beat 1: FRONT-RIGHT, hips LEFT
+              { z:  1.00, x:  1.45, hy:  0.35 },  // Beat 2: BEHIND-RIGHT
+              { z: -1.30, x: -1.50, hy: -0.85 },  // Beat 3: FRONT-LEFT,  hips RIGHT
+              { z: -1.00, x:  1.45, hy: -0.35 },  // Beat 4: BEHIND-LEFT
             ];
 
             const seg  = cycle * 4;
@@ -102,14 +102,15 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const armZ = lerp(K[i0].z, K[i1].z);
             const armX = lerp(K[i0].x, K[i1].x);
 
-            /* Both arms move as one parallel unit */
+            /* Both arms move as ONE parallel unit */
             s.leftArm.rotation.z  = armZ;
             s.rightArm.rotation.z = armZ;
             s.leftArm.rotation.x  = armX;
             s.rightArm.rotation.x = armX;
 
+            /* Hips move opposite to arms */
             s.body.rotation.y = lerp(K[i0].hy, K[i1].hy);
-            s.body.rotation.z = lerp(K[i0].hz, K[i1].hz);
+            s.body.rotation.z = 0;
             s.body.rotation.x = 0;
 
             /* Legs: completely still */
@@ -129,7 +130,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.head) return;
 
-            /* Build Minecraft-style blocky Technoblade crown on first frame */
+            /* Build Minecraft castle-crown on first frame */
             if (!s.head.userData.crownDone) {
               s.head.userData.crownDone = true;
               import('three').then((T: any) => {
@@ -137,104 +138,105 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 s.head.userData.crownBuilt = true;
 
                 /* ── Materials ── */
-                const matGold   = new T.MeshBasicMaterial({ color: 0xFFB800 });
-                const matGoldDk = new T.MeshBasicMaterial({ color: 0xCC8800 });
-                const matMaroon = new T.MeshBasicMaterial({ color: 0x5C0808 });
-                const matRed    = new T.MeshBasicMaterial({ color: 0xFF2222 });
-                const matGreen  = new T.MeshBasicMaterial({ color: 0x22EE44 });
-                const matBlue   = new T.MeshBasicMaterial({ color: 0x4488FF });
+                const gold  = new T.MeshBasicMaterial({ color: 0xF5D000 });
+                const mPurp = new T.MeshBasicMaterial({ color: 0xCC44EE });
+                const mBlue = new T.MeshBasicMaterial({ color: 0x4466FF });
+                const mBlu2 = new T.MeshBasicMaterial({ color: 0x2244CC });
+                const mGrn  = new T.MeshBasicMaterial({ color: 0x33DD55 });
 
                 const g = new T.Group();
 
-                /* Helper: add a box */
-                const box = (mat: any, w: number, h: number, d: number, x: number, y: number, z: number) => {
+                /* Helper: add a box mesh */
+                const bx = (mat: any, w: number, h: number, d: number, x: number, y: number, z: number) => {
                   const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
                   m.position.set(x, y, z);
                   g.add(m);
                 };
 
-                /* ── DIMENSIONS ──
-                   Head ≈ 8 units wide. Crown target height above head: ~6 units.
-                   All values chosen to match the Minecraft Technoblade crown style. */
-                const BW = 8.5;  // band outer width (slightly wider than head)
-                const BH = 1.5;  // band height
-                const BT = 1.1;  // band wall thickness
+                /* ── CROWN DIMENSIONS ──
+                   Head = 8 units wide.
+                   Crown sits at y=8 (top of head), all y coords are ABOVE that. */
+                const BW = 9.0;   // outer width (slightly wider than head)
+                const BH = 1.6;   // base band height
+                const BT = 1.3;   // wall thickness
 
-                /* ── BOTTOM BAND (gold ring) ── */
-                box(matGold, BW,       BH, BT,         0,         BH / 2, -(BW / 2 - BT / 2));  // front
-                box(matGold, BW,       BH, BT,         0,         BH / 2,  (BW / 2 - BT / 2));  // back
-                box(matGold, BT,       BH, BW - BT*2, -(BW/2-BT/2), BH/2, 0);                   // left
-                box(matGold, BT,       BH, BW - BT*2,  (BW/2-BT/2), BH/2, 0);                   // right
+                /* ── BASE BAND: 4 rectangular walls ── */
+                const fz = -(BW / 2 - BT / 2);   // front face z
+                const bz =  (BW / 2 - BT / 2);   // back face z
+                const lx = -(BW / 2 - BT / 2);   // left face x
+                const rx =  (BW / 2 - BT / 2);   // right face x
+                const inner = BW - BT * 2;
 
-                /* Mid-band stripe (darker gold for visual depth) */
-                box(matGoldDk, BW, 0.4, BT,       0,       BH/2, -(BW/2-BT/2));
-                box(matGoldDk, BW, 0.4, BT,       0,       BH/2,  (BW/2-BT/2));
-                box(matGoldDk, BT, 0.4, BW-BT*2, -(BW/2-BT/2), BH/2, 0);
-                box(matGoldDk, BT, 0.4, BW-BT*2,  (BW/2-BT/2), BH/2, 0);
+                bx(gold, BW,   BH, BT,    0,    BH / 2, fz);       // front wall
+                bx(gold, BW,   BH, BT,    0,    BH / 2, bz);       // back wall
+                bx(gold, BT,   BH, inner, lx,   BH / 2, 0);        // left wall
+                bx(gold, BT,   BH, inner, rx,   BH / 2, 0);        // right wall
 
-                /* ── INNER CAP (maroon fill, sits inside band) ── */
-                const CW  = BW - BT * 2;              // 6.3
-                const capY = BH + 0.7;                // center: 2.2
-                box(matMaroon, CW, 1.4, CW, 0, capY, 0);
+                /* ── BATTLEMENTS (Zinnen / Merlons) ──
+                   Classic castle crown: evenly spaced rectangular pillars
+                   with gaps between them (crenels). Center merlon is tallest.
 
-                /* ── UPPER GOLD RING (second tier, inset) ── */
-                const B2W  = BW - 1.4;                // 7.1
-                const b2Y  = BH + 1.4 + 0.3;         // 3.2
-                box(matGold, B2W,       0.6, BT,         0,           b2Y, -(B2W/2-BT/2));
-                box(matGold, B2W,       0.6, BT,         0,           b2Y,  (B2W/2-BT/2));
-                box(matGold, BT,        0.6, B2W-BT*2, -(B2W/2-BT/2), b2Y, 0);
-                box(matGold, BT,        0.6, B2W-BT*2,  (B2W/2-BT/2), b2Y, 0);
+                   Front & back: 5 merlons at x = -3.2, -1.6, 0, +1.6, +3.2
+                   Left & right: 3 merlons each
+                   Merlon size: 1.4 × h × 1.3 (width × height × depth)     */
+                const MW  = 1.4;  // merlon width
+                const MD  = BT;   // merlon depth = wall thickness
+                const MH  = 2.0;  // standard merlon height
+                const MHC = 2.8;  // center merlon height (taller)
 
-                /* ── SECOND MAROON CAP ── */
-                const CW2  = B2W - BT * 2;
-                const cap2Y = b2Y + 0.3 + 0.45;      // 3.95
-                box(matMaroon, CW2, 0.9, CW2, 0, cap2Y, 0);
+                const frontXPos = [-3.2, -1.6, 0, 1.6, 3.2];
 
-                /* ── PRONGS (rectangular gold pillars) ── */
-                const pBase = b2Y + 0.6 + 0.9;       // 4.7
-                const PS    = 1.2;                    // prong footprint
+                /* Front merlons */
+                frontXPos.forEach((x, i) => {
+                  const mh = i === 2 ? MHC : MH;
+                  bx(gold, MW, mh, MD, x, BH + mh / 2, fz);
+                });
 
-                /* Center prong — tallest */
-                box(matGold, PS, 3.0, PS, 0, pBase + 1.5, 0);
+                /* Back merlons */
+                frontXPos.forEach((x, i) => {
+                  const mh = i === 2 ? MHC : MH;
+                  bx(gold, MW, mh, MD, x, BH + mh / 2, bz);
+                });
 
-                /* 4 corner prongs — shorter */
-                const off = 2.1;
-                const PCS = 1.0;
-                box(matGold, PCS, 2.0, PCS, -off, pBase + 1.0, -off);
-                box(matGold, PCS, 2.0, PCS,  off, pBase + 1.0, -off);
-                box(matGold, PCS, 2.0, PCS, -off, pBase + 1.0,  off);
-                box(matGold, PCS, 2.0, PCS,  off, pBase + 1.0,  off);
+                /* Left side merlons */
+                [-2.2, 0, 2.2].forEach((z) => {
+                  bx(gold, MD, MH, MW, lx, BH + MH / 2, z);
+                });
 
-                /* Small gold caps on top of each prong tip */
-                box(matGoldDk, PS+0.2, 0.3, PS+0.2, 0,    pBase+3.0+0.15, 0);
-                box(matGoldDk, PCS+0.2, 0.3, PCS+0.2, -off, pBase+2.0+0.15, -off);
-                box(matGoldDk, PCS+0.2, 0.3, PCS+0.2,  off, pBase+2.0+0.15, -off);
-                box(matGoldDk, PCS+0.2, 0.3, PCS+0.2, -off, pBase+2.0+0.15,  off);
-                box(matGoldDk, PCS+0.2, 0.3, PCS+0.2,  off, pBase+2.0+0.15,  off);
+                /* Right side merlons */
+                [-2.2, 0, 2.2].forEach((z) => {
+                  bx(gold, MD, MH, MW, rx, BH + MH / 2, z);
+                });
 
-                /* ── GEMS on band (colorful Minecraft-style cubes) ── */
-                const GS   = 0.95;
-                const GY   = BH / 2;
-                const GZ_F = -(BW / 2 - BT / 2) - 0.7;  // front face
-
-                /* Front gems: red  blue  green  blue  red */
-                const frontGems: [number, any][] = [
-                  [-3.0, matRed], [-1.5, matBlue], [0, matGreen], [1.5, matBlue], [3.0, matRed],
+                /* Corner blocks — fill each corner at the junction */
+                const cornersXZ: [number, number][] = [
+                  [lx, fz], [rx, fz], [lx, bz], [rx, bz],
                 ];
-                frontGems.forEach(([gx, mat]) => box(mat, GS, GS, GS, gx as number, GY, GZ_F));
+                cornersXZ.forEach(([cx, cz]) => {
+                  bx(gold, BT, MH, BT, cx, BH + MH / 2, cz);
+                });
 
-                /* Back gems: green  red */
-                const GZ_B = (BW / 2 - BT / 2) + 0.7;
-                box(matGreen, GS, GS, GS, -1.8, GY, GZ_B);
-                box(matRed,   GS, GS, GS,  1.8, GY, GZ_B);
+                /* ── GEMS on front band face ──
+                   4 colored square gems embedded in the front wall.
+                   Colors (left→right): purple, blue, blue, green             */
+                const GS   = 1.15;   // gem size
+                const GD   = 0.4;    // gem depth (protrudes slightly)
+                const GY   = BH / 2; // gem vertical center
+                const GZ_F = fz - BT / 2 - 0.05; // just in front of wall
 
-                /* Side gems */
-                box(matBlue,  GS, GS, GS, -(BW/2-BT/2)-0.7, GY, -1.0);
-                box(matRed,   GS, GS, GS,  (BW/2-BT/2)+0.7, GY, -1.0);
-                box(matGreen, GS, GS, GS, -(BW/2-BT/2)-0.7, GY,  1.0);
-                box(matBlue,  GS, GS, GS,  (BW/2-BT/2)+0.7, GY,  1.0);
+                const gemRow: [number, any][] = [
+                  [-2.8, mPurp],
+                  [-0.9, mBlue],
+                  [ 0.9, mBlu2],
+                  [ 2.8, mGrn ],
+                ];
+                gemRow.forEach(([x, mat]) => {
+                  const gem = new T.Mesh(new T.BoxGeometry(GS, GS, GD), mat);
+                  gem.position.set(x as number, GY, GZ_F);
+                  g.add(gem);
+                });
 
-                /* ── Place crown at top of head ── */
+                /* Place crown at top of head (y=8 in head local space) */
                 g.position.set(0, 8, 0);
 
                 s.head.add(g);
