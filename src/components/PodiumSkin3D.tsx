@@ -98,69 +98,46 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE — REVAMPED v5: circular arc around body ────────
-               Problem with v4: extension phase went BEHIND(x=1.57) → DOWN(x=0)
-               → FRONT(x=-0.20) linearly, which passes THROUGH the chest at x≈0.
+            /* ── FLOSS DANCE — COMPLETE REWRITE: korrekte Floss-Bewegung ──────
+               Richtiges Floss-Muster:
+               - BEIDE Arme schwingen GLEICHZEITIG zur GLEICHEN Seite
+               - "Streck-Arm": horizontal nach außen (wie eine T-Pose)
+               - "Kreuz-Arm": schwingt VOR dem Bauch diagonal zur selben Seite
+               - HÜFTE: gegenseitig
 
-               Fix: split extension into two sub-phases so the arm travels AROUND
-               the outside of the body via the SIDE — never through the chest:
+               swing=+1 (Arme RECHTS):
+                 rightArm = Streck-Arm → z=+1.57, x=0  (gerade horizontal rechts)
+                 leftArm  = Kreuz-Arm  → z=+0.80, x=-0.50  (vor dem Bauch nach rechts)
 
-               Sub-phase 1 (first half of extension, p=0→0.5):
-                 BEHIND (x=1.57, z=0) → SIDE (x=0, z=±1.50 max lateral)
-                 Arm sweeps from pointing backward to pointing straight sideways.
-                 Arm is always either behind or beside the body — never in front.
+               swing=-1 (Arme LINKS):
+                 leftArm  = Streck-Arm → z=-1.57, x=0  (gerade horizontal links)
+                 rightArm = Kreuz-Arm  → z=-0.80, x=-0.50  (vor dem Bauch nach links)
 
-               Sub-phase 2 (second half of extension, p=0.5→1):
-                 SIDE (x=0, z=±1.50) → FRONT-DIAGONAL (x=−0.20, z=±1.10)
-                 Arm comes slightly forward from horizontal while retracting slightly.
-                 Arm is clearly outside the body (z is large) when coming forward.
-
-               Crossing phase (arm stays behind throughout):
-                 x stays ≈1.57→1.20 (always > 1.0 rad backward), sweeps with z and y.
-                 Arm NEVER crosses through the chest in this phase.
-
-               Continuity: all branches evaluate to (x=1.57, z=0, y=0) at swing=0.
+               x NEGATIV = Arm kommt nach VORNE/unten (sichtbar vor dem Körper).
+               Der Kreuz-Arm geht VOR dem Körper, nicht durch die Brust.
+               ph = (swing+1)/2  →  0 = Arme links, 1 = Arme rechts.
             ──────────────────────────────────────────────────────────────── */
-            const SPEED = 2.2;
+            const SPEED = 2.0;
             const t     = progress * SPEED;
             const swing = Math.sin(t);
+            const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
+            /* ph: 0 = Arme ganz LINKS (swing=-1),  1 = Arme ganz RECHTS (swing=+1) */
+            const ph = (swing + 1) * 0.5;
 
-            /* ── LEFT arm ──────────────────────────────────────────────────
-               swing ≥ 0  →  CROSSING phase: arm stays behind, sweeps right
-               swing < 0  →  EXTENSION phase: arm goes from behind → side → front-left */
-            if (swing >= 0) {
-              /* CROSSING: arm stays behind the body and sweeps rightward */
-              s.leftArm.rotation.z = lerp(0,    0.80, swing);   /* behind → behind-right  */
-              s.leftArm.rotation.x = lerp(1.57, 1.20, swing);   /* stays strongly backward */
-              s.leftArm.rotation.y = lerp(0,   -1.20, swing);   /* sweeps arm rightward    */
-            } else {
-              const p  = -swing;                            /* 0→1 as swing goes 0→−1 */
-              const p1 = Math.min(1.0, p * 2.0);           /* 0→1 for first half  (sub-phase 1) */
-              const p2 = Math.max(0.0, p * 2.0 - 1.0);    /* 0→1 for second half (sub-phase 2) */
-              /* Sub-phase 1: arm sweeps from behind to full lateral (outside of body) */
-              /* Sub-phase 2: arm comes slightly forward from lateral to extended-left  */
-              s.leftArm.rotation.z = lerp(0,    -1.50, p1) + lerp(0,  0.40, p2); /* 0→-1.50→-1.10 */
-              s.leftArm.rotation.x = lerp(1.57,  0.00, p1) + lerp(0, -0.20, p2); /* 1.57→0→-0.20  */
-              s.leftArm.rotation.y = 0;
-            }
+            /* ── LINKER ARM ────────────────────────────────────────────────
+               ph=0 (links): Streck-Arm  → horizontal links  (z=-1.57, x=0)
+               ph=1 (rechts): Kreuz-Arm → vor Bauch rechts  (z=+0.80, x=-0.50) */
+            s.leftArm.rotation.z =  lerp(-1.57,  0.80, ph);
+            s.leftArm.rotation.x =  lerp( 0.00, -0.50, ph);
+            s.leftArm.rotation.y =  0;
 
-            /* ── RIGHT arm (mirror of left) ──────────────────────────────── */
-            if (swing <= 0) {
-              /* CROSSING: arm stays behind, sweeps leftward */
-              const p  = -swing;
-              const p1 = Math.min(1.0, p * 2.0);
-              const p2 = Math.max(0.0, p * 2.0 - 1.0);
-              s.rightArm.rotation.z = lerp(0,    1.50, p1) + lerp(0, -0.40, p2); /* 0→+1.50→+1.10 */
-              s.rightArm.rotation.x = lerp(1.57, 0.00, p1) + lerp(0, -0.20, p2); /* 1.57→0→-0.20  */
-              s.rightArm.rotation.y = 0;
-            } else {
-              /* CROSSING: arm stays behind, sweeps leftward */
-              s.rightArm.rotation.z = lerp(0,    -0.80, swing);
-              s.rightArm.rotation.x = lerp(1.57,  1.20, swing);
-              s.rightArm.rotation.y = lerp(0,     1.20, swing);
-            }
+            /* ── RECHTER ARM ───────────────────────────────────────────────
+               ph=0 (links): Kreuz-Arm  → vor Bauch links   (z=-0.80, x=-0.50)
+               ph=1 (rechts): Streck-Arm → horizontal rechts (z=+1.57, x=0) */
+            s.rightArm.rotation.z =  lerp(-0.80,  1.57, ph);
+            s.rightArm.rotation.x =  lerp(-0.50,  0.00, ph);
+            s.rightArm.rotation.y =  0;
 
             /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
             s.body.rotation.z = -swing * 0.18;
