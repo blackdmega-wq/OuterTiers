@@ -98,59 +98,55 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE — REVAMPED v2: corrected Y-axis direction ────
-               Three.js XYZ Euler rotation — arm starts at (0,-1,0) local.
+            /* ── FLOSS DANCE — REVAMPED v3: baseline spread + correct axes ──
+               Root cause of the "arm inside chest" bug at screenshot frame:
+               At swing=0 (transition), goRight=0 and goLeft=0, so ALL rotations
+               were 0 → arms hung STRAIGHT DOWN, clipping through the chest sides.
+               This always happens twice per sine cycle and was the visible frame.
 
-               Verified axis directions (from victory-pose ground truth):
-                 arm.x POSITIVE → tilts arm BACKWARD (away from camera)
-                 arm.x NEGATIVE → tilts arm FORWARD  (toward camera / in front)
-                 arm.z for leftArm:  NEGATIVE → extends LEFT, POSITIVE → crosses RIGHT
-                 arm.z for rightArm: POSITIVE → extends RIGHT, NEGATIVE → crosses LEFT
+               Fix: add a permanent BASE_OUT spread (±0.60) so arms are NEVER
+               at 0° — they always have some lateral position away from the body.
 
-               Y-axis math for leftArm crossing BEHIND to the RIGHT
-               -------------------------------------------------------
-               After X (+1.40 rad): arm direction ≈ (0, -0.170, -0.985) — mostly backward.
-               After Y (-1.20 rad): x-component = sin(-1.20) * (-0.985) ≈ +0.918 → RIGHT ✓
-                                    Y NEGATIVE sweeps the backward arm toward +X (rightward).
-                                    Y POSITIVE (previous bug) swept it toward -X (leftward = WRONG).
-               Final result with Z+0.30: arm tip at ≈ (0.93, +0.11, -0.36) — clearly right+behind ✓
+               Axis conventions (verified from victory-pose):
+                 leftArm.z  NEGATIVE → extends LEFT   POSITIVE → crosses RIGHT
+                 rightArm.z POSITIVE → extends RIGHT  NEGATIVE → crosses LEFT
+                 arm.x POSITIVE → tilts BACKWARD (away from camera)
+                 arm.x NEGATIVE → tilts FORWARD (toward camera)
+                 leftArm.y  NEGATIVE → sweeps backward arm RIGHTWARD (crossing side)
+                 rightArm.y POSITIVE → sweeps backward arm LEFTWARD (crossing side)
 
-               Y-axis for rightArm crossing BEHIND to the LEFT: opposite sign (+1.20).
-
-               Extending arm gets slight forward tilt (x = -0.15) so it stands
-               clearly in FRONT of the body while the crossing arm goes BEHIND —
-               this depth contrast is what makes the behind/in-front visible.
+               Pose at key swing values:
+                 swing= 0: both arms spread at baseline ±0.60 (natural rest, no clip)
+                 swing=+1: rightArm fully extends right (z=+1.10, diagonal down)
+                           leftArm crosses BEHIND to right (x=+1.20, y=-1.20)
+                 swing=−1: leftArm fully extends left (z=−1.10, diagonal down)
+                           rightArm crosses BEHIND to left (x=+1.20, y=+1.20)
             ──────────────────────────────────────────────────────────────── */
             const SPEED = 2.2;
             const t     = progress * SPEED;
-            const swing = Math.sin(t);   /* −1 (full-left) → +1 (full-right) */
+            const swing = Math.sin(t);
 
-            const goRight = Math.max(0,  swing);  /* 0→1 as swing goes 0→+1 */
-            const goLeft  = Math.max(0, -swing);  /* 0→1 as swing goes 0→−1 */
+            const goRight = Math.max(0,  swing);
+            const goLeft  = Math.max(0, -swing);
+            const BASE_OUT = 0.60;   /* permanent spread so arms never hang straight down */
 
             /* ── LEFT arm ────────────────────────────────────────────────
-               Extends LEFT (goLeft):
-                 z = -1.10  →  63° from vertical = diagonal downward (not horizontal)
-                 x = -0.20  →  slightly forward/in-front for depth contrast
-               Crosses BEHIND to right (goRight):
-                 z = +0.80  →  wider lateral swing → more clearance from chest side
-                 x = +1.20  →  backward past the chest plane
-                 y = -1.20  →  NEGATIVE sweeps backward arm toward +X (rightward) ✓ */
-            s.leftArm.rotation.z = -goLeft * 1.10 + goRight * 0.80;
-            s.leftArm.rotation.x = -goLeft * 0.20 + goRight * 1.20;
-            s.leftArm.rotation.y = -goRight * 1.20;   /* NEGATIVE → rightward behind ✓ */
+               Baseline: z = -BASE_OUT (spread left, never hangs down)
+               Extends left: adds -0.50 more (total z ≈ -1.10 diagonal)
+               Crosses right: adds +0.80 (total z ≈ +0.20, arm angles toward right)
+                 + x=+1.20 backward + y=-1.20 sweeps arm rightward behind body  */
+            s.leftArm.rotation.z = -(BASE_OUT + goLeft * 0.50) + goRight * 0.80;
+            s.leftArm.rotation.x =  -goLeft * 0.20 + goRight * 1.20;
+            s.leftArm.rotation.y =  -goRight * 1.20;   /* NEGATIVE → sweeps rightward ✓ */
 
             /* ── RIGHT arm ───────────────────────────────────────────────
-               Extends RIGHT (goRight):
-                 z = +1.10  →  63° from vertical = diagonal downward (schräg nach unten)
-                 x = -0.20  →  slightly forward/in-front for depth contrast
-               Crosses BEHIND to left (goLeft):
-                 z = -0.80  →  wider lateral swing → arm clears right side of chest
-                 x = +1.20  →  backward past the chest plane
-                 y = +1.20  →  POSITIVE sweeps backward arm toward -X (leftward) ✓ */
-            s.rightArm.rotation.z =  goRight * 1.10 - goLeft * 0.80;
-            s.rightArm.rotation.x = -goRight * 0.20 + goLeft * 1.20;
-            s.rightArm.rotation.y =  goLeft  * 1.20;  /* POSITIVE → leftward behind ✓ */
+               Baseline: z = +BASE_OUT (spread right, never hangs down)
+               Extends right: adds +0.50 more (total z ≈ +1.10 diagonal downward)
+               Crosses left: subtracts 0.80 (total z ≈ −0.20, angles toward left)
+                 + x=+1.20 backward + y=+1.20 sweeps arm leftward behind body   */
+            s.rightArm.rotation.z =  (BASE_OUT + goRight * 0.50) - goLeft * 0.80;
+            s.rightArm.rotation.x =  -goRight * 0.20 + goLeft * 1.20;
+            s.rightArm.rotation.y =   goLeft  * 1.20;  /* POSITIVE → sweeps leftward ✓ */
 
             /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
             s.body.rotation.z = -swing * 0.18;
