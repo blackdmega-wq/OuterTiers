@@ -2297,21 +2297,54 @@ img { display: block; }
   filter: drop-shadow(0 0 18px rgba(251,191,36,0.90));
 }
 
-/* Confetti rocket particles behind #1 */
+/* ── Fire rockets (very background, behind everything) ── */
+.lb-fire-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.lb-fire-rocket {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: 22px;
+  border-radius: 2px 2px 0 0;
+  opacity: 0;
+  animation: lb-fire-rise var(--fdur, 3s) var(--fdelay, 0s) ease-in infinite;
+}
+@keyframes lb-fire-rise {
+  0%   { transform: translateY(0)      scaleX(1.0); opacity: 0;    }
+  8%   {                                            opacity: 0.22;  }
+  60%  { transform: translateY(-55%)   scaleX(0.7); opacity: 0.16; }
+  100% { transform: translateY(-115%)  scaleX(0.3); opacity: 0;    }
+}
+
+/* Confetti rocket particles above fire */
 .lb-confetti-wrap {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: visible;
-  z-index: 0;
+  z-index: 1;
 }
 /* Full-pod confetti: covers trophy + skin (placed at lb-pod level) */
 .lb-confetti-full {
   top: 0;
   bottom: 0;
-  left: -12px;
-  right: -12px;
-  z-index: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+/* Ensure trophy, skin, pedestal and info appear above both fire and confetti */
+.lb-pod--rank1 .lb-trophy,
+.lb-pod--rank1 .lb-pod-skin-wrap,
+.lb-pod--rank1 .lb-pod-pedestal,
+.lb-pod--rank1 .lb-pod-info {
+  position: relative;
+  z-index: 2;
 }
 .lb-confetti-wrap .lb-rocket {
   position: absolute;
