@@ -121,19 +121,34 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const f    = ease(beat);
             const lerp = (a: number, b: number) => a + (b - a) * f;
 
+            /*
+              ROTATION.Z SIGN RULE (Three.js right-hand, char faces +Z):
+                leftArm  rotation.z POSITIVE  → tip goes toward +X (char RIGHT) = CROSSES body
+                leftArm  rotation.z NEGATIVE  → tip goes toward -X (char LEFT)  = outward left
+                rightArm rotation.z POSITIVE  → tip goes toward -X (char LEFT)  = CROSSES body
+                rightArm rotation.z NEGATIVE  → tip goes toward +X (char RIGHT) = outward right
+
+              So for PHASE_R (arms toward char's RIGHT):
+                left arm  crosses RIGHT  → lAz POSITIVE ✓
+                right arm outward RIGHT  → rAz NEGATIVE  ← this was the bug (+0.40 wrong)
+
+              For PHASE_L (arms toward char's LEFT):
+                right arm crosses LEFT   → rAz POSITIVE  ← this was wrong (-1.00)
+                left arm  outward LEFT   → lAz NEGATIVE ✓
+            */
             const PHASE_R = {
-              by:  -0.65,                          // big body twist RIGHT
-              lAx: -1.30, lAz:  1.00,             // left arm: UP-FORWARD + crosses right
-              rAx:  0.75, rAz:  0.40,             // right arm: DOWN-BACKWARD behind
-              lLx: -0.35, lLz:  0.15,             // left leg forward + slight spread
-              rLx:  0.35, rLz: -0.15,             // right leg back  + slight spread
+              by:  -0.72,                          // big body twist RIGHT
+              lAx: -1.40, lAz:  1.10,             // left arm: UP-FORWARD + CROSSES RIGHT
+              rAx:  0.80, rAz: -0.55,             // right arm: DOWN-BACKWARD + OUTWARD RIGHT
+              lLx: -0.40, lLz:  0.20,             // left leg forward + spread
+              rLx:  0.40, rLz: -0.20,             // right leg back   + spread
             };
             const PHASE_L = {
-              by:   0.65,                          // big body twist LEFT
-              lAx:  0.75, lAz: -0.40,             // left arm: DOWN-BACKWARD behind
-              rAx: -1.30, rAz: -1.00,             // right arm: UP-FORWARD + crosses left
-              lLx:  0.35, lLz: -0.15,             // left leg back  + slight spread
-              rLx: -0.35, rLz:  0.15,             // right leg forward + slight spread
+              by:   0.72,                          // big body twist LEFT
+              lAx:  0.80, lAz: -0.55,             // left arm: DOWN-BACKWARD + OUTWARD LEFT
+              rAx: -1.40, rAz:  1.10,             // right arm: UP-FORWARD + CROSSES LEFT
+              lLx:  0.40, lLz: -0.20,             // left leg back   + spread
+              rLx: -0.40, rLz:  0.20,             // right leg forward + spread
             };
 
             const from = toRight ? PHASE_L : PHASE_R;
