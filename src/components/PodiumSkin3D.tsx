@@ -113,24 +113,27 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* ── 4 keyframe poses ── */
             /* see KEYS block below for axis reference */
             /* ─────────────────────────────────────────────────────────────
-               CORRECTED 4-POSE FLOSS KEYFRAMES
-               skinview3d axis (character faces +Z = toward camera):
-                 leftArm.z  NEGATIVE → extends character's LEFT  (screen-right)
-                 leftArm.z  POSITIVE → crosses character's RIGHT (screen-left)
-                 rightArm.z NEGATIVE → extends character's RIGHT (screen-left)
-                 rightArm.z POSITIVE → crosses character's LEFT  (screen-right)
+               VERIFIED 4-POSE FLOSS KEYFRAMES
+               Axis reference validated against the #1 victory pose:
+                 leftArm.z  NEGATIVE → extends character's LEFT
+                 leftArm.z  POSITIVE → crosses toward character's RIGHT
+                 rightArm.z POSITIVE → extends character's RIGHT   ← KEY FIX
+                 rightArm.z NEGATIVE → crosses toward character's LEFT
                  .x NEGATIVE → arm FORWARD (belly)  .x POSITIVE → arm BACKWARD (behind)
                ───────────────────────────────────────────────────────────── */
             const KEYS = [
-              /* Frame 1: L-arm extends CHARACTER-LEFT, R-arm BEHIND BACK */
-              { lAx:  0.00, lAz: -1.55, rAx:  0.78, rAz:  0.12, bz: -0.13 },
-              /* Frame 2: R-arm extends CHARACTER-RIGHT, L-arm FORWARD in front of belly */
-              /*          lAx strongly negative = arm pushed out forward (no chest-clip)   */
-              { lAx: -1.42, lAz:  1.05, rAx:  0.00, rAz: -1.55, bz:  0.13 },
-              /* Frame 3: BOTH arms to CHARACTER-LEFT (L extends, R crosses over)          */
-              { lAx:  0.00, lAz: -1.55, rAx: -0.28, rAz:  1.45, bz: -0.13 },
-              /* Frame 4: R-arm extends CHARACTER-RIGHT, L-arm BEHIND BACK                 */
-              { lAx:  0.78, lAz: -0.12, rAx:  0.00, rAz: -1.55, bz:  0.13 },
+              /* Frame 1: L-arm extends character-LEFT, R-arm BEHIND BACK */
+              { lAx:  0.00, lAz: -1.55, rAx:  0.78, rAz:  0.00, bz: -0.12 },
+              /* Frame 2: R-arm extends character-RIGHT, L-arm FORWARD in front of belly  */
+              /*          lAx=-1.38 pushes arm well forward → no chest-clip               */
+              /*          lAz=+1.05 crosses leftArm toward character-RIGHT (belly cross)  */
+              { lAx: -1.38, lAz:  1.05, rAx:  0.00, rAz:  1.55, bz:  0.12 },
+              /* Frame 3: BOTH arms to character-LEFT                                     */
+              /*          leftArm extends left (lAz=-1.55), rightArm crosses left         */
+              /*          rightArm crosses LEFT = NEGATIVE rAz (not positive!)            */
+              { lAx:  0.00, lAz: -1.55, rAx: -0.25, rAz: -1.30, bz: -0.12 },
+              /* Frame 4: R-arm extends character-RIGHT, L-arm BEHIND BACK                */
+              { lAx:  0.78, lAz:  0.00, rAx:  0.00, rAz:  1.55, bz:  0.12 },
             ];
 
             const kA = KEYS[ki % 4];
