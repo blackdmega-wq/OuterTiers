@@ -98,50 +98,60 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ── FLOSS DANCE: pure sine-wave pendulum ──────────────────────
-               Both arms swing TOGETHER left↔right like a pendulum.
-               No keyframes — one equation drives everything smoothly.
+            /* ── FLOSS DANCE — REVAMPED: proper 3-axis arm arc ────────────
+               Axes (verified from victory-pose ground truth):
+                 leftArm.z:  NEGATIVE → extends LEFT,  POSITIVE → crosses RIGHT
+                 rightArm.z: POSITIVE → extends RIGHT, NEGATIVE → crosses LEFT
+                 arm.x:      POSITIVE → tilts BACKWARD (behind body plane)
+                 arm.y:      leftArm  POSITIVE → sweeps arm tip behind body
+                             rightArm NEGATIVE → sweeps arm tip behind body
 
-               Verified axes (from victory-pose ground truth):
-                 leftArm.z  POSITIVE → crosses right   NEGATIVE → extends left
-                 rightArm.z POSITIVE → extends right   NEGATIVE → crosses left
-                 arm.x      NEGATIVE → forward/belly   POSITIVE → backward
+               The crossing arm requires ALL THREE axes to go AROUND the body:
+                 Z — direction toward the crossing side (reduced, arm arcs back)
+                 X — strong backward tilt (>90°) puts arm behind the chest plane
+                 Y — strong horizontal sweep arcs the arm AROUND the body side
 
-               When swing > 0 (arms RIGHT):
-                 rightArm extends right  (rAz = +swing * 1.55, rAx = 0)
-                 leftArm  crosses right  (lAz = +swing * 1.55, lAx = forward)
-               When swing < 0 (arms LEFT):
-                 leftArm  extends left   (lAz = swing * 1.55,  lAx = 0)
-                 rightArm crosses left   (rAz = swing * 1.55,  rAx = forward)
+               Without strong Y the arm tilts back but stays in the chest plane
+               and clips through the torso. Y rotation at the shoulder pulls the
+               arm tip behind the body's side — this is the missing axis.
+
+               4-frame reference (from images):
+                 Frame 1: L arm extends LEFT   — R arm behind, tucked to left
+                 Frame 2: R arm extends RIGHT  — L arm sweeps BEHIND to right
+                 Frame 3: Both arms LEFT       — L extends, R arcs behind-left
+                 Frame 4: R arm extends RIGHT  — L arm behind, tucked to right
             ──────────────────────────────────────────────────────────────── */
             const SPEED = 2.2;
             const t     = progress * SPEED;
             const swing = Math.sin(t);   /* −1 (full-left) → +1 (full-right) */
 
-            /* ── Arms ── */
-            /* Both arms swing together (same z-sign = same direction).
-               Extending arm:  z = ±1.55, x = 0, y = 0  →  horizontal, out to the side.
-               Crossing arm goes BEHIND THE BACK:
-                 x = +1.40  (backward — behind the chest plane)
-                 y = ±0.65  (Y-axis tuck pulls arm around behind body, not through chest)
-                             leftArm: positive y = behind; rightArm: negative y = behind */
-            const sw = Math.abs(swing);
             const goRight = Math.max(0,  swing);  /* 0→1 as swing goes 0→+1 */
             const goLeft  = Math.max(0, -swing);  /* 0→1 as swing goes 0→−1 */
 
-            /* left arm: extends when swing<0, crosses behind when swing>0 */
-            s.leftArm.rotation.z  =  swing * 1.55;
-            s.leftArm.rotation.x  =  goRight * 1.40;
-            s.leftArm.rotation.y  =  goRight * 0.65;   /* positive y = behind for leftArm  */
+            /* ── LEFT arm ────────────────────────────────────────────────
+               Extends LEFT when goLeft → 1  (z negative, x=0, y=0)
+               Crosses BEHIND to right when goRight → 1
+                 z: slight rightward lean (reduced — arm arcs backward, not sideways)
+                 x: strong backward tilt (1.68 rad ≈ 96°, past the body plane)
+                 y: large positive sweep — arcs arm tip AROUND behind the body
+                    (this is the key axis that prevents the arm going through the chest) */
+            s.leftArm.rotation.z = -goLeft * 1.55 + goRight * 0.40;
+            s.leftArm.rotation.x =  goRight * 1.68;
+            s.leftArm.rotation.y =  goRight * 1.40;
 
-            /* right arm: extends when swing>0, crosses behind when swing<0 */
-            s.rightArm.rotation.z =  swing * 1.55;
-            s.rightArm.rotation.x =  goLeft  * 1.40;
-            s.rightArm.rotation.y = -goLeft  * 0.65;   /* negative y = behind for rightArm */
+            /* ── RIGHT arm ───────────────────────────────────────────────
+               Extends RIGHT when goRight → 1  (z positive, x=0, y=0)
+               Crosses BEHIND to left when goLeft → 1
+                 z: slight leftward lean (reduced)
+                 x: strong backward tilt
+                 y: large negative sweep — arcs arm tip AROUND behind the body */
+            s.rightArm.rotation.z =  goRight * 1.55 - goLeft * 0.40;
+            s.rightArm.rotation.x =  goLeft  * 1.68;
+            s.rightArm.rotation.y = -goLeft  * 1.40;
 
-            /* ── Body: hip counter-sway + gentle forward lean ── */
-            s.body.rotation.z = -swing * 0.13;
-            s.body.rotation.y =  swing * 0.06;
+            /* ── Body: hip counter-sway (hips move OPPOSITE to arms) ── */
+            s.body.rotation.z = -swing * 0.18;
+            s.body.rotation.y =  swing * 0.08;
             s.body.rotation.x =  0.06;
 
             /* ── Head: follows the sway softly ── */
@@ -152,12 +162,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             }
 
             /* ── Legs: slight weight-shift with each swing ── */
-            s.leftLeg.rotation.x  =  swing * 0.07;
+            s.leftLeg.rotation.x  =  swing * 0.08;
             s.leftLeg.rotation.z  =  0.14;
-            s.leftLeg.rotation.y  = 0;
-            s.rightLeg.rotation.x = -swing * 0.07;
+            s.leftLeg.rotation.y  =  0;
+            s.rightLeg.rotation.x = -swing * 0.08;
             s.rightLeg.rotation.z = -0.14;
-            s.rightLeg.rotation.y = 0;
+            s.rightLeg.rotation.y =  0;
           } catch (_) {}
         });
 
