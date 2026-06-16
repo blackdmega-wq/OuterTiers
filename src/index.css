@@ -2305,22 +2305,35 @@ img { display: block; }
   overflow: hidden;
   z-index: 0;
 }
+/* Minecraft bottle rocket: white tip → gray body → orange flame trail */
 .lb-fire-rocket {
   position: absolute;
-  bottom: -4px;
+  bottom: 0;
   width: 5px;
-  height: 28px;
-  border-radius: 3px 3px 1px 1px;
+  height: 36px;
+  border-radius: 50% 50% 0 0 / 8px 8px 0 0;   /* pointed tip at top */
   opacity: 0;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,       /* rocket tip  */
+    #dddddd 18%,      /* rocket body */
+    #aaaaaa 34%,      /* body base   */
+    #FF8C00 50%,      /* flame start */
+    #FF3300 68%,      /* flame core  */
+    transparent 100%  /* trail fade  */
+  );
+  box-shadow:
+    0 0 4px 1px rgba(255,120,0,0.55),
+    0 8px 8px 0px rgba(255,60,0,0.35);
   animation: lb-fire-rise var(--fdur, 3s) var(--fdelay, 0s) ease-in infinite;
 }
 @keyframes lb-fire-rise {
-  0%   { transform: translateY(0)      scaleX(1.0) scaleY(1.0); opacity: 0;    }
-  6%   { opacity: 0.35; }
-  30%  { transform: translateY(-28%)   scaleX(0.9) scaleY(1.1); opacity: 0.30; }
-  65%  { transform: translateY(-65%)   scaleX(0.6) scaleY(0.8); opacity: 0.20; }
-  88%  { opacity: 0.10; }
-  100% { transform: translateY(-105%)  scaleX(0.2) scaleY(0.5); opacity: 0;    }
+  0%   { transform: translateY(0)     scaleX(1.0); opacity: 0;    }
+  5%   { opacity: 0.40; }
+  40%  { transform: translateY(-38%)  scaleX(0.85); opacity: 0.32; }
+  70%  { transform: translateY(-75%)  scaleX(0.65); opacity: 0.22; }
+  90%  { opacity: 0.08; }
+  100% { transform: translateY(-108%) scaleX(0.3);  opacity: 0;    }
 }
 
 /* Confetti rocket particles above fire */
