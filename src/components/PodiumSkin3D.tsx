@@ -55,38 +55,43 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  MINECRAFT FLOSS DANCE — korrekte Minecraft-Version
+         #2  MINECRAFT FLOSS EMOTE — exakte Blockbench/Mine-imator Keyframes
 
-         Das Minecraft-Floss-Muster (für steife Blockmodelle):
+         Rig: Kopf · Körper · linker Arm · rechter Arm · Beine
 
-         Frame 1 (Arme → RECHTS, Hüfte ← LINKS):
-           Rechter Arm: VOR dem Körper nach rechts schwingen (~45°)
-           Linker Arm:  HINTER dem Körper nach rechts schwingen
-           Hüfte/Oberkörper: leicht nach links drehen
+         FRAME 1 — „Rechte Seite vorne" (swing = +1)
+           Rechter Arm: VOR dem Körper → x = −25° = −0.436 rad
+                        leicht nach rechts außen → z = −30° = −0.524 rad
+           Linker Arm:  HINTER dem Körper → x = +25° = +0.436 rad
+                        leicht nach rechts (hinten) → z = +20° = +0.349 rad
+           Körper:      leicht nach LINKS drehen → body.y = +10° = +0.175 rad
+           Hüfte:       minimal nach rechts → body.z = +2° (sehr subtil)
 
-         Frame 3 (Arme ← LINKS, Hüfte → RECHTS):
-           Linker Arm:  VOR dem Körper nach links schwingen (~45°)
-           Rechter Arm: HINTER dem Körper nach links schwingen
-           Hüfte/Oberkörper: leicht nach rechts drehen
+         FRAME 2 — Übergang (Mitte, ease-in-out)
+           Alle Werte → 0 (Neutralposition, Arme nach unten)
 
-         Die Arme wechseln bei jedem Schwung zwischen VORNE und HINTEN.
-         Das ist das charakteristische Minecraft-Floss-Muster.
+         FRAME 3 — „Linke Seite vorne" (swing = −1)
+           Linker Arm:  VOR dem Körper → x = −25° = −0.436 rad
+                        leicht nach links außen → z = −30° = −0.524 rad
+           Rechter Arm: HINTER dem Körper → x = +25° = +0.436 rad
+                        leicht nach links (hinten) → z = +20° = +0.349 rad
+           Körper:      leicht nach RECHTS drehen → body.y = −10° = −0.175 rad
+
+         FRAME 4 — Übergang zurück zur Mitte
 
          skinview3d Achsen (Charakter schaut +Z = zur Kamera):
-           rotation.x: negativ = nach VORNE   positiv = nach HINTEN
-           leftArm.z:  negativ = außen LINKS   positiv = kreuzt RECHTS
-           rightArm.z: negativ = außen RECHTS  positiv = kreuzt LINKS
+           arm.rotation.x: NEGATIV = nach VORNE   POSITIV = nach HINTEN
+           leftArm.rotation.z:  NEGATIV = außen LINKS  POSITIV = kreuzt RECHTS
+           rightArm.rotation.z: NEGATIV = außen RECHTS POSITIV = kreuzt LINKS
+           body.rotation.y: POSITIV = dreht nach LINKS (Schultern)
 
-         swing = sin(t): +1 = Frame 1 (rechts)   −1 = Frame 3 (links)
-         ph = (swing+1)/2:  0 = Arme LINKS   1 = Arme RECHTS
+         swing = Math.sin(t): +1 = Frame 1,  −1 = Frame 3
+         ph = (swing+1)/2:     0 = Frame 3 (links),  1 = Frame 1 (rechts)
 
-         ph=0 (Arme LINKS, Frame 3):
-           leftArm:  VOR  dem Körper, nach links  → x=−0.65, z=−0.78
-           rightArm: HINTER dem Körper, nach links → x=+0.65, z=+0.78
-
-         ph=1 (Arme RECHTS, Frame 1):
-           rightArm: VOR  dem Körper, nach rechts → x=−0.65, z=−0.78
-           leftArm:  HINTER dem Körper, nach rechts → x=+0.65, z=+0.78
+         Profi-Details:
+           • Kopf kippt 3° in Gegenrichtung (Anti-stiff)
+           • Beine: nur 1–2° Weight-Shift
+           • Sinuswelle hält Extremposen länger (natürlicher Easing)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -94,57 +99,61 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* 12–16 FPS Rhythmus — Hauptposen werden kurz gehalten */
+            /* 12–16 FPS Rhythmus — Sinuswelle hält Extremposen länger */
             const SPEED = 2.8;
             const t     = progress * SPEED;
             const swing = Math.sin(t);
             const lerp  = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ph: 0 = Arme LINKS (Frame 3)   1 = Arme RECHTS (Frame 1) */
+            /* ph: 0 = Frame 3 (Arme LINKS)   1 = Frame 1 (Arme RECHTS) */
             const ph = (swing + 1) * 0.5;
 
-            /* ── LINKER ARM ────────────────────────────────────────────────
-               ph=0 (Frame 3, Arme LINKS):
-                 VOR dem Körper nach links → x=−0.65 (vorne), z=−0.78 (außen links)
-               ph=1 (Frame 1, Arme RECHTS):
-                 HINTER dem Körper nach rechts → x=+0.65 (hinten), z=+0.78 (kreuzt rechts)
+            /* ── LINKER ARM ─────────────────────────────────────────────────
+               Frame 3 (ph=0 / links):  VOR dem Körper nach links
+                 x = −25° = −0.436 (nach vorne)
+                 z = −30° = −0.524 (nach außen links gestreckt)
+               Frame 1 (ph=1 / rechts): HINTER dem Körper nach rechts
+                 x = +25° = +0.436 (nach hinten)
+                 z = +20° = +0.349 (kreuzt nach rechts, hinter dem Körper)
             ────────────────────────────────────────────────────────────── */
-            s.leftArm.rotation.x = lerp(-0.65, +0.65, ph);
-            s.leftArm.rotation.z = lerp(-0.78, +0.78, ph);
+            s.leftArm.rotation.x = lerp(-0.436, +0.436, ph);
+            s.leftArm.rotation.z = lerp(-0.524, +0.349, ph);
             s.leftArm.rotation.y = 0;
 
-            /* ── RECHTER ARM ───────────────────────────────────────────────
-               ph=0 (Frame 3, Arme LINKS):
-                 HINTER dem Körper nach links → x=+0.65 (hinten), z=+0.78 (kreuzt links)
-               ph=1 (Frame 1, Arme RECHTS):
-                 VOR dem Körper nach rechts → x=−0.65 (vorne), z=−0.78 (außen rechts)
+            /* ── RECHTER ARM ────────────────────────────────────────────────
+               Frame 3 (ph=0 / links):  HINTER dem Körper nach links
+                 x = +25° = +0.436 (nach hinten)
+                 z = +20° = +0.349 (kreuzt nach links, hinter dem Körper)
+               Frame 1 (ph=1 / rechts): VOR dem Körper nach rechts
+                 x = −25° = −0.436 (nach vorne)
+                 z = −30° = −0.524 (nach außen rechts gestreckt)
             ────────────────────────────────────────────────────────────── */
-            s.rightArm.rotation.x = lerp(+0.65, -0.65, ph);
-            s.rightArm.rotation.z = lerp(+0.78, -0.78, ph);
+            s.rightArm.rotation.x = lerp(+0.436, -0.436, ph);
+            s.rightArm.rotation.z = lerp(+0.349, -0.524, ph);
             s.rightArm.rotation.y = 0;
 
-            /* ── HÜFTE / OBERKÖRPER — gegenseitig zu den Armen ────────────
-               Arme rechts (Frame 1) → Hüfte dreht leicht nach links
-               Arme links  (Frame 3) → Hüfte dreht leicht nach rechts
-               body.rotation.y: Drehung um Y-Achse (links/rechts drehen)
-               body.rotation.z: Seitliches Kippen (sehr minimal)           */
-            s.body.rotation.y = -swing * 0.12;
-            s.body.rotation.z = -swing * 0.06;
+            /* ── KÖRPER / SCHULTERN — gegenseitig zu den Armen ─────────────
+               Frame 1 (Arme rechts): Oberkörper dreht leicht LINKS (+10°)
+               Frame 3 (Arme links):  Oberkörper dreht leicht RECHTS (−10°)
+               + sehr subtiles seitliches Hüft-Kippen (2°)                 */
+            s.body.rotation.y =  swing * 0.175;   /* −10° bis +10° */
+            s.body.rotation.z = -swing * 0.035;   /* ±2° Hüfte subtil */
             s.body.rotation.x =  0;
 
-            /* ── KOPF — leicht mitwippen (±5° = ±0.087 rad) ────────────── */
+            /* ── KOPF — Micro-Movement in Gegenrichtung (±3°) ─────────────
+               "Kopf 2–3° leicht in Gegenrichtung kippen" (Profi-Tipp)     */
             if (s.head) {
-              s.head.rotation.y =  swing * 0.087;
+              s.head.rotation.y = -swing * 0.052;  /* Gegenbewegung ±3° */
               s.head.rotation.x =  0;
               s.head.rotation.z =  0;
             }
 
-            /* ── BEINE — minimale Bewegung (Floss ist hauptsächlich Arme) ─ */
-            s.leftLeg.rotation.x  =  swing * 0.04;
-            s.leftLeg.rotation.z  =  0.06;
+            /* ── BEINE — nur minimaler Weight-Shift (1–2°) ─────────────── */
+            s.leftLeg.rotation.x  =  swing * 0.03;
+            s.leftLeg.rotation.z  =  0.12;         /* leicht auseinander */
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.x = -swing * 0.04;
-            s.rightLeg.rotation.z = -0.06;
+            s.rightLeg.rotation.x = -swing * 0.03;
+            s.rightLeg.rotation.z = -0.12;         /* leicht auseinander */
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
