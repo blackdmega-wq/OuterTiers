@@ -2249,6 +2249,8 @@ img { display: block; }
   margin-top: 8px;
   overflow: visible;
   flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 }
 .lb-pod--rank1 .lb-pod-skin-wrap { width: 100px; height: 152px; margin-top: 12px; }
 .lb-pod--rank2 .lb-pod-skin-wrap { width: 82px; height: 128px; }
