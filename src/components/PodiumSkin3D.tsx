@@ -55,28 +55,33 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════
-         #2  FORTNITE FLOSS DANCE (Backpack Kid)
+         #2  FORTNITE FLOSS DANCE — 4 exact poses
 
          Viewed from the FRONT of the dancer:
-         ┌──────────────────────────────────────────────────────┐
-         │  PHASE-R  (arms swing RIGHT):                        │
-         │   Left arm  → FORWARD + crosses body to RIGHT        │
-         │   Right arm → BACKWARD + swings outward RIGHT        │
-         │   Hips counter-twist to the LEFT                     │
-         │                                                      │
-         │  PHASE-L  (arms swing LEFT):                         │
-         │   Right arm → FORWARD + crosses body to LEFT         │
-         │   Left arm  → BACKWARD + swings outward LEFT         │
-         │   Hips counter-twist to the RIGHT                    │
-         └──────────────────────────────────────────────────────┘
 
-         skinview3d arm rotation axes:
-           rotation.x  neg = arm swings FORWARD (toward camera)
-                       pos = arm swings BACKWARD
-           leftArm.rotation.z   pos = arm crosses body RIGHT
-                                neg = arm swings outward LEFT
-           rightArm.rotation.z  neg = arm crosses body LEFT
-                                pos = arm swings outward RIGHT
+         POSE 1 — frame 1:
+           Left arm  → OUT-LEFT (extended fully to the left)
+           Right arm → BEHIND BACK
+
+         POSE 2 — frame 2:
+           Right arm → OUT-RIGHT (extended fully to the right)
+           Left arm  → FORWARD in front of belly, crossing toward RIGHT
+
+         POSE 3 — frame 3:
+           BOTH arms → extended to the LEFT
+           (left arm out-left, right arm crosses body to left)
+
+         POSE 4 — frame 4:
+           Right arm → OUT-RIGHT
+           Left arm  → BEHIND BACK
+
+         skinview3d arm rotation axes (char faces +Z = toward camera):
+           rotation.x  negative = arm swings FORWARD (toward camera)
+                       positive = arm swings BACKWARD (behind back)
+           leftArm.rotation.z   positive = arm crosses body toward RIGHT
+                                negative = arm swings outward LEFT
+           rightArm.rotation.z  positive = arm swings outward LEFT / crosses LEFT
+                                negative = arm swings outward RIGHT
          ═══════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -84,23 +89,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /*
-              ─── FLOSS — 4-BEAT KEYFRAME CYCLE ──────────────────────────
-              Beat 1: L-arm OUT-LEFT,  R-arm BEHIND
-              Beat 2: L-arm OUT-RIGHT, R-arm OUT-RIGHT  (both arms RIGHT)
-              Beat 3: L-arm OUT-LEFT,  R-arm OUT-LEFT   (both arms LEFT)
-              Beat 4: L-arm BEHIND,    R-arm OUT-RIGHT
-
-              Rotation.z sign rule (Three.js, char faces +Z):
-                leftArm  .z POSITIVE → crosses body to char-RIGHT
-                leftArm  .z NEGATIVE → points outward char-LEFT
-                rightArm .z POSITIVE → crosses body to char-LEFT
-                rightArm .z NEGATIVE → points outward char-RIGHT
-
-              Legs: no movement (user request)
-              ─────────────────────────────────────────────────────────────
-            */
-            const SPEED = 0.85;
+            const SPEED = 0.90;
             const raw = ((progress * SPEED * 4) % 4 + 4) % 4;
             const ki  = Math.floor(raw);
             const frac = raw - ki;
@@ -111,22 +100,22 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const lerp = (a: number, b: number) => a + (b - a) * ef;
 
             /*
-              Chest (body.rotation.y) = 0 always — stays still, faces forward.
-              Hips simulated via body.rotation.z (slight lateral tilt):
-                Beat 1 → hips RIGHT (hz = -0.13)
-                Beat 2 → hips LEFT  (hz = +0.13)
-                Beat 3 → hips RIGHT (hz = -0.13)
-                Beat 4 → hips LEFT  (hz = +0.13)
+              ── FLOSS 4-BEAT KEYFRAME TABLE ──────────────────────────
+              Pose 1: L arm out-LEFT,       R arm BEHIND BACK
+              Pose 2: R arm out-RIGHT,      L arm FORWARD + crosses RIGHT
+              Pose 3: BOTH arms to the LEFT
+              Pose 4: R arm out-RIGHT,      L arm BEHIND BACK
+              ─────────────────────────────────────────────────────────
             */
             const KEYS = [
-              /* Beat 1 — L out-LEFT,  R behind,  hips RIGHT */
-              { lAx:  0.10, lAz: -1.30, rAx:  1.20, rAz:  0.10, hz: -0.13 },
-              /* Beat 2 — Both arms RIGHT,         hips LEFT  */
-              { lAx:  0.10, lAz:  1.30, rAx:  0.10, rAz: -1.30, hz:  0.13 },
-              /* Beat 3 — Both arms LEFT,          hips RIGHT */
-              { lAx:  0.10, lAz: -1.30, rAx:  0.10, rAz:  1.30, hz: -0.13 },
-              /* Beat 4 — L behind,    R out-RIGHT, hips LEFT */
-              { lAx:  1.20, lAz: -0.10, rAx:  0.10, rAz: -1.30, hz:  0.13 },
+              /* Pose 1 — L out-LEFT, R behind back */
+              { lAx:  0.0,  lAz: -1.45, rAx:  1.25, rAz: -0.08, hz: -0.14 },
+              /* Pose 2 — R out-RIGHT, L forward + crossing right (vor dem Bauch) */
+              { lAx: -0.90, lAz:  0.85, rAx:  0.0,  rAz: -1.45, hz:  0.14 },
+              /* Pose 3 — BOTH arms LEFT */
+              { lAx:  0.0,  lAz: -1.45, rAx:  0.0,  rAz:  1.38, hz: -0.14 },
+              /* Pose 4 — R out-RIGHT, L behind back */
+              { lAx:  1.25, lAz: -0.08, rAx:  0.0,  rAz: -1.45, hz:  0.14 },
             ];
 
             const kA = KEYS[ki % 4];
@@ -139,9 +128,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.rightArm.rotation.z = lerp(kA.rAz, kB.rAz);
             s.rightArm.rotation.y = 0;
 
-            s.body.rotation.y = 0;                   /* chest stays still */
+            s.body.rotation.y = 0;
             s.body.rotation.x = 0;
-            s.body.rotation.z = lerp(kA.hz, kB.hz); /* hips R/L/R/L tilt */
+            s.body.rotation.z = lerp(kA.hz, kB.hz);
 
             /* Legs: no movement */
             s.leftLeg.rotation.x  = 0; s.leftLeg.rotation.z  = 0; s.leftLeg.rotation.y  = 0;
@@ -150,20 +139,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         });
 
       /* ═══════════════════════════════════════════════════════
-         #1  VICTORY POSE + MINECRAFT CASTLE CROWN
+         #1  VICTORY POSE + MINECRAFT CROWN — REVAMPED
 
-         Crown built to match reference screenshot 1-to-1:
-         • Wide base band (yellow/gold) — chunky walls
-         • Castle merlons: 5 front, 5 back, 3 per side, corner blocks
-         • Center merlon visibly taller
-         • 4 LARGE gems on the FRONT face (toward camera = +Z in head space):
-             purple | light-blue | dark-blue | green
-         • Crown sits ON TOP of head (group.y = 8 = head top)
-
-         IMPORTANT — coordinate system in skinview3d:
-           The character faces +Z (toward the camera).
-           In head LOCAL space the face/front is at +Z.
-           ∴ front wall of crown = positive Z; gems protrude at +Z.
+         Crown redesign:
+         • Metallic MeshStandardMaterial (metalness 0.92, roughness 0.08)
+           → real shading, specular highlights, no flat look
+         • Darker inner-shadow material for depth
+         • Slimmer proportions — less chunky walls
+         • 9 front merlons (more castle-like detail)
+         • Center merlon distinctly taller
+         • 4 glowing gems on FRONT face: purple | lightblue | darkblue | green
+           each with emissive colour for a bright inner glow
+         • Crown sits flush on head top (group.y = 7.8)
          ═══════════════════════════════════════════════════════ */
       } else {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -178,14 +165,50 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 if (disposed || s.head.userData.crownBuilt) return;
                 s.head.userData.crownBuilt = true;
 
-                /* ── Materials ── */
-                const gold  = new T.MeshLambertMaterial({ color: 0xF0CC00 });
-                const mPurp = new T.MeshLambertMaterial({ color: 0xBB44EE });
-                const mBlu1 = new T.MeshLambertMaterial({ color: 0x55AAFF });
-                const mBlu2 = new T.MeshLambertMaterial({ color: 0x1155CC });
-                const mGrn  = new T.MeshLambertMaterial({ color: 0x33DD44 });
+                /* ── Metallic gold materials — 3 shades for depth ── */
+                const goldBase = new T.MeshStandardMaterial({
+                  color: 0xFFCC00,
+                  metalness: 0.92,
+                  roughness: 0.08,
+                  emissive: 0x3A2000,
+                  emissiveIntensity: 0.14,
+                });
+                const goldDark = new T.MeshStandardMaterial({
+                  color: 0xC89800,
+                  metalness: 0.88,
+                  roughness: 0.14,
+                  emissive: 0x1E1000,
+                  emissiveIntensity: 0.10,
+                });
+                const goldTop = new T.MeshStandardMaterial({
+                  color: 0xFFE040,
+                  metalness: 0.95,
+                  roughness: 0.06,
+                  emissive: 0x604400,
+                  emissiveIntensity: 0.22,
+                });
+
+                /* ── Gem materials — emissive glow ── */
+                const gemPurple = new T.MeshStandardMaterial({
+                  color: 0xDD44FF, metalness: 0.15, roughness: 0.05,
+                  emissive: 0x8800CC, emissiveIntensity: 0.80,
+                });
+                const gemCyan = new T.MeshStandardMaterial({
+                  color: 0x44CCFF, metalness: 0.15, roughness: 0.05,
+                  emissive: 0x006699, emissiveIntensity: 0.75,
+                });
+                const gemBlue = new T.MeshStandardMaterial({
+                  color: 0x2266EE, metalness: 0.15, roughness: 0.05,
+                  emissive: 0x001166, emissiveIntensity: 0.75,
+                });
+                const gemGreen = new T.MeshStandardMaterial({
+                  color: 0x22EE55, metalness: 0.15, roughness: 0.05,
+                  emissive: 0x005522, emissiveIntensity: 0.80,
+                });
 
                 const g = new T.Group();
+
+                /* Helper: add a box mesh */
                 const bx = (
                   mat: any, w: number, h: number, d: number,
                   x: number, y: number, z: number,
@@ -196,94 +219,89 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 };
 
                 /*
-                  Crown dimensions — proportioned to match IMG_4985 reference.
-                  Head = 8×8×8 units; crown sits on top (group at y=8).
-                  Total height above head: BH + MHC = 1.6 + 2.0 = 3.6 units (~45% of head).
+                  Slimmer crown — proportions tuned for less "chunky" look.
+                  Head = 8×8×8 units.
+                  Crown sits at y = 7.8 (group offset).
                 */
-                const BW  = 10.5;               // crown width (wider than 8-unit head)
-                const BH  = 1.6;               // base band height
-                const BT  = 1.3;               // wall thickness
+                const BW  = 9.2;     // total crown width (just wider than head)
+                const BH  = 1.1;     // base band height — slimmer
+                const BT  = 0.85;    // wall thickness — thinner walls
+                const inner = BW - BT * 2;
 
-                /* Character faces +Z (toward camera).
-                   Front wall = POSITIVE Z, back wall = NEGATIVE Z. */
-                const FZ  =  (BW / 2 - BT / 2);   // front wall center (+Z = toward camera)
-                const BKZ = -(BW / 2 - BT / 2);   // back  wall center (-Z)
-                const LX  = -(BW / 2 - BT / 2);   // left  wall center
-                const RX  =  (BW / 2 - BT / 2);   // right wall center
-                const inner = BW - BT * 2;         // inner span
+                /* Front/back wall Z centers */
+                const FZ  =  (BW / 2 - BT / 2);
+                const BKZ = -(BW / 2 - BT / 2);
+                const LX  = -(BW / 2 - BT / 2);
+                const RX  =  (BW / 2 - BT / 2);
 
-                /* ── BASE BAND — 4 walls ── */
-                bx(gold, BW,    BH, BT,    0,     BH / 2, FZ);   // FRONT wall
-                bx(gold, BW,    BH, BT,    0,     BH / 2, BKZ);  // back wall
-                bx(gold, BT,    BH, inner, LX,    BH / 2, 0);    // left wall
-                bx(gold, BT,    BH, inner, RX,    BH / 2, 0);    // right wall
+                /* ── BASE BAND — 4 walls with dark material (shadow) ── */
+                bx(goldDark, BW,    BH, BT,    0,     BH / 2, FZ);   // front
+                bx(goldDark, BW,    BH, BT,    0,     BH / 2, BKZ);  // back
+                bx(goldDark, BT,    BH, inner, LX,    BH / 2, 0);    // left
+                bx(goldDark, BT,    BH, inner, RX,    BH / 2, 0);    // right
 
                 /* ── MERLONS (castle battlements) ──
-                   Front & back: 5 merlons, evenly spaced.
-                   Center merlon is taller (matches the reference screenshot).
-                   Sides: 3 merlons each. Corner junction blocks. */
-                const MW  = 1.4;   // merlon width
-                const MD  = BT;    // merlon depth
-                const MH  = 1.5;   // standard merlon height
-                const MHC = 2.0;   // center merlon height (taller)
-                const yB  = BH;    // merlons start at base top
+                   Front & back: 7 merlons, slim & tall.
+                   Center merlon is distinctly taller.
+                   goldTop material for the bright top faces. */
+                const MW  = 0.95;   // merlon width — slimmer
+                const MD  = BT;     // merlon depth
+                const MH  = 1.55;   // standard merlon height
+                const MHC = 2.30;   // center merlon — clearly taller
+                const yB  = BH;     // merlons start at base top
 
-                const frontXs = [-3.5, -1.75, 0, 1.75, 3.5];
+                /* 7 merlons across front and back */
+                const frontXs = [-3.6, -2.4, -1.2, 0, 1.2, 2.4, 3.6];
+                frontXs.forEach((x, i) => {
+                  const h = i === 3 ? MHC : MH;
+                  const mat = i === 3 ? goldTop : goldBase;
+                  bx(mat, MW, h, MD, x, yB + h / 2, FZ);
+                  bx(mat, MW, h, MD, x, yB + h / 2, BKZ);
+                });
 
-                /* front merlons */
-                frontXs.forEach((x, i) => {
-                  const h = i === 2 ? MHC : MH;
-                  bx(gold, MW, h, MD, x, yB + h / 2, FZ);
+                /* Side merlons — 3 per side */
+                [-2.2, 0, 2.2].forEach((z) => {
+                  bx(goldBase, MD, MH, MW, LX, yB + MH / 2, z);
+                  bx(goldBase, MD, MH, MW, RX, yB + MH / 2, z);
                 });
-                /* back merlons */
-                frontXs.forEach((x, i) => {
-                  const h = i === 2 ? MHC : MH;
-                  bx(gold, MW, h, MD, x, yB + h / 2, BKZ);
-                });
-                /* left side merlons */
-                [-2.2, 0, 2.2].forEach((z) => bx(gold, MD, MH, MW, LX, yB + MH / 2, z));
-                /* right side merlons */
-                [-2.2, 0, 2.2].forEach((z) => bx(gold, MD, MH, MW, RX, yB + MH / 2, z));
-                /* corner junction blocks */
+
+                /* Corner junction caps */
                 ([[LX, FZ], [RX, FZ], [LX, BKZ], [RX, BKZ]] as [number,number][])
-                  .forEach(([cx, cz]) => bx(gold, BT, MH, BT, cx, yB + MH / 2, cz));
+                  .forEach(([cx, cz]) => bx(goldTop, BT, MH, BT, cx, yB + MH / 2, cz));
 
-                /* ── GEMS on the FRONT face (+Z, toward camera) ──
-                   Large coloured squares embedded in the base band.
-                   They protrude outward (more positive Z) to be CLEARLY visible.
-
-                   Front wall face is at:  FZ + BT/2  (most-positive-Z surface)
-                   Gem protrudes to:       FZ + BT/2 + GD
-                   Gem centre at:          FZ + BT/2 + GD/2                      */
-                const GS   = 1.55;                           // gem side length
-                const GD   = 0.70;                           // gem depth (protrusion)
-                const GY   = BH / 2;                         // vertically centred in band
-                const GZ   = FZ + BT / 2 + GD / 2;          // ← FRONT face, protruding outward
+                /* ── GEMS on FRONT face (+Z = toward camera) ──
+                   Protrude outward so they are clearly visible.
+                   Front wall outer face = FZ + BT/2
+                   Gem center           = FZ + BT/2 + GD/2                 */
+                const GS = 1.40;                       // gem side (slightly smaller for elegance)
+                const GD = 0.75;                       // gem protrusion depth
+                const GY = BH / 2;                     // centered in base band height
+                const GZ = FZ + BT / 2 + GD / 2;      // protrudes outward
 
                 ([
-                  [-3.1, mPurp],   // purple (left)
-                  [-1.0, mBlu1],   // light blue
-                  [ 1.0, mBlu2],   // dark blue
-                  [ 3.1, mGrn ],   // green (right)
+                  [-3.0, gemPurple],
+                  [-1.0, gemCyan  ],
+                  [ 1.0, gemBlue  ],
+                  [ 3.0, gemGreen ],
                 ] as [number, any][]).forEach(([x, mat]) => {
                   const gem = new T.Mesh(new T.BoxGeometry(GS, GS, GD), mat);
                   gem.position.set(x, GY, GZ);
                   g.add(gem);
                 });
 
-                /* Crown deeper into head — y=6 sinks 2 units, looks properly seated. */
-                g.position.set(0, 6.0, 0);
+                /* Seat the crown on top of the head */
+                g.position.set(0, 7.8, 0);
                 s.head.add(g);
               }).catch(() => {});
             }
 
-            /* Victory pose — gentle wave */
+            /* Victory pose — arms wide, gentle wave */
             const t = progress * 2.5;
-            s.leftArm.rotation.z  = -(1.4 + Math.sin(t * 1.5) * 0.35);
-            s.rightArm.rotation.z =   1.4 + Math.sin(t * 1.5 + Math.PI) * 0.35;
-            s.leftArm.rotation.x  = -0.18 + Math.sin(t) * 0.18;
-            s.rightArm.rotation.x = -0.18 - Math.sin(t) * 0.18;
-            s.head.rotation.y     =  Math.sin(t * 0.8) * 0.25;
+            s.leftArm.rotation.z  = -(1.45 + Math.sin(t * 1.5) * 0.32);
+            s.rightArm.rotation.z =   1.45 + Math.sin(t * 1.5 + Math.PI) * 0.32;
+            s.leftArm.rotation.x  = -0.20 + Math.sin(t) * 0.20;
+            s.rightArm.rotation.x = -0.20 - Math.sin(t) * 0.20;
+            s.head.rotation.y     =  Math.sin(t * 0.8) * 0.24;
             s.head.rotation.x     = -0.08 + Math.sin(t * 1.1) * 0.08;
             s.body.rotation.y     =  Math.sin(t * 0.5) * 0.08;
             s.leftLeg.rotation.x  =  Math.sin(t * 1.8) * 0.06;
