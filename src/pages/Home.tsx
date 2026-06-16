@@ -314,33 +314,26 @@ export default function Home() {
                     >
                       {rank === 1 && (
                         <div className="lb-fire-wrap">
-                          {/* Minecraft-style fire rockets: bright core + wide glow trail */}
+                          {/* Minecraft bottle rockets — styling from CSS, only position+timing inline */}
                           {[
-                            {l:'6%',  col:'255,80,0',  dur:'2.6s',delay:'0s',   w:5},
-                            {l:'14%', col:'255,140,0', dur:'3.1s',delay:'0.55s',w:4},
-                            {l:'22%', col:'255,55,0',  dur:'2.4s',delay:'1.1s', w:6},
-                            {l:'30%', col:'255,200,0', dur:'2.9s',delay:'0.3s', w:4},
-                            {l:'38%', col:'255,80,0',  dur:'3.3s',delay:'0.8s', w:5},
-                            {l:'46%', col:'255,120,0', dur:'2.7s',delay:'1.4s', w:4},
-                            {l:'54%', col:'255,55,0',  dur:'3.0s',delay:'0.2s', w:6},
-                            {l:'62%', col:'255,180,0', dur:'2.5s',delay:'0.9s', w:4},
-                            {l:'70%', col:'255,80,0',  dur:'3.2s',delay:'0.5s', w:5},
-                            {l:'78%', col:'255,140,0', dur:'2.8s',delay:'1.2s', w:4},
-                            {l:'86%', col:'255,55,0',  dur:'3.4s',delay:'0.7s', w:6},
-                            {l:'94%', col:'255,200,0', dur:'2.6s',delay:'0.15s',w:4},
-                            {l:'10%', col:'255,100,0', dur:'2.9s',delay:'1.8s', w:3},
-                            {l:'42%', col:'255,60,0',  dur:'3.1s',delay:'1.6s', w:3},
-                            {l:'74%', col:'255,160,0', dur:'2.5s',delay:'2.0s', w:3},
+                            {l:'5%',  dur:'2.6s',delay:'0s'   },
+                            {l:'13%', dur:'3.1s',delay:'0.55s'},
+                            {l:'21%', dur:'2.4s',delay:'1.1s' },
+                            {l:'29%', dur:'2.9s',delay:'0.3s' },
+                            {l:'37%', dur:'3.3s',delay:'0.85s'},
+                            {l:'45%', dur:'2.7s',delay:'1.4s' },
+                            {l:'53%', dur:'3.0s',delay:'0.2s' },
+                            {l:'61%', dur:'2.5s',delay:'0.95s'},
+                            {l:'69%', dur:'3.2s',delay:'0.5s' },
+                            {l:'77%', dur:'2.8s',delay:'1.25s'},
+                            {l:'85%', dur:'3.4s',delay:'0.7s' },
+                            {l:'93%', dur:'2.6s',delay:'0.15s'},
+                            {l:'9%',  dur:'2.9s',delay:'1.85s'},
+                            {l:'41%', dur:'3.1s',delay:'1.6s' },
+                            {l:'73%', dur:'2.5s',delay:'2.05s'},
                           ].map((r,i) => (
                             <div key={i} className="lb-fire-rocket"
-                              style={{
-                                '--fdur': r.dur,
-                                '--fdelay': r.delay,
-                                left: r.l,
-                                width: `${r.w}px`,
-                                background: `linear-gradient(180deg,rgb(${r.col}) 0%,rgba(${r.col},0.7) 35%,rgba(${r.col},0.3) 65%,transparent 100%)`,
-                                boxShadow: `0 0 ${r.w * 2}px 1px rgba(${r.col},0.5)`,
-                              } as React.CSSProperties}
+                              style={{'--fdur':r.dur,'--fdelay':r.delay,left:r.l} as React.CSSProperties}
                             />
                           ))}
                         </div>
