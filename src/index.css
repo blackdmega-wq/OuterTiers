@@ -2481,16 +2481,16 @@ img { display: block; }
    Big arm-swing left & right, clear hip rhythm
    ───────────────────────────────────────────── */
 @keyframes lb-skin-floss {
-  /* Beat 1: swing hard right */
-  0%   { transform: rotate(30deg) translateX(12px) skewX(-12deg) translateY(0px); }
-  /* centre up */
-  25%  { transform: rotate(0deg) translateX(0px) skewX(0deg) translateY(-10px) scaleX(1.08); }
-  /* Beat 2: swing hard left */
-  50%  { transform: rotate(-30deg) translateX(-12px) skewX(12deg) translateY(0px); }
-  /* centre up */
-  75%  { transform: rotate(0deg) translateX(0px) skewX(0deg) translateY(-10px) scaleX(1.08); }
-  /* back to right */
-  100% { transform: rotate(30deg) translateX(12px) skewX(-12deg) translateY(0px); }
+  /* Arme RECHTS → Hüfte LINKS — Oberkörper bleibt aufrecht */
+  0%   { transform: translateX(10px) skewY(3deg) scaleX(0.95); }
+  /* Mitte (kurz hochfedern) */
+  25%  { transform: translateX(0px) skewY(0deg) scaleX(1.0) translateY(-5px); }
+  /* Arme LINKS → Hüfte RECHTS */
+  50%  { transform: translateX(-10px) skewY(-3deg) scaleX(0.95); }
+  /* Mitte */
+  75%  { transform: translateX(0px) skewY(0deg) scaleX(1.0) translateY(-5px); }
+  /* zurück rechts */
+  100% { transform: translateX(10px) skewY(3deg) scaleX(0.95); }
 }
 @keyframes lb-skin-floss-glow {
   0%,50%  { filter: drop-shadow(-8px 0 14px rgba(148,163,184,0.80)) drop-shadow(0 4px 10px rgba(203,213,225,0.55)); }
