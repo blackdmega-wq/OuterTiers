@@ -6,7 +6,7 @@ interface Props {
 }
 
 const SIZES = { 1:{width:100,height:160}, 2:{width:82,height:128}, 3:{width:76,height:118} } as const;
-const ZOOM: Record<1|2|3,number> = { 1:0.80, 2:0.82, 3:0.78 };
+const ZOOM: Record<1|2|3,number> = { 1:0.68, 2:0.82, 3:0.78 };
 
 const STYLE_ID = 'podium-skin-3d-v11';
 function ensureStyles() {
@@ -173,7 +173,7 @@ const CREEPER_PX: [number,number][] = [
 ];
 
 const FW_W = 220;
-const FW_H = 300; // canvas covers full card height; overflow:hidden on the card clips to golden border
+const FW_H = 220; // canvas starts at skin-wrap top (top:0) and extends to card bottom — no overflow above card
 
 // Preloaded rocket image (shared across all canvas instances)
 let _rocketImg: HTMLImageElement | null = null;
@@ -349,8 +349,8 @@ function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean): () => v
     // X: keep 60px away from each edge so explosion particles stay on-screen
     const startX = FW_W * 0.28 + Math.random() * FW_W * 0.44; // 61..158 px
 
-    // Explosions in the upper card area (trophy/skin zone), launches from card bottom
-    const targetExpY = 30 + Math.random() * 80;  // 30-110 px from canvas top = trophy/upper-skin area
+    // Canvas top = skin-wrap top; explosions in upper skin/trophy zone, launch from card bottom
+    const targetExpY = 15 + Math.random() * 65;  // 15-80 px from canvas top = upper skin area
     const startY     = FW_H - 5;                 // near canvas bottom = bottom of the gold card
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
@@ -553,7 +553,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
       // Shift the 3D skin canvas down so the character's feet sit on the pedestal line
-      const yOff = rank === 1 ? 12 : rank === 2 ? 14 : 18;
+      const yOff = rank === 1 ? 24 : rank === 2 ? 14 : 22;
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
@@ -675,13 +675,13 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks canvas — covers full card interior, clipped by overflow:hidden on lb-pod--rank1 */}
+      {/* Rank 1: Minecraft fireworks canvas — top:0 keeps it flush with skin-wrap top, no overflow above card */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
           style={{
             position: 'absolute',
-            bottom: -120,  // extends down past pedestal+info to card bottom; overflow:hidden clips it
+            top: 0,        // starts at skin-wrap top = inside the golden card; no upward overflow
             left: '50%',
             transform: 'translateX(-50%)',
             width: `${FW_W}px`,
