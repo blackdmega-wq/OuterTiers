@@ -97,16 +97,16 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
                ph=0: KREUZUNGS-Arm nach LINKS  → z negativ groß, x vorne
-               ph=1: AUSSEN-Arm nach RECHTS    → z positiv klein, x hinten */
-            s.rightArm.rotation.x = lerp(+0.50, -0.50, ph);
-            s.rightArm.rotation.z = lerp(-1.10, +0.65, ph);
+               ph=1: AUSSEN-Arm nach RECHTS    → z positiv, x hinten */
+            s.rightArm.rotation.x = lerp(+0.55, -0.55, ph);
+            s.rightArm.rotation.z = lerp(-1.10, +0.90, ph);
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               ph=0: AUSSEN-Arm nach LINKS     → z negativ klein, x hinten
+               ph=0: AUSSEN-Arm nach LINKS     → z negativ, x hinten
                ph=1: KREUZUNGS-Arm nach RECHTS → z positiv groß, x vorne */
-            s.leftArm.rotation.x = lerp(-0.50, +0.50, ph);
-            s.leftArm.rotation.z = lerp(-0.65, +1.10, ph);
+            s.leftArm.rotation.x = lerp(-0.55, +0.55, ph);
+            s.leftArm.rotation.z = lerp(-0.90, +1.10, ph);
             s.leftArm.rotation.y = 0;
 
             /* ── KÖRPER — leichte Gegendrehung ───────────────────────────  */
