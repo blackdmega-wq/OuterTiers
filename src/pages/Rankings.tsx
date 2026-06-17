@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
@@ -186,9 +186,15 @@ export default function Rankings() {
   };
 
   const isOverall = category === 'overall';
-  const sorted = [...players].filter(p => p.points > 0).sort((a, b) => b.points - a.points);
-  const tierColumns = !isOverall ? getCategoryTiers(category as keyof PlayerTiers, players) : [];
-  const currentCat = CATEGORIES.find(c => c.id === category);
+  const sorted = useMemo(
+    () => [...players].filter(p => p.points > 0).sort((a, b) => b.points - a.points),
+    [players]
+  );
+  const tierColumns = useMemo(
+    () => !isOverall ? getCategoryTiers(category as keyof PlayerTiers, players) : [],
+    [isOverall, category, players]
+  );
+  const currentCat = useMemo(() => CATEGORIES.find(c => c.id === category), [category]);
 
   return (
     <div className="rankings-page">
