@@ -55,28 +55,27 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  MINECRAFT FLOSS DANCE  — v11
+         #2  FLOSS DANCE  — v15
 
-         ACHSEN (aus RunningAnimation source verifiziert):
-           arm.x   POSITIV=vorne(Kamera)  NEGATIV=hinten(Rücken)
-             → RunningAnimation nutzt +1.5 für Vorwärts-Schwung ✓
-           leftArm.z   POSITIV=außen-links(Char)  NEGATIV=kreuzt-rechts(Char)
-           rightArm.z  NEGATIV=außen-rechts(Char) POSITIV=kreuzt-links(Char)
-           body.y  POSITIV=Körper dreht LINKS
+         CANVAS: 82×128px, zoom=0.68. Arme müssen sichtbar bleiben.
 
-         DER ECHTE FLOSS: beide Arme schwingen GLEICHZEITIG zur GLEICHEN Seite.
-         KREUZUNGS-Arm (von gegenüber): geht VORNE vor der Brust → x POSITIV
-         AUSSEN-Arm (native Seite):     geht HINTEN hinter Rücken → x NEGATIV
+         ECHTE FLOSS-LOGIK (von vorne gesehen):
+           Beide Arme schwingen zur GLEICHEN Seite → dominante z-Rotation.
+           KREUZUNGS-Arm kommt von gegenüber, liegt VOR dem Körper.
+           AUSSEN-Arm geht zur natürlichen Seite, liegt HINTER dem Körper.
 
-         ph=1 (swing=+1) → Arme zu Char-LINKS:
-           rightArm = VORDER-Arm, kreuzt nach links  → x=+0.65, z=+1.30
-           leftArm  = HINTER-Arm, außen nach links   → x=−1.30, z=+0.85
-           body.y = +0.18 (dreht LINKS)
+         x-Achse (aus Victory-Pose + RunningAnimation abgeleitet):
+           Negativ → Arm lehnt leicht NACH HINTEN (sichtbar bleibt, geht "hinter")
+           Positiv → Arm lehnt leicht NACH VORNE  (kommt vor die Brust)
+           WICHTIG: bei ±1.30 verschwindet der Arm aus dem Canvas → ±0.45 nutzen!
 
-         ph=0 (swing=−1) → Arme zu Char-RECHTS:
-           leftArm  = VORDER-Arm, kreuzt nach rechts → x=+0.65, z=−1.30
-           rightArm = HINTER-Arm, außen nach rechts  → x=−1.30, z=−0.85
-           body.y = −0.18 (dreht RECHTS)
+         ph=1 → Arme zu Char-LINKS:
+           rightArm KREUZUNGS-Arm:  x=+0.45 (leicht vorne),  z=+1.10 (kreuzt links)
+           leftArm  AUSSEN-Arm:     x=−0.45 (leicht hinten), z=+0.82 (außen links)
+
+         ph=0 → Arme zu Char-RECHTS:
+           leftArm  KREUZUNGS-Arm:  x=+0.45 (leicht vorne),  z=−1.10 (kreuzt rechts)
+           rightArm AUSSEN-Arm:     x=−0.45 (leicht hinten), z=−0.82 (außen rechts)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -86,53 +85,49 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
             const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ~1.0 Zyklen/sec — authentisches Floss-Emote-Tempo */
-            const t    = progress * 6.3;
-            const raw  = Math.sin(t);
+            /* ~0.85 Hz — Floss-Tempo wie im Fortnite-Emote */
+            const t     = progress * 5.4;
+            const raw   = Math.sin(t);
 
-            /* Power-Easing: Posen halten länger, Übergänge schnell */
-            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.38);
+            /* Power-Easing: hält die Posen, schnelle Übergänge */
+            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.42);
             const ph    = (swing + 1) * 0.5;
             /* ph=0 → Arme zu Char-RECHTS  |  ph=1 → Arme zu Char-LINKS */
 
-            /* ── RECHTER ARM ─────────────────────────────────────────────────
-               ph=0 → HINTER-Arm, außen-rechts:  x=−1.30 (NEGATIV=hinten!) z=−0.85
-               ph=1 → VORDER-Arm, kreuzt-links:  x=+0.65 (POSITIV=vorne!)  z=+1.30 */
-            s.rightArm.rotation.x = lerp(-1.30, +0.65, ph);
-            s.rightArm.rotation.z = lerp(-0.85, +1.30, ph);
+            /* ── RECHTER ARM ──────────────────────────────────────────────
+               ph=0: AUSSEN-rechts (hinten), ph=1: KREUZUNGS-links (vorne) */
+            s.rightArm.rotation.x = lerp(-0.45, +0.45, ph);
+            s.rightArm.rotation.z = lerp(-0.82, +1.10, ph);
             s.rightArm.rotation.y = 0;
 
-            /* ── LINKER ARM ──────────────────────────────────────────────────
-               ph=0 → VORDER-Arm, kreuzt-rechts: x=+0.65 (POSITIV=vorne!)  z=−1.30
-               ph=1 → HINTER-Arm, außen-links:   x=−1.30 (NEGATIV=hinten!) z=+0.85 */
-            s.leftArm.rotation.x = lerp(+0.65, -1.30, ph);
-            s.leftArm.rotation.z = lerp(-1.30, +0.85, ph);
+            /* ── LINKER ARM ───────────────────────────────────────────────
+               ph=0: KREUZUNGS-rechts (vorne), ph=1: AUSSEN-links (hinten) */
+            s.leftArm.rotation.x = lerp(+0.45, -0.45, ph);
+            s.leftArm.rotation.z = lerp(-1.10, +0.82, ph);
             s.leftArm.rotation.y = 0;
 
-            /* ── KÖRPER — dreht zur Seite des Vorderarms ────────────────── */
-            s.body.rotation.y =  swing * 0.18;
+            /* ── KÖRPER — leichte Gegendrehung ───────────────────────────  */
+            s.body.rotation.y =  swing * 0.14;
             s.body.rotation.x =  0;
-            s.body.rotation.z = -swing * 0.06;
+            s.body.rotation.z = -swing * 0.05;
 
-            /* ── GANZKÖRPER LATERAL-SHIFT — Hüfte gegenläufig zu Armen ─── */
-            /* Arme gehen zu Char-LINKS (+X) → Hüfte geht Char-RECHTS (−X)  */
-            player.position.x = -swing * 0.42;
-            /* Leichtes Hochfedern in der Mitte, minimal nach unten an Extremen */
-            player.position.y = (1 - Math.abs(swing)) * 0.30 - 0.15;
+            /* ── GANZKÖRPER — Hüfte gegenläufig zu Armen ─────────────────  */
+            player.position.x = -swing * 0.55;
+            player.position.y = (1 - Math.abs(swing)) * 0.25 - 0.12;
 
-            /* ── KOPF — leichte Mikro-Gegenrotation ──────────────────────── */
+            /* ── KOPF ─────────────────────────────────────────────────────  */
             if (s.head) {
-              s.head.rotation.y = -swing * 0.07;
+              s.head.rotation.y = -swing * 0.10;
               s.head.rotation.x =  0;
               s.head.rotation.z =  0;
             }
 
-            /* ── BEINE — fast statisch, minimaler Weight-Shift ───────────── */
-            s.leftLeg.rotation.z  =  0.12;
-            s.leftLeg.rotation.x  =  swing * 0.04;
+            /* ── BEINE — leichter Weight-Shift ───────────────────────────  */
+            s.leftLeg.rotation.z  =  swing * 0.10;
+            s.leftLeg.rotation.x  =  0;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z = -0.12;
-            s.rightLeg.rotation.x = -swing * 0.04;
+            s.rightLeg.rotation.z = -swing * 0.10;
+            s.rightLeg.rotation.x =  0;
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
