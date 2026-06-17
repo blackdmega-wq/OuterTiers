@@ -173,8 +173,7 @@ const CREEPER_PX: [number,number][] = [
 ];
 
 const FW_W = 220;
-const FW_H_MOBILE = 340;
-const FW_H_PC    = 500;  // taller canvas on PC — rockets launch from below the full card
+const FW_H = 300; // canvas covers full card height; overflow:hidden on the card clips to golden border
 
 // Preloaded rocket image (shared across all canvas instances)
 let _rocketImg: HTMLImageElement | null = null;
@@ -327,9 +326,9 @@ function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: n
   bl(-0.5, -18, 1, 2, 255,255,255);
 }
 
-function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean, fwH: number): () => void {
+function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean): () => void {
   cv.width  = FW_W;
-  cv.height = fwH;
+  cv.height = FW_H;
   const dc = cv.getContext('2d')!;
   if (!dc) return () => {};
 
@@ -350,13 +349,9 @@ function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean, fwH: num
     // X: keep 60px away from each edge so explosion particles stay on-screen
     const startX = FW_W * 0.28 + Math.random() * FW_W * 0.44; // 61..158 px
 
-    // Y explosion target — adjusted per device:
-    // Mobile (portrait): explosions closer to the skin so they stay visible on small screens
-    // PC: wider vertical range for a more dramatic effect
-    const targetExpY = isMobile
-      ? 130 + Math.random() * 80   // 130-210 px from top (closer to skin)
-      : 55 + Math.random() * 130;  // 55-185 px from top (full range on PC)
-    const startY    = fwH - 12; // near canvas bottom
+    // Explosions in the upper card area (trophy/skin zone), launches from card bottom
+    const targetExpY = 30 + Math.random() * 80;  // 30-110 px from canvas top = trophy/upper-skin area
+    const startY     = FW_H - 5;                 // near canvas bottom = bottom of the gold card
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
     const fuse      = dist / speed;               // exact frames to reach target
@@ -380,7 +375,7 @@ function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean, fwH: num
     launchTimer += dt;
     if (launchTimer >= LAUNCH_GAP) { launchRocket(); launchTimer = 0; }
 
-    dc.clearRect(0, 0, FW_W, fwH);
+    dc.clearRect(0, 0, FW_W, FW_H);
 
     // ── Rockets ──────────────────────────────────────────────
     for (let i = rockets.length - 1; i >= 0; i--) {
@@ -422,20 +417,8 @@ function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean, fwH: num
         }
       }
 
-      // Draw rocket sprite — use the loaded image if available, else fall back to canvas drawing
-      if (_rocketReady && _rocketImg) {
-        // The firework-rocket.webp image shows the rocket pointing upward.
-        // Draw it centered horizontally, with the bottom of the rocket at rk.y.
-        const RW = 32, RH = 80; // display size on canvas — thick, clearly visible
-        dc.save();
-        dc.translate(rk.x, rk.y);
-        // Rotate slightly so the rocket leans in its flight direction (natural look)
-        dc.rotate(-0.10);
-        dc.drawImage(_rocketImg, -RW / 2, -RH, RW, RH);
-        dc.restore();
-      } else {
-        drawMcRocket(dc, rk.x, rk.y, 3.0);
-      }
+      // Draw the Minecraft-style pixel rocket (always — the webp sprite is a placeholder)
+      drawMcRocket(dc, rk.x, rk.y, 5.0);
 
       // Exhaust flame glow below the fuse (at cy + ~3 units = +4.5px)
       const flicker = 0.75 + Math.random() * 0.25;
@@ -560,8 +543,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     }
     if (rank === 1 && fireworkCanvasRef.current) {
       const isMobile = window.innerWidth < 768;
-      const fwH = isMobile ? FW_H_MOBILE : FW_H_PC;
-      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile, fwH);
+      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
     }
 
     const isMobile = window.innerWidth < 768;
@@ -571,7 +553,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
       // Shift the 3D skin canvas down so the character's feet sit on the pedestal line
-      const yOff = rank === 1 ? 22 : rank === 2 ? 14 : 10;
+      const yOff = rank === 1 ? 12 : rank === 2 ? 14 : 18;
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
@@ -693,29 +675,24 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks canvas — large, centered, extends above and around the skin */}
-      {rank === 1 && (() => {
-        const _isMobFW = typeof window !== 'undefined' && window.innerWidth < 768;
-        const _fwH     = _isMobFW ? FW_H_MOBILE : FW_H_PC;
-        const _fwBot   = _isMobFW ? -10 : -170; // PC: canvas extends 170px below skin-wrap → launches from below card
-        return (
-          <canvas
-            ref={fireworkCanvasRef}
-            style={{
-              position: 'absolute',
-              bottom: _fwBot,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: `${FW_W}px`,
-              height: `${_fwH}px`,
-              pointerEvents: 'none',
-              zIndex: 50,
-            }}
-            width={FW_W}
-            height={_fwH}
-          />
-        );
-      })()}
+      {/* Rank 1: Minecraft fireworks canvas — covers full card interior, clipped by overflow:hidden on lb-pod--rank1 */}
+      {rank === 1 && (
+        <canvas
+          ref={fireworkCanvasRef}
+          style={{
+            position: 'absolute',
+            bottom: -120,  // extends down past pedestal+info to card bottom; overflow:hidden clips it
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: `${FW_W}px`,
+            height: `${FW_H}px`,
+            pointerEvents: 'none',
+            zIndex: 50,
+          }}
+          width={FW_W}
+          height={FW_H}
+        />
+      )}
     </div>
   );
 }
