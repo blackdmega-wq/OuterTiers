@@ -195,7 +195,7 @@ function startDustCanvas(
   const parts: DPart[] = [];
   const LFX = w * 0.36;
   const RFX = w * 0.64;
-  const FY  = h - 24;
+  const FY  = h - 58; // behind legs, not at ground
 
   let spawnClock = 0;
   let spawnSide  = 0;
@@ -208,7 +208,7 @@ function startDustCanvas(
     spawnSide = 1 - spawnSide;
 
     // 2–4 soft puffs
-    const puffCount = 2 + Math.floor(Math.random() * 3);
+    const puffCount = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < puffCount; i++) {
       const ml = 0.65 + Math.random() * 0.55;
       parts.push({
@@ -216,7 +216,7 @@ function startDustCanvas(
         y: FY  + (Math.random() - 0.5) * 5,
         vx: (Math.random() * 0.9 + 0.15) * (Math.random() > 0.38 ? dir : -dir),
         vy: -(Math.random() * 0.55 + 0.18),
-        r:  6 + Math.random() * 11,
+        r:  3 + Math.random() * 8,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
@@ -224,7 +224,7 @@ function startDustCanvas(
     }
 
     // 1–3 small debris specks
-    const debrisCount = 1 + Math.floor(Math.random() * 3);
+    const debrisCount = Math.floor(Math.random() * 2);
     for (let i = 0; i < debrisCount; i++) {
       const ml = 0.28 + Math.random() * 0.32;
       parts.push({
@@ -251,7 +251,7 @@ function startDustCanvas(
 
     // Spawn new particles every ~5 frames (≈6 times/sec at 30fps)
     spawnClock += delta;
-    if (spawnClock >= 5) {
+    if (spawnClock >= 9) {
       spawnClock = 0;
       spawn();
     }
@@ -271,10 +271,10 @@ function startDustCanvas(
       const lifeRatio = p.life / p.maxLife;
       // Fade in quickly, hold, then fade out
       const alpha = lifeRatio > 0.75
-        ? 0.88
+        ? 0.55
         : lifeRatio > 0.2
-          ? 0.88 * ((lifeRatio - 0.2) / 0.55)
-          : (lifeRatio / 0.2) * 0.88;
+          ? 0.55 * ((lifeRatio - 0.2) / 0.55)
+          : (lifeRatio / 0.2) * 0.55;
 
       if (p.isDebris) {
         dc.beginPath();
