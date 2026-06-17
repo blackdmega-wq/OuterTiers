@@ -272,6 +272,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       viewer.zoom = ZOOM[rank];
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch(_){}
+      // Cap WebGL render to 30 fps — 3 simultaneous canvases at 60 fps hammers the GPU
+      try {
+        const _ms = 1000 / 30; let _lt = 0;
+        const _orig = viewer.render.bind(viewer);
+        viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
+      } catch(_) {}
 
       /* ──────── #3  FAST SPRINT ──────── */
       if (rank === 3) {
