@@ -168,17 +168,12 @@ function ensureStyles() {
 const PR = [0,45,90,135,180,225,270,315];
 const SR = [22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5];
 
-/* ── Canvas-based dust particle system for rank 3 ── */
-interface DPart {
-  x: number; y: number; vx: number; vy: number;
-  r: number; life: number; maxLife: number;
-  color: string; isDebris: boolean;
+/* ── Step-impact ring FX for rank 3 sprint ── */
+interface StepRing {
+  x: number; y: number;
+  r: number; maxR: number;
+  life: number; maxLife: number;
 }
-
-const DUST_COLORS = [
-  '220,230,255','200,215,255','240,245,255',
-  '180,200,245','255,255,255','210,225,255',
-];
 
 function startDustCanvas(
   cv: HTMLCanvasElement,
@@ -187,106 +182,65 @@ function startDustCanvas(
 ): () => void {
   cv.width = w;
   cv.height = h;
-  const dcRaw = cv.getContext('2d');
-  if (!dcRaw) return () => {};
-  const dc: CanvasRenderingContext2D = dcRaw;
+  const dc = cv.getContext('2d');
+  if (!dc) return () => {};
 
-  const parts: DPart[] = [];
-  const LFX = w * 0.35;  // left foot X
-  const RFX = w * 0.65;  // right foot X
-  const FY  = h - 36;    // foot level
+  const rings: StepRing[] = [];
+  const LFX = w * 0.36;
+  const RFX = w * 0.64;
+  const FY  = h - 34;          // ground contact point (just above feet)
 
-  // Sprint animation uses t = progress * 10.5, cy = sin(t)
-  // cy > 0 → right foot on ground; cy < 0 → left foot on ground
   const START_T = performance.now();
   let prevCy = 0;
   let lastT  = performance.now();
   let animId = 0;
 
-  function spawnStep(fx: number, outDir: number) {
-    const C = () => DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)];
-    // 2 soft glow puffs
-    for (let i = 0; i < 2; i++) {
-      const ml = 0.28 + Math.random() * 0.18;
-      parts.push({
-        x:  fx + (Math.random() - 0.5) * 8,
-        y:  FY + (Math.random() - 0.5) * 2,
-        vx: (Math.random() * 0.9 + 0.3) * outDir,
-        vy: -(Math.random() * 0.55 + 0.20),
-        r:  2.5 + Math.random() * 4.0,
-        life: ml, maxLife: ml, color: C(), isDebris: false,
-      });
-    }
-    // 1 tiny spark
-    { const ml = 0.10 + Math.random() * 0.08;
-      parts.push({
-        x: fx + (Math.random()-0.5)*5, y: FY,
-        vx: (Math.random()*2.2+0.8)*outDir, vy:-(Math.random()*0.25),
-        r: 0.6+Math.random()*0.8,
-        life:ml, maxLife:ml, color:C(), isDebris:true,
-      });
-    }
+  function spawnRing(fx: number) {
+    // Primary impact ring
+    rings.push({ x: fx, y: FY, r: 0, maxR: 15, life: 0.22, maxLife: 0.22 });
+    // Secondary smaller echo
+    rings.push({ x: fx, y: FY, r: 0, maxR: 8,  life: 0.30, maxLife: 0.30 });
   }
-
-  const DUST_FPS = 30;
-  const DUST_MS  = 1000 / DUST_FPS;
 
   function tick(now: number) {
     animId = requestAnimationFrame(tick);
-    if (now - lastT < DUST_MS) return;
-    const delta = Math.min((now - lastT) / 16.67, 2.5);
+    const dt = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
 
-    // Sync with sprint animation: same formula as FunctionAnimation
-    const progress = (now - START_T) / 1000;
-    const t = progress * 10.5;
+    // Sync with sprint animation formula
+    const t = ((now - START_T) / 1000) * 10.5;
     const cy = Math.sin(t);
-
-    // Detect zero-crossing → footstep impact
-    if (prevCy <= 0 && cy > 0) {
-      spawnStep(RFX,  1); // right foot hits ground → dust spreads right
-    } else if (prevCy >= 0 && cy < 0) {
-      spawnStep(LFX, -1); // left foot hits ground  → dust spreads left
-    }
+    if (prevCy <= 0 && cy > 0) spawnRing(RFX);
+    else if (prevCy >= 0 && cy < 0) spawnRing(LFX);
     prevCy = cy;
 
     dc.clearRect(0, 0, w, h);
 
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i];
-      p.life -= 0.028 * delta;
-      if (p.life <= 0) { parts.splice(i, 1); continue; }
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const rg = rings[i];
+      rg.life -= 0.032 * dt;
+      if (rg.life <= 0) { rings.splice(i, 1); continue; }
 
-      p.x  += p.vx * delta;
-      p.y  += p.vy * delta;
-      // Puffs nearly float (tiny gravity); debris falls normally
-      p.vy += (p.isDebris ? 0.055 : 0.003) * delta; // grit falls fast, puffs float
-      p.vx *= Math.pow(0.960, delta); // air resistance
+      const lifeRatio = rg.life / rg.maxLife; // 1→0 as ring ages
+      rg.r = rg.maxR * (1 - lifeRatio);        // grows 0→maxR
+      const alpha = lifeRatio * 0.75;           // fades out
 
-      const lifeRatio = p.life / p.maxLife;
-      // Fade: quick fade-in → hold → smooth fade-out
-      const alpha = lifeRatio > 0.80
-        ? lifeRatio * 0.75                              // fade in
-        : lifeRatio > 0.25
-          ? 0.75                                        // hold
-          : (lifeRatio / 0.25) * 0.75;                 // fade out
+      // Stroke width shrinks as ring expands
+      const lw = 0.8 + lifeRatio * 2.0;
 
-      if (p.isDebris) {
+      dc.beginPath();
+      dc.ellipse(rg.x, rg.y, rg.r, rg.r * 0.32, 0, 0, Math.PI * 2);
+      dc.strokeStyle = `rgba(160,200,255,${alpha})`;
+      dc.lineWidth = lw;
+      dc.stroke();
+
+      // Bright inner flash at the moment of impact
+      if (lifeRatio > 0.65) {
         dc.beginPath();
-        dc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        dc.fillStyle = `rgba(${p.color},${Math.min(0.95, alpha * 1.3)})`;
-        dc.fill();
-      } else {
-        const expandR = p.r * (1 + (1 - lifeRatio) * 1.30); // expand more as fades
-        const grad = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, expandR);
-        grad.addColorStop(0,    `rgba(${p.color},${alpha * 0.85})`);
-        grad.addColorStop(0.40, `rgba(${p.color},${alpha * 0.55})`);
-        grad.addColorStop(0.75, `rgba(${p.color},${alpha * 0.22})`);
-        grad.addColorStop(1,    `rgba(${p.color},0)`);
-        dc.beginPath();
-        dc.arc(p.x, p.y, expandR, 0, Math.PI * 2);
-        dc.fillStyle = grad;
-        dc.fill();
+        dc.ellipse(rg.x, rg.y, rg.r * 0.5, rg.r * 0.16, 0, 0, Math.PI * 2);
+        dc.strokeStyle = `rgba(220,240,255,${(lifeRatio - 0.65) / 0.35 * 0.9})`;
+        dc.lineWidth = lw * 0.5;
+        dc.stroke();
       }
     }
   }
