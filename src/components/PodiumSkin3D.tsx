@@ -577,23 +577,38 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       //   https://yoursite.com?yoff1m=-20&yoff3m=-8      ← tune mobile only
       //   https://yoursite.com?yoff1pc=5&yoff1m=-15      ← tune rank1 on both separately
       let yOff: number;
-      const urlParams  = new URLSearchParams(window.location.search);
-      const onMobile   = window.innerWidth < 580;
-      const pcKey  = rank === 1 ? 'yoff1pc'  : rank === 3 ? 'yoff3pc'  : null;
-      const mobKey = rank === 1 ? 'yoff1m'   : rank === 3 ? 'yoff3m'   : null;
-      const urlKey = onMobile ? mobKey : pcKey;
-      const urlOverride = urlKey ? urlParams.get(urlKey) : null;
-      // Confirmed defaults (tuned by visual testing):
-      //   PC rank1=-20, PC rank3=15
-      //   Mobile still uses dynamic formula until tuned via ?yoff1m / ?yoff3m
-      const PC_DEFAULT:  Record<number,number> = { 1: -20, 2: 14, 3: 15 };
+      // ── URL tuning parameters ──────────────────────────────────────────────────
+      // PC   position:  ?yoff1pc=  ?yoff2pc=  ?yoff3pc=
+      // Mobile position:?yoff1m=   ?yoff2m=   ?yoff3m=
+      // Mobile scale:   ?scale1m=  ?scale2m=  ?scale3m=   (default ~0.68–0.82; bigger = larger skin)
+      //
+      // Positive yoff = skin moves DOWN, Negative = UP.
+      // Scale 1.0 = normal, 0.5 = half size, 1.5 = 50% bigger.
+      //
+      // Example (all mobile):
+      //   ?yoff1m=-25&scale1m=0.9&yoff2m=10&scale2m=1.1&yoff3m=-10&scale3m=0.85
+      const urlParams = new URLSearchParams(window.location.search);
+      const onMobile  = window.innerWidth < 580;
+
+      const yoffPcKey    = `yoff${rank}pc`;
+      const yoffMobKey   = `yoff${rank}m`;
+      const scaleMobKey  = `scale${rank}m`;
+
+      const yoffOverrideRaw = onMobile
+        ? urlParams.get(yoffMobKey)
+        : urlParams.get(yoffPcKey);
+      const scaleOverrideRaw = onMobile ? urlParams.get(scaleMobKey) : null;
+
+      // Confirmed PC defaults (tuned visually): rank1=-20, rank2=14, rank3=15
+      // Mobile uses dynamic formula until tuned via URL params
+      const PC_DEFAULT: Record<number, number> = { 1: -20, 2: 14, 3: 15 };
       const mobileFallback = () => {
         const wrapH = wrap.offsetHeight || (rank === 1 ? 100 : rank === 2 ? 84 : 76);
         return Math.round(wrapH - 0.71 * height);
       };
 
-      if (urlOverride !== null && !isNaN(Number(urlOverride))) {
-        yOff = Number(urlOverride);
+      if (yoffOverrideRaw !== null && !isNaN(Number(yoffOverrideRaw))) {
+        yOff = Number(yoffOverrideRaw);
       } else if (onMobile) {
         yOff = mobileFallback();
       } else {
@@ -606,7 +621,11 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       try { viewer.renderer.setClearColor(0x000000,0); } catch(_){}
       // target (0,0,0) = look at waist → feet appear in lower half of canvas
       try { viewer.controls.target.set(0,0,0); viewer.controls.update(); } catch(_){}
-      viewer.zoom = ZOOM[rank];
+      // Apply scale override on mobile, otherwise use default ZOOM
+      const baseZoom = ZOOM[rank];
+      viewer.zoom = (scaleOverrideRaw !== null && !isNaN(Number(scaleOverrideRaw)))
+        ? Number(scaleOverrideRaw)
+        : baseZoom;
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch(_){}
 
