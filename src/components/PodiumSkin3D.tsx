@@ -333,12 +333,23 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
     const def = FW_DEFS[_fwIdx % FW_DEFS.length];
     _fwIdx++;
     const [cr,cg,cb] = def.colors[Math.floor(Math.random() * def.colors.length)];
+
+    // X: keep 60px away from each edge so explosion particles stay on-screen
+    const startX = FW_W * 0.28 + Math.random() * FW_W * 0.44; // 61..158 px
+
+    // Y explosion target: 65..185 px from canvas top (always above skin, always on canvas)
+    const targetExpY = 65 + Math.random() * 120;
+    const startY    = FW_H - 12; // 328
+    const dist      = startY - targetExpY;       // distance to travel upward
+    const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
+    const fuse      = dist / speed;               // exact frames to reach target
+
     rockets.push({
-      x: FW_W * 0.15 + Math.random() * FW_W * 0.70,
-      y: FW_H - 12,
-      vy: -(3.0 + Math.random() * 2.2),
+      x: startX,
+      y: startY,
+      vy: -speed,
       cr, cg, cb,
-      fuse: 44 + Math.floor(Math.random() * 28),
+      fuse,
       def,
       trail: [],
     });
@@ -361,7 +372,7 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
       if (rk.trail.length > 14) rk.trail.shift();
 
       rk.y  += rk.vy * dt;
-      rk.vy += 0.028 * dt;
+      // No gravity on rockets — flies straight up to hit exact explosion target
       rk.fuse -= dt;
 
       if (rk.fuse <= 0) {
