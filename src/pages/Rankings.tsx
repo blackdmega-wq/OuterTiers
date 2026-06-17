@@ -74,7 +74,7 @@ function OverallTable({ players }: { players: Player[] }) {
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
               <img
-                src={`https://starlightskins.lunareclipse.studio/render/default/${player.username}/bust`}
+                src={`https://mc-heads.net/avatar/${player.username}/64`}
                 alt={player.username}
                 className="ot-ov-av-img ot-ov-av-img--bust"
                 loading="lazy"
@@ -82,10 +82,7 @@ function OverallTable({ players }: { players: Player[] }) {
                   const img = e.target as HTMLImageElement;
                   if (!img.dataset.fb) {
                     img.dataset.fb = '1';
-                    img.src = `https://mc-heads.net/body/${player.username}/128`;
-                  } else if (!img.dataset.fb2) {
-                    img.dataset.fb2 = '1';
-                    img.src = `https://minotar.net/body/${player.username}/128`;
+                    img.src = `https://minotar.net/avatar/${player.username}/64`;
                   }
                 }}
               />
