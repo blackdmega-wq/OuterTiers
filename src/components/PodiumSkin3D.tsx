@@ -188,7 +188,7 @@ function startDustCanvas(
   const rings: StepRing[] = [];
   const LFX = w * 0.36;
   const RFX = w * 0.64;
-  const FY  = h - 34;          // ground contact point (just above feet)
+  const FY  = h - 10;          // ground contact point (right at the feet)
 
   const START_T = performance.now();
   let prevCy = 0;
@@ -197,9 +197,9 @@ function startDustCanvas(
 
   function spawnRing(fx: number) {
     // Primary impact ring
-    rings.push({ x: fx, y: FY, r: 0, maxR: 15, life: 0.22, maxLife: 0.22 });
+    rings.push({ x: fx, y: FY, r: 0, maxR: 9, life: 0.22, maxLife: 0.22 });
     // Secondary smaller echo
-    rings.push({ x: fx, y: FY, r: 0, maxR: 8,  life: 0.30, maxLife: 0.30 });
+    rings.push({ x: fx, y: FY, r: 0, maxR: 5, life: 0.30, maxLife: 0.30 });
   }
 
   function tick(now: number) {
