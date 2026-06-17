@@ -8,26 +8,24 @@ interface Props {
 const SIZES = { 1:{width:100,height:160}, 2:{width:82,height:128}, 3:{width:76,height:118} } as const;
 const ZOOM: Record<1|2|3,number> = { 1:0.58, 2:0.68, 3:0.64 };
 
-const STYLE_ID = 'podium-skin-3d-v8';
+const STYLE_ID = 'podium-skin-3d-v9';
 function ensureStyles() {
   if (document.getElementById(STYLE_ID)) return;
   ['podium-skin-3d-css','podium-skin-3d-css-v4','podium-skin-3d-css-v5',
-   'podium-skin-3d-v6','podium-skin-3d-v7']
+   'podium-skin-3d-v6','podium-skin-3d-v7','podium-skin-3d-v8']
     .forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
   const s = document.createElement('style');
   s.id = STYLE_ID;
   s.textContent = `
 
 /* ══════════════════════════════════════════════════════════
-   ROCKET OVERLAY  (#1)
+   ROCKET OVERLAY  (#1) — no wobble, straight flight
    ══════════════════════════════════════════════════════════ */
 .mc-rockets-overlay {
   position:absolute; inset:0; overflow:visible;
   pointer-events:none; z-index:3;
 }
-.mc-fw-slot {
-  position:absolute; bottom:10px;
-}
+.mc-fw-slot { position:absolute; bottom:10px; }
 .mc-fw-slot--a { left:-8px; }
 .mc-fw-slot--b { left:20px; }
 .mc-fw-slot--c { right:20px; }
@@ -39,79 +37,32 @@ function ensureStyles() {
 .mc-fw-slot--c { --pc:#3399ff; --sc:#88ddff; --gc:#ccf0ff;  }
 .mc-fw-slot--d { --pc:#33ee66; --sc:#99ffbb; --gc:#dfffee;  }
 
-/* ────────────────────────────────────────────────────────
-   SMOOTH ROCKET FLIGHT
-   Two separate animations per slot:
-     mc-fly-*   → translateY + opacity  (smooth, ease-in)
-     mc-wobble  → rotate                (fast continuous alternate)
-   Separating them means each runs at its own timing curve
-   → NO discrete frame jumps visible to the eye.
-   ──────────────────────────────────────────────────────── */
+/* SMOOTH, STRAIGHT FLIGHT — single animation, no wobble */
 .mc-fw-rocket {
   display:flex; flex-direction:column; align-items:center;
   image-rendering:pixelated; transform-origin:bottom center;
   will-change:transform,opacity;
 }
+.mc-fw-slot--a .mc-fw-rocket { animation:mc-fly 2.4s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.0s; }
+.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 2.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.9s; }
+.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 2.5s cubic-bezier(0.25,0.0,0.5,1.0) infinite  1.7s; }
+.mc-fw-slot--d .mc-fw-rocket { animation:mc-fly 2.6s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.5s; }
 
-/* slot-a: 2.4s flight, left-leaning wobble */
-.mc-fw-slot--a .mc-fw-rocket {
-  animation:
-    mc-fly-l     2.4s cubic-bezier(0.3,0.0,0.55,1.0) infinite  0.0s,
-    mc-wobble-l  0.26s ease-in-out           infinite alternate 0.0s;
-}
-/* slot-b */
-.mc-fw-slot--b .mc-fw-rocket {
-  animation:
-    mc-fly-r     2.7s cubic-bezier(0.3,0.0,0.55,1.0) infinite  0.9s,
-    mc-wobble-r  0.30s ease-in-out           infinite alternate 0.9s;
-}
-/* slot-c */
-.mc-fw-slot--c .mc-fw-rocket {
-  animation:
-    mc-fly-l     2.5s cubic-bezier(0.3,0.0,0.55,1.0) infinite  1.7s,
-    mc-wobble-l  0.28s ease-in-out           infinite alternate 1.7s;
-}
-/* slot-d */
-.mc-fw-slot--d .mc-fw-rocket {
-  animation:
-    mc-fly-r     2.6s cubic-bezier(0.3,0.0,0.55,1.0) infinite  0.5s,
-    mc-wobble-r  0.32s ease-in-out           infinite alternate 0.5s;
+@keyframes mc-fly {
+  0%   { transform:translateY(0px);    opacity:1; }
+  68%  { transform:translateY(-120px); opacity:1; }
+  73%  { transform:translateY(-130px); opacity:0; }
+  74%  { transform:translateY(0px);    opacity:0; }
+  100% { transform:translateY(0px);    opacity:0; }
 }
 
-/* Flight: pure vertical + opacity — browser interpolates every frame */
-@keyframes mc-fly-l {
-  0%   { transform:translateY(0px);    opacity:1 }
-  68%  { transform:translateY(-122px); opacity:1 }
-  73%  { transform:translateY(-130px); opacity:0 }
-  74%  { transform:translateY(0px);    opacity:0 }
-  100% { transform:translateY(0px);    opacity:0 }
-}
-@keyframes mc-fly-r {
-  0%   { transform:translateY(0px);    opacity:1 }
-  68%  { transform:translateY(-122px); opacity:1 }
-  73%  { transform:translateY(-130px); opacity:0 }
-  74%  { transform:translateY(0px);    opacity:0 }
-  100% { transform:translateY(0px);    opacity:0 }
-}
-
-/* Wobble: fast continuous rotation — completely independent from flight */
-@keyframes mc-wobble-l {
-  from { rotate:-6deg }
-  to   { rotate: 5deg }
-}
-@keyframes mc-wobble-r {
-  from { rotate: 5deg }
-  to   { rotate:-6deg }
-}
-
-/* ── Pixel-art rocket parts ── */
+/* ── Pixel-art rocket body ── */
 .mc-fw-cap  { position:relative; width:14px; height:10px; margin-bottom:-1px; }
 .mc-fw-cap-bar {
   position:absolute; top:5px; left:0; width:14px; height:4px; background:#5c2e0e;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.3);
 }
 .mc-fw-cap-knob { position:absolute; top:0; left:4px; width:6px; height:7px; background:#6b3417; }
-
 .mc-fw-body {
   width:10px; height:22px;
   background:repeating-linear-gradient(-45deg,#cc1111 0,#cc1111 3px,#f2f2f2 3px,#f2f2f2 6px);
@@ -121,49 +72,41 @@ function ensureStyles() {
   width:6px; height:7px;
   background:repeating-conic-gradient(#111 0% 25%,#333 0% 50%) 0 0/3px 3px;
 }
-
-/* Smooth flame exhaust — no steps() */
 .mc-fw-exhaust {
   width:7px; height:16px; margin-top:-2px;
-  background:linear-gradient(to bottom,#ffffff 0%,#ffee44 25%,#ff8800 55%,#ff3300 80%,transparent 100%);
+  background:linear-gradient(to bottom,#ffffff 0%,#ffee44 25%,#ff8800 55%,#ff3300 82%,transparent 100%);
   border-radius:0 0 5px 5px;
-  box-shadow:0 0 8px 3px rgba(255,120,0,0.9), 0 0 18px 5px rgba(255,60,0,0.5);
+  box-shadow:0 0 8px 3px rgba(255,120,0,.9), 0 0 18px 5px rgba(255,60,0,.5);
   filter:blur(0.4px);
   animation:mc-exhaust-smooth .14s ease-in-out infinite alternate;
-  will-change:transform,height;
 }
 @keyframes mc-exhaust-smooth {
   from { height:16px; transform:scaleX(1.0); opacity:1.0; }
-  to   { height:10px; transform:scaleX(0.8); opacity:0.75; }
+  to   { height:10px; transform:scaleX(0.8); opacity:0.72; }
 }
-
-/* ── Glowing exhaust trail behind the rocket ── */
 .mc-fw-trail {
   position:absolute; bottom:-2px; left:50%;
   transform:translateX(-50%);
   width:4px; height:50px;
-  background:linear-gradient(to top,transparent 0%,rgba(255,140,0,.25) 40%,rgba(255,200,50,.12) 75%,transparent 100%);
-  border-radius:50%;
-  filter:blur(3px);
-  pointer-events:none;
+  background:linear-gradient(to top,transparent 0%,rgba(255,140,0,.22) 45%,rgba(255,200,50,.1) 75%,transparent 100%);
+  border-radius:50%; filter:blur(3px); pointer-events:none;
 }
 
 /* ══════════════════════════════════════════════════════════
-   EXPLOSION BURST  (each child synced to parent slot timing)
+   EXPLOSION BURST — child anims synced to slot timing
    ══════════════════════════════════════════════════════════ */
 .mc-fw-burst {
   position:absolute; left:50%; bottom:10px;
   transform:translateX(-50%) translateY(-130px);
-  width:64px; height:64px;
-  pointer-events:none;
+  width:64px; height:64px; pointer-events:none;
 }
 
 /* Flash */
 .mc-burst-flash { position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%; opacity:0; }
-.mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 2.4s linear infinite 0.0s; }
-.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 2.7s linear infinite 0.9s; }
-.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 2.5s linear infinite 1.7s; }
-.mc-fw-slot--d .mc-burst-flash { animation:mc-bflash 2.6s linear infinite 0.5s; }
+.mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 2.4s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 2.7s linear infinite  0.9s; }
+.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 2.5s linear infinite  1.7s; }
+.mc-fw-slot--d .mc-burst-flash { animation:mc-bflash 2.6s linear infinite  0.5s; }
 @keyframes mc-bflash {
   0%,68%  { transform:translate(-50%,-50%) scale(0); opacity:0; }
   71%     { transform:translate(-50%,-50%) scale(0.5); opacity:1;
@@ -180,10 +123,10 @@ function ensureStyles() {
   width:5px; height:28px; border-radius:4px 4px 1px 1px;
   transform-origin:50% 0%; margin-left:-2.5px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 2.4s linear infinite 0.0s; }
-.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 2.7s linear infinite 0.9s; }
-.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 2.5s linear infinite 1.7s; }
-.mc-fw-slot--d .mc-burst-pr { animation:mc-bpr 2.6s linear infinite 0.5s; }
+.mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 2.4s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 2.7s linear infinite  0.9s; }
+.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 2.5s linear infinite  1.7s; }
+.mc-fw-slot--d .mc-burst-pr { animation:mc-bpr 2.6s linear infinite  0.5s; }
 @keyframes mc-bpr {
   0%,69%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   72%     { opacity:1; transform:rotate(var(--ra,0deg)) scaleY(0.1);
@@ -200,10 +143,10 @@ function ensureStyles() {
   width:2.5px; height:18px; border-radius:2px;
   transform-origin:50% 0%; margin-left:-1.25px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 2.4s linear infinite 0.0s; }
-.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 2.7s linear infinite 0.9s; }
-.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 2.5s linear infinite 1.7s; }
-.mc-fw-slot--d .mc-burst-sr { animation:mc-bsr 2.6s linear infinite 0.5s; }
+.mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 2.4s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 2.7s linear infinite  0.9s; }
+.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 2.5s linear infinite  1.7s; }
+.mc-fw-slot--d .mc-burst-sr { animation:mc-bsr 2.6s linear infinite  0.5s; }
 @keyframes mc-bsr {
   0%,71%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   74%     { opacity:.9; transform:rotate(var(--ra,0deg)) scaleY(0.2);
@@ -220,74 +163,90 @@ function ensureStyles() {
   width:6px; height:6px; border-radius:50%;
   margin-left:-3px; margin-top:-3px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-tp { animation:mc-btp 2.4s linear infinite 0.0s; }
-.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 2.7s linear infinite 0.9s; }
-.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 2.5s linear infinite 1.7s; }
-.mc-fw-slot--d .mc-burst-tp { animation:mc-btp 2.6s linear infinite 0.5s; }
+.mc-fw-slot--a .mc-burst-tp { animation:mc-btp 2.4s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 2.7s linear infinite  0.9s; }
+.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 2.5s linear infinite  1.7s; }
+.mc-fw-slot--d .mc-burst-tp { animation:mc-btp 2.6s linear infinite  0.5s; }
 @keyframes mc-btp {
   0%,75%  { opacity:0; transform:rotate(var(--ra,0deg)) translateY(-20px) scale(0); }
   79%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-27px) scale(1.4);
             background:var(--gc); box-shadow:0 0 7px 3px var(--pc); }
   88%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-31px) scale(1.0); }
   95%     { opacity:.4; transform:rotate(var(--ra,0deg)) translateY(-35px) scale(.6); }
-  100%    { opacity:0; transform:rotate(var(--ra,0deg)) translateY(-40px) scale(0); }
+  100%    { opacity:0;  transform:rotate(var(--ra,0deg)) translateY(-40px) scale(0); }
 }
 
 /* ══════════════════════════════════════════════════════════
-   DUST CLOUD REVAMP (#3)
+   DUST CLOUD (#3)  — BEHIND the player skin
    
-   Problem: z-index can't put CSS sibling "behind" a WebGL
-   canvas — transparent canvas pixels show page background,
-   not lower-z siblings.
+   How "behind" works:
+   DOM order: dust div is React-rendered FIRST → canvas is
+   JS-appended SECOND. No z-index on either means the canvas
+   paints on top in normal flow. Transparent WebGL pixels
+   (clearColor alpha=0) then reveal the dust div beneath them,
+   just like looking through a window: the player body blocks
+   the dust, but the transparent space around/between the legs
+   shows the dust through.
    
-   Solution: height:22px + overflow:hidden clips all particles
-   to ground level. They're technically above the canvas
-   (z-index:10) but physically can only appear at foot level,
-   so they LOOK like ground dust, not body-covering circles.
-   
-   12 tiny pixel-art dust particles scattered horizontally.
+   → dust has NO z-index (default auto)
+   → canvas has NO z-index (default auto)
    ══════════════════════════════════════════════════════════ */
-.dust-wrap {
-  position:absolute; bottom:2px; left:50%;
-  transform:translateX(-50%);
-  width:96px; height:22px;
-  overflow:hidden;
-  pointer-events:none;
-  z-index:10;
-}
-.dp {
+.dust-cloud-wrap {
   position:absolute;
-  border-radius:1px;
+  bottom:4px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90px;
+  height:58px;          /* covers lower legs area */
+  pointer-events:none;
+  /* NO z-index — stays behind canvas in natural DOM paint order */
 }
-/* 12 particles: left-side (go left), right-side (go right) */
-/* format: bottom, left, size, color, animation, delay */
-.dp-01{width:4px;height:4px;background:rgba(185,155,110,.90);bottom:1px;left:46px;animation:dp-l1 .30s ease-out infinite;animation-delay:.000s;}
-.dp-02{width:3px;height:3px;background:rgba(200,175,135,.85);bottom:4px;left:44px;animation:dp-l2 .30s ease-out infinite;animation-delay:.075s;}
-.dp-03{width:4px;height:3px;background:rgba(170,142, 98,.88);bottom:2px;left:43px;animation:dp-l3 .30s ease-out infinite;animation-delay:.150s;}
-.dp-04{width:3px;height:4px;background:rgba(210,188,155,.80);bottom:0px;left:45px;animation:dp-l4 .30s ease-out infinite;animation-delay:.225s;}
-.dp-05{width:5px;height:3px;background:rgba(160,130, 88,.92);bottom:1px;left:47px;animation:dp-l5 .30s ease-out infinite;animation-delay:.015s;}
-.dp-06{width:3px;height:3px;background:rgba(195,165,120,.82);bottom:3px;left:46px;animation:dp-l6 .30s ease-out infinite;animation-delay:.195s;}
-.dp-07{width:4px;height:4px;background:rgba(185,155,110,.90);bottom:1px;left:46px;animation:dp-r1 .30s ease-out infinite;animation-delay:.000s;}
-.dp-08{width:3px;height:3px;background:rgba(200,175,135,.85);bottom:4px;left:48px;animation:dp-r2 .30s ease-out infinite;animation-delay:.075s;}
-.dp-09{width:4px;height:3px;background:rgba(170,142, 98,.88);bottom:2px;left:47px;animation:dp-r3 .30s ease-out infinite;animation-delay:.150s;}
-.dp-10{width:3px;height:4px;background:rgba(210,188,155,.80);bottom:0px;left:49px;animation:dp-r4 .30s ease-out infinite;animation-delay:.225s;}
-.dp-11{width:5px;height:3px;background:rgba(160,130, 88,.92);bottom:1px;left:48px;animation:dp-r5 .30s ease-out infinite;animation-delay:.015s;}
-.dp-12{width:3px;height:3px;background:rgba(195,165,120,.82);bottom:3px;left:46px;animation:dp-r6 .30s ease-out infinite;animation-delay:.195s;}
+.dc-puff {
+  position:absolute;
+  border-radius:50%;
+  /* default color — overridden per puff */
+}
 
-/* Left particles scatter leftward */
-@keyframes dp-l1{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:1}100%{transform:translate(-28px,-6px)scale(.4);opacity:0}}
-@keyframes dp-l2{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:.9}100%{transform:translate(-22px,-10px)scale(.3);opacity:0}}
-@keyframes dp-l3{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:.9}100%{transform:translate(-18px,-4px)scale(.5);opacity:0}}
-@keyframes dp-l4{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:.8}100%{transform:translate(-32px,-2px)scale(.3);opacity:0}}
-@keyframes dp-l5{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:1}100%{transform:translate(-14px,-8px)scale(.6);opacity:0}}
-@keyframes dp-l6{0%{transform:translate( 0px,0px)scale(1);opacity:0}10%{opacity:.85}100%{transform:translate(-26px,-5px)scale(.4);opacity:0}}
-/* Right particles scatter rightward */
-@keyframes dp-r1{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:1}100%{transform:translate(28px,-6px)scale(.4);opacity:0}}
-@keyframes dp-r2{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:.9}100%{transform:translate(22px,-10px)scale(.3);opacity:0}}
-@keyframes dp-r3{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:.9}100%{transform:translate(18px,-4px)scale(.5);opacity:0}}
-@keyframes dp-r4{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:.8}100%{transform:translate(32px,-2px)scale(.3);opacity:0}}
-@keyframes dp-r5{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:1}100%{transform:translate(14px,-8px)scale(.6);opacity:0}}
-@keyframes dp-r6{0%{transform:translate(0px,0px)scale(1);opacity:0}10%{opacity:.85}100%{transform:translate(26px,-5px)scale(.4);opacity:0}}
+/* 8 soft dust puffs spread around the legs area */
+/* Left side */
+.dc-1  { width:18px; height:16px; left:38px; bottom:2px;  background:rgba(188,162,122,.82); animation:dc-l  .38s ease-out infinite; animation-delay:.00s; }
+.dc-2  { width:14px; height:13px; left:34px; bottom:6px;  background:rgba(205,178,138,.74); animation:dc-l  .38s ease-out infinite; animation-delay:.19s; }
+.dc-3  { width:12px; height:12px; left:30px; bottom:10px; background:rgba(172,146,106,.78); animation:dc-sl .38s ease-out infinite; animation-delay:.10s; }
+.dc-4  { width:10px; height:10px; left:35px; bottom:16px; background:rgba(198,172,132,.68); animation:dc-sl .38s ease-out infinite; animation-delay:.28s; }
+/* Right side */
+.dc-5  { width:18px; height:16px; left:38px; bottom:2px;  background:rgba(188,162,122,.82); animation:dc-r  .38s ease-out infinite; animation-delay:.09s; }
+.dc-6  { width:14px; height:13px; left:42px; bottom:6px;  background:rgba(205,178,138,.74); animation:dc-r  .38s ease-out infinite; animation-delay:.28s; }
+.dc-7  { width:12px; height:12px; left:46px; bottom:10px; background:rgba(172,146,106,.78); animation:dc-sr .38s ease-out infinite; animation-delay:.18s; }
+.dc-8  { width:10px; height:10px; left:41px; bottom:16px; background:rgba(198,172,132,.68); animation:dc-sr .38s ease-out infinite; animation-delay:.05s; }
+
+/* Left: scatter left + slightly up */
+@keyframes dc-l {
+  0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
+  12%  { transform:translate( -5px,-3px) scale(.80); opacity:0.90; }
+  55%  { transform:translate(-18px,-9px) scale(1.15); opacity:.60; }
+  100% { transform:translate(-30px,-14px) scale(1.5); opacity:0;   }
+}
+/* Left upper: go more upward */
+@keyframes dc-sl {
+  0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
+  12%  { transform:translate(-4px, -5px) scale(.75); opacity:0.85; }
+  55%  { transform:translate(-12px,-16px) scale(1.1); opacity:.55; }
+  100% { transform:translate(-20px,-26px) scale(1.4); opacity:0;   }
+}
+/* Right: scatter right + slightly up */
+@keyframes dc-r {
+  0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
+  12%  { transform:translate(  5px,-3px) scale(.80); opacity:0.90; }
+  55%  { transform:translate( 18px,-9px) scale(1.15); opacity:.60; }
+  100% { transform:translate( 30px,-14px) scale(1.5); opacity:0;   }
+}
+/* Right upper: go more upward */
+@keyframes dc-sr {
+  0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
+  12%  { transform:translate( 4px, -5px) scale(.75); opacity:0.85; }
+  55%  { transform:translate(12px,-16px) scale(1.1); opacity:.55; }
+  100% { transform:translate(20px,-26px) scale(1.4); opacity:0;   }
+}
 `;
   document.head.appendChild(s);
 }
@@ -308,7 +267,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
-      canvas.style.cssText = 'display:block;background:transparent;position:relative;z-index:1;';
+      /* NO z-index, NO position:relative — canvas sits in normal DOM
+         flow, painted on top of the earlier-rendered dust div.
+         Transparent WebGL pixels let the dust show through. */
+      canvas.style.cssText = 'display:block;background:transparent;';
       wrap.appendChild(canvas);
 
       viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}` });
@@ -407,6 +369,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       ref={wrapRef}
       style={{width,height,position:'relative',zIndex:1,flexShrink:0,margin:'0 auto',overflow:'visible'}}
     >
+      {/* Dust rendered FIRST by React — canvas appended SECOND by useEffect.
+          No z-index on either → canvas sits on top in natural paint order.
+          Transparent WebGL pixels reveal the dust underneath. */}
+      {rank === 3 && (
+        <div className="dust-cloud-wrap">
+          <div className="dc-puff dc-1"/><div className="dc-puff dc-2"/>
+          <div className="dc-puff dc-3"/><div className="dc-puff dc-4"/>
+          <div className="dc-puff dc-5"/><div className="dc-puff dc-6"/>
+          <div className="dc-puff dc-7"/><div className="dc-puff dc-8"/>
+        </div>
+      )}
+
       {rank === 1 && (
         <div className="mc-rockets-overlay">
           {(['a','b','c','d'] as const).map(slot => (
@@ -434,16 +408,6 @@ export default function PodiumSkin3D({ username, rank }: Props) {
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {rank === 3 && (
-        /* height:22px + overflow:hidden clips dust to ground level only
-           — physically impossible for particles to overlap player body */
-        <div className="dust-wrap">
-          {Array.from({length:12},(_,i)=>(
-            <div key={i} className={`dp dp-${String(i+1).padStart(2,'0')}`}/>
           ))}
         </div>
       )}
