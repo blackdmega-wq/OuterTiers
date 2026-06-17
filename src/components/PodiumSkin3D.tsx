@@ -182,7 +182,7 @@ function startDustCanvas(
 ): () => void {
   cv.width = w;
   cv.height = h;
-  const dc = cv.getContext('2d');
+  const dc = cv.getContext('2d') as CanvasRenderingContext2D;
   if (!dc) return () => {};
 
   const rings: StepRing[] = [];
