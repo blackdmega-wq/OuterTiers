@@ -64,6 +64,14 @@ function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) 
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
+  // Reset image when skinId changes (e.g. useLiveProfile resolves UUID after initial render)
+  React.useEffect(() => {
+    setSrc(bust);
+    setUseSv3d(false);
+    triedRef.current = 0;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skinId]);
+
   /* Mount skinview3d whenever we switch to canvas mode */
   React.useEffect(() => {
     if (!useSv3d) return;
