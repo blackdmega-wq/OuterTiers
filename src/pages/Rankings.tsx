@@ -31,6 +31,58 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
+/* ── Mojang live-profile lookup (cached per session) ──────────────────────
+   Resolves the *current* username + UUID from Mojang via the Ashcon proxy.
+   Falls back silently to whatever the backend stored.
+   Results are cached module-level so each player is only fetched once.
+──────────────────────────────────────────────────────────────────────── */
+interface MojangProfile { username: string; uuid: string; }
+const _mojangCache = new Map<string, MojangProfile | null>();
+
+async function fetchMojangProfile(identifier: string): Promise<MojangProfile | null> {
+  const key = identifier.toLowerCase();
+  if (_mojangCache.has(key)) return _mojangCache.get(key)!;
+  try {
+    const r = await fetch(
+      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (!r.ok) { _mojangCache.set(key, null); return null; }
+    const d = await r.json();
+    if (d?.username) {
+      const profile: MojangProfile = { username: d.username, uuid: d.uuid ?? '' };
+      _mojangCache.set(key, profile);
+      return profile;
+    }
+  } catch { /* network / timeout */ }
+  _mojangCache.set(key, null);
+  return null;
+}
+
+function useLiveProfile(storedUsername: string, storedUuid: string) {
+  const [profile, setProfile] = React.useState<MojangProfile>({
+    username: storedUsername,
+    uuid: storedUuid,
+  });
+
+  React.useEffect(() => {
+    // Use UUID when available (most accurate), else username
+    const identifier = storedUuid || storedUsername;
+    // Stagger requests slightly to avoid API rate limits (0–1.5 s random offset)
+    const delay = Math.random() * 1500;
+    const timer = setTimeout(async () => {
+      const p = await fetchMojangProfile(identifier);
+      if (p) setProfile(p);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [storedUsername, storedUuid]);
+
+  return profile;
+}
+
+/* ── Skin URL with daily cache-bust so browsers reload changed skins ── */
+const TODAY = new Date().toISOString().slice(0, 10); // "2025-06-17"
+
 /* ── Custom rank icons — trophy shape ── */
 /* ── Overall rankings — full list with ring-avatar + tier badges ── */
 
@@ -54,12 +106,12 @@ const OV_PAGE = 25;
 
 /* ── PlayerBustImg: visage → skinview3d (diagonal, offline-safe) → crafthead → avatar ── */
 function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) {
-  // Prefer UUID for all skin lookups — avoids stale data when a player renames
+  // Prefer UUID for all skin lookups — avoids stale data when a player renames.
+  // Append daily cache-bust so browsers always reload changed skins once per day.
   const skinId = uuid || username;
+  const bust = `https://visage.surgeplay.com/bust/128/${skinId}?yaw=-25&d=${TODAY}`;
   const [useSv3d, setUseSv3d] = React.useState(false);
-  const [src, setSrc] = React.useState(
-    `https://visage.surgeplay.com/bust/128/${skinId}?yaw=-25`
-  );
+  const [src, setSrc] = React.useState(bust);
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
@@ -148,75 +200,80 @@ function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) 
   );
 }
 
+/* ── Single overall-table row — needs its own component so it can call hooks ── */
+function PlayerRow({ player, rank }: { player: Player; rank: number }) {
+  const live = useLiveProfile(player.username, player.uuid ?? '');
+  const ringCls =
+    rank === 1 ? 'ov-ring-gold'
+    : rank === 2 ? 'ov-ring-silver'
+    : rank === 3 ? 'ov-ring-bronze'
+    : rank <= 10 ? 'ov-ring-blue'
+    : 'ov-ring-dim';
+  const topCls = rank <= 3 ? ` ot-ov-row--top${rank}` : '';
+  const raw = player.rawTiers ?? {};
+  const allModes = MODE_KEYS.map(k => ({
+    modeId: k as string,
+    rawTier: (raw as Record<string, string | null | undefined>)[k] ?? null,
+  }));
+
+  return (
+    <Link key={player.id} to={`/player/${live.username}`} className={`ot-ov-row${topCls}`}>
+
+      {/* ── Avatar — uses live UUID / username for up-to-date skin ── */}
+      <div className={`ot-ov-av-ring ${ringCls}`}>
+        <PlayerBustImg username={live.username} uuid={live.uuid || player.uuid} />
+        <span className="ot-ov-rank-pill">{rank}.</span>
+      </div>
+
+      {/* ── Player info ── */}
+      <div className="ot-ov-info">
+        <div className="ot-ov-name-row">
+          <span className="ot-ov-name">{live.username}</span>
+          <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+        </div>
+        <span className="ot-ov-title-txt">◆ {getTitle(player.points)}</span>
+      </div>
+
+      {/* ── Tier badges: 5×2 grid ── */}
+      <div className="ot-ov-tiers">
+        <span className="ot-ov-tiers-lbl">TIERS</span>
+        <div className="ot-ov-tiers-grid">
+          {allModes.map(({ modeId, rawTier }) => {
+            const cat = CATEGORIES.find(c => c.id === modeId);
+            if (!cat) return null;
+            const hasRank = !!rawTier && rawTier !== '-';
+            const numCls = hasRank ? tierNumCls(rawTier!) : '';
+            return (
+              <div key={modeId} className={`ot-ov-badge${numCls ? ` ot-ov-badge--${numCls}` : ''}`}>
+                <div className="ot-ov-badge-icon">
+                  <img src={cat.icon} alt={cat.label} className="ot-ov-badge-img" loading="lazy" />
+                </div>
+                <span className="ot-ov-badge-lbl">{hasRank ? rawTier : '—'}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Points ── */}
+      <div className="ot-ov-pts-col">
+        <span className="ot-ov-pts">{player.points}</span>
+        <span className="ot-ov-pts-lbl">POINTS</span>
+      </div>
+
+    </Link>
+  );
+}
+
 function OverallTable({ players }: { players: Player[] }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(players.length / OV_PAGE);
   const visible = players.slice((page - 1) * OV_PAGE, page * OV_PAGE);
   return (
     <div className="ot-ov-wrap">
-      {visible.map((player, i) => {
-        const rank = (page - 1) * OV_PAGE + i + 1;
-        const ringCls =
-          rank === 1 ? 'ov-ring-gold'
-          : rank === 2 ? 'ov-ring-silver'
-          : rank === 3 ? 'ov-ring-bronze'
-          : rank <= 10 ? 'ov-ring-blue'
-          : 'ov-ring-dim';
-        const topCls = rank <= 3 ? ` ot-ov-row--top${rank}` : '';
-        const raw = player.rawTiers ?? {};
-        const allModes = MODE_KEYS.map(k => ({
-          modeId: k as string,
-          rawTier: (raw as Record<string, string | null | undefined>)[k] ?? null,
-        }));
-
-        return (
-          <Link key={player.id} to={`/player/${player.username}`} className={`ot-ov-row${topCls}`}>
-
-            {/* ── Avatar ── */}
-            <div className={`ot-ov-av-ring ${ringCls}`}>
-              <PlayerBustImg username={player.username} uuid={player.uuid} />
-              <span className="ot-ov-rank-pill">{rank}.</span>
-            </div>
-
-            {/* ── Player info ── */}
-            <div className="ot-ov-info">
-              <div className="ot-ov-name-row">
-                <span className="ot-ov-name">{player.username}</span>
-                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-              </div>
-              <span className="ot-ov-title-txt">◆ {getTitle(player.points)}</span>
-            </div>
-
-            {/* ── Tier badges: 5×2 grid ── */}
-            <div className="ot-ov-tiers">
-              <span className="ot-ov-tiers-lbl">TIERS</span>
-              <div className="ot-ov-tiers-grid">
-                {allModes.map(({ modeId, rawTier }) => {
-                  const cat = CATEGORIES.find(c => c.id === modeId);
-                  if (!cat) return null;
-                  const hasRank = !!rawTier && rawTier !== '-';
-                  const numCls = hasRank ? tierNumCls(rawTier!) : '';
-                  return (
-                    <div key={modeId} className={`ot-ov-badge${numCls ? ` ot-ov-badge--${numCls}` : ''}`}>
-                      <div className="ot-ov-badge-icon">
-                        <img src={cat.icon} alt={cat.label} className="ot-ov-badge-img" loading="lazy" />
-                      </div>
-                      <span className="ot-ov-badge-lbl">{hasRank ? rawTier : '—'}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ── Points ── */}
-            <div className="ot-ov-pts-col">
-              <span className="ot-ov-pts">{player.points}</span>
-              <span className="ot-ov-pts-lbl">POINTS</span>
-            </div>
-
-          </Link>
-        );
-      })}
+      {visible.map((player, i) => (
+        <PlayerRow key={player.id} player={player} rank={(page - 1) * OV_PAGE + i + 1} />
+      ))}
       {totalPages > 1 && (
         <div className="ot-ov-pagination">
           <button
