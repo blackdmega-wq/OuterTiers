@@ -193,33 +193,31 @@ function startDustCanvas(
   const dc: CanvasRenderingContext2D = dcRaw;
 
   const parts: DPart[] = [];
-  // Foot positions: 36% and 64% of width
-  const LFX = w * 0.36;
-  const RFX = w * 0.64;
-  // Spawn at lower-leg / calf height (behind legs, not below feet)
-  const FY  = h - 38;
+  const LFX = w * 0.36;   // left foot X
+  const RFX = w * 0.64;   // right foot X
+  const FY  = h - 62;     // upper-leg / thigh height — visually behind legs
 
   let spawnClock = 0;
-  let spawnSide  = 0; // 0=left foot, 1=right foot
+  let spawnSide  = 0;
   let lastT      = performance.now();
   let animId     = 0;
 
   function spawn() {
     const isLeft = spawnSide === 0;
     const fx     = isLeft ? LFX : RFX;
-    const outDir = isLeft ? -1 : 1; // puffs spread outward from center
+    const outDir = isLeft ? -1 : 1;
     spawnSide = 1 - spawnSide;
 
-    // 2–3 footstep puffs per step
+    // 2–3 puffs per step, drift outward + gently upward
     const puffCount = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < puffCount; i++) {
-      const ml = 0.55 + Math.random() * 0.45;
+      const ml = 0.60 + Math.random() * 0.50;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 8,
+        x:  fx + (Math.random() - 0.5) * 9,
         y:  FY + (Math.random() - 0.5) * 4,
-        vx: (Math.random() * 0.8 + 0.2) * outDir,
-        vy: -(Math.random() * 0.5 + 0.15),
-        r:  3 + Math.random() * 7,
+        vx: (Math.random() * 0.9 + 0.2) * outDir,
+        vy: -(Math.random() * 0.55 + 0.15), // drifts upward
+        r:  3.5 + Math.random() * 7.5,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
@@ -229,13 +227,13 @@ function startDustCanvas(
     // 1–2 tiny debris specks
     const debrisCount = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < debrisCount; i++) {
-      const ml = 0.22 + Math.random() * 0.20;
+      const ml = 0.20 + Math.random() * 0.18;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 6,
+        x:  fx + (Math.random() - 0.5) * 7,
         y:  FY + (Math.random() - 0.5) * 4,
-        vx: (Math.random() * 1.4 + 0.4) * outDir,
-        vy: -(Math.random() * 1.0 + 0.3),
-        r:  0.7 + Math.random() * 1.8,
+        vx: (Math.random() * 1.5 + 0.5) * outDir,
+        vy: -(Math.random() * 1.1 + 0.3),
+        r:  0.6 + Math.random() * 1.6,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: true,
@@ -252,7 +250,6 @@ function startDustCanvas(
     const delta = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
 
-    // Spawn every ~7 frames — matches walking footstep pace
     spawnClock += delta;
     if (spawnClock >= 7) {
       spawnClock = 0;
@@ -263,21 +260,21 @@ function startDustCanvas(
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
-      p.life -= 0.022 * delta;
+      p.life -= 0.020 * delta;
       if (p.life <= 0) { parts.splice(i, 1); continue; }
 
       p.x  += p.vx * delta;
       p.y  += p.vy * delta;
-      p.vy += 0.018 * delta; // soft gravity
-      p.vx *= Math.pow(0.968, delta); // air drag
+      // Near-zero gravity for puffs so they stay high; debris falls
+      p.vy += (p.isDebris ? 0.030 : 0.004) * delta;
+      p.vx *= Math.pow(0.968, delta);
 
       const lifeRatio = p.life / p.maxLife;
-      // Fade in fast, hold, fade out
       const alpha = lifeRatio > 0.75
-        ? 0.68
+        ? 0.70
         : lifeRatio > 0.2
-          ? 0.68 * ((lifeRatio - 0.2) / 0.55)
-          : (lifeRatio / 0.2) * 0.68;
+          ? 0.70 * ((lifeRatio - 0.2) / 0.55)
+          : (lifeRatio / 0.2) * 0.70;
 
       if (p.isDebris) {
         dc.beginPath();
