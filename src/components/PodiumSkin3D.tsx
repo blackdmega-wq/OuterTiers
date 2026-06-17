@@ -177,11 +177,9 @@ const FW_H = 220; // canvas starts at skin-wrap top (top:0) and extends to card 
 
 // Preloaded rocket image (shared across all canvas instances)
 let _rocketImg: HTMLImageElement | null = null;
-let _rocketReady = false;
 function ensureRocketImage() {
   if (_rocketImg) return;
   _rocketImg = new Image();
-  _rocketImg.onload = () => { _rocketReady = true; };
   _rocketImg.src = '/firework-rocket.webp';
 }
 
@@ -326,7 +324,7 @@ function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: n
   bl(-0.5, -18, 1, 2, 255,255,255);
 }
 
-function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean): () => void {
+function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => void {
   cv.width  = FW_W;
   cv.height = FW_H;
   const dc = cv.getContext('2d')!;
