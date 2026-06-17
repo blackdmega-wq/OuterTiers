@@ -565,8 +565,16 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       // 3D canvas stays at SIZES height — so yOff must go NEGATIVE to shift the canvas up.
       // skinview3d with target=(0,0,0) renders feet at ~71% of canvas height for ranks 1 & 3.
       // Rank 2 (zoom=0.82) has a different ratio and yOff=14 is known-good, kept hardcoded.
+      //
+      // URL override (for tuning): add ?yoff1=XX or ?yoff3=XX to the URL to test values live.
+      // Positive = skin moves DOWN, Negative = skin moves UP.
+      // Example: https://yoursite.com?yoff1=-10&yoff3=-5
       let yOff: number;
-      if (rank === 2) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlOverride = rank === 1 ? urlParams.get('yoff1') : rank === 3 ? urlParams.get('yoff3') : null;
+      if (urlOverride !== null && !isNaN(Number(urlOverride))) {
+        yOff = Number(urlOverride);
+      } else if (rank === 2) {
         yOff = 14;
       } else {
         const wrapH = wrap.offsetHeight || (rank === 1 ? 152 : 118);
