@@ -87,10 +87,10 @@ function OverallTable({ players }: { players: Player[] }) {
                   const img = e.target as HTMLImageElement;
                   if (!img.dataset.fb) {
                     img.dataset.fb = '1';
-                    img.src = `https://crafthead.net/bust/${player.username}/128`;
+                    img.src = `https://mc-heads.net/bust/${player.username}/128`;
                   } else if (!img.dataset.fb2) {
                     img.dataset.fb2 = '1';
-                    img.src = `https://mc-heads.net/avatar/${player.username}/64`;
+                    img.src = `https://mc-heads.net/bust/${player.username}/64`;
                   }
                 }}
               />
