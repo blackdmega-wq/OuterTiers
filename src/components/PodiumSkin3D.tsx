@@ -266,7 +266,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       canvas.style.cssText = 'display:block;background:transparent;';
       wrap.appendChild(canvas);
 
-      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}`, fpsLimit: 30 });
+      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}` });
       try { viewer.renderer.setClearColor(0x000000,0); } catch(_){}
       try { viewer.controls.target.set(0,-8,0); viewer.controls.update(); } catch(_){}
       viewer.zoom = ZOOM[rank];
