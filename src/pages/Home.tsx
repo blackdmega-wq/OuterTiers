@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
+import type { Player } from '../data/players';
 import PlayerAvatar from '../components/PlayerAvatar';
 import PodiumSkin3D from '../components/PodiumSkin3D';
 import DiscordJoinModal from '../components/DiscordJoinModal';
 import Logo from '../components/Logo';
 import { usePlayers } from '../hooks/usePlayers';
+import { useLiveProfile, SKIN_DATE } from '../hooks/useMojangProfile';
 import { usePresence } from '../hooks/usePresence';
 
 const GAME_MODE_CATEGORIES = CATEGORIES.filter(c => c.id !== 'overall');
@@ -131,6 +133,37 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
         <TierLabel tier={tier} />
         <RegionBadge region={region} />
       </div>
+    </div>
+  );
+}
+
+/* ── Leaderboard row — own component so it can use the useLiveProfile hook ── */
+function LbRow({ player, rank }: { player: Player; rank: number }) {
+  const navigate = useNavigate();
+  const live     = useLiveProfile(player.username, player.uuid ?? '');
+  const skinId   = live.uuid || player.uuid || live.username;
+  const isTop10  = rank <= 10;
+  return (
+    <div
+      className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '0 56px' } as React.CSSProperties}
+      onClick={() => navigate(`/player/${live.username}`)}
+    >
+      <span className="lb-rank">{rank}</span>
+      <img
+        src={`https://mc-heads.net/avatar/${skinId}/36?d=${SKIN_DATE}`}
+        alt={live.username}
+        className="lb-avatar"
+        loading="lazy"
+      />
+      <span className="lb-info">
+        <span className="lb-name">{live.username}</span>
+        <span className="lb-title">{getTitle(player.points)}</span>
+      </span>
+      <span className="lb-pts">
+        {player.points}
+        <span className="lb-pts-label">pts</span>
+      </span>
     </div>
   );
 }
@@ -367,33 +400,9 @@ export default function Home() {
                   <span className="lb-lh-player">Player</span>
                   <span className="lb-lh-pts">Points</span>
                 </div>
-                {rest.map((player, i) => {
-                  const rank = i + 4;
-                  const isTop10 = rank <= 10;
-                  return (
-                    <div
-                      key={player.id}
-                      className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`} style={{contentVisibility:'auto',containIntrinsicSize:'0 56px'} as React.CSSProperties}
-                      onClick={() => navigate(`/player/${player.username}`)}
-                    >
-                      <span className="lb-rank">{rank}</span>
-                      <img
-                        src={`https://mc-heads.net/avatar/${player.uuid || player.username}/36`}
-                        alt={player.username}
-                        className="lb-avatar"
-                        loading="lazy"
-                      />
-                      <span className="lb-info">
-                        <span className="lb-name">{player.username}</span>
-                        <span className="lb-title">{getTitle(player.points)}</span>
-                      </span>
-                      <span className="lb-pts">
-                        {player.points}
-                        <span className="lb-pts-label">pts</span>
-                      </span>
-                    </div>
-                  );
-                })}
+                {rest.map((player, i) => (
+                  <LbRow key={player.id} player={player} rank={i + 4} />
+                ))}
               </div>
             )}
 
