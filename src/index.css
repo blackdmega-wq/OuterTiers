@@ -2220,6 +2220,7 @@ img { display: block; }
   border-top: 1px solid rgba(148,163,184,0.16);
   border-radius: 18px 18px 0 0;
   animation: lb-pod-silver-pulse 3.4s ease-in-out infinite;
+  isolation: isolate;
 }
 @keyframes lb-pod-silver-pulse {
   0%,100% { box-shadow: 0 0 0 1px rgba(148,163,184,0.14) inset, 0 0 18px rgba(148,163,184,0.06); }
@@ -2275,6 +2276,7 @@ img { display: block; }
   border-right: 1px solid rgba(192,120,48,0.14);
   border-top: 1px solid rgba(192,120,48,0.16);
   border-radius: 18px 18px 0 0;
+  isolation: isolate;
 }
 
 /* ── TROPHY ICON ── */
@@ -2737,6 +2739,11 @@ img { display: block; }
   font-size: 0.48rem; font-weight: 600; color: var(--text-muted);
   display: block; text-align: right; text-transform: uppercase;
   letter-spacing: 0.08em; margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+  /* Disable box-shadow pulse on rank2 — causes full card repaint on mobile */
+  .lb-pod--rank2 { animation: none; }
 }
 
 /* ── Mobile responsive ── */
