@@ -42,8 +42,8 @@ function ensureStyles() {
   will-change:transform,opacity;
 }
 .mc-fw-slot--a .mc-fw-rocket { animation:mc-fly 3.5s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.0s; }
-.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 4.0s cubic-bezier(0.25,0.0,0.5,1.0) infinite  1.2s; }
-.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 3.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite  2.2s; }
+.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 4.0s cubic-bezier(0.25,0.0,0.5,1.0) infinite -1.2s; }
+.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 3.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite -2.2s; }
 
 @keyframes mc-fly {
   0%   { transform:translateY(0px);    opacity:1; }
@@ -101,8 +101,8 @@ function ensureStyles() {
 /* Flash */
 .mc-burst-flash { position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%; opacity:0; }
 .mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 4.0s linear infinite  1.2s; }
-.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 3.7s linear infinite  2.2s; }
+.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 4.0s linear infinite -1.2s; }
+.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 3.7s linear infinite -2.2s; }
 @keyframes mc-bflash {
   0%,68%  { transform:translate(-50%,-50%) scale(0); opacity:0; }
   71%     { transform:translate(-50%,-50%) scale(0.5); opacity:1;
@@ -120,8 +120,8 @@ function ensureStyles() {
   transform-origin:50% 0%; margin-left:-2.5px; opacity:0;
 }
 .mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 4.0s linear infinite  1.2s; }
-.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 3.7s linear infinite  2.2s; }
+.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 4.0s linear infinite -1.2s; }
+.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 3.7s linear infinite -2.2s; }
 @keyframes mc-bpr {
   0%,69%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   72%     { opacity:1; transform:rotate(var(--ra,0deg)) scaleY(0.1);
@@ -139,8 +139,8 @@ function ensureStyles() {
   transform-origin:50% 0%; margin-left:-1.25px; opacity:0;
 }
 .mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 4.0s linear infinite  1.2s; }
-.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 3.7s linear infinite  2.2s; }
+.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 4.0s linear infinite -1.2s; }
+.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 3.7s linear infinite -2.2s; }
 @keyframes mc-bsr {
   0%,71%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   74%     { opacity:.9; transform:rotate(var(--ra,0deg)) scaleY(0.2);
@@ -158,8 +158,8 @@ function ensureStyles() {
   margin-left:-3px; margin-top:-3px; opacity:0;
 }
 .mc-fw-slot--a .mc-burst-tp { animation:mc-btp 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 4.0s linear infinite  1.2s; }
-.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 3.7s linear infinite  2.2s; }
+.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 4.0s linear infinite -1.2s; }
+.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 3.7s linear infinite -2.2s; }
 @keyframes mc-btp {
   0%,75%  { opacity:0; transform:rotate(var(--ra,0deg)) translateY(-20px) scale(0); }
   79%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-27px) scale(1.4);
@@ -170,75 +170,54 @@ function ensureStyles() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   DUST CLOUD (#3)  — BEHIND the player skin
-   
-   How "behind" works:
-   DOM order: dust div is React-rendered FIRST → canvas is
-   JS-appended SECOND. No z-index on either means the canvas
-   paints on top in normal flow. Transparent WebGL pixels
-   (clearColor alpha=0) then reveal the dust div beneath them,
-   just like looking through a window: the player body blocks
-   the dust, but the transparent space around/between the legs
-   shows the dust through.
-   
-   → dust has NO z-index (default auto)
-   → canvas has NO z-index (default auto)
+   DUST CLOUD (#3)  — clipped behind skin, no platform bleed
+   clip wrapper (overflow:hidden, z-index:0) keeps puffs
+   strictly inside the skin frame; canvas z-index:1 sits above.
    ══════════════════════════════════════════════════════════ */
 .dust-cloud-wrap {
   position:absolute;
-  bottom:24px;
+  bottom:16px;
   left:50%;
   transform:translateX(-50%);
-  width:90px;
-  height:50px;
+  width:120px;
+  height:75px;
   pointer-events:none;
-  /* NO z-index — stays behind canvas in natural DOM paint order */
 }
-.dc-puff {
-  position:absolute;
-  border-radius:50%;
-  /* default color — overridden per puff */
-}
+.dc-puff { position:absolute; border-radius:50%; }
 
-/* 8 soft dust puffs spread around the legs area */
-/* Left side */
-.dc-1  { width:18px; height:16px; left:38px; bottom:2px;  background:rgba(188,162,122,.82); animation:dc-l  .38s ease-out infinite; animation-delay:.00s; }
-.dc-2  { width:14px; height:13px; left:34px; bottom:6px;  background:rgba(205,178,138,.74); animation:dc-l  .38s ease-out infinite; animation-delay:.19s; }
-.dc-3  { width:12px; height:12px; left:30px; bottom:10px; background:rgba(172,146,106,.78); animation:dc-sl .38s ease-out infinite; animation-delay:.10s; }
-.dc-4  { width:10px; height:10px; left:35px; bottom:16px; background:rgba(198,172,132,.68); animation:dc-sl .38s ease-out infinite; animation-delay:.28s; }
-/* Right side */
-.dc-5  { width:18px; height:16px; left:38px; bottom:2px;  background:rgba(188,162,122,.82); animation:dc-r  .38s ease-out infinite; animation-delay:.09s; }
-.dc-6  { width:14px; height:13px; left:42px; bottom:6px;  background:rgba(205,178,138,.74); animation:dc-r  .38s ease-out infinite; animation-delay:.28s; }
-.dc-7  { width:12px; height:12px; left:46px; bottom:10px; background:rgba(172,146,106,.78); animation:dc-sr .38s ease-out infinite; animation-delay:.18s; }
-.dc-8  { width:10px; height:10px; left:41px; bottom:16px; background:rgba(198,172,132,.68); animation:dc-sr .38s ease-out infinite; animation-delay:.05s; }
+/* 8 dramatic puffs — spread wide & upward only (clip prevents downward bleed) */
+.dc-1  { width:24px; height:21px; left:36px; bottom:0;   background:rgba(175,148,108,.65); animation:dc-l  .44s ease-out infinite; animation-delay:.00s; }
+.dc-2  { width:18px; height:16px; left:28px; bottom:6px; background:rgba(198,170,128,.56); animation:dc-l  .44s ease-out infinite; animation-delay:.22s; }
+.dc-3  { width:15px; height:15px; left:20px; bottom:15px;background:rgba(160,135,96,.60);  animation:dc-sl .44s ease-out infinite; animation-delay:.12s; }
+.dc-4  { width:12px; height:12px; left:30px; bottom:26px;background:rgba(186,160,120,.50); animation:dc-sl .44s ease-out infinite; animation-delay:.33s; }
+.dc-5  { width:24px; height:21px; left:60px; bottom:0;   background:rgba(175,148,108,.65); animation:dc-r  .44s ease-out infinite; animation-delay:.11s; }
+.dc-6  { width:18px; height:16px; left:70px; bottom:6px; background:rgba(198,170,128,.56); animation:dc-r  .44s ease-out infinite; animation-delay:.34s; }
+.dc-7  { width:15px; height:15px; left:78px; bottom:15px;background:rgba(160,135,96,.60);  animation:dc-sr .44s ease-out infinite; animation-delay:.21s; }
+.dc-8  { width:12px; height:12px; left:68px; bottom:26px;background:rgba(186,160,120,.50); animation:dc-sr .44s ease-out infinite; animation-delay:.07s; }
 
-/* Left: scatter left + slightly up */
 @keyframes dc-l {
-  0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
-  12%  { transform:translate( -5px,-3px) scale(.80); opacity:0.90; }
-  55%  { transform:translate(-18px,-9px) scale(1.15); opacity:.60; }
-  100% { transform:translate(-28px,-12px) scale(0.95); opacity:0;   }
+  0%   { transform:translate(  0px,  0px) scale(.10); opacity:0;    }
+  10%  { transform:translate( -8px, -5px) scale(.90); opacity:0.84; }
+  50%  { transform:translate(-26px,-20px) scale(1.28); opacity:.50; }
+  100% { transform:translate(-42px,-30px) scale(1.05); opacity:0;   }
 }
-/* Left upper: go more upward */
 @keyframes dc-sl {
-  0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
-  12%  { transform:translate(-4px, -5px) scale(.75); opacity:0.85; }
-  55%  { transform:translate(-12px,-16px) scale(1.1); opacity:.55; }
-  100% { transform:translate(-18px,-24px) scale(0.90); opacity:0;   }
+  0%   { transform:translate( 0px,  0px) scale(.10); opacity:0;    }
+  10%  { transform:translate(-6px,-10px) scale(.82); opacity:0.78; }
+  50%  { transform:translate(-18px,-30px) scale(1.18); opacity:.44; }
+  100% { transform:translate(-28px,-46px) scale(0.86); opacity:0;   }
 }
-/* Right: scatter right + slightly up */
 @keyframes dc-r {
-  0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
-  12%  { transform:translate(  5px,-3px) scale(.80); opacity:0.90; }
-  55%  { transform:translate( 18px,-9px) scale(1.15); opacity:.60; }
-  100% { transform:translate( 28px,-12px) scale(0.95); opacity:0;   }
+  0%   { transform:translate(  0px,  0px) scale(.10); opacity:0;    }
+  10%  { transform:translate(  8px, -5px) scale(.90); opacity:0.84; }
+  50%  { transform:translate( 26px,-20px) scale(1.28); opacity:.50; }
+  100% { transform:translate( 42px,-30px) scale(1.05); opacity:0;   }
 }
-/* Right upper: go more upward */
 @keyframes dc-sr {
-  0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
-  12%  { transform:translate( 4px, -5px) scale(.75); opacity:0.85; }
-  55%  { transform:translate(12px,-16px) scale(1.1); opacity:.55; }
-  100% { transform:translate(18px,-24px) scale(0.90); opacity:0;   }
+  0%   { transform:translate( 0px,  0px) scale(.10); opacity:0;    }
+  10%  { transform:translate( 6px,-10px) scale(.82); opacity:0.78; }
+  50%  { transform:translate(18px,-30px) scale(1.18); opacity:.44; }
+  100% { transform:translate(28px,-46px) scale(0.86); opacity:0;   }
 }
 `;
   document.head.appendChild(s);
@@ -263,7 +242,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       /* NO z-index, NO position:relative — canvas sits in normal DOM
          flow, painted on top of the earlier-rendered dust div.
          Transparent WebGL pixels let the dust show through. */
-      canvas.style.cssText = 'display:block;background:transparent;';
+      canvas.style.cssText = 'display:block;background:transparent;position:relative;z-index:1;';
       wrap.appendChild(canvas);
 
       viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}` });
@@ -274,7 +253,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       try { viewer.controls.enabled = false; } catch(_){}
       // Cap WebGL render to 30 fps — 3 simultaneous canvases at 60 fps hammers the GPU
       try {
-        const _ms = 1000 / 30; let _lt = 0;
+        const _ms = 1000 / 45; let _lt = 0;
         const _orig = viewer.render.bind(viewer);
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
@@ -284,17 +263,33 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin; if (!s) return;
-            const t = progress * 9.0;
-            s.body.rotation.x=0.22; s.body.rotation.y=0; s.body.rotation.z=Math.sin(t*2)*.05;
-            const arm=Math.sin(t)*1.15;
-            s.rightArm.rotation.x= arm; s.leftArm.rotation.x=-arm;
-            s.rightArm.rotation.z=-0.07; s.leftArm.rotation.z=0.07;
-            s.rightArm.rotation.y=0; s.leftArm.rotation.y=0;
-            const leg=Math.sin(t)*1.0;
-            s.rightLeg.rotation.x=-leg; s.leftLeg.rotation.x=leg;
-            s.rightLeg.rotation.z=0; s.leftLeg.rotation.z=0;
-            if(s.head){s.head.rotation.x=0.15+Math.sin(t*2)*.04;s.head.rotation.y=0;s.head.rotation.z=Math.sin(t*2)*.025;}
-            player.position.y=-Math.abs(Math.sin(t))*.6; player.position.x=0; player.rotation.y=0;
+            const t = progress * 10.5;
+            const cy = Math.sin(t), c2 = Math.sin(t * 2);
+            // deep forward lean + subtle side sway
+            s.body.rotation.x = 0.34 + c2 * 0.04;
+            s.body.rotation.y = 0;
+            s.body.rotation.z = c2 * 0.08;
+            // aggressive arm pump with outward flare
+            const armX = cy * 1.40;
+            s.rightArm.rotation.x =  armX; s.leftArm.rotation.x = -armX;
+            s.rightArm.rotation.z = -0.14 - Math.abs(cy) * 0.10;
+            s.leftArm.rotation.z  =  0.14 + Math.abs(cy) * 0.10;
+            s.rightArm.rotation.y =  cy * 0.10; s.leftArm.rotation.y = -cy * 0.10;
+            // high leg kick
+            const legX = cy * 1.30;
+            s.rightLeg.rotation.x = -legX; s.leftLeg.rotation.x = legX;
+            s.rightLeg.rotation.z =  Math.abs(cy) * 0.05;
+            s.leftLeg.rotation.z  = -Math.abs(cy) * 0.05;
+            // head bob
+            if (s.head) {
+              s.head.rotation.x = 0.20 + c2 * 0.07;
+              s.head.rotation.y = cy * 0.07;
+              s.head.rotation.z = c2 * 0.03;
+            }
+            // strong vertical bounce + slight side drift
+            player.position.y = -Math.abs(cy) * 1.0;
+            player.position.x =  cy * 0.06;
+            player.rotation.y = 0;
           } catch(_){}
         });
 
@@ -372,11 +367,13 @@ export default function PodiumSkin3D({ username, rank }: Props) {
           No z-index on either → canvas sits on top in natural paint order.
           Transparent WebGL pixels reveal the dust underneath. */}
       {rank === 3 && (
-        <div className="dust-cloud-wrap">
-          <div className="dc-puff dc-1"/><div className="dc-puff dc-2"/>
-          <div className="dc-puff dc-3"/><div className="dc-puff dc-4"/>
-          <div className="dc-puff dc-5"/><div className="dc-puff dc-6"/>
-          <div className="dc-puff dc-7"/><div className="dc-puff dc-8"/>
+        <div style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none',zIndex:0}}>
+          <div className="dust-cloud-wrap">
+            <div className="dc-puff dc-1"/><div className="dc-puff dc-2"/>
+            <div className="dc-puff dc-3"/><div className="dc-puff dc-4"/>
+            <div className="dc-puff dc-5"/><div className="dc-puff dc-6"/>
+            <div className="dc-puff dc-7"/><div className="dc-puff dc-8"/>
+          </div>
         </div>
       )}
 
