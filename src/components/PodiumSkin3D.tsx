@@ -29,13 +29,11 @@ function ensureStyles() {
 .mc-fw-slot--a { left:-8px; }
 .mc-fw-slot--b { left:20px; }
 .mc-fw-slot--c { right:20px; }
-.mc-fw-slot--d { right:-8px; }
 
 /* Per-slot burst colors */
 .mc-fw-slot--a { --pc:#ff3322; --sc:#ff9944; --gc:#ffdd88; }
 .mc-fw-slot--b { --pc:#ffdd00; --sc:#ffe855; --gc:#ffffff;  }
 .mc-fw-slot--c { --pc:#3399ff; --sc:#88ddff; --gc:#ccf0ff;  }
-.mc-fw-slot--d { --pc:#33ee66; --sc:#99ffbb; --gc:#dfffee;  }
 
 /* SMOOTH, STRAIGHT FLIGHT — single animation, no wobble */
 .mc-fw-rocket {
@@ -43,10 +41,9 @@ function ensureStyles() {
   image-rendering:pixelated; transform-origin:bottom center;
   will-change:transform,opacity;
 }
-.mc-fw-slot--a .mc-fw-rocket { animation:mc-fly 2.4s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.0s; }
-.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 2.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.9s; }
-.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 2.5s cubic-bezier(0.25,0.0,0.5,1.0) infinite  1.7s; }
-.mc-fw-slot--d .mc-fw-rocket { animation:mc-fly 2.6s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.5s; }
+.mc-fw-slot--a .mc-fw-rocket { animation:mc-fly 3.5s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.0s; }
+.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 4.0s cubic-bezier(0.25,0.0,0.5,1.0) infinite  1.2s; }
+.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 3.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite  2.2s; }
 
 @keyframes mc-fly {
   0%   { transform:translateY(0px);    opacity:1; }
@@ -103,10 +100,9 @@ function ensureStyles() {
 
 /* Flash */
 .mc-burst-flash { position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%; opacity:0; }
-.mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 2.4s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 2.7s linear infinite  0.9s; }
-.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 2.5s linear infinite  1.7s; }
-.mc-fw-slot--d .mc-burst-flash { animation:mc-bflash 2.6s linear infinite  0.5s; }
+.mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 3.5s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 4.0s linear infinite  1.2s; }
+.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 3.7s linear infinite  2.2s; }
 @keyframes mc-bflash {
   0%,68%  { transform:translate(-50%,-50%) scale(0); opacity:0; }
   71%     { transform:translate(-50%,-50%) scale(0.5); opacity:1;
@@ -123,10 +119,9 @@ function ensureStyles() {
   width:5px; height:28px; border-radius:4px 4px 1px 1px;
   transform-origin:50% 0%; margin-left:-2.5px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 2.4s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 2.7s linear infinite  0.9s; }
-.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 2.5s linear infinite  1.7s; }
-.mc-fw-slot--d .mc-burst-pr { animation:mc-bpr 2.6s linear infinite  0.5s; }
+.mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 3.5s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 4.0s linear infinite  1.2s; }
+.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 3.7s linear infinite  2.2s; }
 @keyframes mc-bpr {
   0%,69%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   72%     { opacity:1; transform:rotate(var(--ra,0deg)) scaleY(0.1);
@@ -143,10 +138,9 @@ function ensureStyles() {
   width:2.5px; height:18px; border-radius:2px;
   transform-origin:50% 0%; margin-left:-1.25px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 2.4s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 2.7s linear infinite  0.9s; }
-.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 2.5s linear infinite  1.7s; }
-.mc-fw-slot--d .mc-burst-sr { animation:mc-bsr 2.6s linear infinite  0.5s; }
+.mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 3.5s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 4.0s linear infinite  1.2s; }
+.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 3.7s linear infinite  2.2s; }
 @keyframes mc-bsr {
   0%,71%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
   74%     { opacity:.9; transform:rotate(var(--ra,0deg)) scaleY(0.2);
@@ -163,10 +157,9 @@ function ensureStyles() {
   width:6px; height:6px; border-radius:50%;
   margin-left:-3px; margin-top:-3px; opacity:0;
 }
-.mc-fw-slot--a .mc-burst-tp { animation:mc-btp 2.4s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 2.7s linear infinite  0.9s; }
-.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 2.5s linear infinite  1.7s; }
-.mc-fw-slot--d .mc-burst-tp { animation:mc-btp 2.6s linear infinite  0.5s; }
+.mc-fw-slot--a .mc-burst-tp { animation:mc-btp 3.5s linear infinite  0.0s; }
+.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 4.0s linear infinite  1.2s; }
+.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 3.7s linear infinite  2.2s; }
 @keyframes mc-btp {
   0%,75%  { opacity:0; transform:rotate(var(--ra,0deg)) translateY(-20px) scale(0); }
   79%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-27px) scale(1.4);
@@ -273,7 +266,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       canvas.style.cssText = 'display:block;background:transparent;';
       wrap.appendChild(canvas);
 
-      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}` });
+      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}`, fpsLimit: 30 });
       try { viewer.renderer.setClearColor(0x000000,0); } catch(_){}
       try { viewer.controls.target.set(0,-8,0); viewer.controls.update(); } catch(_){}
       viewer.zoom = ZOOM[rank];
@@ -383,7 +376,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
       {rank === 1 && (
         <div className="mc-rockets-overlay">
-          {(['a','b','c','d'] as const).map(slot => (
+          {(['a','b','c'] as const).map(slot => (
             <div key={slot} className={`mc-fw-slot mc-fw-slot--${slot}`}>
               <div className="mc-fw-rocket">
                 <div className="mc-fw-cap">
