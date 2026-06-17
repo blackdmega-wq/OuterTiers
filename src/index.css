@@ -2216,12 +2216,10 @@ img { display: block; }
   isolation: isolate; /* own stacking context — forces Chrome to clip child z-index layers */
 }
 .lb-pod--rank2 {
-  background: linear-gradient(180deg, rgba(148,163,184,0.10) 0%, rgba(148,163,184,0.03) 60%, transparent 100%);
-  border-left: 1px solid rgba(148,163,184,0.14);
-  border-right: 1px solid rgba(148,163,184,0.06);
-  border-top: 1px solid rgba(148,163,184,0.16);
-  border-radius: 18px 18px 0 0;
-  animation: lb-pod-silver-pulse 3.4s ease-in-out infinite;
+  background: linear-gradient(180deg, rgba(148,163,184,0.10)animation: lb-pod-silver-pulse 3.4s ease-in-out infinite;
+  isolation: isolate;
+  overflow: hidden;
+  will-change: box-shadow;
 }
 @keyframes lb-pod-silver-pulse {
   0%,100% { box-shadow: 0 0 0 1px rgba(148,163,184,0.14) inset, 0 0 18px rgba(148,163,184,0.06); }
@@ -2272,11 +2270,9 @@ img { display: block; }
   100% { transform: translateY(-160px) scale(0)    rotate(260deg); opacity: 0;    }
 }
 .lb-pod--rank3 {
-  background: linear-gradient(180deg, rgba(192,120,48,0.10) 0%, rgba(192,120,48,0.03) 60%, transparent 100%);
-  border-left: 1px solid rgba(192,120,48,0.06);
-  border-right: 1px solid rgba(192,120,48,0.14);
-  border-top: 1px solid rgba(192,120,48,0.16);
-  border-radius: 18px 18px 0 0;
+  background: linear-gradient(180deg, rgba(192,120,48,0.10)border-radius: 18px 18px 0 0;
+  isolation: isolate;
+  overflow: hidden;
 }
 
 /* ── TROPHY ICON ── */
@@ -2560,6 +2556,7 @@ img { display: block; }
              lb-skin-floss-glow 0.55s ease-in-out infinite;
   transform-origin: bottom center;
   filter: drop-shadow(0 0 12px rgba(203,213,225,0.70));
+  will-change: transform;
 }
 
 /* ─────────────────────────────────────────────
@@ -2588,6 +2585,7 @@ img { display: block; }
              lb-skin-sprint-glow 0.64s ease-in-out infinite;
   transform-origin: bottom center;
   filter: drop-shadow(0 0 10px rgba(201,119,56,0.65));
+  will-change: transform;
 }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
