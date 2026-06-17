@@ -147,7 +147,7 @@ function LbRow({ player, rank }: { player: Player; rank: number }) {
   return (
     <div
       className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '0 56px' } as React.CSSProperties}
+      style={{}}
       onClick={() => navigate(`/player/${live.username}`)}
     >
       <span className="lb-rank">{rank}</span>
