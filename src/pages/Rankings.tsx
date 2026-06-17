@@ -85,8 +85,21 @@ function PlayerBustImg({ username }: { username: string }) {
       viewer.zoom = 2.0;
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
+      // Lock diagonal-right pose every frame — reset all limbs to neutral so
+      // no default walk animation can override the rotation.
       viewer.animation = new sv3d.FunctionAnimation((player: any) => {
-        try { player.rotation.y = 0.55; } catch (_) {}
+        try {
+          player.rotation.y = 0.55;
+          const s = player?.skin;
+          if (s) {
+            s.rightArm.rotation.set(0, 0, 0);
+            s.leftArm.rotation.set(0, 0, 0);
+            s.rightLeg.rotation.set(0, 0, 0);
+            s.leftLeg.rotation.set(0, 0, 0);
+            s.body.rotation.set(0, 0, 0);
+            if (s.head) s.head.rotation.set(0, 0, 0);
+          }
+        } catch (_) {}
       });
     });
 
@@ -100,13 +113,13 @@ function PlayerBustImg({ username }: { username: string }) {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      // visage failed → try crafthead (reliable, consistent bust)
-      setSrc(`https://crafthead.net/bust/${username}/128`);
-    } else if (t === 1) {
-      // crafthead failed → render in-browser via skinview3d
+      // visage failed → render diagonal in-browser via skinview3d
       setUseSv3d(true);
-    } else {
+    } else if (t === 1) {
+      // skinview3d failed → crafthead bust
       setUseSv3d(false);
+      setSrc(`https://crafthead.net/bust/${username}/128`);
+    } else {
       setSrc(`https://mc-heads.net/avatar/${username}/64`);
     }
   }, [username]);
