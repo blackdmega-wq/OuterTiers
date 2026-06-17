@@ -8,219 +8,64 @@ interface Props {
 const SIZES = { 1:{width:100,height:160}, 2:{width:82,height:128}, 3:{width:76,height:118} } as const;
 const ZOOM: Record<1|2|3,number> = { 1:0.58, 2:0.68, 3:0.64 };
 
-const STYLE_ID = 'podium-skin-3d-v10';
+const STYLE_ID = 'podium-skin-3d-v11';
 function ensureStyles() {
   if (document.getElementById(STYLE_ID)) return;
   ['podium-skin-3d-css','podium-skin-3d-css-v4','podium-skin-3d-css-v5',
-   'podium-skin-3d-v6','podium-skin-3d-v7','podium-skin-3d-v8','podium-skin-3d-v9']
+   'podium-skin-3d-v6','podium-skin-3d-v7','podium-skin-3d-v8','podium-skin-3d-v9','podium-skin-3d-v10']
     .forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
   const s = document.createElement('style');
   s.id = STYLE_ID;
-  s.textContent = `
-
-/* ══════════════════════════════════════════════════════════
-   ROCKET OVERLAY  (#1) — no wobble, straight flight
-   ══════════════════════════════════════════════════════════ */
-.mc-rockets-overlay {
-  position:absolute; inset:0; overflow:visible;
-  pointer-events:none; z-index:3;
-}
-.mc-fw-slot { position:absolute; bottom:10px; }
-.mc-fw-slot--a { left:-8px; }
-.mc-fw-slot--b { left:20px; }
-.mc-fw-slot--c { right:20px; }
-
-.mc-fw-slot--a { --pc:#ff3322; --sc:#ff9944; --gc:#ffdd88; }
-.mc-fw-slot--b { --pc:#ffdd00; --sc:#ffe855; --gc:#ffffff;  }
-.mc-fw-slot--c { --pc:#3399ff; --sc:#88ddff; --gc:#ccf0ff;  }
-
-.mc-fw-rocket {
-  display:flex; flex-direction:column; align-items:center;
-  image-rendering:pixelated; transform-origin:bottom center;
-  will-change:transform,opacity;
-}
-.mc-fw-slot--a .mc-fw-rocket { animation:mc-fly 3.5s cubic-bezier(0.25,0.0,0.5,1.0) infinite  0.0s; }
-.mc-fw-slot--b .mc-fw-rocket { animation:mc-fly 4.0s cubic-bezier(0.25,0.0,0.5,1.0) infinite -1.2s; }
-.mc-fw-slot--c .mc-fw-rocket { animation:mc-fly 3.7s cubic-bezier(0.25,0.0,0.5,1.0) infinite -2.2s; }
-
-@keyframes mc-fly {
-  0%   { transform:translateY(0px);    opacity:1; }
-  68%  { transform:translateY(-120px); opacity:1; }
-  73%  { transform:translateY(-130px); opacity:0; }
-  74%  { transform:translateY(0px);    opacity:0; }
-  100% { transform:translateY(0px);    opacity:0; }
-}
-
-.mc-fw-cap  { position:relative; width:14px; height:10px; margin-bottom:-1px; }
-.mc-fw-cap-bar {
-  position:absolute; top:5px; left:0; width:14px; height:4px; background:#5c2e0e;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.3);
-}
-.mc-fw-cap-knob { position:absolute; top:0; left:4px; width:6px; height:7px; background:#6b3417; }
-.mc-fw-body {
-  width:10px; height:22px;
-  background:repeating-linear-gradient(-45deg,#cc1111 0,#cc1111 3px,#f2f2f2 3px,#f2f2f2 6px);
-  border-left:1px solid rgba(0,0,0,.2); border-right:1px solid rgba(0,0,0,.2);
-}
-.mc-fw-fuse {
-  width:6px; height:7px;
-  background:repeating-conic-gradient(#111 0% 25%,#333 0% 50%) 0 0/3px 3px;
-}
-.mc-fw-exhaust {
-  width:7px; height:16px; margin-top:-2px;
-  background:linear-gradient(to bottom,#ffffff 0%,#ffee44 25%,#ff8800 55%,#ff3300 82%,transparent 100%);
-  border-radius:0 0 5px 5px;
-  box-shadow:0 0 8px 3px rgba(255,120,0,.9), 0 0 18px 5px rgba(255,60,0,.5);
-  filter:blur(0.4px);
-  animation:mc-exhaust-smooth .14s ease-in-out infinite alternate;
-}
-@keyframes mc-exhaust-smooth {
-  from { height:16px; transform:scaleX(1.0); opacity:1.0; }
-  to   { height:10px; transform:scaleX(0.8); opacity:0.72; }
-}
-.mc-fw-trail {
-  position:absolute; bottom:-2px; left:50%;
-  transform:translateX(-50%);
-  width:4px; height:50px;
-  background:linear-gradient(to top,transparent 0%,rgba(255,140,0,.22) 45%,rgba(255,200,50,.1) 75%,transparent 100%);
-  border-radius:50%; filter:blur(3px); pointer-events:none;
-}
-
-/* ══════════════════════════════════════════════════════════
-   EXPLOSION BURST — child anims synced to slot timing
-   ══════════════════════════════════════════════════════════ */
-.mc-fw-burst {
-  position:absolute; left:50%; bottom:10px;
-  transform:translateX(-50%) translateY(-130px);
-  width:64px; height:64px; pointer-events:none;
-}
-
-.mc-burst-flash { position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%; opacity:0; }
-.mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 4.0s linear infinite -1.2s; }
-.mc-fw-slot--c .mc-burst-flash { animation:mc-bflash 3.7s linear infinite -2.2s; }
-@keyframes mc-bflash {
-  0%,68%  { transform:translate(-50%,-50%) scale(0); opacity:0; }
-  71%     { transform:translate(-50%,-50%) scale(0.5); opacity:1;
-            background:radial-gradient(circle,#fff 0%,var(--gc) 30%,var(--pc) 70%,transparent 100%);
-            box-shadow:0 0 16px 6px var(--pc),0 0 30px 12px var(--sc); }
-  80%     { transform:translate(-50%,-50%) scale(1.8); opacity:1; }
-  92%     { transform:translate(-50%,-50%) scale(2.4); opacity:.45; }
-  100%    { transform:translate(-50%,-50%) scale(3.0); opacity:0; }
-}
-
-.mc-burst-pr {
-  position:absolute; top:50%; left:50%;
-  width:5px; height:28px; border-radius:4px 4px 1px 1px;
-  transform-origin:50% 0%; margin-left:-2.5px; opacity:0;
-}
-.mc-fw-slot--a .mc-burst-pr { animation:mc-bpr 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-pr { animation:mc-bpr 4.0s linear infinite -1.2s; }
-.mc-fw-slot--c .mc-burst-pr { animation:mc-bpr 3.7s linear infinite -2.2s; }
-@keyframes mc-bpr {
-  0%,69%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
-  72%     { opacity:1; transform:rotate(var(--ra,0deg)) scaleY(0.1);
-            background:linear-gradient(to bottom,#fff 0%,var(--gc) 15%,var(--pc) 60%,transparent 100%);
-            box-shadow:0 0 8px 3px var(--pc),0 0 14px 5px var(--sc); }
-  80%     { opacity:1; transform:rotate(var(--ra,0deg)) scaleY(1.0); }
-  91%     { opacity:.7; transform:rotate(var(--ra,0deg)) scaleY(1.5); }
-  100%    { opacity:0;  transform:rotate(var(--ra,0deg)) scaleY(1.9); }
-}
-
-.mc-burst-sr {
-  position:absolute; top:50%; left:50%;
-  width:2.5px; height:18px; border-radius:2px;
-  transform-origin:50% 0%; margin-left:-1.25px; opacity:0;
-}
-.mc-fw-slot--a .mc-burst-sr { animation:mc-bsr 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-sr { animation:mc-bsr 4.0s linear infinite -1.2s; }
-.mc-fw-slot--c .mc-burst-sr { animation:mc-bsr 3.7s linear infinite -2.2s; }
-@keyframes mc-bsr {
-  0%,71%  { opacity:0; transform:rotate(var(--ra,0deg)) scaleY(0); }
-  74%     { opacity:.9; transform:rotate(var(--ra,0deg)) scaleY(0.2);
-            background:linear-gradient(to bottom,var(--gc) 0%,var(--sc) 55%,transparent 100%);
-            box-shadow:0 0 5px 2px var(--sc); }
-  83%     { opacity:.9; transform:rotate(var(--ra,0deg)) scaleY(1.0); }
-  93%     { opacity:.4; transform:rotate(var(--ra,0deg)) scaleY(1.35); }
-  100%    { opacity:0;  transform:rotate(var(--ra,0deg)) scaleY(1.65); }
-}
-
-.mc-burst-tp {
-  position:absolute; top:50%; left:50%;
-  width:6px; height:6px; border-radius:50%;
-  margin-left:-3px; margin-top:-3px; opacity:0;
-}
-.mc-fw-slot--a .mc-burst-tp { animation:mc-btp 3.5s linear infinite  0.0s; }
-.mc-fw-slot--b .mc-burst-tp { animation:mc-btp 4.0s linear infinite -1.2s; }
-.mc-fw-slot--c .mc-burst-tp { animation:mc-btp 3.7s linear infinite -2.2s; }
-@keyframes mc-btp {
-  0%,75%  { opacity:0; transform:rotate(var(--ra,0deg)) translateY(-20px) scale(0); }
-  79%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-27px) scale(1.4);
-            background:var(--gc); box-shadow:0 0 7px 3px var(--pc); }
-  88%     { opacity:1; transform:rotate(var(--ra,0deg)) translateY(-31px) scale(1.0); }
-  95%     { opacity:.4; transform:rotate(var(--ra,0deg)) translateY(-35px) scale(.6); }
-  100%    { opacity:0;  transform:rotate(var(--ra,0deg)) translateY(-40px) scale(0); }
-}
-`;
+  s.textContent = '';
   document.head.appendChild(s);
 }
 
-const PR = [0,45,90,135,180,225,270,315];
-const SR = [22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5];
-
-/* ── Rising ember / sparkle aura for rank 3 ────────────────────────────────
-   Small glowing particles spawn near the player's feet and float upward,
-   drifting sideways slightly and fading as they rise.
-   Colours: gold, orange, cyan, white — gives a "champion energy" feel.
-──────────────────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   EMBER AURA (rank 3)
+   ══════════════════════════════════════════════════════════ */
 interface Ember {
   x: number; y: number;
   vx: number; vy: number;
   r: number;
   life: number; maxLife: number;
-  cr: number; cg: number; cb: number; // colour channels
+  cr: number; cg: number; cb: number;
 }
 
 const EMBER_COLORS: [number, number, number][] = [
-  [255, 210,  50],  // gold
-  [255, 140,  40],  // orange
-  [100, 210, 255],  // cyan
-  [255, 255, 255],  // white
-  [200, 160, 255],  // soft purple
+  [255, 210,  50],
+  [255, 140,  40],
+  [100, 210, 255],
+  [255, 255, 255],
+  [200, 160, 255],
 ];
 
-function startAuraCanvas(
-  cv: HTMLCanvasElement,
-  w: number,
-  h: number
-): () => void {
+function startAuraCanvas(cv: HTMLCanvasElement, w: number, h: number): () => void {
   cv.width  = w;
   cv.height = h;
   const dc = cv.getContext('2d') as CanvasRenderingContext2D;
   if (!dc) return () => {};
 
   const embers: Ember[] = [];
-  // Spawn zone: bottom quarter of the canvas, centered on the player
   const SPAWN_X_MIN = w * 0.22;
   const SPAWN_X_MAX = w * 0.78;
   const SPAWN_Y_MIN = h - 48;
   const SPAWN_Y_MAX = h - 30;
 
   let lastT    = performance.now();
-  let spawnAcc = 0;          // accumulate fractional spawns
-  const SPAWNS_PER_FRAME = 0.18; // ~11 new embers/sec at 60 fps
+  let spawnAcc = 0;
+  const SPAWNS_PER_FRAME = 0.18;
   let animId   = 0;
 
   function spawn() {
     const [cr, cg, cb] = EMBER_COLORS[Math.floor(Math.random() * EMBER_COLORS.length)];
     embers.push({
-      x:       SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
-      y:       SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
-      vx:      (Math.random() - 0.5) * 0.45,
-      vy:      -(0.55 + Math.random() * 0.75),
-      r:        0.9 + Math.random() * 1.6,
-      life:     1.0,
-      maxLife:  45 + Math.random() * 40, // frames (not seconds)
+      x: SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
+      y: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: -(0.55 + Math.random() * 0.75),
+      r:   0.9 + Math.random() * 1.6,
+      life: 1.0,
+      maxLife: 45 + Math.random() * 40,
       cr, cg, cb,
     });
   }
@@ -229,52 +74,358 @@ function startAuraCanvas(
     animId = requestAnimationFrame(tick);
     const dt = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
-
     spawnAcc += SPAWNS_PER_FRAME * dt;
     while (spawnAcc >= 1) { spawn(); spawnAcc -= 1; }
-
     dc.clearRect(0, 0, w, h);
-
     for (let i = embers.length - 1; i >= 0; i--) {
       const e = embers[i];
       e.life -= dt / e.maxLife;
       if (e.life <= 0) { embers.splice(i, 1); continue; }
-
       e.x += e.vx * dt;
       e.y += e.vy * dt;
-      // Gentle sine drift
       e.vx += Math.sin(now * 0.003 + i) * 0.006 * dt;
-
       const alpha = e.life * 0.88;
-
-      // Soft outer glow
       const grd = dc.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
       grd.addColorStop(0,   `rgba(${e.cr},${e.cg},${e.cb},${(alpha * 0.55).toFixed(3)})`);
       grd.addColorStop(0.4, `rgba(${e.cr},${e.cg},${e.cb},${(alpha * 0.18).toFixed(3)})`);
       grd.addColorStop(1,   `rgba(${e.cr},${e.cg},${e.cb},0)`);
-      dc.beginPath();
-      dc.arc(e.x, e.y, e.r * 4, 0, Math.PI * 2);
-      dc.fillStyle = grd;
-      dc.fill();
-
-      // Bright core
-      dc.beginPath();
-      dc.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-      dc.fillStyle = `rgba(${e.cr},${e.cg},${e.cb},${alpha.toFixed(3)})`;
-      dc.fill();
+      dc.beginPath(); dc.arc(e.x, e.y, e.r * 4, 0, Math.PI * 2); dc.fillStyle = grd; dc.fill();
+      dc.beginPath(); dc.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+      dc.fillStyle = `rgba(${e.cr},${e.cg},${e.cb},${alpha.toFixed(3)})`; dc.fill();
     }
   }
-
-  // Pre-seed a handful of particles so the effect is visible immediately
   for (let i = 0; i < 8; i++) spawn();
-
   animId = requestAnimationFrame(tick);
   return () => cancelAnimationFrame(animId);
 }
 
+/* ══════════════════════════════════════════════════════════
+   MINECRAFT FIREWORKS CANVAS (rank 1)
+   ══════════════════════════════════════════════════════════ */
+
+type ExpType = 'large-ball' | 'small-ball' | 'star' | 'burst' | 'creeper' | 'trail-ball';
+
+interface FWDef {
+  type: ExpType;
+  colors: [number,number,number][];
+  fadeColors?: [number,number,number][];
+  trail: boolean;
+  twinkle: boolean;
+}
+
+// 8 different firework definitions cycling through — inspired by the Minecraft screenshots
+const FW_DEFS: FWDef[] = [
+  // 1. Large Ball — multicolored sphere (screenshot 1)
+  { type:'large-ball', colors:[[255,50,50],[255,160,0],[255,220,0],[255,80,200],[100,220,100],[100,150,255],[220,80,255]], trail:false, twinkle:false },
+  // 2. Large Ball — yellow/orange/red → lime+white twinkle (screenshot 2)
+  { type:'large-ball', colors:[[255,220,0],[255,140,20],[220,50,30]], fadeColors:[[180,255,80],[255,255,255]], trail:false, twinkle:true },
+  // 3. Burst — yellow/orange → red/white twinkle (screenshot 3)
+  { type:'burst', colors:[[255,220,0],[255,160,0],[255,80,0]], fadeColors:[[220,50,30],[255,220,150]], trail:false, twinkle:true },
+  // 4. Trail Ball — yellow+blue+purple → white, trail+twinkle (screenshot 4)
+  { type:'trail-ball', colors:[[255,220,0],[100,120,255],[200,80,255]], fadeColors:[[255,255,255],[200,230,255]], trail:true, twinkle:true },
+  // 5. Star-shaped — yellow/orange twinkle (screenshot 5)
+  { type:'star', colors:[[255,230,0],[255,150,20],[255,255,180]], trail:false, twinkle:true },
+  // 6. Creeper-shaped — yellow/lime (screenshot 6)
+  { type:'creeper', colors:[[220,255,60],[120,220,60],[255,255,100]], trail:false, twinkle:false },
+  // 7. Small Ball — warm gold + pink twinkle (screenshot 7)
+  { type:'small-ball', colors:[[255,220,0],[255,80,120],[255,180,50]], trail:false, twinkle:true },
+  // 8. Large Ball — purple/cyan/pink spectral burst
+  { type:'large-ball', colors:[[200,80,255],[80,200,255],[255,80,180],[80,255,200]], trail:false, twinkle:false },
+];
+
+let _fwIdx = 0;
+
+interface FWParticle {
+  x: number; y: number;
+  vx: number; vy: number;
+  r: number; g: number; b: number;
+  fr: number; fg: number; fb: number;
+  hasFade: boolean; hasTrail: boolean; hasTwinkle: boolean;
+  life: number; maxLife: number;
+  isChild: boolean;
+}
+
+interface FWRocket {
+  x: number; y: number; vy: number;
+  cr: number; cg: number; cb: number;
+  fuse: number;
+  def: FWDef;
+  trail: {x:number;y:number}[];
+}
+
+// Creeper face pixels (relative units, centered at 0,0)
+// Based on standard 8×8 Minecraft creeper face pixel art
+const CREEPER_PX: [number,number][] = [
+  // left eye 2×2
+  [-3,-2],[-2,-2],[-3,-1],[-2,-1],
+  // right eye 2×2
+  [2,-2],[3,-2],[2,-1],[3,-1],
+  // nose bridge
+  [-1,0],[0,0],[1,0],
+  // mouth top
+  [-2,1],[-1,1],[0,1],[1,1],[2,1],
+  // mouth sides
+  [-2,2],[-1,2],[1,2],[2,2],
+  // mouth bottom
+  [-2,3],[-1,3],[0,3],[1,3],[2,3],
+];
+
+const FW_W = 220;
+const FW_H = 340;
+
+function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
+  const pc = (arr: [number,number,number][]) => arr[Math.floor(Math.random() * arr.length)];
+  const fc = (): [number,number,number] => def.fadeColors ? pc(def.fadeColors) : [0,0,0];
+
+  function makeP(vx: number, vy: number, life = 1.0, maxLife = 50 + Math.random() * 30): FWParticle {
+    const [r,g,b] = pc(def.colors);
+    const [fr,fg,fb] = fc();
+    return { x, y, vx, vy, r, g, b, fr, fg, fb,
+      hasFade: !!def.fadeColors, hasTrail: def.trail, hasTwinkle: def.twinkle,
+      life, maxLife, isChild: false };
+  }
+
+  if (def.type === 'large-ball') {
+    const cnt = 65 + Math.floor(Math.random() * 25);
+    for (let i = 0; i < cnt; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const spd   = 1.6 + Math.random() * 1.4;
+      particles.push(makeP(Math.sin(phi)*Math.cos(theta)*spd, Math.sin(phi)*Math.sin(theta)*spd, 1.0, 55+Math.random()*25));
+    }
+  } else if (def.type === 'trail-ball') {
+    const cnt = 55 + Math.floor(Math.random() * 20);
+    for (let i = 0; i < cnt; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const spd   = 1.4 + Math.random() * 1.8;
+      const p = makeP(Math.sin(phi)*Math.cos(theta)*spd, Math.sin(phi)*Math.sin(theta)*spd, 1.0, 60+Math.random()*30);
+      particles.push(p);
+    }
+  } else if (def.type === 'small-ball') {
+    const cnt = 28 + Math.floor(Math.random() * 14);
+    for (let i = 0; i < cnt; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const spd   = 0.7 + Math.random() * 0.9;
+      particles.push(makeP(Math.cos(theta)*spd, Math.sin(theta)*spd, 1.0, 40+Math.random()*20));
+    }
+  } else if (def.type === 'star') {
+    // 5-pointed star: 5 primary arms with spread
+    for (let arm = 0; arm < 5; arm++) {
+      const baseAngle = (arm / 5) * Math.PI * 2 - Math.PI / 2;
+      const cnt = 12 + Math.floor(Math.random() * 6);
+      for (let i = 0; i < cnt; i++) {
+        const spread = (Math.random() - 0.5) * 0.35;
+        const spd    = 0.8 + Math.random() * 2.4;
+        const angle  = baseAngle + spread;
+        particles.push(makeP(Math.cos(angle)*spd, Math.sin(angle)*spd, 1.0, 50+Math.random()*25));
+      }
+    }
+  } else if (def.type === 'burst') {
+    // Burst: random speeds, scattered — looks like a cluster/splat
+    const cnt = 45 + Math.floor(Math.random() * 20);
+    for (let i = 0; i < cnt; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const spd   = 0.3 + Math.pow(Math.random(), 1.5) * 2.8; // biased toward center
+      const [r,g,b] = pc(def.colors);
+      const [fr,fg,fb] = fc();
+      particles.push({
+        x, y, vx: Math.cos(theta)*spd, vy: Math.sin(theta)*spd,
+        r, g, b, fr, fg, fb,
+        hasFade: !!def.fadeColors, hasTrail: false, hasTwinkle: def.twinkle,
+        life: 0.65 + Math.random() * 0.35,
+        maxLife: 25 + Math.random() * 35,
+        isChild: false,
+      });
+    }
+  } else if (def.type === 'creeper') {
+    const SCALE = 4; // pixels per unit → controls creeper face size
+    for (const [px,py] of CREEPER_PX) {
+      const [r,g,b] = pc(def.colors);
+      // Each pixel expands slightly outward from center, then holds shape
+      const dist = Math.sqrt(px*px + py*py);
+      const norm = dist > 0 ? 1/dist : 0;
+      const spd  = 0.08 + dist * 0.04;
+      particles.push({
+        x: x + px * SCALE, y: y + py * SCALE,
+        vx: px * norm * spd,
+        vy: py * norm * spd,
+        r, g, b, fr: 0, fg: 0, fb: 0,
+        hasFade: false, hasTrail: false, hasTwinkle: def.twinkle,
+        life: 1.0,
+        maxLife: 85 + Math.random() * 35,
+        isChild: false,
+      });
+    }
+  }
+}
+
+function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
+  cv.width  = FW_W;
+  cv.height = FW_H;
+  const dc = cv.getContext('2d');
+  if (!dc) return () => {};
+
+  const rockets: FWRocket[] = [];
+  const particles: FWParticle[] = [];
+  let animId = 0;
+  let lastT  = performance.now();
+  let launchTimer = 0;
+  const LAUNCH_GAP = 55; // frames between launches
+
+  function launchRocket() {
+    const def = FW_DEFS[_fwIdx % FW_DEFS.length];
+    _fwIdx++;
+    const [cr,cg,cb] = def.colors[Math.floor(Math.random() * def.colors.length)];
+    rockets.push({
+      x: FW_W * 0.15 + Math.random() * FW_W * 0.70,
+      y: FW_H - 12,
+      vy: -(2.2 + Math.random() * 1.6),
+      cr, cg, cb,
+      fuse: 44 + Math.floor(Math.random() * 28),
+      def,
+      trail: [],
+    });
+  }
+
+  function tick(now: number) {
+    animId = requestAnimationFrame(tick);
+    const dt = Math.min((now - lastT) / 16.67, 2.5);
+    lastT = now;
+
+    launchTimer += dt;
+    if (launchTimer >= LAUNCH_GAP) { launchRocket(); launchTimer = 0; }
+
+    dc.clearRect(0, 0, FW_W, FW_H);
+
+    // ── Rockets ──────────────────────────────────────────────
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const rk = rockets[i];
+      rk.trail.push({ x: rk.x, y: rk.y });
+      if (rk.trail.length > 7) rk.trail.shift();
+
+      rk.y  += rk.vy * dt;
+      rk.vy += 0.028 * dt;
+      rk.fuse -= dt;
+
+      if (rk.fuse <= 0) {
+        explode(particles, rk.x, rk.y, rk.def);
+        rockets.splice(i, 1);
+        continue;
+      }
+
+      // Trail dots — small and subtle
+      for (let t = 0; t < rk.trail.length; t++) {
+        const tr = rk.trail[t];
+        const alpha = (t / rk.trail.length) * 0.75;
+        const radius = 0.9 + (t / rk.trail.length) * 0.6;
+        dc.beginPath();
+        dc.arc(tr.x, tr.y, radius, 0, Math.PI * 2);
+        dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},${alpha})`;
+        dc.fill();
+      }
+
+      // Rocket body — small pixel rect (4px × 7px)
+      dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},0.95)`;
+      dc.fillRect(rk.x - 1, rk.y - 4, 2, 6);
+      // Nose tip (1px brighter)
+      dc.fillStyle = `rgba(255,255,255,0.8)`;
+      dc.fillRect(rk.x - 1, rk.y - 5, 2, 1);
+      // Exhaust glow below
+      dc.beginPath();
+      dc.arc(rk.x, rk.y + 4, 2.5, 0, Math.PI * 2);
+      const exGrd = dc.createRadialGradient(rk.x, rk.y+4, 0, rk.x, rk.y+4, 2.5);
+      exGrd.addColorStop(0, `rgba(255,220,100,0.9)`);
+      exGrd.addColorStop(0.5, `rgba(255,120,0,0.5)`);
+      exGrd.addColorStop(1, `rgba(255,60,0,0)`);
+      dc.fillStyle = exGrd;
+      dc.fill();
+    }
+
+    // ── Particles ─────────────────────────────────────────────
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life -= dt / p.maxLife;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+      p.x  += p.vx * dt;
+      p.y  += p.vy * dt;
+      p.vy += 0.035 * dt;   // gravity
+      p.vx *= Math.pow(0.975, dt);
+      p.vy *= Math.pow(0.975, dt);
+
+      // Trail child particles
+      if (p.hasTrail && !p.isChild && Math.random() < 0.35 * dt) {
+        const [tr, tg, tb] = [p.r, p.g, p.b];
+        particles.push({
+          x: p.x, y: p.y,
+          vx: p.vx * 0.25 + (Math.random()-0.5)*0.4,
+          vy: p.vy * 0.25 + (Math.random()-0.5)*0.4,
+          r: tr, g: tg, b: tb, fr: 255, fg: 255, fb: 255,
+          hasFade: true, hasTrail: false, hasTwinkle: false,
+          life: 0.7, maxLife: 12,
+          isChild: true,
+        });
+      }
+
+      // Color lerp primary → fade
+      let cr = p.r, cg = p.g, cb = p.b;
+      if (p.hasFade) {
+        const ft = Math.max(0, Math.min(1, (1 - p.life) * 1.8));
+        cr = Math.round(p.r + (p.fr - p.r) * ft);
+        cg = Math.round(p.g + (p.fg - p.g) * ft);
+        cb = Math.round(p.b + (p.fb - p.b) * ft);
+      }
+
+      // Alpha — twinkle flicker
+      let alpha = p.life * 0.92;
+      if (p.hasTwinkle) {
+        alpha *= 0.35 + 0.65 * Math.abs(Math.sin(p.life * 14 + i * 0.7));
+      }
+      if (p.isChild) alpha *= 0.75;
+
+      // Particle size shrinks with life
+      const sz = (p.isChild ? 0.5 : 0.9) + p.life * (p.isChild ? 0.8 : 1.9);
+
+      // Draw Minecraft-style × + particle
+      dc.lineWidth = p.isChild ? 0.7 : 1.1;
+      dc.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
+      dc.beginPath();
+      // × diagonals
+      dc.moveTo(p.x - sz, p.y - sz); dc.lineTo(p.x + sz, p.y + sz);
+      dc.moveTo(p.x + sz, p.y - sz); dc.lineTo(p.x - sz, p.y + sz);
+      dc.stroke();
+      // + cross (slightly smaller)
+      const sh = sz * 0.72;
+      dc.beginPath();
+      dc.moveTo(p.x - sh, p.y); dc.lineTo(p.x + sh, p.y);
+      dc.moveTo(p.x, p.y - sh); dc.lineTo(p.x, p.y + sh);
+      dc.stroke();
+
+      // Soft glow core for non-child particles
+      if (!p.isChild && p.life > 0.3) {
+        const gr = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz * 2.5);
+        gr.addColorStop(0, `rgba(${cr},${cg},${cb},${(alpha * 0.4).toFixed(3)})`);
+        gr.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+        dc.beginPath(); dc.arc(p.x, p.y, sz * 2.5, 0, Math.PI * 2);
+        dc.fillStyle = gr; dc.fill();
+      }
+    }
+  }
+
+  // Pre-launch 2 rockets staggered so there's immediate action
+  launchRocket();
+  setTimeout(() => { if (animId) launchRocket(); }, 700);
+  setTimeout(() => { if (animId) launchRocket(); }, 1400);
+
+  animId = requestAnimationFrame(tick);
+  return () => { cancelAnimationFrame(animId); animId = 0; };
+}
+
 export default function PodiumSkin3D({ username, rank }: Props) {
-  const wrapRef      = useRef<HTMLDivElement>(null);
-  const dustCanvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapRef          = useRef<HTMLDivElement>(null);
+  const dustCanvasRef    = useRef<HTMLCanvasElement>(null);
+  const fireworkCanvasRef = useRef<HTMLCanvasElement>(null);
   const { width, height } = SIZES[rank];
 
   useEffect(() => {
@@ -285,10 +436,13 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     let viewer: any;
     let canvas: HTMLCanvasElement | null = null;
     let stopDust: (() => void) | null = null;
+    let stopFW:   (() => void) | null = null;
 
-    // Start ember-aura canvas for rank 3
     if (rank === 3 && dustCanvasRef.current) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
+    }
+    if (rank === 1 && fireworkCanvasRef.current) {
+      stopFW = startFireworksCanvas(fireworkCanvasRef.current);
     }
 
     const isMobile = window.innerWidth < 768;
@@ -307,53 +461,29 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch(_){}
 
-      // Cap render FPS — reduces GPU load significantly on mobile
       try {
         const _ms = 1000 / targetFps; let _lt = 0;
         const _orig = viewer.render.bind(viewer);
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
 
-      /* ──────── #3  SPIN LOOP — smooth 360° spin emote, arms out ──────────
-         Player continuously spins 360° (full loop emote).
-         Arms spread wide, legs slightly apart — confident champion spin.
-      ─────────────────────────────────────────────────────────────────── */
+      /* ──────── #3  SPIN LOOP ──────── */
       if (rank === 3) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin; if (!s?.leftArm) return;
-            // Full 360° continuous spin — progress goes 0→1 looping
             player.rotation.y = progress * Math.PI * 2;
-
             const t = progress * Math.PI * 2;
-
-            // ── ARMS: spread out wide, slight forward tilt (flying spin pose) ─
             s.rightArm.rotation.z =  0.90 + Math.sin(t * 2) * 0.08;
             s.rightArm.rotation.x = -0.15;
             s.rightArm.rotation.y =  0.0;
             s.leftArm.rotation.z  = -0.90 - Math.sin(t * 2) * 0.08;
             s.leftArm.rotation.x  = -0.15;
             s.leftArm.rotation.y  =  0.0;
-
-            // ── BODY: upright, slight chest lift ──────────────────────
-            s.body.rotation.y = 0;
-            s.body.rotation.z = 0;
-            s.body.rotation.x = -0.04;
-
-            // ── HEAD: faces forward (counter-spin so head stays toward viewer) ─
-            if (s.head) {
-              s.head.rotation.y = 0;
-              s.head.rotation.x = 0;
-              s.head.rotation.z = 0;
-            }
-
-            // ── LEGS: slight split stance ──────────────────────────────
-            s.rightLeg.rotation.z = -0.10;
-            s.leftLeg.rotation.z  =  0.10;
-            s.rightLeg.rotation.x =  0.0;
-            s.leftLeg.rotation.x  =  0.0;
-
-            // ── ROOT: tiny hover bounce while spinning ─────────────────
+            s.body.rotation.y = 0; s.body.rotation.z = 0; s.body.rotation.x = -0.04;
+            if (s.head) { s.head.rotation.y = 0; s.head.rotation.x = 0; s.head.rotation.z = 0; }
+            s.rightLeg.rotation.z = -0.10; s.leftLeg.rotation.z = 0.10;
+            s.rightLeg.rotation.x = 0.0;   s.leftLeg.rotation.x = 0.0;
             player.position.y = Math.sin(t * 2) * -0.12;
             player.position.x = 0;
           } catch(_){}
@@ -420,6 +550,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     return () => {
       disposed = true;
       if (stopDust) stopDust();
+      if (stopFW)   stopFW();
       if (viewer) { try { viewer.dispose(); } catch(_) {} }
       if (canvas && wrap.contains(canvas)) { wrap.removeChild(canvas); }
     };
@@ -430,50 +561,33 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       ref={wrapRef}
       style={{width,height,position:'relative',zIndex:1,flexShrink:0,margin:'0 auto',overflow:'visible'}}
     >
-      {/* Canvas dust rendered FIRST (z-index 0) — WebGL canvas appended SECOND (z-index 1) by useEffect.
-          Transparent WebGL pixels let the dust canvas show through underneath. */}
+      {/* Rank 3: ember aura canvas (behind 3D skin) */}
       {rank === 3 && (
         <canvas
           ref={dustCanvasRef}
-          style={{
-            position:'absolute', bottom:0, left:0,
-            width:`${width}px`, height:`${height}px`,
-            pointerEvents:'none', zIndex:0,
-          }}
+          style={{ position:'absolute', bottom:0, left:0, width:`${width}px`, height:`${height}px`, pointerEvents:'none', zIndex:0 }}
           width={width}
           height={height}
         />
       )}
 
+      {/* Rank 1: Minecraft fireworks canvas — large, centered, extends above and around the skin */}
       {rank === 1 && (
-        <div className="mc-rockets-overlay">
-          {(['a','b','c'] as const).map(slot => (
-            <div key={slot} className={`mc-fw-slot mc-fw-slot--${slot}`}>
-              <div className="mc-fw-rocket">
-                <div className="mc-fw-cap">
-                  <div className="mc-fw-cap-knob"/>
-                  <div className="mc-fw-cap-bar"/>
-                </div>
-                <div className="mc-fw-body"/>
-                <div className="mc-fw-fuse"/>
-                <div className="mc-fw-exhaust"/>
-                <div className="mc-fw-trail"/>
-              </div>
-              <div className="mc-fw-burst">
-                <div className="mc-burst-flash"/>
-                {PR.map(a=>(
-                  <div key={`p${a}`} className="mc-burst-pr" style={{'--ra':`${a}deg`}as React.CSSProperties}/>
-                ))}
-                {SR.map(a=>(
-                  <div key={`s${a}`} className="mc-burst-sr" style={{'--ra':`${a}deg`}as React.CSSProperties}/>
-                ))}
-                {PR.map(a=>(
-                  <div key={`t${a}`} className="mc-burst-tp" style={{'--ra':`${a}deg`}as React.CSSProperties}/>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <canvas
+          ref={fireworkCanvasRef}
+          style={{
+            position: 'absolute',
+            bottom: -10,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: `${FW_W}px`,
+            height: `${FW_H}px`,
+            pointerEvents: 'none',
+            zIndex: 4,
+          }}
+          width={FW_W}
+          height={FW_H}
+        />
       )}
     </div>
   );
