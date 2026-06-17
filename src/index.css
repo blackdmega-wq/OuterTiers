@@ -2837,7 +2837,7 @@ img { display: block; }
   display: block;
   background: rgba(10,15,35,0.95);
   image-rendering: auto;
-  transform: scaleX(-1);
+  transform: perspective(320px) rotateY(20deg);
 }
 
 /* ── OVERALL PAGINATION ── */
