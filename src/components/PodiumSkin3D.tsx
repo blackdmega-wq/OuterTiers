@@ -130,10 +130,6 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.rightLeg.rotation.x =  0;
             s.rightLeg.rotation.y =  0;
 
-            /* ── KAMERA-WINKEL: 22° von der Seite → Arm-Tiefe sichtbar ──  */
-            /* Charakter leicht nach links gedreht → man sieht vorne/hinten */
-            player.rotation.y = 0.38;
-
           } catch (_) {}
         });
 
