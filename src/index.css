@@ -2210,7 +2210,8 @@ img { display: block; }
   border-top: 1px solid rgba(251,191,36,0.20);
   border-radius: 18px 18px 0 0;
   z-index: 2;
-  overflow: hidden; /* clips fireworks canvas to the golden card border */
+  overflow: hidden;
+  isolation: isolate; /* own stacking context — forces Chrome to clip child z-index layers */
 }
 .lb-pod--rank2 {
   background: linear-gradient(180deg, rgba(148,163,184,0.10) 0%, rgba(148,163,184,0.03) 60%, transparent 100%);
