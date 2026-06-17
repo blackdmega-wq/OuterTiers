@@ -53,10 +53,12 @@ function tierNumCls(tier: string): string {
 const OV_PAGE = 25;
 
 /* ── PlayerBustImg: visage → skinview3d (diagonal, offline-safe) → crafthead → avatar ── */
-function PlayerBustImg({ username }: { username: string }) {
+function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) {
+  // Prefer UUID for all skin lookups — avoids stale data when a player renames
+  const skinId = uuid || username;
   const [useSv3d, setUseSv3d] = React.useState(false);
   const [src, setSrc] = React.useState(
-    `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
+    `https://visage.surgeplay.com/bust/128/${skinId}?yaw=-25`
   );
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -75,7 +77,7 @@ function PlayerBustImg({ username }: { username: string }) {
         canvas,
         width: 80,
         height: 80,
-        skin: `https://mc-heads.net/skin/${username}`,
+        skin: `https://mc-heads.net/skin/${skinId}`,
       });
       try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
       try {
@@ -108,7 +110,7 @@ function PlayerBustImg({ username }: { username: string }) {
       disposed = true;
       if (viewer) try { viewer.dispose(); } catch (_) {}
     };
-  }, [useSv3d, username]);
+  }, [useSv3d, skinId]);
 
   const handleError = React.useCallback(() => {
     const t = triedRef.current;
@@ -119,11 +121,11 @@ function PlayerBustImg({ username }: { username: string }) {
     } else if (t === 1) {
       // skinview3d failed → crafthead bust
       setUseSv3d(false);
-      setSrc(`https://crafthead.net/bust/${username}/128`);
+      setSrc(`https://crafthead.net/bust/${skinId}/128`);
     } else {
-      setSrc(`https://mc-heads.net/avatar/${username}/64`);
+      setSrc(`https://mc-heads.net/avatar/${skinId}/64`);
     }
-  }, [username]);
+  }, [skinId]);
 
   if (useSv3d) {
     return (
@@ -172,7 +174,7 @@ function OverallTable({ players }: { players: Player[] }) {
 
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
-              <PlayerBustImg username={player.username} />
+              <PlayerBustImg username={player.username} uuid={player.uuid} />
               <span className="ot-ov-rank-pill">{rank}.</span>
             </div>
 
@@ -405,7 +407,7 @@ export default function Rankings() {
                                 </div>
                                 {/* Avatar */}
                                 <img
-                                  src={`https://mc-heads.net/avatar/${player.username}/28`}
+                                  src={`https://mc-heads.net/avatar/${player.uuid || player.username}/28`}
                                   alt={player.username}
                                   width={28} height={28}
                                   className="tc-avatar"
