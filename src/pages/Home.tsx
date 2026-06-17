@@ -378,7 +378,7 @@ export default function Home() {
                     >
                       <span className="lb-rank">{rank}</span>
                       <img
-                        src={`https://mc-heads.net/avatar/${player.username}/36`}
+                        src={`https://mc-heads.net/avatar/${player.uuid || player.username}/36`}
                         alt={player.username}
                         className="lb-avatar"
                         loading="lazy"
