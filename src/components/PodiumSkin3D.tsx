@@ -582,7 +582,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     }
 
     const isMobile = window.innerWidth < 768;
-    const targetFps = isMobile ? 15 : 45;
+    const targetFps = isMobile ? 30 : 45;
 
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
