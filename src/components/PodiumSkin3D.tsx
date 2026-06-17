@@ -566,12 +566,23 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       // skinview3d with target=(0,0,0) renders feet at ~71% of canvas height for ranks 1 & 3.
       // Rank 2 (zoom=0.82) has a different ratio and yOff=14 is known-good, kept hardcoded.
       //
-      // URL override (for tuning): add ?yoff1=XX or ?yoff3=XX to the URL to test values live.
+      // URL overrides for live tuning — PC and mobile are separate so changing one won't affect the other.
       // Positive = skin moves DOWN, Negative = skin moves UP.
-      // Example: https://yoursite.com?yoff1=-10&yoff3=-5
+      //
+      // PC   (screen width ≥ 580px): ?yoff1pc=XX  and  ?yoff3pc=XX
+      // Mobile (screen width < 580px): ?yoff1m=XX  and  ?yoff3m=XX
+      //
+      // Examples:
+      //   https://yoursite.com?yoff1pc=-5&yoff3pc=10     ← tune PC only
+      //   https://yoursite.com?yoff1m=-20&yoff3m=-8      ← tune mobile only
+      //   https://yoursite.com?yoff1pc=5&yoff1m=-15      ← tune rank1 on both separately
       let yOff: number;
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlOverride = rank === 1 ? urlParams.get('yoff1') : rank === 3 ? urlParams.get('yoff3') : null;
+      const urlParams  = new URLSearchParams(window.location.search);
+      const onMobile   = window.innerWidth < 580;
+      const pcKey  = rank === 1 ? 'yoff1pc'  : rank === 3 ? 'yoff3pc'  : null;
+      const mobKey = rank === 1 ? 'yoff1m'   : rank === 3 ? 'yoff3m'   : null;
+      const urlKey = onMobile ? mobKey : pcKey;
+      const urlOverride = urlKey ? urlParams.get(urlKey) : null;
       if (urlOverride !== null && !isNaN(Number(urlOverride))) {
         yOff = Number(urlOverride);
       } else if (rank === 2) {
