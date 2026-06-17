@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
 import { usePlayers } from '../hooks/usePlayers';
-import { useLiveProfile, SKIN_DATE as TODAY } from '../hooks/useMojangProfile';
+import { useLiveProfile, useSkinDate } from '../hooks/useMojangProfile';
 import InfoModal from '../components/InfoModal';
 import { Info } from 'lucide-react';
 
@@ -55,8 +55,9 @@ const OV_PAGE = 25;
 
 /* ── PlayerBustImg: visage → skinview3d (diagonal, offline-safe) → crafthead → avatar ── */
 function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) {
+  // Reactive 5-min skin date — updates every 5 min so skin changes appear within 5 min.
+  const TODAY = useSkinDate();
   // Prefer UUID for all skin lookups — avoids stale data when a player renames.
-  // Append daily cache-bust so browsers always reload changed skins once per day.
   const skinId = uuid || username;
   const bust = `https://visage.surgeplay.com/bust/128/${skinId}?yaw=-25&d=${TODAY}`;
   const [useSv3d, setUseSv3d] = React.useState(false);
@@ -64,13 +65,13 @@ function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) 
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
-  // Reset image when skinId changes (e.g. useLiveProfile resolves UUID after initial render)
+  // Reset image when skinId OR skin-date changes (UUID resolve + 5-min skin refresh)
   React.useEffect(() => {
     setSrc(bust);
     setUseSv3d(false);
     triedRef.current = 0;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skinId]);
+  }, [bust]);
 
   /* Mount skinview3d whenever we switch to canvas mode */
   React.useEffect(() => {
@@ -233,6 +234,7 @@ function TierColRow({
   pos: number | undefined;
 }) {
   const live = useLiveProfile(player.username, player.uuid ?? '');
+  const TODAY = useSkinDate();
   const regionKey = (player.region || 'eu').toLowerCase();
   const barColor = REGION_COLOR[regionKey] ?? '#60a5fa';
   const skinId = live.uuid || player.uuid || live.username;
