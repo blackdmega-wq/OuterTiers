@@ -1,9 +1,9 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
 import { usePlayer, usePlayers } from '../hooks/usePlayers';
-import { useLiveProfile } from '../hooks/useMojangProfile';
+import { useLiveProfile, resolveAlias } from '../hooks/useMojangProfile';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
 import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check } from 'lucide-react';
@@ -216,11 +216,20 @@ function UuidBadge({ uuid }: { uuid: string }) {
 
 export default function PlayerProfile() {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const { player, loading } = usePlayer(username);
   const { players } = usePlayers();
   const animPts = useCountUp(player?.points ?? 0);
   // Must be called unconditionally before any early returns (Rules of Hooks)
   const live = useLiveProfile(player?.username ?? '', player?.uuid ?? '');
+
+  // If player not found, check aliases (e.g. "clawmc" → "karajic")
+  useEffect(() => {
+    if (loading || player || !username) return;
+    resolveAlias(username).then(stored => {
+      if (stored) navigate(`/player/${encodeURIComponent(stored)}`, { replace: true });
+    });
+  }, [loading, player, username, navigate]);
 
   if (loading) {
     return (

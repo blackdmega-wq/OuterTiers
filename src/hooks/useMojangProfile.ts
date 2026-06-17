@@ -4,17 +4,22 @@ import { useState, useEffect } from 'react';
    FIXING A RENAMED PLAYER — NO CODE CHANGES NEEDED
    ─────────────────────────────────────────────────────────────────────────
    Edit  /public/uuid-overrides.json  directly on GitHub:
-     1. Find player's current Minecraft name (ask them)
-     2. Go to https://playerdb.co/api/player/minecraft/THEIR_NEW_NAME
-     3. Copy the "id" value (their permanent UUID — never changes)
-     4. Add: "old-stored-name": "their-uuid"  to the "overrides" object
-     5. Click "Commit changes" on GitHub → site updates within minutes
 
-   Code-level overrides below are a fallback only.
+   "overrides": maps old stored username → permanent UUID
+     → fixes skin + display name everywhere automatically
+
+   "aliases": maps player's NEW name → old stored username
+     → fixes search: typing "clawmc" finds "karajic" in the backend
+
+   HOW TO ADD AFTER A RENAME:
+     1. Ask the player for their new Minecraft name
+     2. Go to https://playerdb.co/api/player/minecraft/NEWNAME → copy "id"
+     3. In overrides: add  "oldname": "the-uuid"
+     4. In aliases:   add  "newname": "oldname"
+     5. Commit on GitHub → live within minutes, no deployment needed
    ══════════════════════════════════════════════════════════════════════════ */
-const CODE_OVERRIDES: Record<string, string> = {
-  // 'karajic': 'paste-uuid-here',
-};
+const CODE_OVERRIDES: Record<string, string> = {};
+const CODE_ALIASES:   Record<string, string> = {};
 
 export interface MojangProfile { username: string; uuid: string; }
 interface CacheEntry { profile: MojangProfile | null; expiry: number; }
@@ -22,42 +27,60 @@ interface CacheEntry { profile: MojangProfile | null; expiry: number; }
 const _profileCache = new Map<string, CacheEntry>();
 const PROFILE_TTL   = 5 * 60 * 1000;
 
-/* ── Runtime override loader ─────────────────────────────────────────────
-   Fetches /uuid-overrides.json once per session. Admins edit that file
-   directly on GitHub — no code deployment required.                       */
-let _overrides: Record<string, string> | null = null;
-let _overridesLoading: Promise<Record<string, string>> | null = null;
-
-async function loadOverrides(): Promise<Record<string, string>> {
-  if (_overrides !== null) return _overrides;
-  if (_overridesLoading)   return _overridesLoading;
-
-  _overridesLoading = fetch('/uuid-overrides.json', { cache: 'no-cache' })
-    .then(r => r.ok ? r.json() : {})
-    .then((json: { overrides?: Record<string, string> }) => {
-      const merged: Record<string, string> = { ...CODE_OVERRIDES };
-      const entries: Record<string, string> = json?.overrides ?? {};
-      for (const [k, v] of Object.entries(entries)) {
-        if (k.startsWith('_')) continue; // skip comment keys
-        if (typeof v === 'string' && v.length > 10 && !v.startsWith('xxx')) {
-          merged[k.toLowerCase()] = v;
-        }
-      }
-      _overrides = merged;
-      _overridesLoading = null;
-      return merged;
-    })
-    .catch(() => {
-      _overrides = { ...CODE_OVERRIDES };
-      _overridesLoading = null;
-      return _overrides;
-    });
-
-  return _overridesLoading;
+/* ── Config loader ───────────────────────────────────────────────────────
+   Fetches /uuid-overrides.json once. Returns { overrides, aliases }.     */
+interface RuntimeConfig {
+  overrides: Record<string, string>;
+  aliases:   Record<string, string>;
 }
 
-// Kick off the load immediately so it's ready before components mount
-loadOverrides();
+let _config: RuntimeConfig | null = null;
+let _configLoading: Promise<RuntimeConfig> | null = null;
+
+function parseEntries(raw: Record<string, string> | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw ?? {})) {
+    if (k.startsWith('_')) continue;
+    if (typeof v === 'string' && v.length > 1) out[k.toLowerCase()] = v;
+  }
+  return out;
+}
+
+export async function loadConfig(): Promise<RuntimeConfig> {
+  if (_config) return _config;
+  if (_configLoading) return _configLoading;
+
+  _configLoading = fetch('/uuid-overrides.json', { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : {})
+    .then((json: { overrides?: Record<string, string>; aliases?: Record<string, string> }) => {
+      _config = {
+        overrides: { ...CODE_OVERRIDES, ...parseEntries(json?.overrides) },
+        aliases:   { ...CODE_ALIASES,   ...parseEntries(json?.aliases)   },
+      };
+      _configLoading = null;
+      return _config;
+    })
+    .catch((): RuntimeConfig => {
+      _config = { overrides: { ...CODE_OVERRIDES }, aliases: { ...CODE_ALIASES } };
+      _configLoading = null;
+      return _config;
+    });
+
+  return _configLoading;
+}
+
+/**
+ * If `searchedName` is an alias for a stored backend username, returns
+ * the stored name. Otherwise returns null.
+ * Use this in PlayerProfile to redirect "clawmc" → "karajic".
+ */
+export async function resolveAlias(searchedName: string): Promise<string | null> {
+  const { aliases } = await loadConfig();
+  return aliases[searchedName.toLowerCase()] ?? null;
+}
+
+// Kick off load immediately so config is ready before components mount
+loadConfig();
 
 /* ── HTTP helpers ────────────────────────────────────────────────────────*/
 function withTimeout(url: string, ms = 7000): Promise<Response> {
@@ -123,10 +146,9 @@ export async function fetchMojangProfile(
  * React hook — returns the *current* Mojang profile for a player.
  *
  * Resolution order (UUID-first so renames are transparent):
- *   1. uuid-overrides.json  override  (admin-editable on GitHub)
- *   2. CODE_OVERRIDES       override  (code-level fallback)
- *   3. storedUuid           from backend
- *   4. storedUsername       last resort (fails if player renamed without UUID)
+ *   1. uuid-overrides.json overrides (admin-editable on GitHub, no deploy needed)
+ *   2. storedUuid from backend
+ *   3. storedUsername — last resort (fails if renamed without UUID)
  */
 export function useLiveProfile(
   storedUsername: string,
@@ -141,12 +163,12 @@ export function useLiveProfile(
     if (!storedUsername) return;
     let cancelled = false;
 
-    const delay = Math.random() * 300; // stagger requests so many rows don't hammer the API
+    const delay = Math.random() * 300;
     const timer = setTimeout(async () => {
-      const overrides  = await loadOverrides();
-      const uuidFromOverride = overrides[storedUsername.toLowerCase()];
-      const uuid       = uuidFromOverride || storedUuid;
-      const identifier = uuid || storedUsername; // UUID-first = rename-safe
+      const { overrides } = await loadConfig();
+      const uuidOverride  = overrides[storedUsername.toLowerCase()];
+      const uuid          = uuidOverride || storedUuid;
+      const identifier    = uuid || storedUsername;
 
       const p = await fetchMojangProfile(identifier);
       if (p && !cancelled) setProfile(p);

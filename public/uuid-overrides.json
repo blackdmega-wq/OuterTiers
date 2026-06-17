@@ -1,13 +1,13 @@
 {
-  "_readme": "HOW TO FIX A RENAMED PLAYER — edit this file directly on GitHub (no deployment needed)",
-  "_steps": [
-    "1. Find the player's current Minecraft name (ask them directly)",
-    "2. Go to https://playerdb.co/api/player/minecraft/THEIR_NEW_NAME",
-    "3. Copy the 'id' field (their permanent UUID)",
-    "4. Add a line below: \"old-stored-name\": \"their-uuid\"",
-    "5. Click 'Commit changes' on GitHub — done! Site updates within minutes."
-  ],
+  "_readme": "Edit this file directly on GitHub — no deployment needed. Changes go live within minutes.",
+
   "overrides": {
+    "_comment": "Maps stored backend username → permanent UUID. Fixes renamed players.",
     "karajic": "730ac220-d39a-400d-ad83-2e3bc2e5b1af"
+  },
+
+  "aliases": {
+    "_comment": "Maps a player's NEW name → their stored backend username. Fixes player search after rename.",
+    "clawmc": "karajic"
   }
 }
