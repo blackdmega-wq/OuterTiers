@@ -56,7 +56,7 @@ const OV_PAGE = 25;
 function PlayerBustImg({ username }: { username: string }) {
   const [useSv3d, setUseSv3d] = React.useState(false);
   const [src, setSrc] = React.useState(
-    `https://crafthead.net/bust/${username}/128`
+    `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
   );
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -79,15 +79,12 @@ function PlayerBustImg({ username }: { username: string }) {
       });
       try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
       try {
-        // Look at upper chest/head area — same crop region as visage bust
         viewer.controls.target.set(0, 14, 0);
         viewer.controls.update();
       } catch (_) {}
-      viewer.zoom = 2.0;        // tight bust crop matching visage output
+      viewer.zoom = 2.0;
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
-      // FunctionAnimation: hold yaw=-30deg (diagonal right) every frame
-      // Same mechanism as sprint anim which locks player.rotation.y = 0
       viewer.animation = new sv3d.FunctionAnimation((player: any) => {
         try { player.rotation.y = 0.55; } catch (_) {}
       });
@@ -103,10 +100,10 @@ function PlayerBustImg({ username }: { username: string }) {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      // crafthead failed → try visage diagonal
-      setSrc(`https://visage.surgeplay.com/bust/128/${username}?yaw=-25`);
+      // visage failed → try crafthead (reliable, consistent bust)
+      setSrc(`https://crafthead.net/bust/${username}/128`);
     } else if (t === 1) {
-      // visage failed → render in-browser via skinview3d
+      // crafthead failed → render in-browser via skinview3d
       setUseSv3d(true);
     } else {
       setUseSv3d(false);
