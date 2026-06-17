@@ -168,38 +168,61 @@ function ensureStyles() {
 const PR = [0,45,90,135,180,225,270,315];
 const SR = [22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5];
 
-/* ── Step-impact ring FX for rank 3 sprint ── */
-interface StepRing {
+/* ── Rising ember / sparkle aura for rank 3 ────────────────────────────────
+   Small glowing particles spawn near the player's feet and float upward,
+   drifting sideways slightly and fading as they rise.
+   Colours: gold, orange, cyan, white — gives a "champion energy" feel.
+──────────────────────────────────────────────────────────────────────────── */
+interface Ember {
   x: number; y: number;
-  r: number; maxR: number;
+  vx: number; vy: number;
+  r: number;
   life: number; maxLife: number;
+  cr: number; cg: number; cb: number; // colour channels
 }
 
-function startDustCanvas(
+const EMBER_COLORS: [number, number, number][] = [
+  [255, 210,  50],  // gold
+  [255, 140,  40],  // orange
+  [100, 210, 255],  // cyan
+  [255, 255, 255],  // white
+  [200, 160, 255],  // soft purple
+];
+
+function startAuraCanvas(
   cv: HTMLCanvasElement,
   w: number,
   h: number
 ): () => void {
-  cv.width = w;
+  cv.width  = w;
   cv.height = h;
   const dc = cv.getContext('2d') as CanvasRenderingContext2D;
   if (!dc) return () => {};
 
-  const rings: StepRing[] = [];
-  const LFX = w * 0.36;
-  const RFX = w * 0.64;
-  const FY  = h - 43;          // ground contact point — at the player skin's feet
+  const embers: Ember[] = [];
+  // Spawn zone: bottom quarter of the canvas, centered on the player
+  const SPAWN_X_MIN = w * 0.22;
+  const SPAWN_X_MAX = w * 0.78;
+  const SPAWN_Y_MIN = h - 48;
+  const SPAWN_Y_MAX = h - 30;
 
-  const START_T = performance.now();
-  let prevCy = 0;
-  let lastT  = performance.now();
-  let animId = 0;
+  let lastT    = performance.now();
+  let spawnAcc = 0;          // accumulate fractional spawns
+  const SPAWNS_PER_FRAME = 0.18; // ~11 new embers/sec at 60 fps
+  let animId   = 0;
 
-  function spawnRing(fx: number) {
-    // Primary impact ring
-    rings.push({ x: fx, y: FY, r: 0, maxR: 9, life: 0.22, maxLife: 0.22 });
-    // Secondary smaller echo
-    rings.push({ x: fx, y: FY, r: 0, maxR: 5, life: 0.30, maxLife: 0.30 });
+  function spawn() {
+    const [cr, cg, cb] = EMBER_COLORS[Math.floor(Math.random() * EMBER_COLORS.length)];
+    embers.push({
+      x:       SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
+      y:       SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
+      vx:      (Math.random() - 0.5) * 0.45,
+      vy:      -(0.55 + Math.random() * 0.75),
+      r:        0.9 + Math.random() * 1.6,
+      life:     1.0,
+      maxLife:  45 + Math.random() * 40, // frames (not seconds)
+      cr, cg, cb,
+    });
   }
 
   function tick(now: number) {
@@ -207,43 +230,43 @@ function startDustCanvas(
     const dt = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
 
-    // Sync with sprint animation formula
-    const t = ((now - START_T) / 1000) * 10.5;
-    const cy = Math.sin(t);
-    if (prevCy <= 0 && cy > 0) spawnRing(RFX);
-    else if (prevCy >= 0 && cy < 0) spawnRing(LFX);
-    prevCy = cy;
+    spawnAcc += SPAWNS_PER_FRAME * dt;
+    while (spawnAcc >= 1) { spawn(); spawnAcc -= 1; }
 
     dc.clearRect(0, 0, w, h);
 
-    for (let i = rings.length - 1; i >= 0; i--) {
-      const rg = rings[i];
-      rg.life -= 0.032 * dt;
-      if (rg.life <= 0) { rings.splice(i, 1); continue; }
+    for (let i = embers.length - 1; i >= 0; i--) {
+      const e = embers[i];
+      e.life -= dt / e.maxLife;
+      if (e.life <= 0) { embers.splice(i, 1); continue; }
 
-      const lifeRatio = rg.life / rg.maxLife; // 1→0 as ring ages
-      rg.r = rg.maxR * (1 - lifeRatio);        // grows 0→maxR
-      const alpha = lifeRatio * 0.75;           // fades out
+      e.x += e.vx * dt;
+      e.y += e.vy * dt;
+      // Gentle sine drift
+      e.vx += Math.sin(now * 0.003 + i) * 0.006 * dt;
 
-      // Stroke width shrinks as ring expands
-      const lw = 0.8 + lifeRatio * 2.0;
+      const alpha = e.life * 0.88;
 
+      // Soft outer glow
+      const grd = dc.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
+      grd.addColorStop(0,   `rgba(${e.cr},${e.cg},${e.cb},${(alpha * 0.55).toFixed(3)})`);
+      grd.addColorStop(0.4, `rgba(${e.cr},${e.cg},${e.cb},${(alpha * 0.18).toFixed(3)})`);
+      grd.addColorStop(1,   `rgba(${e.cr},${e.cg},${e.cb},0)`);
       dc.beginPath();
-      dc.ellipse(rg.x, rg.y, rg.r, rg.r * 0.32, 0, 0, Math.PI * 2);
-      dc.strokeStyle = `rgba(160,200,255,${alpha})`;
-      dc.lineWidth = lw;
-      dc.stroke();
+      dc.arc(e.x, e.y, e.r * 4, 0, Math.PI * 2);
+      dc.fillStyle = grd;
+      dc.fill();
 
-      // Bright inner flash at the moment of impact
-      if (lifeRatio > 0.65) {
-        dc.beginPath();
-        dc.ellipse(rg.x, rg.y, rg.r * 0.5, rg.r * 0.16, 0, 0, Math.PI * 2);
-        dc.strokeStyle = `rgba(220,240,255,${(lifeRatio - 0.65) / 0.35 * 0.9})`;
-        dc.lineWidth = lw * 0.5;
-        dc.stroke();
-      }
+      // Bright core
+      dc.beginPath();
+      dc.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+      dc.fillStyle = `rgba(${e.cr},${e.cg},${e.cb},${alpha.toFixed(3)})`;
+      dc.fill();
     }
   }
+
+  // Pre-seed a handful of particles so the effect is visible immediately
+  for (let i = 0; i < 8; i++) spawn();
 
   animId = requestAnimationFrame(tick);
   return () => cancelAnimationFrame(animId);
@@ -263,9 +286,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     let canvas: HTMLCanvasElement | null = null;
     let stopDust: (() => void) | null = null;
 
-    // Start canvas dust for rank 3
+    // Start ember-aura canvas for rank 3
     if (rank === 3 && dustCanvasRef.current) {
-      stopDust = startDustCanvas(dustCanvasRef.current, width, height);
+      stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
 
     const isMobile = window.innerWidth < 768;
