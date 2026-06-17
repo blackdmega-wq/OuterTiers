@@ -56,7 +56,7 @@ const OV_PAGE = 25;
 function PlayerBustImg({ username }: { username: string }) {
   const [useSv3d, setUseSv3d] = React.useState(false);
   const [src, setSrc] = React.useState(
-    `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
+    `https://crafthead.net/bust/${username}/128`
   );
   const triedRef = React.useRef(0);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -103,12 +103,13 @@ function PlayerBustImg({ username }: { username: string }) {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      // visage failed → render diagonal in-browser via skinview3d
-      setUseSv3d(true);
+      // crafthead failed → try visage diagonal
+      setSrc(`https://visage.surgeplay.com/bust/128/${username}?yaw=-25`);
     } else if (t === 1) {
-      setUseSv3d(false);
-      setSrc(`https://crafthead.net/bust/${username}/128`);
+      // visage failed → render in-browser via skinview3d
+      setUseSv3d(true);
     } else {
+      setUseSv3d(false);
       setSrc(`https://mc-heads.net/avatar/${username}/64`);
     }
   }, [username]);
