@@ -21,8 +21,11 @@ function useCountUp(target: number, duration = 1100) {
   useEffect(() => {
     if (!target) { setVal(0); return; }
     let start: number | null = null;
+    let lastStep = 0;
     const step = (ts: number) => {
       if (!start) start = ts;
+      if (ts - lastStep < 33.34) { rafRef.current = requestAnimationFrame(step); return; }
+      lastStep = ts;
       const p = Math.min((ts - start) / duration, 1);
       const ease = 1 - Math.pow(1 - p, 4);
       setVal(Math.round(ease * target));
