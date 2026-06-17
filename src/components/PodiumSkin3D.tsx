@@ -288,40 +288,47 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
 
 
 /** Draw a pixel-art Minecraft Firework Rocket.
- *  cx/cy = center-bottom of the fuse. s = pixel scale (1.5 = small).
+ *  cx/cy = center-bottom of the fuse. s = pixel scale.
  *  Layout (upward from fuse):
- *    fuse → base+fins → 5× candy-stripe stripes → gray nose → white tip
+ *    fuse → base+fins → 4× red/white stripes → red dome → red tip
+ *  Matches the Minecraft firework rocket appearance: narrow 3-unit body, red dome nose.
  */
 function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
   const bl = (x: number, y: number, w: number, h: number, r: number, g: number, b: number, a = 1.0) => {
     dc.fillStyle = `rgba(${r},${g},${b},${a})`;
-    dc.fillRect(cx + x * s, cy + y * s, w * s, h * s);
+    // Math.round for crisp pixel-art edges — no anti-aliasing blur
+    dc.fillRect(
+      Math.round(cx + x * s),
+      Math.round(cy + y * s),
+      Math.max(1, Math.round(w * s)),
+      Math.max(1, Math.round(h * s)),
+    );
   };
 
-  // Fuse (thin dark stem below base)
-  bl(-0.5, -2,  1, 2,  65, 45, 20);
+  // Fuse (1 wide, 2 tall — below base)
+  bl(-0.5, -2, 1, 2, 90, 65, 30);
 
-  // Fins (jut out left/right from bottom of body)
-  bl(-3.5, -4,  1, 2,  65, 45, 20);   // left fin
-  bl( 2.5, -4,  1, 2,  65, 45, 20);   // right fin
+  // Fins (1 wide, 2 tall — flanking base on each side)
+  bl(-2.5, -4, 1, 2, 90, 65, 30);   // left fin
+  bl( 1.5, -4, 1, 2, 90, 65, 30);   // right fin
 
-  // Base (dark brown cap, 5 units wide)
-  bl(-2.5, -4,  5, 2,  95, 68, 38);
+  // Base cap (3 wide, 2 tall — dark brown)
+  bl(-1.5, -4, 3, 2, 110, 78, 42);
 
-  // Body — alternating Red / White candy stripes (5 wide × 2 tall each, 5 stripes)
-  bl(-2.5,  -6, 5, 2, 218, 32, 32);   // red
-  bl(-2.5,  -8, 5, 2, 248,248,248);   // white
-  bl(-2.5, -10, 5, 2, 218, 32, 32);   // red
-  bl(-2.5, -12, 5, 2, 248,248,248);   // white
-  bl(-2.5, -14, 5, 2, 218, 32, 32);   // red
+  // Body — alternating Red / White candy stripes (3 wide × 2 tall each, 4 stripes)
+  bl(-1.5,  -6, 3, 2, 218, 32, 32);   // red
+  bl(-1.5,  -8, 3, 2, 240,240,240);   // white
+  bl(-1.5, -10, 3, 2, 218, 32, 32);   // red
+  bl(-1.5, -12, 3, 2, 240,240,240);   // white
 
-  // Shade: left 1-pixel darkening on body for slight 3D depth
-  bl(-2.5,  -6, 1, 10, 0, 0, 0, 0.18);
+  // Nose dome lower (2 wide, 2 tall — red, narrowing from body)
+  bl(-1,   -14, 2, 2, 200, 28, 28);
 
-  // Nose cone lower (3 wide, light gray)
-  bl(-1.5, -16, 3, 2, 215,215,215);
-  // Nose tip (1 wide, bright white)
-  bl(-0.5, -18, 1, 2, 255,255,255);
+  // Nose dome upper (1 wide, 2 tall — deep red peak)
+  bl(-0.5, -16, 1, 2, 175, 22, 22);
+
+  // Tip highlight (1 wide, 1 tall — bright white shine)
+  bl(-0.5, -18, 1, 1, 255, 200, 200, 0.85);
 }
 
 function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => void {
@@ -415,8 +422,8 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
         }
       }
 
-      // Draw the Minecraft-style pixel rocket (always — the webp sprite is a placeholder)
-      drawMcRocket(dc, rk.x, rk.y, 1.5);
+      // Draw the Minecraft-style pixel rocket
+      drawMcRocket(dc, rk.x, rk.y, 2.0);
 
       // Exhaust flame glow below the fuse
       const flicker = 0.75 + Math.random() * 0.25;
@@ -551,7 +558,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
       // Shift the 3D skin canvas down so the character's feet sit on the pedestal line
-      const yOff = rank === 1 ? 42 : rank === 2 ? 14 : 34;
+      const yOff = rank === 1 ? 32 : rank === 2 ? 14 : 34;
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
@@ -673,19 +680,21 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks canvas — top:0 keeps it flush with skin-wrap top, no overflow above card */}
+      {/* Rank 1: Minecraft fireworks canvas — clipped to skin-wrap height so it never overlaps the pedestal/number */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
           style={{
             position: 'absolute',
-            top: 0,        // starts at skin-wrap top = inside the golden card; no upward overflow
+            top: 0,
             left: '50%',
             transform: 'translateX(-50%)',
             width: `${FW_W}px`,
             height: `${FW_H}px`,
             pointerEvents: 'none',
             zIndex: 50,
+            // Clip the bottom so fireworks stay inside the skin-wrap area (152px) and don't bleed onto the number
+            clipPath: `inset(0 0 ${FW_H - 152}px 0)`,
           }}
           width={FW_W}
           height={FW_H}
