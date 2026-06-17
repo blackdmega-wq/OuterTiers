@@ -143,6 +143,8 @@ interface FWParticle {
   hasFade: boolean; hasTrail: boolean; hasTwinkle: boolean;
   life: number; maxLife: number;
   isChild: boolean;
+  shape: 'cross' | 'square'; // cross = Minecraft ×+ style; square = pixel-art block (creeper)
+  sqSize: number; // only used when shape === 'square'
 }
 
 interface FWRocket {
@@ -182,7 +184,7 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
     const [fr,fg,fb] = fc();
     return { x, y, vx, vy, r, g, b, fr, fg, fb,
       hasFade: !!def.fadeColors, hasTrail: def.trail, hasTwinkle: def.twinkle,
-      life, maxLife, isChild: false };
+      life, maxLife, isChild: false, shape: 'cross', sqSize: 0 };
   }
 
   if (def.type === 'large-ball') {
@@ -235,26 +237,42 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
         hasFade: !!def.fadeColors, hasTrail: false, hasTwinkle: def.twinkle,
         life: 0.65 + Math.random() * 0.35,
         maxLife: 25 + Math.random() * 35,
-        isChild: false,
+        isChild: false, shape: 'cross' as const, sqSize: 0,
       });
     }
   } else if (def.type === 'creeper') {
-    const SCALE = 4; // pixels per unit → controls creeper face size
+    // Creeper face: each pixel is a square block that expands from center then holds shape
+    const SCALE = 6; // px per unit — gives ~72px wide face on 220px canvas
+    const SQ    = 5; // square size per pixel block
+    // Flash: spawn a bright central burst first
+    for (let i = 0; i < 8; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const [r,g,b] = pc(def.colors);
+      particles.push({
+        x, y, vx: Math.cos(theta)*3.5, vy: Math.sin(theta)*3.5,
+        r, g, b, fr: 255, fg: 255, fb: 200,
+        hasFade: true, hasTrail: false, hasTwinkle: false,
+        life: 1.0, maxLife: 14, isChild: false, shape: 'cross', sqSize: 0,
+      });
+    }
     for (const [px,py] of CREEPER_PX) {
       const [r,g,b] = pc(def.colors);
-      // Each pixel expands slightly outward from center, then holds shape
-      const dist = Math.sqrt(px*px + py*py);
+      // Start near center, fly outward to final position using high initial speed + strong drag
+      const targetX = x + px * SCALE;
+      const targetY = y + py * SCALE;
+      const dist = Math.sqrt((targetX-x)**2 + (targetY-y)**2);
       const norm = dist > 0 ? 1/dist : 0;
-      const spd  = 0.08 + dist * 0.04;
+      // Initial velocity: fast enough to reach target in ~15 frames (speed = dist/15)
+      const launchSpd = dist / 14;
       particles.push({
-        x: x + px * SCALE, y: y + py * SCALE,
-        vx: px * norm * spd,
-        vy: py * norm * spd,
-        r, g, b, fr: 0, fg: 0, fb: 0,
-        hasFade: false, hasTrail: false, hasTwinkle: def.twinkle,
+        x, y,
+        vx: (targetX - x) * norm * launchSpd,
+        vy: (targetY - y) * norm * launchSpd,
+        r, g, b, fr: 255, fg: 255, fb: 150,
+        hasFade: true, hasTrail: false, hasTwinkle: def.twinkle,
         life: 1.0,
-        maxLife: 85 + Math.random() * 35,
-        isChild: false,
+        maxLife: 100 + Math.random() * 30,
+        isChild: false, shape: 'square', sqSize: SQ,
       });
     }
   }
@@ -280,7 +298,7 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
     rockets.push({
       x: FW_W * 0.15 + Math.random() * FW_W * 0.70,
       y: FW_H - 12,
-      vy: -(2.2 + Math.random() * 1.6),
+      vy: -(3.0 + Math.random() * 2.2),
       cr, cg, cb,
       fuse: 44 + Math.floor(Math.random() * 28),
       def,
@@ -302,7 +320,7 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
     for (let i = rockets.length - 1; i >= 0; i--) {
       const rk = rockets[i];
       rk.trail.push({ x: rk.x, y: rk.y });
-      if (rk.trail.length > 7) rk.trail.shift();
+      if (rk.trail.length > 14) rk.trail.shift();
 
       rk.y  += rk.vy * dt;
       rk.vy += 0.028 * dt;
@@ -314,32 +332,53 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
         continue;
       }
 
-      // Trail dots — small and subtle
+      // Rocket trail — bright spark dots
       for (let t = 0; t < rk.trail.length; t++) {
         const tr = rk.trail[t];
-        const alpha = (t / rk.trail.length) * 0.75;
-        const radius = 0.9 + (t / rk.trail.length) * 0.6;
+        const frac  = t / rk.trail.length;
+        const alpha = frac * 0.90;
+        const radius = 1.0 + frac * 2.8; // grows from 1px to 3.8px toward head
         dc.beginPath();
         dc.arc(tr.x, tr.y, radius, 0, Math.PI * 2);
-        dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},${alpha})`;
+        dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},${alpha.toFixed(2)})`;
         dc.fill();
+        // Tiny glow around each trail dot
+        if (frac > 0.5) {
+          const gl = dc.createRadialGradient(tr.x, tr.y, 0, tr.x, tr.y, radius * 2.5);
+          gl.addColorStop(0, `rgba(${rk.cr},${rk.cg},${rk.cb},${(alpha*0.35).toFixed(2)})`);
+          gl.addColorStop(1, `rgba(${rk.cr},${rk.cg},${rk.cb},0)`);
+          dc.beginPath(); dc.arc(tr.x, tr.y, radius * 2.5, 0, Math.PI * 2);
+          dc.fillStyle = gl; dc.fill();
+        }
       }
 
-      // Rocket body — small pixel rect (4px × 7px)
-      dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},0.95)`;
-      dc.fillRect(rk.x - 1, rk.y - 4, 2, 6);
-      // Nose tip (1px brighter)
-      dc.fillStyle = `rgba(255,255,255,0.8)`;
-      dc.fillRect(rk.x - 1, rk.y - 5, 2, 1);
-      // Exhaust glow below
-      dc.beginPath();
-      dc.arc(rk.x, rk.y + 4, 2.5, 0, Math.PI * 2);
-      const exGrd = dc.createRadialGradient(rk.x, rk.y+4, 0, rk.x, rk.y+4, 2.5);
-      exGrd.addColorStop(0, `rgba(255,220,100,0.9)`);
-      exGrd.addColorStop(0.5, `rgba(255,120,0,0.5)`);
-      exGrd.addColorStop(1, `rgba(255,60,0,0)`);
-      dc.fillStyle = exGrd;
-      dc.fill();
+      // Rocket body — clearly visible pixel-art style (4px wide × 12px tall)
+      // Main candy-stripe body
+      dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},1.0)`;
+      dc.fillRect(rk.x - 2, rk.y - 9, 4, 10);
+      // White stripes on body
+      dc.fillStyle = `rgba(255,255,255,0.55)`;
+      dc.fillRect(rk.x - 2, rk.y - 9, 4, 2);
+      dc.fillRect(rk.x - 2, rk.y - 4, 4, 2);
+      // Nose cone (bright white point)
+      dc.fillStyle = `rgba(255,255,255,1.0)`;
+      dc.fillRect(rk.x - 1, rk.y - 13, 2, 4);
+      dc.fillRect(rk.x,     rk.y - 15, 1, 2); // tip pixel
+      // Dark outline for visibility
+      dc.strokeStyle = `rgba(0,0,0,0.45)`;
+      dc.lineWidth = 0.8;
+      dc.strokeRect(rk.x - 2, rk.y - 9, 4, 10);
+      // Exhaust flame glow — big and bright
+      const flicker = 0.7 + Math.random() * 0.3;
+      const exR = 7 * flicker;
+      const exGrd = dc.createRadialGradient(rk.x, rk.y+3, 0, rk.x, rk.y+3, exR);
+      exGrd.addColorStop(0,   `rgba(255,255,220,1.0)`);
+      exGrd.addColorStop(0.25,`rgba(255,200,40,0.95)`);
+      exGrd.addColorStop(0.55,`rgba(255,100,0,0.7)`);
+      exGrd.addColorStop(0.85,`rgba(255,30,0,0.3)`);
+      exGrd.addColorStop(1,   `rgba(200,0,0,0)`);
+      dc.beginPath(); dc.arc(rk.x, rk.y+3, exR, 0, Math.PI * 2);
+      dc.fillStyle = exGrd; dc.fill();
     }
 
     // ── Particles ─────────────────────────────────────────────
@@ -350,9 +389,10 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
 
       p.x  += p.vx * dt;
       p.y  += p.vy * dt;
-      p.vy += 0.035 * dt;   // gravity
-      p.vx *= Math.pow(0.975, dt);
-      p.vy *= Math.pow(0.975, dt);
+      p.vy += (p.shape === 'square' ? 0.012 : 0.035) * dt;   // gravity (less for creeper squares)
+      const drag = p.shape === 'square' ? 0.82 : 0.975;
+      p.vx *= Math.pow(drag, dt);
+      p.vy *= Math.pow(drag, dt);
 
       // Trail child particles
       if (p.hasTrail && !p.isChild && Math.random() < 0.35 * dt) {
@@ -364,7 +404,7 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
           r: tr, g: tg, b: tb, fr: 255, fg: 255, fb: 255,
           hasFade: true, hasTrail: false, hasTwinkle: false,
           life: 0.7, maxLife: 12,
-          isChild: true,
+          isChild: true, shape: 'cross' as const, sqSize: 0,
         });
       }
 
@@ -387,28 +427,35 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
       // Particle size shrinks with life
       const sz = (p.isChild ? 0.5 : 0.9) + p.life * (p.isChild ? 0.8 : 1.9);
 
-      // Draw Minecraft-style × + particle
-      dc.lineWidth = p.isChild ? 0.7 : 1.1;
-      dc.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
-      dc.beginPath();
-      // × diagonals
-      dc.moveTo(p.x - sz, p.y - sz); dc.lineTo(p.x + sz, p.y + sz);
-      dc.moveTo(p.x + sz, p.y - sz); dc.lineTo(p.x - sz, p.y + sz);
-      dc.stroke();
-      // + cross (slightly smaller)
-      const sh = sz * 0.72;
-      dc.beginPath();
-      dc.moveTo(p.x - sh, p.y); dc.lineTo(p.x + sh, p.y);
-      dc.moveTo(p.x, p.y - sh); dc.lineTo(p.x, p.y + sh);
-      dc.stroke();
-
-      // Soft glow core for non-child particles
-      if (!p.isChild && p.life > 0.3) {
-        const gr = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz * 2.5);
-        gr.addColorStop(0, `rgba(${cr},${cg},${cb},${(alpha * 0.4).toFixed(3)})`);
-        gr.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-        dc.beginPath(); dc.arc(p.x, p.y, sz * 2.5, 0, Math.PI * 2);
-        dc.fillStyle = gr; dc.fill();
+      if (p.shape === 'square') {
+        // Creeper pixel block — filled square with outline
+        const half = p.sqSize * 0.5 * (0.4 + p.life * 0.6); // shrinks with life
+        dc.fillStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
+        dc.fillRect(p.x - half, p.y - half, half * 2, half * 2);
+        // Bright inner highlight
+        dc.fillStyle = `rgba(255,255,255,${(alpha * 0.35).toFixed(3)})`;
+        dc.fillRect(p.x - half * 0.55, p.y - half * 0.55, half * 0.6, half * 0.6);
+      } else {
+        // Minecraft-style × + particle
+        dc.lineWidth = p.isChild ? 0.7 : 1.1;
+        dc.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
+        dc.beginPath();
+        dc.moveTo(p.x - sz, p.y - sz); dc.lineTo(p.x + sz, p.y + sz);
+        dc.moveTo(p.x + sz, p.y - sz); dc.lineTo(p.x - sz, p.y + sz);
+        dc.stroke();
+        const sh = sz * 0.72;
+        dc.beginPath();
+        dc.moveTo(p.x - sh, p.y); dc.lineTo(p.x + sh, p.y);
+        dc.moveTo(p.x, p.y - sh); dc.lineTo(p.x, p.y + sh);
+        dc.stroke();
+        // Soft glow for non-child particles
+        if (!p.isChild && p.life > 0.3) {
+          const gr = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz * 2.5);
+          gr.addColorStop(0, `rgba(${cr},${cg},${cb},${(alpha * 0.4).toFixed(3)})`);
+          gr.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+          dc.beginPath(); dc.arc(p.x, p.y, sz * 2.5, 0, Math.PI * 2);
+          dc.fillStyle = gr; dc.fill();
+        }
       }
     }
   }
