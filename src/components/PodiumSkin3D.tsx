@@ -176,48 +176,50 @@ function ensureStyles() {
    ══════════════════════════════════════════════════════════ */
 .dust-cloud-wrap {
   position:absolute;
-  bottom:16px;
+  bottom:24px;
   left:50%;
   transform:translateX(-50%);
-  width:120px;
-  height:75px;
+  width:90px;
+  height:52px;
   pointer-events:none;
 }
 .dc-puff { position:absolute; border-radius:50%; }
 
-/* 8 dramatic puffs — spread wide & upward only (clip prevents downward bleed) */
-.dc-1  { width:24px; height:21px; left:36px; bottom:0;   background:rgba(175,148,108,.65); animation:dc-l  .44s ease-out infinite; animation-delay:.00s; }
-.dc-2  { width:18px; height:16px; left:28px; bottom:6px; background:rgba(198,170,128,.56); animation:dc-l  .44s ease-out infinite; animation-delay:.22s; }
-.dc-3  { width:15px; height:15px; left:20px; bottom:15px;background:rgba(160,135,96,.60);  animation:dc-sl .44s ease-out infinite; animation-delay:.12s; }
-.dc-4  { width:12px; height:12px; left:30px; bottom:26px;background:rgba(186,160,120,.50); animation:dc-sl .44s ease-out infinite; animation-delay:.33s; }
-.dc-5  { width:24px; height:21px; left:60px; bottom:0;   background:rgba(175,148,108,.65); animation:dc-r  .44s ease-out infinite; animation-delay:.11s; }
-.dc-6  { width:18px; height:16px; left:70px; bottom:6px; background:rgba(198,170,128,.56); animation:dc-r  .44s ease-out infinite; animation-delay:.34s; }
-.dc-7  { width:15px; height:15px; left:78px; bottom:15px;background:rgba(160,135,96,.60);  animation:dc-sr .44s ease-out infinite; animation-delay:.21s; }
-.dc-8  { width:12px; height:12px; left:68px; bottom:26px;background:rgba(186,160,120,.50); animation:dc-sr .44s ease-out infinite; animation-delay:.07s; }
+/* Small puffs — positioned beside the legs (left cluster / right cluster) */
+/* Left side of left leg */
+.dc-1  { width:12px; height:11px; left:18px; bottom:0;   background:rgba(175,148,108,.64); animation:dc-l  .44s ease-out infinite; animation-delay:.00s; }
+.dc-2  { width: 9px; height: 8px; left:14px; bottom:7px; background:rgba(198,170,128,.55); animation:dc-l  .44s ease-out infinite; animation-delay:.22s; }
+.dc-3  { width: 7px; height: 7px; left:10px; bottom:15px;background:rgba(160,135,96,.58);  animation:dc-sl .44s ease-out infinite; animation-delay:.12s; }
+.dc-4  { width: 6px; height: 6px; left:17px; bottom:23px;background:rgba(186,160,120,.48); animation:dc-sl .44s ease-out infinite; animation-delay:.33s; }
+/* Right side of right leg */
+.dc-5  { width:12px; height:11px; left:60px; bottom:0;   background:rgba(175,148,108,.64); animation:dc-r  .44s ease-out infinite; animation-delay:.11s; }
+.dc-6  { width: 9px; height: 8px; left:67px; bottom:7px; background:rgba(198,170,128,.55); animation:dc-r  .44s ease-out infinite; animation-delay:.34s; }
+.dc-7  { width: 7px; height: 7px; left:73px; bottom:15px;background:rgba(160,135,96,.58);  animation:dc-sr .44s ease-out infinite; animation-delay:.21s; }
+.dc-8  { width: 6px; height: 6px; left:63px; bottom:23px;background:rgba(186,160,120,.48); animation:dc-sr .44s ease-out infinite; animation-delay:.07s; }
 
 @keyframes dc-l {
-  0%   { transform:translate(  0px,  0px) scale(.10); opacity:0;    }
-  10%  { transform:translate( -8px, -5px) scale(.90); opacity:0.84; }
-  50%  { transform:translate(-26px,-20px) scale(1.28); opacity:.50; }
-  100% { transform:translate(-42px,-30px) scale(1.05); opacity:0;   }
+  0%   { transform:translate(  0px, 0px) scale(.12); opacity:0;    }
+  10%  { transform:translate( -4px,-2px) scale(.84); opacity:0.80; }
+  50%  { transform:translate(-13px,-7px) scale(1.06); opacity:.46; }
+  100% { transform:translate(-20px,-10px) scale(0.88); opacity:0;  }
 }
 @keyframes dc-sl {
-  0%   { transform:translate( 0px,  0px) scale(.10); opacity:0;    }
-  10%  { transform:translate(-6px,-10px) scale(.82); opacity:0.78; }
-  50%  { transform:translate(-18px,-30px) scale(1.18); opacity:.44; }
-  100% { transform:translate(-28px,-46px) scale(0.86); opacity:0;   }
+  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
+  10%  { transform:translate(-3px,-5px) scale(.78); opacity:0.74; }
+  50%  { transform:translate(-9px,-14px) scale(1.02); opacity:.40; }
+  100% { transform:translate(-14px,-20px) scale(0.80); opacity:0;  }
 }
 @keyframes dc-r {
-  0%   { transform:translate(  0px,  0px) scale(.10); opacity:0;    }
-  10%  { transform:translate(  8px, -5px) scale(.90); opacity:0.84; }
-  50%  { transform:translate( 26px,-20px) scale(1.28); opacity:.50; }
-  100% { transform:translate( 42px,-30px) scale(1.05); opacity:0;   }
+  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
+  10%  { transform:translate( 4px,-2px) scale(.84); opacity:0.80; }
+  50%  { transform:translate(13px,-7px) scale(1.06); opacity:.46; }
+  100% { transform:translate(20px,-10px) scale(0.88); opacity:0;  }
 }
 @keyframes dc-sr {
-  0%   { transform:translate( 0px,  0px) scale(.10); opacity:0;    }
-  10%  { transform:translate( 6px,-10px) scale(.82); opacity:0.78; }
-  50%  { transform:translate(18px,-30px) scale(1.18); opacity:.44; }
-  100% { transform:translate(28px,-46px) scale(0.86); opacity:0;   }
+  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
+  10%  { transform:translate( 3px,-5px) scale(.78); opacity:0.74; }
+  50%  { transform:translate( 9px,-14px) scale(1.02); opacity:.40; }
+  100% { transform:translate(14px,-20px) scale(0.80); opacity:0;  }
 }
 `;
   document.head.appendChild(s);
