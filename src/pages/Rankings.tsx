@@ -32,6 +32,19 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   UUID OVERRIDES — permanent fix for players whose Mojang account was
+   renamed AND whose UUID is missing from the backend.
+   ─────────────────────────────────────────────────────────────────────────
+   HOW TO USE:
+   Add:  'old-backend-username': 'correct-mojang-uuid'
+   The UUID can be found at namemc.com, laby.net, or by asking the player.
+   Format: 32 hex chars (with or without dashes).
+   ══════════════════════════════════════════════════════════════════════════ */
+const UUID_OVERRIDES: Record<string, string> = {
+  // 'karajic': 'paste-karajic-uuid-here',   ← fill this in once you have it
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
    AUTO-CHECK: Live Mojang profile lookup
    ─────────────────────────────────────────────────────────────────────────
    Strategy:
@@ -94,10 +107,12 @@ function useLiveProfile(storedUsername: string, storedUuid: string) {
   });
 
   React.useEffect(() => {
-    // UUID lookup is the most accurate (handles renames).
-    // Fall back to username if UUID is absent.
-    const identifier = storedUuid || storedUsername;
-    // Small stagger (0–300 ms) to avoid hammering APIs for 100+ players at once
+    // UUID_OVERRIDES takes priority — fixes players with empty backend UUID
+    const overrideUuid = UUID_OVERRIDES[storedUsername.toLowerCase()];
+    const uuid        = overrideUuid || storedUuid;
+    // UUID lookup is most accurate (survives renames). Fallback to username.
+    const identifier  = uuid || storedUsername;
+    // Small stagger (0–300 ms) so 100+ rows don't all hit the API at once
     const delay = Math.random() * 300;
     const timer = setTimeout(async () => {
       const p = await fetchMojangProfile(identifier);
