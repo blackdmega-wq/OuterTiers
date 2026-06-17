@@ -312,29 +312,7 @@ export default function Home() {
                       className={`lb-pod lb-pod--rank${rank}`}
                       onClick={() => navigate(`/player/${player.username}`)}
                     >
-                      {rank === 1 && (
-                        <div className="lb-fire-wrap">
-                          {/* Revamped multi-color Minecraft firework rockets */}
-                          {([
-                            {l:'4%',  dur:'2.4s',delay:'0s',    fh:'152px',fc:'#FFD700',fe:'#FFFF44',fs:'255,220,0'},
-                            {l:'13%', dur:'3.0s',delay:'0.55s', fh:'174px',fc:'#FF4455',fe:'#FF8899',fs:'255,80,80'},
-                            {l:'23%', dur:'2.65s',delay:'1.25s',fh:'158px',fc:'#44AAFF',fe:'#88CCFF',fs:'80,160,255'},
-                            {l:'33%', dur:'3.25s',delay:'0.3s', fh:'182px',fc:'#FFD700',fe:'#FFFF88',fs:'255,220,0'},
-                            {l:'43%', dur:'2.5s', delay:'1.85s',fh:'148px',fc:'#BB44FF',fe:'#DD88FF',fs:'180,80,255'},
-                            {l:'53%', dur:'2.8s', delay:'0.85s',fh:'166px',fc:'#22EE66',fe:'#88FFAA',fs:'50,220,100'},
-                            {l:'62%', dur:'3.1s', delay:'1.5s', fh:'170px',fc:'#FF4455',fe:'#FF7788',fs:'255,80,80'},
-                            {l:'71%', dur:'2.6s', delay:'0.2s', fh:'156px',fc:'#44AAFF',fe:'#AADDFF',fs:'80,160,255'},
-                            {l:'80%', dur:'3.45s',delay:'1.05s',fh:'184px',fc:'#FFD700',fe:'#FFFF44',fs:'255,220,0'},
-                            {l:'89%', dur:'2.75s',delay:'0.65s',fh:'162px',fc:'#BB44FF',fe:'#EE99FF',fs:'180,80,255'},
-                            {l:'18%', dur:'2.9s', delay:'2.15s',fh:'145px',fc:'#22EE66',fe:'#66FFBB',fs:'50,220,100'},
-                            {l:'58%', dur:'2.35s',delay:'1.7s', fh:'160px',fc:'#FFD700',fe:'#FFEE88',fs:'255,220,0'},
-                          ] as {l:string;dur:string;delay:string;fh:string;fc:string;fe:string;fs:string}[]).map((r,i) => (
-                            <div key={i} className="lb-fire-rocket"
-                              style={{'--fdur':r.dur,'--fdelay':r.delay,'--fh':r.fh,'--fc':r.fc,'--fe':r.fe,'--fs':r.fs,left:r.l} as React.CSSProperties}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      
                       {rank === 2 && (
                         <div className="lb-silver-wrap">
                           {/* Silver sparkle stars for rank 2 */}
