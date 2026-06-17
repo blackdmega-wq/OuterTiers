@@ -1,0 +1,117 @@
+name: Check Player UUIDs
+
+on:
+  push:
+    branches: [ main, master ]
+  schedule:
+    # Run every 6 hours to catch name/skin changes quickly
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-uuids:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Fetch players and verify UUIDs
+        run: |
+          echo "========================================"
+          echo "  OuterTiers — Player UUID/Name Check"
+          echo "========================================"
+          echo ""
+
+          # Fetch players from the backend API
+          RESPONSE=$(curl -s --max-time 30 "https://outertiers-api.onrender.com/api/players" 2>/dev/null)
+
+          if [ -z "$RESPONSE" ] || echo "$RESPONSE" | grep -q "error"; then
+            echo "⚠️  Could not reach backend API — skipping check."
+            exit 0
+          fi
+
+          # Parse players and check each one via Mojang
+          echo "$RESPONSE" | python3 - <<'PYEOF'
+import json, sys, urllib.request, urllib.error, time
+
+data = json.loads(sys.stdin.read())
+players = data.get('players', [])
+
+print(f"Found {len(players)} players in database.\n")
+
+needs_fix = []
+ok_count  = 0
+skip_count = 0
+
+for p in players:
+    name = p.get('username', '')
+    uuid = p.get('uuid', '').replace('-', '')
+    if not name:
+        continue
+
+    identifier = uuid if uuid else name
+    time.sleep(0.15)  # be polite to the API
+
+    # Try playerdb first
+    current_name = None
+    current_uuid = None
+    for url in [
+        f'https://playerdb.co/api/player/minecraft/{identifier}',
+        f'https://api.ashcon.app/mojang/v2/user/{identifier}',
+    ]:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'OuterTiers-CI'})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                d = json.loads(r.read())
+                # playerdb format
+                if 'data' in d and 'player' in d['data']:
+                    pp = d['data']['player']
+                    current_name = pp.get('username')
+                    current_uuid = pp.get('id', '')
+                # ashcon format
+                elif 'username' in d:
+                    current_name = d['username']
+                    current_uuid = d.get('uuid', '')
+                if current_name:
+                    break
+        except Exception:
+            continue
+
+    if current_name is None:
+        print(f"  ⚠️  SKIP  {name!r} — could not resolve (API timeout or unknown account)")
+        skip_count += 1
+        continue
+
+    name_changed = current_name.lower() != name.lower()
+    uuid_missing = not uuid
+
+    if name_changed or uuid_missing:
+        needs_fix.append({
+            'stored_name': name,
+            'stored_uuid': uuid or '(missing)',
+            'current_name': current_name,
+            'current_uuid': current_uuid,
+        })
+        status = '❌ STALE'
+        print(f"  {status}  stored={name!r}  →  current={current_name!r}  uuid={current_uuid}")
+    else:
+        ok_count += 1
+        print(f"  ✅ OK    {name!r}")
+
+print(f"\n{'='*50}")
+print(f"Summary: {ok_count} OK  |  {len(needs_fix)} need fix  |  {skip_count} skipped")
+
+if needs_fix:
+    print("\n🔧 ACTION REQUIRED — the following players have changed their name")
+    print("   or are missing a UUID in the backend database:\n")
+    for f in needs_fix:
+        print(f"   Player : {f['stored_name']!r}")
+        print(f"   UUID   : {f['current_uuid']}")
+        print(f"   New name: {f['current_name']!r}")
+        print(f"   Fix: Add to UUID_OVERRIDES in src/hooks/useMojangProfile.ts:")
+        print(f"        '{f['stored_name'].lower()}': '{f['current_uuid']}',")
+        print()
+    sys.exit(1)
+else:
+    print("\n✅ All player names and UUIDs are up to date!")
+PYEOF

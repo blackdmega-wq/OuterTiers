@@ -314,59 +314,48 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
 
-      /* ──────── #3  DEFAULT DANCE (Fortnite) ──────────────────────────────
-         The iconic cross-body arm sweep: one arm swings forward-and-across
-         while the other swings back, torso rotates, legs two-step.
-         Uses every available bone for a full-body, high-energy look.
+      /* ──────── #3  WAVE — clean one-arm wave, confident idle ──────────
+         Right arm raises and waves smoothly; left arm hangs relaxed.
+         Body sways gently, head follows — simple, cool, recognisable.
       ─────────────────────────────────────────────────────────────────── */
       if (rank === 3) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin; if (!s?.leftArm) return;
-            const t    = progress * 7.5;
+            const t = progress * 3.2;
 
-            // Primary beat driving the arm cross
-            const raw  = Math.sin(t);
-            const snap = Math.sign(raw) * Math.pow(Math.abs(raw), 0.32); // extra snappy
-            const abs  = Math.abs(raw);
+            // ── RIGHT ARM: raised wave (Z lifts arm up, X waves forward/back) ─
+            s.rightArm.rotation.z =  1.05 + Math.sin(t * 2.2) * 0.32;
+            s.rightArm.rotation.x = -0.10 + Math.sin(t * 2.2 + 0.8) * 0.18;
+            s.rightArm.rotation.y =  0.08;
 
-            // Double-time accent for secondary detail (arm Z, leg Z)
-            const dt2  = Math.sin(t * 2);
-            const abs2 = Math.abs(dt2);
+            // ── LEFT ARM: relaxed natural hang ────────────────────────
+            s.leftArm.rotation.z  =  0.14;
+            s.leftArm.rotation.x  =  0.06 + Math.sin(t * 0.9) * 0.05;
+            s.leftArm.rotation.y  =  0.0;
 
-            // ── ARMS: big cross-body sweep ─────────────────────────────
-            // snap=+1 → right arm sweeps forward & across, left swings back
-            s.rightArm.rotation.x =  0.20 + snap * 1.65;  // -1.45 ↔ +1.85
-            s.rightArm.rotation.y = -snap * 0.72;           // crosses over chest
-            s.rightArm.rotation.z = -0.14 - abs2 * 0.10;
+            // ── BODY: subtle sway following the wave ──────────────────
+            s.body.rotation.y =  Math.sin(t * 0.8) * 0.06;
+            s.body.rotation.z =  Math.sin(t * 0.8) * 0.03;
+            s.body.rotation.x =  0.04;
 
-            s.leftArm.rotation.x  =  0.20 - snap * 1.65;   // mirror
-            s.leftArm.rotation.y  =  snap * 0.72;
-            s.leftArm.rotation.z  =  0.14 + abs2 * 0.10;
-
-            // ── TORSO: rotates to follow the leading arm ───────────────
-            s.body.rotation.y =  snap * 0.22;
-            s.body.rotation.x =  0.10 + abs * 0.08;   // forward lean deepens at extremes
-            s.body.rotation.z = -snap * 0.05;
-
-            // ── HEAD: looks toward the cross, natural follow-through ───
+            // ── HEAD: slight turn toward viewer, gentle nod ───────────
             if (s.head) {
-              s.head.rotation.y =  snap * 0.28;
-              s.head.rotation.x = -0.07 + abs2 * 0.06;
-              s.head.rotation.z =  snap * 0.03;
+              s.head.rotation.y = -0.10 + Math.sin(t * 0.7) * 0.07;
+              s.head.rotation.x = -0.05 + Math.sin(t * 1.1) * 0.04;
+              s.head.rotation.z =  0.0;
             }
 
-            // ── LEGS: two-step shuffle, 90° offset from arms ──────────
-            const legPhase = Math.sin(t + Math.PI * 0.5);
-            s.rightLeg.rotation.x = -legPhase * 0.42;
-            s.leftLeg.rotation.x  =  legPhase * 0.42;
-            s.rightLeg.rotation.z = -0.07 - abs2 * 0.04;
-            s.leftLeg.rotation.z  =  0.07 + abs2 * 0.04;
+            // ── LEGS: stable stance, tiny weight-shift ────────────────
+            s.rightLeg.rotation.z = -0.05;
+            s.leftLeg.rotation.z  =  0.05;
+            s.rightLeg.rotation.x =  Math.sin(t * 0.9) * 0.04;
+            s.leftLeg.rotation.x  = -Math.sin(t * 0.9) * 0.04;
 
-            // ── PLAYER ROOT: bounce + sway + whole-body micro-rotation ─
-            player.position.y =  -(abs * 0.90 + abs2 * 0.18);
-            player.position.x =   snap * 0.26;
-            player.rotation.y =   snap * 0.12;
+            // ── ROOT: smooth gentle bounce ────────────────────────────
+            player.position.y =  Math.sin(t * 2.2) * -0.15;
+            player.position.x =  Math.sin(t * 0.8) * 0.08;
+            player.rotation.y =  0;
           } catch(_){}
         });
 

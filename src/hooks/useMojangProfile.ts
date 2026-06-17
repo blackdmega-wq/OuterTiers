@@ -4,24 +4,33 @@ import { useState, useEffect } from 'react';
    UUID OVERRIDES
    ─────────────────────────────────────────────────────────────────────────
    Use this to permanently fix any player whose Minecraft account was renamed
-   AND whose UUID is missing (empty) in the backend.
+   AND whose UUID is missing or wrong in the backend.
 
-   HOW TO FIX A BROKEN PLAYER:
-   1. Find their Minecraft UUID → ask the player, or look on namemc.com / laby.net
-   2. Add one line: 'old-backend-username': 'their-uuid'
+   HOW TO FIX A BROKEN PLAYER (name/skin not updating):
+   1. Find their permanent Minecraft UUID:
+        → https://namemc.com/search?q=OLDNAME  (click the profile → copy UUID)
+        → https://laby.net/@OLDNAME             (UUID shown in the URL / profile)
+        → https://api.mojang.com/users/profiles/minecraft/NEWNAME
+   2. Add ONE line below: 'stored-backend-username': 'their-uuid-here'
+      UUID format: 32 hex chars, dashes optional.
    3. Push — name + skin will update automatically everywhere on the site.
 
-   UUID format: 32 hex chars, with or without dashes.
+   IMPORTANT: The key is the username currently stored in the BACKEND DB,
+   NOT the player's new name. The value is the permanent UUID (never changes).
    ══════════════════════════════════════════════════════════════════════════ */
 export const UUID_OVERRIDES: Record<string, string> = {
-  // 'karajic': 'paste-karajic-uuid-here',
+  // Example — uncomment and fill in when a player renames:
+  // 'karajic': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  //
+  // HOW TO FIND: go to https://namemc.com/search?q=karajic
+  // or ask the player for their UUID directly.
 };
 
 export interface MojangProfile { username: string; uuid: string; }
 interface CacheEntry   { profile: MojangProfile | null; expiry: number; }
 
 const _cache = new Map<string, CacheEntry>();
-const TTL    = 5 * 60 * 1000; // cache entries expire after 5 minutes
+const TTL    = 5 * 60 * 1000; // 5-minute in-memory cache
 
 function withTimeout(url: string, ms = 7000): Promise<Response> {
   const ctrl = new AbortController();
@@ -29,7 +38,7 @@ function withTimeout(url: string, ms = 7000): Promise<Response> {
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id));
 }
 
-/** Resolve current Minecraft username + UUID from Mojang (playerdb → ashcon). */
+/** Resolve current Minecraft username + UUID from Mojang (playerdb → ashcon → mojang). */
 export async function fetchMojangProfile(
   identifier: string
 ): Promise<MojangProfile | null> {
@@ -54,7 +63,7 @@ export async function fetchMojangProfile(
     }
   } catch { /* timeout / offline */ }
 
-  // ── Fallback: Ashcon proxy ────────────────────────────────────────────
+  // ── Fallback 1: Ashcon proxy ──────────────────────────────────────────
   try {
     const r = await withTimeout(
       `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`
@@ -65,7 +74,22 @@ export async function fetchMojangProfile(
     }
   } catch { /* timeout / offline */ }
 
-  return set(null); // both failed — keep existing display name as-is
+  // ── Fallback 2: Official Mojang API (username lookups only) ──────────
+  // Only try this for username-style identifiers (no dashes/32-char UUID)
+  const isUuid = /^[0-9a-f-]{32,36}$/i.test(identifier);
+  if (!isUuid) {
+    try {
+      const r = await withTimeout(
+        `https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(identifier)}`
+      );
+      if (r.ok) {
+        const d = await r.json();
+        if (d?.name) return set({ username: d.name, uuid: d.id ?? '' });
+      }
+    } catch { /* timeout / offline */ }
+  }
+
+  return set(null); // all sources failed — keep existing display name as-is
 }
 
 /**
@@ -75,6 +99,11 @@ export async function fetchMojangProfile(
  *
  * UUID_OVERRIDES takes priority over the stored UUID so admins can
  * fix renamed players with a single line in this file.
+ *
+ * Resolution order (UUID always preferred — it never changes after rename):
+ *   1. UUID_OVERRIDES[storedUsername]  — admin override
+ *   2. storedUuid                      — backend-stored UUID
+ *   3. storedUsername                  — fallback (fails for renamed accounts)
  */
 export function useLiveProfile(
   storedUsername: string,
@@ -86,12 +115,12 @@ export function useLiveProfile(
   });
 
   useEffect(() => {
-    // Check override first so renamed players are found even with empty UUID
     const overrideUuid = UUID_OVERRIDES[storedUsername.toLowerCase()];
     const uuid         = overrideUuid || storedUuid;
+    // Always prefer UUID lookup — resolves renamed accounts transparently
     const identifier   = uuid || storedUsername;
 
-    // Spread requests 0–300 ms so 100+ rows don't all hit the API at once
+    // Spread requests 0–300 ms so many rows don't hammer the API at once
     const delay = Math.random() * 300;
     const timer = setTimeout(async () => {
       const p = await fetchMojangProfile(identifier);

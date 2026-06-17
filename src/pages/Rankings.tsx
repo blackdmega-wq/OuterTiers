@@ -214,6 +214,40 @@ function PlayerRow({ player, rank }: { player: Player; rank: number }) {
   );
 }
 
+/* ── Single tier-column row — own component so it can call useLiveProfile ── */
+function TierColRow({
+  player,
+  rawTier,
+  pos,
+}: {
+  player: Player;
+  rawTier: string | null;
+  pos: number | undefined;
+}) {
+  const live = useLiveProfile(player.username, player.uuid ?? '');
+  const regionKey = (player.region || 'eu').toLowerCase();
+  const barColor = REGION_COLOR[regionKey] ?? '#60a5fa';
+  const skinId = live.uuid || player.uuid || live.username;
+
+  return (
+    <Link to={`/player/${live.username}`} className="tier-col-row">
+      <div className="tc-region-bar" style={{ '--rbar-color': barColor } as React.CSSProperties}>
+        <span className="tc-region-text">{player.region || '?'}</span>
+      </div>
+      <img
+        src={`https://mc-heads.net/avatar/${skinId}/28?d=${TODAY}`}
+        alt={live.username}
+        width={28} height={28}
+        className="tc-avatar"
+        loading="lazy"
+      />
+      <span className="tc-name">{live.username}</span>
+      {pos != null && <span className="tc-pos">#{pos}</span>}
+      <TierArrows rawTier={rawTier} />
+    </Link>
+  );
+}
+
 function OverallTable({ players }: { players: Player[] }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(players.length / OV_PAGE);
@@ -403,29 +437,13 @@ export default function Rankings() {
                           tieredPlayers.map((player) => {
                             const rawTier = (player.rawTiers as Record<string, string | null | undefined> | undefined)?.[category];
                             const pos = positions.get(player.id);
-                            const regionKey = (player.region || 'eu').toLowerCase();
-                            const barColor = REGION_COLOR[regionKey] ?? '#60a5fa';
                             return (
-                              <Link key={player.id} to={`/player/${player.username}`} className="tier-col-row">
-                                {/* Region bar */}
-                                <div className="tc-region-bar" style={{ '--rbar-color': barColor } as React.CSSProperties}>
-                                  <span className="tc-region-text">{player.region || '?'}</span>
-                                </div>
-                                {/* Avatar */}
-                                <img
-                                  src={`https://mc-heads.net/avatar/${player.uuid || player.username}/28`}
-                                  alt={player.username}
-                                  width={28} height={28}
-                                  className="tc-avatar"
-                                  loading="lazy"
-                                />
-                                {/* Name */}
-                                <span className="tc-name">{player.username}</span>
-                                {/* Position */}
-                                {pos != null && <span className="tc-pos">#{pos}</span>}
-                                {/* HT/LT arrows */}
-                                <TierArrows rawTier={rawTier} />
-                              </Link>
+                              <TierColRow
+                                key={player.id}
+                                player={player}
+                                rawTier={rawTier ?? null}
+                                pos={pos}
+                              />
                             );
                           })
                         )}

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
 import { usePlayer, usePlayers } from '../hooks/usePlayers';
+import { useLiveProfile } from '../hooks/useMojangProfile';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
 import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap } from 'lucide-react';
@@ -215,6 +216,7 @@ export default function PlayerProfile() {
     );
   }
 
+  const live = useLiveProfile(player.username, player.uuid ?? '');
   const sorted = [...players].sort((a, b) => b.points - a.points);
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
@@ -236,7 +238,7 @@ export default function PlayerProfile() {
           <div className="ppv2-header">
             <div className={`ppv2-avatar-wrap${rankClass ? ` ppv2-avatar-${rankClass}` : ''}`}>
               <div className="ppv2-avatar-bg" />
-              <PlayerAvatar username={player.username} size={106} />
+              <PlayerAvatar username={live.uuid || player.uuid || live.username} size={106} />
               {/* Epic tilted crown for top 3 */}
               {rank > 0 && rank <= 3 && (
                 <div className={`ppv2-crown-svg ppv2-crown-svg--${rank}`}>
@@ -250,7 +252,7 @@ export default function PlayerProfile() {
                 <Zap size={10} style={{ opacity: 0.7 }} />
                 OuterTiers Player
               </div>
-              <h1 className="ppv2-username">{player.username}</h1>
+              <h1 className="ppv2-username">{live.username}</h1>
               <div className="ppv2-title-row">
                 <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.6 }} />
                 <span>{getTitle(player.points)}</span>
