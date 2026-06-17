@@ -4,10 +4,18 @@ import { calculatePoints } from '../data/players';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
-const CACHE_TTL_MS = 60_000;
+const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes — auto-check refresh window
+const AUTO_REFRESH_MS = 3 * 60 * 1000; // re-fetch every 3 minutes automatically
 let _cachedPlayers: Player[] | null = null;
 let _cacheTime = 0;
 let _inflight: Promise<Player[]> | null = null;
+
+/** Force-invalidate cache so next usePlayers call re-fetches */
+export function invalidatePlayerCache() {
+  _cachedPlayers = null;
+  _cacheTime = 0;
+  _inflight = null;
+}
 
 function fetchPlayers(): Promise<Player[]> {
   if (_inflight) return _inflight;
@@ -58,6 +66,31 @@ export function usePlayers(): UsePlayersResult {
     fetchPlayers()
       .then(mapped => { setPlayers(mapped); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
+  }, []);
+
+  // ── AutoCheck: re-fetch every AUTO_REFRESH_MS so name / skin changes appear automatically ──
+  useEffect(() => {
+    const doRefresh = () => {
+      invalidatePlayerCache();
+      fetchPlayers()
+        .then(mapped => setPlayers(mapped))
+        .catch(() => {});
+    };
+
+    const intervalId = setInterval(doRefresh, AUTO_REFRESH_MS);
+
+    // Also refresh immediately when the user switches back to this tab
+    const handleVisibility = () => {
+      if (!document.hidden && Date.now() - _cacheTime > 30_000) {
+        doRefresh();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   return { players, loading, error };
