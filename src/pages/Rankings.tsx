@@ -74,7 +74,7 @@ function OverallTable({ players }: { players: Player[] }) {
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
               <img
-                src={`https://mc-heads.net/avatar/${player.username}/64`}
+                src={`https://visage.surgeplay.com/bust/128/${player.username}`}
                 alt={player.username}
                 className="ot-ov-av-img ot-ov-av-img--bust"
                 loading="lazy"
@@ -82,7 +82,7 @@ function OverallTable({ players }: { players: Player[] }) {
                   const img = e.target as HTMLImageElement;
                   if (!img.dataset.fb) {
                     img.dataset.fb = '1';
-                    img.src = `https://minotar.net/avatar/${player.username}/64`;
+                    img.src = `https://mc-heads.net/avatar/${player.username}/64`;
                   }
                 }}
               />
