@@ -52,51 +52,84 @@ function tierNumCls(tier: string): string {
 
 const OV_PAGE = 25;
 
-
-/* ── PlayerBustImg: visage(yaw) → mc-heads+CSS-rotateY → crafthead+CSS-rotateY → avatar ── */
+/* ── PlayerBustImg: visage → skinview3d (diagonal, offline-safe) → crafthead → avatar ── */
 function PlayerBustImg({ username }: { username: string }) {
+  const [useSv3d, setUseSv3d] = React.useState(false);
   const [src, setSrc] = React.useState(
     `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
   );
-  const [extraStyle, setExtraStyle] = React.useState<React.CSSProperties | undefined>(undefined);
   const triedRef = React.useRef(0);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
-  // CSS perspective rotateY: fakes diagonal-right look for any front-facing image
-  const fakeYaw: React.CSSProperties = {
-    objectFit: "cover",
-    objectPosition: "top center",
-    transform: "perspective(140px) rotateY(-22deg) scaleX(1.15)",
-    transformOrigin: "center center",
-  };
+  /* Mount skinview3d whenever we switch to canvas mode */
+  React.useEffect(() => {
+    if (!useSv3d) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let viewer: any = null;
+    let disposed = false;
+
+    import('skinview3d').then((sv3d) => {
+      if (disposed || !canvasRef.current) return;
+      viewer = new sv3d.SkinViewer({
+        canvas,
+        width: 64,
+        height: 80,
+        skin: `https://mc-heads.net/skin/${username}`,
+      });
+      try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
+      try {
+        // Target chest/head — shows bust at default diagonal camera angle
+        viewer.controls.target.set(0, 4, 0);
+        viewer.controls.update();
+      } catch (_) {}
+      viewer.zoom = 1.15;       // tighter crop = bust view
+      viewer.autoRotate = false;
+      try { viewer.controls.enabled = false; } catch (_) {}
+      viewer.animation = null;  // static pose
+    });
+
+    return () => {
+      disposed = true;
+      if (viewer) try { viewer.dispose(); } catch (_) {}
+    };
+  }, [useSv3d, username]);
 
   const handleError = React.useCallback(() => {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      // Full-body render cropped to upper body + CSS diagonal
-      setSrc(`https://mc-heads.net/player/${username}/256`);
-      setExtraStyle(fakeYaw);
+      // visage failed → render diagonal in-browser via skinview3d
+      setUseSv3d(true);
     } else if (t === 1) {
+      setUseSv3d(false);
       setSrc(`https://crafthead.net/bust/${username}/128`);
-      setExtraStyle({ transform: "perspective(140px) rotateY(-22deg) scaleX(1.15)" });
-    } else if (t === 2) {
+    } else {
       setSrc(`https://mc-heads.net/avatar/${username}/64`);
-      setExtraStyle(undefined);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
+
+  if (useSv3d) {
+    return (
+      <canvas
+        ref={canvasRef}
+        className="ot-ov-av-img ot-ov-av-img--bust"
+        style={{ display: 'block', width: '100%', height: '100%', background: 'transparent' }}
+      />
+    );
+  }
 
   return (
     <img
       src={src}
       alt={username}
       className="ot-ov-av-img ot-ov-av-img--bust"
-      style={extraStyle}
       loading="lazy"
       onError={handleError}
     />
   );
 }
+
 function OverallTable({ players }: { players: Player[] }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(players.length / OV_PAGE);
