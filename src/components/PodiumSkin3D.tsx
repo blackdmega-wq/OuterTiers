@@ -193,11 +193,11 @@ function ensureStyles() {
    ══════════════════════════════════════════════════════════ */
 .dust-cloud-wrap {
   position:absolute;
-  bottom:4px;
+  bottom:24px;
   left:50%;
   transform:translateX(-50%);
   width:90px;
-  height:58px;          /* covers lower legs area */
+  height:50px;
   pointer-events:none;
   /* NO z-index — stays behind canvas in natural DOM paint order */
 }
@@ -224,28 +224,28 @@ function ensureStyles() {
   0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
   12%  { transform:translate( -5px,-3px) scale(.80); opacity:0.90; }
   55%  { transform:translate(-18px,-9px) scale(1.15); opacity:.60; }
-  100% { transform:translate(-30px,-14px) scale(1.5); opacity:0;   }
+  100% { transform:translate(-28px,-12px) scale(0.95); opacity:0;   }
 }
 /* Left upper: go more upward */
 @keyframes dc-sl {
   0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
   12%  { transform:translate(-4px, -5px) scale(.75); opacity:0.85; }
   55%  { transform:translate(-12px,-16px) scale(1.1); opacity:.55; }
-  100% { transform:translate(-20px,-26px) scale(1.4); opacity:0;   }
+  100% { transform:translate(-18px,-24px) scale(0.90); opacity:0;   }
 }
 /* Right: scatter right + slightly up */
 @keyframes dc-r {
   0%   { transform:translate(  0px, 0px) scale(.15); opacity:0;    }
   12%  { transform:translate(  5px,-3px) scale(.80); opacity:0.90; }
   55%  { transform:translate( 18px,-9px) scale(1.15); opacity:.60; }
-  100% { transform:translate( 30px,-14px) scale(1.5); opacity:0;   }
+  100% { transform:translate( 28px,-12px) scale(0.95); opacity:0;   }
 }
 /* Right upper: go more upward */
 @keyframes dc-sr {
   0%   { transform:translate( 0px,  0px) scale(.15); opacity:0;    }
   12%  { transform:translate( 4px, -5px) scale(.75); opacity:0.85; }
   55%  { transform:translate(12px,-16px) scale(1.1); opacity:.55; }
-  100% { transform:translate(20px,-26px) scale(1.4); opacity:0;   }
+  100% { transform:translate(18px,-24px) scale(0.90); opacity:0;   }
 }
 `;
   document.head.appendChild(s);
