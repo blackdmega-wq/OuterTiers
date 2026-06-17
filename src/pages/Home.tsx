@@ -7,7 +7,7 @@ import PodiumSkin3D from '../components/PodiumSkin3D';
 import DiscordJoinModal from '../components/DiscordJoinModal';
 import Logo from '../components/Logo';
 import { usePlayers } from '../hooks/usePlayers';
-import { useLiveProfile, SKIN_DATE } from '../hooks/useMojangProfile';
+import { useLiveProfile, useSkinDate } from '../hooks/useMojangProfile';
 import { usePresence } from '../hooks/usePresence';
 
 const GAME_MODE_CATEGORIES = CATEGORIES.filter(c => c.id !== 'overall');
@@ -141,6 +141,7 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
 function LbRow({ player, rank }: { player: Player; rank: number }) {
   const navigate = useNavigate();
   const live     = useLiveProfile(player.username, player.uuid ?? '');
+  const SKIN_DATE = useSkinDate();
   const skinId   = live.uuid || player.uuid || live.username;
   const isTop10  = rank <= 10;
   return (
