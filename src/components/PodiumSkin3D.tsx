@@ -70,15 +70,8 @@ export default function PodiumSkin3D({ username, rank }: Props) {
            Beat 4 — Arme LINKS:   Linker Arm VORNE,  Rechter Arm HINTEN
            → LOOP
 
-         MATHEMATIK:
-           swing = sin(t)        → Arm links/rechts (Period 2π)
-           depth = sin(t/2)      → vorne/hinten Phase (Period 4π)
-             depth > 0 → Rechter Arm VORNE, Linker Arm HINTEN
-             depth < 0 → Linker Arm VORNE,  Rechter Arm HINTEN
-           Übergang exakt wenn swing≈0 (Arme in Mittelposition)
-
          HÜFTE: Arme RECHTS → Hüfte LINKS | Arme LINKS → Hüfte RECHTS
-         BEINE: gespreizt, statisch
+         BEINE: weit auseinander gespreizt (z-Rotation)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -86,60 +79,53 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ~0.8 Hz Tempo – angenehmes Floss-Tempo */
-            const t = progress * 5.0;
+            /* Schnelleres Tempo */
+            const t = progress * 7.5;
 
             /* Links-Rechts-Schwung | +1=RECHTS, −1=LINKS */
             const rawSwing = Math.sin(t);
-            /* Leichtes Easing → Endposen kurz halten */
             const swing = Math.sign(rawSwing) * Math.pow(Math.abs(rawSwing), 0.60);
 
             /* Vorne/Hinten-Phase | sin(t/2) hat Period 4π
-               Wechselt genau wenn swing≈0 (Arme in Mitte) → flüssiger Übergang */
+               Wechselt genau wenn swing≈0 (Arme in Mitte) */
             const rawDepth = Math.sin(t / 2);
             const depth = Math.sign(rawDepth) * Math.pow(Math.abs(rawDepth), 0.50);
 
-            /* ── RECHTER ARM ──────────────────────────────────────────
-               z: folgt swing (rechts wenn swing>0)
-               x: VORNE wenn depth>0, HINTEN wenn depth<0              */
+            /* ── RECHTER ARM ──────────────────────────────────────── */
             s.rightArm.rotation.z = swing * 1.35;
             s.rightArm.rotation.x = depth * 0.62;
             s.rightArm.rotation.y = 0;
 
-            /* ── LINKER ARM ───────────────────────────────────────────
-               z: gleiche Richtung wie rechter Arm
-               x: entgegengesetzt (HINTEN wenn depth>0, VORNE wenn <0) */
+            /* ── LINKER ARM ───────────────────────────────────────── */
             s.leftArm.rotation.z = swing * 1.35;
             s.leftArm.rotation.x = -depth * 0.62;
             s.leftArm.rotation.y = 0;
 
-            /* ── HÜFTE — gegenläufig zu den Armen ────────────────────
-               Arme RECHTS (swing>0) → Hüfte LINKS (position.x negativ)
-               Arme LINKS  (swing<0) → Hüfte RECHTS (position.x positiv) */
+            /* ── HÜFTE — gegenläufig zu den Armen ─────────────────── */
             player.position.x = -swing * 0.70;
             player.position.y = 0;
             player.rotation.y = 0;
 
-            /* ── KÖRPER — leichter Tilt mit den Armen ─────────────── */
+            /* ── KÖRPER ─────────────────────────────────────────────── */
             s.body.rotation.z = swing * 0.10;
             s.body.rotation.x = 0;
             s.body.rotation.y = 0;
 
-            /* ── KOPF — folgt Armen minimal ──────────────────────── */
+            /* ── KOPF ───────────────────────────────────────────────── */
             if (s.head) {
               s.head.rotation.y = swing * 0.12;
               s.head.rotation.x = 0;
               s.head.rotation.z = 0;
             }
 
-            /* ── BEINE — auseinander gespreizt, statisch ────────────
-               Linkes Bein: leicht nach links (z negativ)
-               Rechtes Bein: leicht nach rechts (z positiv)             */
-            s.leftLeg.rotation.z  = -0.22;
-            s.leftLeg.rotation.x  =  0;
+            /* ── BEINE — weit auseinander gespreizt ─────────────────
+               Großer z-Winkel damit Beine sichtbar gespreizt sind
+               Linkes Bein nach links, rechtes Bein nach rechts         */
+            s.leftLeg.rotation.z  =  0.45;
+            s.leftLeg.rotation.x  =  0.05;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z =  0.22;
-            s.rightLeg.rotation.x =  0;
+            s.rightLeg.rotation.z = -0.45;
+            s.rightLeg.rotation.x =  0.05;
             s.rightLeg.rotation.y =  0;
 
           } catch (_) {}
