@@ -314,32 +314,48 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
 
-      /* ──────── #3  FAST SPRINT ──────── */
+      /* ──────── #3  ORANGE JUSTICE (Fortnite emote) ──────── */
       if (rank === 3) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
-            const s = player?.skin; if (!s) return;
-            const t = progress * 10.5;
-            const cy = Math.sin(t), c2 = Math.sin(t * 2);
-            s.body.rotation.x = 0.34 + c2 * 0.04;
-            s.body.rotation.y = 0;
-            s.body.rotation.z = c2 * 0.08;
-            const armX = cy * 1.40;
-            s.rightArm.rotation.x =  armX; s.leftArm.rotation.x = -armX;
-            s.rightArm.rotation.z = -0.14 - Math.abs(cy) * 0.10;
-            s.leftArm.rotation.z  =  0.14 + Math.abs(cy) * 0.10;
-            s.rightArm.rotation.y =  cy * 0.10; s.leftArm.rotation.y = -cy * 0.10;
-            const legX = cy * 1.30;
-            s.rightLeg.rotation.x = -legX; s.leftLeg.rotation.x = legX;
-            s.rightLeg.rotation.z =  Math.abs(cy) * 0.05;
-            s.leftLeg.rotation.z  = -Math.abs(cy) * 0.05;
+            const s = player?.skin; if (!s?.leftArm) return;
+            const t = progress * 9.0;
+            const raw  = Math.sin(t);
+            // Snappy beat — snap-like feel instead of smooth sine
+            const snap = Math.sign(raw) * Math.pow(Math.abs(raw), 0.40);
+
+            // Alternating L-shape arms:
+            // snap=+1 → right arm UP (-z), left arm DOWN (+small z)
+            // snap=-1 → right arm DOWN (+small z), left arm UP (+z)
+            s.rightArm.rotation.z = -0.55 - snap * 0.85; // -1.4 ↔ +0.3
+            s.rightArm.rotation.x =  0.22 + snap * 0.14;
+            s.rightArm.rotation.y =  snap * 0.06;
+
+            s.leftArm.rotation.z  =  0.55 + snap * 0.85; // +1.4 ↔ -0.3
+            s.leftArm.rotation.x  =  0.22 - snap * 0.14;
+            s.leftArm.rotation.y  = -snap * 0.06;
+
+            // Body sways opposite to raised arm
+            s.body.rotation.z =  snap * 0.12;
+            s.body.rotation.x =  0.06;
+            s.body.rotation.y =  0;
+
+            // Head nods with the beat
             if (s.head) {
-              s.head.rotation.x = 0.20 + c2 * 0.07;
-              s.head.rotation.y = cy * 0.07;
-              s.head.rotation.z = c2 * 0.03;
+              s.head.rotation.y = -snap * 0.14;
+              s.head.rotation.x = -0.06 + Math.abs(raw) * 0.05;
+              s.head.rotation.z =  snap * 0.04;
             }
-            player.position.y = -Math.abs(cy) * 1.0;
-            player.position.x =  cy * 0.06;
+
+            // Weight shift on legs
+            s.rightLeg.rotation.z = -0.05 - raw * 0.06;
+            s.leftLeg.rotation.z  =  0.05 + raw * 0.06;
+            s.rightLeg.rotation.x =  raw * 0.12;
+            s.leftLeg.rotation.x  = -raw * 0.12;
+
+            // Slight downward bounce on beat peak
+            player.position.y = -Math.abs(raw) * 0.55;
+            player.position.x =  snap * 0.18;
             player.rotation.y = 0;
           } catch(_){}
         });
