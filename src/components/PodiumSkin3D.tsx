@@ -583,13 +583,21 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       const mobKey = rank === 1 ? 'yoff1m'   : rank === 3 ? 'yoff3m'   : null;
       const urlKey = onMobile ? mobKey : pcKey;
       const urlOverride = urlKey ? urlParams.get(urlKey) : null;
+      // Confirmed defaults (tuned by visual testing):
+      //   PC rank1=-20, PC rank3=15
+      //   Mobile still uses dynamic formula until tuned via ?yoff1m / ?yoff3m
+      const PC_DEFAULT:  Record<number,number> = { 1: -20, 2: 14, 3: 15 };
+      const mobileFallback = () => {
+        const wrapH = wrap.offsetHeight || (rank === 1 ? 100 : rank === 2 ? 84 : 76);
+        return Math.round(wrapH - 0.71 * height);
+      };
+
       if (urlOverride !== null && !isNaN(Number(urlOverride))) {
         yOff = Number(urlOverride);
-      } else if (rank === 2) {
-        yOff = 14;
+      } else if (onMobile) {
+        yOff = mobileFallback();
       } else {
-        const wrapH = wrap.offsetHeight || (rank === 1 ? 152 : 118);
-        yOff = Math.round(wrapH - 0.71 * height);
+        yOff = PC_DEFAULT[rank] ?? 14;
       }
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
