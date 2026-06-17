@@ -187,6 +187,8 @@ export default function PlayerProfile() {
   const { player, loading } = usePlayer(username);
   const { players } = usePlayers();
   const animPts = useCountUp(player?.points ?? 0);
+  // Must be called unconditionally before any early returns (Rules of Hooks)
+  const live = useLiveProfile(player?.username ?? '', player?.uuid ?? '');
 
   if (loading) {
     return (
@@ -215,8 +217,6 @@ export default function PlayerProfile() {
       </div>
     );
   }
-
-  const live = useLiveProfile(player.username, player.uuid ?? '');
   const sorted = [...players].sort((a, b) => b.points - a.points);
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
