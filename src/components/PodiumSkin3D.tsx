@@ -121,10 +121,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* ── BEINE — weit auseinander gespreizt ─────────────────
                Großer z-Winkel damit Beine sichtbar gespreizt sind
                Linkes Bein nach links, rechtes Bein nach rechts         */
-            s.leftLeg.rotation.z  =  0.45;
+            s.leftLeg.rotation.z  =  0.18;
             s.leftLeg.rotation.x  =  0.05;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z = -0.45;
+            s.rightLeg.rotation.z = -0.18;
             s.rightLeg.rotation.x =  0.05;
             s.rightLeg.rotation.y =  0;
 
