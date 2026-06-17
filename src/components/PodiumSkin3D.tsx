@@ -96,16 +96,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const ph    = (swing + 1) * 0.5;
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
-               ph=0: KREUZUNGS-Arm nach LINKS  → z negativ groß, x vorne
-               ph=1: AUSSEN-Arm nach RECHTS    → z positiv, x hinten */
-            s.rightArm.rotation.x = lerp(+0.55, -0.55, ph);
+               WikiHow Step 2: arms LEFT → LEFT arm in FRONT, right BEHIND
+               WikiHow Step 6: arms RIGHT → RIGHT arm in FRONT, left BEHIND
+               ph=0 (swing=−1, arms LEFT): rightArm = HINTER-Arm → x NEGATIV
+               ph=1 (swing=+1, arms RIGHT): rightArm = VORDER-Arm → x POSITIV */
+            s.rightArm.rotation.x = lerp(-0.55, +0.55, ph);
             s.rightArm.rotation.z = lerp(-1.10, +0.90, ph);
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               ph=0: AUSSEN-Arm nach LINKS     → z negativ, x hinten
-               ph=1: KREUZUNGS-Arm nach RECHTS → z positiv groß, x vorne */
-            s.leftArm.rotation.x = lerp(-0.55, +0.55, ph);
+               ph=0 (arms LEFT): leftArm = VORDER-Arm → x POSITIV
+               ph=1 (arms RIGHT): leftArm = HINTER-Arm → x NEGATIV */
+            s.leftArm.rotation.x = lerp(+0.55, -0.55, ph);
             s.leftArm.rotation.z = lerp(-0.90, +1.10, ph);
             s.leftArm.rotation.y = 0;
 
