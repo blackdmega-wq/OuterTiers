@@ -614,8 +614,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       try { viewer.renderer.setClearColor(0x000000,0); } catch(_){}
       // target (0,0,0) = look at waist → feet appear in lower half of canvas
       try { viewer.controls.target.set(0,0,0); viewer.controls.update(); } catch(_){}
-      // Apply scale override on mobile, otherwise use default ZOOM
-      const baseZoom = ZOOM[rank];
+      // Scale: mobile default = 0.60 for all ranks, PC uses ZOOM defaults
+      const MOB_SCALE_DEFAULT = 0.60;
+      const baseZoom = onMobile ? MOB_SCALE_DEFAULT : ZOOM[rank];
       viewer.zoom = (scaleOverrideRaw !== null && !isNaN(Number(scaleOverrideRaw)))
         ? Number(scaleOverrideRaw)
         : baseZoom;
