@@ -34,7 +34,7 @@ async function loadOverrides(): Promise<Record<string, string>> {
 
   _overridesLoading = fetch('/uuid-overrides.json', { cache: 'no-cache' })
     .then(r => r.ok ? r.json() : {})
-    .then(json => {
+    .then((json: { overrides?: Record<string, string> }) => {
       const merged: Record<string, string> = { ...CODE_OVERRIDES };
       const entries: Record<string, string> = json?.overrides ?? {};
       for (const [k, v] of Object.entries(entries)) {
