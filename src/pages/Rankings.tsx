@@ -79,7 +79,7 @@ function OverallTable({ players }: { players: Player[] }) {
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
               <img
-                src={`https://visage.surgeplay.com/bust/128/${player.username}`}
+                src={`https://visage.surgeplay.com/bust/128/${player.username}?yaw=-25`}
                 alt={player.username}
                 className="ot-ov-av-img ot-ov-av-img--bust"
                 loading="lazy"
