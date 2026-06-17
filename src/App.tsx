@@ -153,8 +153,14 @@ function TouchTrail() {
     const pts: { x: number; y: number; t: number }[] = [];
     let rafId = 0, isActive = false;
 
+    let lastDrawTime = 0;
     function draw(now: number) {
       rafId = 0;
+      if (now - lastDrawTime < 33.34) {
+        if (isActive || pts.length > 0) { rafId = requestAnimationFrame(draw); }
+        return;
+      }
+      lastDrawTime = now;
       ctx.clearRect(0, 0, W, H);
       const cutoff = now - TRAIL_LIFE_MS;
       while (pts.length > 0 && pts[pts.length - 1].t < cutoff) pts.pop();
