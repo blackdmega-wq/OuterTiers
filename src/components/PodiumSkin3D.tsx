@@ -57,23 +57,25 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       /* ═══════════════════════════════════════════════════════════════
          #2  MINECRAFT FLOSS DANCE  — v11
 
-         ACHSEN (aus WalkingAnimation source verifiziert):
-           arm.x   NEGATIV=vorne(Kamera)  POSITIV=hinten
+         ACHSEN (aus RunningAnimation source verifiziert):
+           arm.x   POSITIV=vorne(Kamera)  NEGATIV=hinten(Rücken)
+             → RunningAnimation nutzt +1.5 für Vorwärts-Schwung ✓
            leftArm.z   POSITIV=außen-links(Char)  NEGATIV=kreuzt-rechts(Char)
            rightArm.z  NEGATIV=außen-rechts(Char) POSITIV=kreuzt-links(Char)
            body.y  POSITIV=Körper dreht LINKS
 
          DER ECHTE FLOSS: beide Arme schwingen GLEICHZEITIG zur GLEICHEN Seite.
-         Ein Arm kreuzt VORNE vor dem Körper, der andere schwingt HINTEN heraus.
+         KREUZUNGS-Arm (von gegenüber): geht VORNE vor der Brust → x POSITIV
+         AUSSEN-Arm (native Seite):     geht HINTEN hinter Rücken → x NEGATIV
 
          ph=1 (swing=+1) → Arme zu Char-LINKS:
-           rightArm = VORDER-Arm, kreuzt nach links  → x=−0.18, z=+1.55
-           leftArm  = HINTER-Arm, außen nach links   → x=+0.32, z=+1.10
-           body.y = +0.18 (dreht LINKS, folgt der Bewegung)
+           rightArm = VORDER-Arm, kreuzt nach links  → x=+0.65, z=+1.30
+           leftArm  = HINTER-Arm, außen nach links   → x=−1.30, z=+0.85
+           body.y = +0.18 (dreht LINKS)
 
          ph=0 (swing=−1) → Arme zu Char-RECHTS:
-           leftArm  = VORDER-Arm, kreuzt nach rechts → x=−0.18, z=−1.55
-           rightArm = HINTER-Arm, außen nach rechts  → x=+0.32, z=−1.10
+           leftArm  = VORDER-Arm, kreuzt nach rechts → x=+0.65, z=−1.30
+           rightArm = HINTER-Arm, außen nach rechts  → x=−1.30, z=−0.85
            body.y = −0.18 (dreht RECHTS)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
@@ -94,19 +96,17 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* ph=0 → Arme zu Char-RECHTS  |  ph=1 → Arme zu Char-LINKS */
 
             /* ── RECHTER ARM ─────────────────────────────────────────────────
-               ph=0 → HINTER-Arm, außen-rechts:  x=+0.55  (weit hinten)
-               ph=1 → VORDER-Arm, kreuzt-links:  x=−0.70  (weit vorne, klar VOR der Brust)
-               z-Werte reduziert (1.25 statt 1.55) — Arm muss nicht 90° werden,
-               die starke x-Neigung nach vorne/hinten verhindert Brust-Clipping. */
-            s.rightArm.rotation.x = lerp(+0.55, -0.70, ph);
-            s.rightArm.rotation.z = lerp(-1.00, +1.25, ph);
+               ph=0 → HINTER-Arm, außen-rechts:  x=−1.30 (NEGATIV=hinten!) z=−0.85
+               ph=1 → VORDER-Arm, kreuzt-links:  x=+0.65 (POSITIV=vorne!)  z=+1.30 */
+            s.rightArm.rotation.x = lerp(-1.30, +0.65, ph);
+            s.rightArm.rotation.z = lerp(-0.85, +1.30, ph);
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ──────────────────────────────────────────────────
-               ph=0 → VORDER-Arm, kreuzt-rechts: x=−0.70  (weit vorne)
-               ph=1 → HINTER-Arm, außen-links:   x=+0.55  (weit hinten)    */
-            s.leftArm.rotation.x = lerp(-0.70, +0.55, ph);
-            s.leftArm.rotation.z = lerp(-1.25, +1.00, ph);
+               ph=0 → VORDER-Arm, kreuzt-rechts: x=+0.65 (POSITIV=vorne!)  z=−1.30
+               ph=1 → HINTER-Arm, außen-links:   x=−1.30 (NEGATIV=hinten!) z=+0.85 */
+            s.leftArm.rotation.x = lerp(+0.65, -1.30, ph);
+            s.leftArm.rotation.z = lerp(-1.30, +0.85, ph);
             s.leftArm.rotation.y = 0;
 
             /* ── KÖRPER — dreht zur Seite des Vorderarms ────────────────── */
