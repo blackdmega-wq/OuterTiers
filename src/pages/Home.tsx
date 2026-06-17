@@ -373,7 +373,7 @@ export default function Home() {
                   return (
                     <div
                       key={player.id}
-                      className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`}
+                      className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`} style={{contentVisibility:'auto',containIntrinsicSize:'0 56px'} as React.CSSProperties}
                       onClick={() => navigate(`/player/${player.username}`)}
                     >
                       <span className="lb-rank">{rank}</span>
