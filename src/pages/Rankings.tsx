@@ -85,11 +85,12 @@ function PlayerBustImg({ username }: { username: string }) {
       viewer.zoom = 2.0;
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
-      // Lock diagonal-right pose every frame — reset all limbs to neutral so
-      // no default walk animation can override the rotation.
+      // Lock diagonal-right pose every frame — negative Y matches visage yaw=-25
+      // (positive rotates wrong way in Three.js).  Reset all limbs to neutral
+      // so no default walk animation can override the rotation.
       viewer.animation = new sv3d.FunctionAnimation((player: any) => {
         try {
-          player.rotation.y = 0.55;
+          player.rotation.y = -0.44;
           const s = player?.skin;
           if (s) {
             s.rightArm.rotation.set(0, 0, 0);
