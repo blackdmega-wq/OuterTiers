@@ -180,5 +180,21 @@ export function useLiveProfile(
   return profile;
 }
 
-/** Daily cache-bust string so skin CDNs reload changed skins once per day. */
-export const SKIN_DATE = new Date().toISOString().slice(0, 10);
+/** Returns a 5-minute bucket string — changes every 5 min, so skin CDNs reload changed skins within 5 minutes. */
+function getSkinBucket(): string {
+  return String(Math.floor(Date.now() / (5 * 60 * 1000)));
+}
+
+/** React hook — returns a 5-minute bucket that updates automatically every 5 minutes.
+ *  Use this in components instead of the static SKIN_DATE to get reactive skin refreshes. */
+export function useSkinDate(): string {
+  const [bucket, setBucket] = useState(getSkinBucket);
+  useEffect(() => {
+    const id = setInterval(() => setBucket(getSkinBucket()), 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+  return bucket;
+}
+
+/** Static cache-bust string (page-load value) — kept for backward compat. */
+export const SKIN_DATE = getSkinBucket();
