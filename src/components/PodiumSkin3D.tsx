@@ -287,16 +287,31 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
 }
 
 
-/** Draw a pixel-art Minecraft Firework Rocket.
- *  cx/cy = center-bottom of the fuse. s = pixel scale.
- *  Layout (upward from fuse):
- *    fuse → base+fins → 4× red/white stripes → red dome → red tip
- *  Matches the Minecraft firework rocket appearance: narrow 3-unit body, red dome nose.
+/** Draw an authentic Minecraft Firework Rocket in pixel art.
+ *
+ *  cx/cy  = center-x / bottom-y of the fuse stick (lowest point of rocket).
+ *  s      = pixels per Minecraft-pixel (e.g. 3 = each MC pixel = 3×3 screen pixels).
+ *
+ *  Pixel layout (each row = 2 MC-pixels tall, drawn upward from fuse):
+ *
+ *       ·          tip    (1 wide)   y = -21
+ *      ···         nose   (2 wide)   y = -19
+ *     ·····        nose   (3 wide)   y = -17
+ *    ▓▓▓▓▓▓▓▓     red    (4 wide)   y = -15
+ *    ▒▒▒▒▒▒▒▒     white  (4 wide)   y = -13
+ *    ▓▓▓▓▓▓▓▓     red    (4 wide)   y = -11
+ *    ▒▒▒▒▒▒▒▒     white  (4 wide)   y =  -9
+ *    ▓▓▓▓▓▓▓▓     red    (4 wide)   y =  -7
+ *    ████████     base   (4 wide)   y =  -5
+ *   ██████████    fins   (6 wide)   y =  -3
+ *      ||||       fuse   (1 wide)   y =   0  (downward to cy)
+ *
+ *  Authentic Minecraft palette with left-column shading for depth.
  */
 function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
-  const bl = (x: number, y: number, w: number, h: number, r: number, g: number, b: number, a = 1.0) => {
-    dc.fillStyle = `rgba(${r},${g},${b},${a})`;
-    // Math.round for crisp pixel-art edges — no anti-aliasing blur
+  // p(x, y, w, h, r, g, b) — draw one block of MC pixels, crisp integer coords
+  const p = (x: number, y: number, w: number, h: number, r: number, g: number, b: number) => {
+    dc.fillStyle = `rgb(${r},${g},${b})`;
     dc.fillRect(
       Math.round(cx + x * s),
       Math.round(cy + y * s),
@@ -305,30 +320,42 @@ function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: n
     );
   };
 
-  // Fuse (1 wide, 2 tall — below base)
-  bl(-0.5, -2, 1, 2, 90, 65, 30);
+  // ── Fuse stick ──────────────────────────────────────────────────────────────
+  p(-0.5, -3,  1, 3,  72, 46, 12);
 
-  // Fins (1 wide, 2 tall — flanking base on each side)
-  bl(-2.5, -4, 1, 2, 90, 65, 30);   // left fin
-  bl( 1.5, -4, 1, 2, 90, 65, 30);   // right fin
+  // ── Fins (1 px each side, same row as base) ─────────────────────────────────
+  p(-3,   -5,  1, 2,  48, 28,  6);   // left fin
+  p( 2,   -5,  1, 2,  48, 28,  6);   // right fin
 
-  // Base cap (3 wide, 2 tall — dark brown)
-  bl(-1.5, -4, 3, 2, 110, 78, 42);
+  // ── Base cap ─────────────────────────────────────────────────────────────────
+  p(-2,   -5,  4, 2,  88, 56, 18);   // base fill
+  p(-2,   -5,  1, 2,  52, 30,  8);   // left-edge depth shadow
 
-  // Body — alternating Red / White candy stripes (3 wide × 2 tall each, 4 stripes)
-  bl(-1.5,  -6, 3, 2, 218, 32, 32);   // red
-  bl(-1.5,  -8, 3, 2, 240,240,240);   // white
-  bl(-1.5, -10, 3, 2, 218, 32, 32);   // red
-  bl(-1.5, -12, 3, 2, 240,240,240);   // white
+  // ── 5 body stripes — 4 px wide × 2 px tall, alternating Red / White ─────────
+  // Red 1 (bottom stripe)
+  p(-2,   -7,  4, 2, 188, 18, 18);
+  p(-2,   -7,  1, 2, 108,  6,  6);   // shadow
 
-  // Nose dome lower (2 wide, 2 tall — red, narrowing from body)
-  bl(-1,   -14, 2, 2, 200, 28, 28);
+  // White 1
+  p(-2,   -9,  4, 2, 255,255,255);
+  p(-2,   -9,  1, 2, 158,158,158);   // shadow
 
-  // Nose dome upper (1 wide, 2 tall — deep red peak)
-  bl(-0.5, -16, 1, 2, 175, 22, 22);
+  // Red 2
+  p(-2,  -11,  4, 2, 188, 18, 18);
+  p(-2,  -11,  1, 2, 108,  6,  6);
 
-  // Tip highlight (1 wide, 1 tall — bright white shine)
-  bl(-0.5, -18, 1, 1, 255, 200, 200, 0.85);
+  // White 2
+  p(-2,  -13,  4, 2, 255,255,255);
+  p(-2,  -13,  1, 2, 158,158,158);
+
+  // Red 3 (top stripe)
+  p(-2,  -15,  4, 2, 188, 18, 18);
+  p(-2,  -15,  1, 2, 108,  6,  6);
+
+  // ── Nose dome — tapers 3 → 2 → 1 px wide ────────────────────────────────────
+  p(-1.5, -17,  3, 2, 160, 12, 12);  // nose base  (3 px)
+  p(-1,   -19,  2, 2, 128,  8,  8);  // nose mid   (2 px)
+  p(-0.5, -21,  1, 2,  96,  4,  4);  // nose tip   (1 px)
 }
 
 function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => void {
@@ -422,8 +449,8 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
         }
       }
 
-      // Draw the Minecraft-style pixel rocket
-      drawMcRocket(dc, rk.x, rk.y, 2.5);
+      // Draw the Minecraft-style pixel rocket — scale 3 = each MC pixel is 3×3 screen pixels
+      drawMcRocket(dc, rk.x, rk.y, 3.0);
 
       // Exhaust flame glow below the fuse
       const flicker = 0.75 + Math.random() * 0.25;
