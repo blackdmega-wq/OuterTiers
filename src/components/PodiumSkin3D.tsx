@@ -176,9 +176,8 @@ interface DPart {
 }
 
 const DUST_COLORS = [
-  '200,173,133','175,150,110','215,195,160',
-  '150,125,90', '225,215,200','185,165,130',
-  '235,220,190','160,135,98', '210,185,150',
+  '220,230,255','200,215,255','240,245,255',
+  '180,200,245','255,255,255','210,225,255',
 ];
 
 function startDustCanvas(
@@ -195,7 +194,7 @@ function startDustCanvas(
   const parts: DPart[] = [];
   const LFX = w * 0.35;  // left foot X
   const RFX = w * 0.65;  // right foot X
-  const FY  = h - 40;    // ankle/foot level — right at ground contact
+  const FY  = h - 36;    // foot level
 
   // Sprint animation uses t = progress * 10.5, cy = sin(t)
   // cy > 0 → right foot on ground; cy < 0 → left foot on ground
@@ -206,42 +205,25 @@ function startDustCanvas(
 
   function spawnStep(fx: number, outDir: number) {
     const C = () => DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)];
-    const jx = (s: number) => fx + (Math.random() - 0.5) * s;
-    const jy = (s: number) => FY + (Math.random() - 0.5) * s;
-
-    // ── 1. Fast grit/pebbles: eject nearly horizontally ──
-    for (let i = 0; i < 3; i++) {
-      const ml = 0.12 + Math.random() * 0.14;
-      parts.push({
-        x: jx(5), y: jy(2),
-        vx: (Math.random() * 2.8 + 0.9) * outDir,
-        vy: -(Math.random() * 0.35),       // nearly flat trajectory
-        r:  0.4 + Math.random() * 0.9,
-        life: ml, maxLife: ml, color: C(), isDebris: true,
-      });
-    }
-
-    // ── 2. Medium rising puffs ──
+    // 2 soft glow puffs
     for (let i = 0; i < 2; i++) {
-      const ml = 0.38 + Math.random() * 0.28;
+      const ml = 0.28 + Math.random() * 0.18;
       parts.push({
-        x: jx(6), y: jy(2),
-        vx: (Math.random() * 0.65 + 0.18) * outDir,
-        vy: -(Math.random() * 0.85 + 0.30), // rise upward
-        r:  2.0 + Math.random() * 3.5,
+        x:  fx + (Math.random() - 0.5) * 8,
+        y:  FY + (Math.random() - 0.5) * 2,
+        vx: (Math.random() * 0.9 + 0.3) * outDir,
+        vy: -(Math.random() * 0.55 + 0.20),
+        r:  2.5 + Math.random() * 4.0,
         life: ml, maxLife: ml, color: C(), isDebris: false,
       });
     }
-
-    // ── 3. One large lingering cloud near foot ──
-    {
-      const ml = 0.50 + Math.random() * 0.35;
+    // 1 tiny spark
+    { const ml = 0.10 + Math.random() * 0.08;
       parts.push({
-        x: jx(4), y: FY - 2,
-        vx: (Math.random() * 0.25 + 0.08) * outDir,
-        vy: -(Math.random() * 0.18 + 0.04), // barely rises
-        r:  4.5 + Math.random() * 3.0,
-        life: ml, maxLife: ml, color: C(), isDebris: false,
+        x: fx + (Math.random()-0.5)*5, y: FY,
+        vx: (Math.random()*2.2+0.8)*outDir, vy:-(Math.random()*0.25),
+        r: 0.6+Math.random()*0.8,
+        life:ml, maxLife:ml, color:C(), isDebris:true,
       });
     }
   }
@@ -272,7 +254,7 @@ function startDustCanvas(
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
-      p.life -= 0.022 * delta;
+      p.life -= 0.028 * delta;
       if (p.life <= 0) { parts.splice(i, 1); continue; }
 
       p.x  += p.vx * delta;
