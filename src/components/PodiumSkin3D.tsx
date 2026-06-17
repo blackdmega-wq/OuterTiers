@@ -188,7 +188,7 @@ function startDustCanvas(
   const rings: StepRing[] = [];
   const LFX = w * 0.36;
   const RFX = w * 0.64;
-  const FY  = h - 10;          // ground contact point (right at the feet)
+  const FY  = h - 20;          // ground contact point (at the feet)
 
   const START_T = performance.now();
   let prevCy = 0;
