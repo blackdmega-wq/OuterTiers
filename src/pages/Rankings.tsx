@@ -73,22 +73,23 @@ function PlayerBustImg({ username }: { username: string }) {
       if (disposed || !canvasRef.current) return;
       viewer = new sv3d.SkinViewer({
         canvas,
-        width: 64,
+        width: 80,
         height: 80,
         skin: `https://mc-heads.net/skin/${username}`,
       });
       try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
       try {
-        // Target chest/head — shows bust at default diagonal camera angle
-        viewer.controls.target.set(0, 4, 0);
+        // Look at upper chest/head area — same crop region as visage bust
+        viewer.controls.target.set(0, 14, 0);
         viewer.controls.update();
       } catch (_) {}
-      viewer.zoom = 1.15;       // tighter crop = bust view
+      viewer.zoom = 2.0;        // tight bust crop matching visage output
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
-      // FunctionAnimation forces yaw=-25deg same way sprint anim forces yaw=0
+      // FunctionAnimation: hold yaw=-30deg (diagonal right) every frame
+      // Same mechanism as sprint anim which locks player.rotation.y = 0
       viewer.animation = new sv3d.FunctionAnimation((player: any) => {
-        try { player.rotation.y = -0.44; } catch (_) {}
+        try { player.rotation.y = -0.55; } catch (_) {}
       });
     });
 
