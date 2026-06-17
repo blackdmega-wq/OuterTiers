@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { CATEGORIES, getTitle } from '../data/players';
 import type { PlayerTiers } from '../data/players';
 import { usePlayer, usePlayers } from '../hooks/usePlayers';
 import { useLiveProfile } from '../hooks/useMojangProfile';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
-import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap } from 'lucide-react';
+import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check } from 'lucide-react';
 import '../styles/profile-v2.css';
 
 function formatDate(ts: number | undefined): string | null {
@@ -182,6 +182,38 @@ function ProfileCrownBronze() {
   );
 }
 
+function UuidBadge({ uuid }: { uuid: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(uuid).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
+  }, [uuid]);
+
+  if (!uuid) return null;
+  const display = uuid.replace(/-/g, '');
+  const short = display.slice(0, 8) + '…' + display.slice(-4);
+
+  return (
+    <button
+      onClick={copy}
+      title={uuid}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: 'var(--text-dim)',
+        fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.03em',
+        transition: 'all 0.15s', marginTop: 6,
+      }}
+    >
+      {copied
+        ? <><Check size={10} style={{ color: '#4ade80' }} /><span style={{ color: '#4ade80' }}>Copied!</span></>
+        : <><Copy size={10} /><span>UUID: {short}</span></>}
+    </button>
+  );
+}
+
 export default function PlayerProfile() {
   const { username } = useParams<{ username: string }>();
   const { player, loading } = usePlayer(username);
@@ -265,6 +297,7 @@ export default function PlayerProfile() {
                   </span>
                 )}
               </div>
+              <UuidBadge uuid={live.uuid || player.uuid || ''} />
             </div>
           </div>
 
