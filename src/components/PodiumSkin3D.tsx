@@ -587,23 +587,16 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       const yoffOverrideRaw  = onMobile ? urlParams.get(yoffMobKey)  : urlParams.get(yoffPcKey);
       const scaleOverrideRaw = onMobile ? urlParams.get(scaleMobKey) : null;
 
-      // Confirmed PC defaults
-      const PC_DEFAULT:  Record<number, number> = { 1: -20, 2:  14, 3:  15 };
-      // Desktop wrap heights (from CSS)
-      const PC_WRAP_H:   Record<number, number> = { 1: 152, 2: 128, 3: 118 };
-      // Mobile wrap heights (from CSS @media max-width:580px)
-      const MOB_WRAP_H:  Record<number, number> = { 1: 100, 2:  84, 3:  76 };
+      // Confirmed defaults (tuned visually by user):
+      const PC_DEFAULT:  Record<number, number> = { 1:  20, 2:  14, 3:  15 };
+      const MOB_DEFAULT: Record<number, number> = { 1: -26, 2: -17, 3: -17 };
 
       let yOff: number;
       if (yoffOverrideRaw !== null && !isNaN(Number(yoffOverrideRaw))) {
-        // URL param takes priority
+        // URL param takes priority for live tuning
         yOff = Number(yoffOverrideRaw);
       } else if (onMobile) {
-        // Scale PC yOff to mobile by adjusting for the smaller wrap height
-        const pcYoff  = PC_DEFAULT[rank]  ?? 14;
-        const pcWrapH = PC_WRAP_H[rank]   ?? 128;
-        const mobWrapH = MOB_WRAP_H[rank] ?? 84;
-        yOff = pcYoff + (mobWrapH - pcWrapH);
+        yOff = MOB_DEFAULT[rank] ?? -17;
       } else {
         yOff = PC_DEFAULT[rank] ?? 14;
       }
