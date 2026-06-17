@@ -195,7 +195,7 @@ function startDustCanvas(
   const parts: DPart[] = [];
   const LFX = w * 0.35;  // left foot X
   const RFX = w * 0.65;  // right foot X
-  const FY  = h - 50;    // calf height — behind legs, not feet
+  const FY  = h - 40;    // ankle/foot level — right at ground contact
 
   // Sprint animation uses t = progress * 10.5, cy = sin(t)
   // cy > 0 → right foot on ground; cy < 0 → left foot on ground
@@ -205,34 +205,43 @@ function startDustCanvas(
   let animId = 0;
 
   function spawnStep(fx: number, outDir: number) {
-    // 2–3 small puffs per step — subtle and clean
-    const puffCount = 2 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < puffCount; i++) {
-      const ml = 0.55 + Math.random() * 0.40;
+    const C = () => DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)];
+    const jx = (s: number) => fx + (Math.random() - 0.5) * s;
+    const jy = (s: number) => FY + (Math.random() - 0.5) * s;
+
+    // ── 1. Fast grit/pebbles: eject nearly horizontally ──
+    for (let i = 0; i < 3; i++) {
+      const ml = 0.12 + Math.random() * 0.14;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 7,
-        y:  FY + (Math.random() - 0.5) * 3,
-        vx: (Math.random() * 0.8 + 0.20) * outDir,
-        vy: -(Math.random() * 0.60 + 0.18),
-        r:  2.2 + Math.random() * 4.5,
-        life: ml, maxLife: ml,
-        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
-        isDebris: false,
+        x: jx(5), y: jy(2),
+        vx: (Math.random() * 2.8 + 0.9) * outDir,
+        vy: -(Math.random() * 0.35),       // nearly flat trajectory
+        r:  0.4 + Math.random() * 0.9,
+        life: ml, maxLife: ml, color: C(), isDebris: true,
       });
     }
-    // 1–2 sharp debris specks
-    const debrisCount = 1 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < debrisCount; i++) {
-      const ml = 0.18 + Math.random() * 0.20;
+
+    // ── 2. Medium rising puffs ──
+    for (let i = 0; i < 2; i++) {
+      const ml = 0.38 + Math.random() * 0.28;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 7,
-        y:  FY + (Math.random() - 0.5) * 3,
-        vx: (Math.random() * 1.8 + 0.6) * outDir,
-        vy: -(Math.random() * 1.3 + 0.4),
-        r:  0.4 + Math.random() * 1.0,
-        life: ml, maxLife: ml,
-        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
-        isDebris: true,
+        x: jx(6), y: jy(2),
+        vx: (Math.random() * 0.65 + 0.18) * outDir,
+        vy: -(Math.random() * 0.85 + 0.30), // rise upward
+        r:  2.0 + Math.random() * 3.5,
+        life: ml, maxLife: ml, color: C(), isDebris: false,
+      });
+    }
+
+    // ── 3. One large lingering cloud near foot ──
+    {
+      const ml = 0.50 + Math.random() * 0.35;
+      parts.push({
+        x: jx(4), y: FY - 2,
+        vx: (Math.random() * 0.25 + 0.08) * outDir,
+        vy: -(Math.random() * 0.18 + 0.04), // barely rises
+        r:  4.5 + Math.random() * 3.0,
+        life: ml, maxLife: ml, color: C(), isDebris: false,
       });
     }
   }
@@ -263,13 +272,13 @@ function startDustCanvas(
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
-      p.life -= 0.018 * delta;
+      p.life -= 0.022 * delta;
       if (p.life <= 0) { parts.splice(i, 1); continue; }
 
       p.x  += p.vx * delta;
       p.y  += p.vy * delta;
       // Puffs nearly float (tiny gravity); debris falls normally
-      p.vy += (p.isDebris ? 0.040 : 0.005) * delta;
+      p.vy += (p.isDebris ? 0.055 : 0.003) * delta; // grit falls fast, puffs float
       p.vx *= Math.pow(0.960, delta); // air resistance
 
       const lifeRatio = p.life / p.maxLife;
@@ -286,7 +295,7 @@ function startDustCanvas(
         dc.fillStyle = `rgba(${p.color},${Math.min(0.95, alpha * 1.3)})`;
         dc.fill();
       } else {
-        const expandR = p.r * (1 + (1 - lifeRatio) * 0.90);
+        const expandR = p.r * (1 + (1 - lifeRatio) * 1.30); // expand more as fades
         const grad = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, expandR);
         grad.addColorStop(0,    `rgba(${p.color},${alpha * 0.85})`);
         grad.addColorStop(0.40, `rgba(${p.color},${alpha * 0.55})`);
