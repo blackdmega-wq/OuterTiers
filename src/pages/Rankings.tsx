@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
@@ -52,6 +52,54 @@ function tierNumCls(tier: string): string {
 
 const OV_PAGE = 25;
 
+
+/* ── Smart bust: visage(yaw=-25) → crafatar(UUID, diagonal) → crafthead → avatar ── */
+const _uuidCache: Record<string, string> = {};
+
+function PlayerBustImg({ username }: { username: string }) {
+  const [src, setSrc] = React.useState(
+    `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
+  );
+  const triedRef = React.useRef(0);
+
+  const handleError = React.useCallback(() => {
+    const t = triedRef.current;
+    triedRef.current += 1;
+    if (t === 0) {
+      (async () => {
+        try {
+          if (_uuidCache[username]) {
+            setSrc(`https://crafatar.com/renders/bust/${_uuidCache[username]}?overlay`);
+            return;
+          }
+          const res = await fetch(`https://playerdb.co/api/player/minecraft/${username}`);
+          const data = await res.json();
+          const uuid = data?.data?.player?.id;
+          if (uuid) {
+            _uuidCache[username] = uuid;
+            setSrc(`https://crafatar.com/renders/bust/${uuid}?overlay`);
+            return;
+          }
+        } catch {}
+        setSrc(`https://crafthead.net/bust/${username}/128`);
+      })();
+    } else if (t === 1) {
+      setSrc(`https://crafthead.net/bust/${username}/128`);
+    } else if (t === 2) {
+      setSrc(`https://mc-heads.net/avatar/${username}/64`);
+    }
+  }, [username]);
+
+  return (
+    <img
+      src={src}
+      alt={username}
+      className="ot-ov-av-img ot-ov-av-img--bust"
+      loading="lazy"
+      onError={handleError}
+    />
+  );
+}
 function OverallTable({ players }: { players: Player[] }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(players.length / OV_PAGE);
@@ -78,22 +126,7 @@ function OverallTable({ players }: { players: Player[] }) {
 
             {/* ── Avatar ── */}
             <div className={`ot-ov-av-ring ${ringCls}`}>
-              <img
-                src={`https://visage.surgeplay.com/bust/128/${player.username}?yaw=-25`}
-                alt={player.username}
-                className="ot-ov-av-img ot-ov-av-img--bust"
-                loading="lazy"
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  if (!img.dataset.fb) {
-                    img.dataset.fb = '1';
-                    img.src = `https://crafthead.net/bust/${player.username}/128`;
-                  } else if (!img.dataset.fb2) {
-                    img.dataset.fb2 = '1';
-                    img.src = `https://mc-heads.net/avatar/${player.username}/64`;
-                  }
-                }}
-              />
+              <PlayerBustImg username={player.username} />
               <span className="ot-ov-rank-pill">{rank}.</span>
             </div>
 
