@@ -263,7 +263,7 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
 function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
   cv.width  = FW_W;
   cv.height = FW_H;
-  const dc = cv.getContext('2d');
+  const dc = cv.getContext('2d')!;
   if (!dc) return () => {};
 
   const rockets: FWRocket[] = [];
