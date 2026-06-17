@@ -94,17 +94,19 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* ph=0 → Arme zu Char-RECHTS  |  ph=1 → Arme zu Char-LINKS */
 
             /* ── RECHTER ARM ─────────────────────────────────────────────────
-               ph=0 → HINTER-Arm, außen-rechts:  x=+0.32, z=−1.10
-               ph=1 → VORDER-Arm, kreuzt-links:  x=−0.18, z=+1.55          */
-            s.rightArm.rotation.x = lerp(+0.32, -0.18, ph);
-            s.rightArm.rotation.z = lerp(-1.10, +1.55, ph);
+               ph=0 → HINTER-Arm, außen-rechts:  x=+0.55  (weit hinten)
+               ph=1 → VORDER-Arm, kreuzt-links:  x=−0.70  (weit vorne, klar VOR der Brust)
+               z-Werte reduziert (1.25 statt 1.55) — Arm muss nicht 90° werden,
+               die starke x-Neigung nach vorne/hinten verhindert Brust-Clipping. */
+            s.rightArm.rotation.x = lerp(+0.55, -0.70, ph);
+            s.rightArm.rotation.z = lerp(-1.00, +1.25, ph);
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ──────────────────────────────────────────────────
-               ph=0 → VORDER-Arm, kreuzt-rechts: x=−0.18, z=−1.55
-               ph=1 → HINTER-Arm, außen-links:   x=+0.32, z=+1.10          */
-            s.leftArm.rotation.x = lerp(-0.18, +0.32, ph);
-            s.leftArm.rotation.z = lerp(-1.55, +1.10, ph);
+               ph=0 → VORDER-Arm, kreuzt-rechts: x=−0.70  (weit vorne)
+               ph=1 → HINTER-Arm, außen-links:   x=+0.55  (weit hinten)    */
+            s.leftArm.rotation.x = lerp(-0.70, +0.55, ph);
+            s.leftArm.rotation.z = lerp(-1.25, +1.00, ph);
             s.leftArm.rotation.y = 0;
 
             /* ── KÖRPER — dreht zur Seite des Vorderarms ────────────────── */
