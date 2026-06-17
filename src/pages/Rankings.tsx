@@ -53,38 +53,26 @@ function tierNumCls(tier: string): string {
 const OV_PAGE = 25;
 
 
-/* ── Smart bust: visage(yaw=-25) → crafatar(UUID, diagonal) → crafthead → avatar ── */
-const _uuidCache: Record<string, string> = {};
 
+
+/* ── Bust image with diagonal-right fallback via mc-heads.net/player ── */
 function PlayerBustImg({ username }: { username: string }) {
   const [src, setSrc] = React.useState(
     `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
   );
+  const [crop, setCrop] = React.useState(false);
   const triedRef = React.useRef(0);
 
   const handleError = React.useCallback(() => {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      (async () => {
-        try {
-          if (_uuidCache[username]) {
-            setSrc(`https://crafatar.com/renders/bust/${_uuidCache[username]}?overlay`);
-            return;
-          }
-          const res = await fetch(`https://playerdb.co/api/player/minecraft/${username}`);
-          const data = await res.json();
-          const uuid = data?.data?.player?.id;
-          if (uuid) {
-            _uuidCache[username] = uuid;
-            setSrc(`https://crafatar.com/renders/bust/${uuid}?overlay`);
-            return;
-          }
-        } catch {}
-        setSrc(`https://crafthead.net/bust/${username}/128`);
-      })();
+      // mc-heads player renders full body at diagonal angle — works offline
+      setSrc(`https://mc-heads.net/player/${username}/256`);
+      setCrop(true);
     } else if (t === 1) {
       setSrc(`https://crafthead.net/bust/${username}/128`);
+      setCrop(false);
     } else if (t === 2) {
       setSrc(`https://mc-heads.net/avatar/${username}/64`);
     }
@@ -95,6 +83,7 @@ function PlayerBustImg({ username }: { username: string }) {
       src={src}
       alt={username}
       className="ot-ov-av-img ot-ov-av-img--bust"
+      style={crop ? { objectFit: "cover", objectPosition: "top center" } : undefined}
       loading="lazy"
       onError={handleError}
     />
