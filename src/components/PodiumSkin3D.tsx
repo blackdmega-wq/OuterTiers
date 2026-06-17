@@ -700,7 +700,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             width: `${FW_W}px`,
             height: `${FW_H}px`,
             pointerEvents: 'none',
-            zIndex: 4,
+            zIndex: 50,
           }}
           width={FW_W}
           height={FW_H}
