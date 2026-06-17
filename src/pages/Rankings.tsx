@@ -50,11 +50,16 @@ function tierNumCls(tier: string): string {
   return `tvh${n}`;
 }
 
+const OV_PAGE = 25;
+
 function OverallTable({ players }: { players: Player[] }) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(players.length / OV_PAGE);
+  const visible = players.slice((page - 1) * OV_PAGE, page * OV_PAGE);
   return (
     <div className="ot-ov-wrap">
-      {players.map((player, i) => {
-        const rank = i + 1;
+      {visible.map((player, i) => {
+        const rank = (page - 1) * OV_PAGE + i + 1;
         const ringCls =
           rank === 1 ? 'ov-ring-gold'
           : rank === 2 ? 'ov-ring-silver'
@@ -131,6 +136,21 @@ function OverallTable({ players }: { players: Player[] }) {
           </Link>
         );
       })}
+      {totalPages > 1 && (
+        <div className="ot-ov-pagination">
+          <button
+            className="ot-ov-pg-btn"
+            disabled={page === 1}
+            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          >‹ Prev</button>
+          <span className="ot-ov-pg-info">{page} / {totalPages}</span>
+          <button
+            className="ot-ov-pg-btn"
+            disabled={page === totalPages}
+            onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          >Next ›</button>
+        </div>
+      )}
     </div>
   );
 }
