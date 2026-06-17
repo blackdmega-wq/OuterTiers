@@ -314,48 +314,48 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
 
-      /* ──────── #3  WAVE — clean one-arm wave, confident idle ──────────
-         Right arm raises and waves smoothly; left arm hangs relaxed.
-         Body sways gently, head follows — simple, cool, recognisable.
+      /* ──────── #3  SPIN LOOP — smooth 360° spin emote, arms out ──────────
+         Player continuously spins 360° (full loop emote).
+         Arms spread wide, legs slightly apart — confident champion spin.
       ─────────────────────────────────────────────────────────────────── */
       if (rank === 3) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
           try {
             const s = player?.skin; if (!s?.leftArm) return;
-            const t = progress * 3.2;
+            // Full 360° continuous spin — progress goes 0→1 looping
+            player.rotation.y = progress * Math.PI * 2;
 
-            // ── RIGHT ARM: raised wave (Z lifts arm up, X waves forward/back) ─
-            s.rightArm.rotation.z =  1.05 + Math.sin(t * 2.2) * 0.32;
-            s.rightArm.rotation.x = -0.10 + Math.sin(t * 2.2 + 0.8) * 0.18;
-            s.rightArm.rotation.y =  0.08;
+            const t = progress * Math.PI * 2;
 
-            // ── LEFT ARM: relaxed natural hang ────────────────────────
-            s.leftArm.rotation.z  =  0.14;
-            s.leftArm.rotation.x  =  0.06 + Math.sin(t * 0.9) * 0.05;
+            // ── ARMS: spread out wide, slight forward tilt (flying spin pose) ─
+            s.rightArm.rotation.z =  0.90 + Math.sin(t * 2) * 0.08;
+            s.rightArm.rotation.x = -0.15;
+            s.rightArm.rotation.y =  0.0;
+            s.leftArm.rotation.z  = -0.90 - Math.sin(t * 2) * 0.08;
+            s.leftArm.rotation.x  = -0.15;
             s.leftArm.rotation.y  =  0.0;
 
-            // ── BODY: subtle sway following the wave ──────────────────
-            s.body.rotation.y =  Math.sin(t * 0.8) * 0.06;
-            s.body.rotation.z =  Math.sin(t * 0.8) * 0.03;
-            s.body.rotation.x =  0.04;
+            // ── BODY: upright, slight chest lift ──────────────────────
+            s.body.rotation.y = 0;
+            s.body.rotation.z = 0;
+            s.body.rotation.x = -0.04;
 
-            // ── HEAD: slight turn toward viewer, gentle nod ───────────
+            // ── HEAD: faces forward (counter-spin so head stays toward viewer) ─
             if (s.head) {
-              s.head.rotation.y = -0.10 + Math.sin(t * 0.7) * 0.07;
-              s.head.rotation.x = -0.05 + Math.sin(t * 1.1) * 0.04;
-              s.head.rotation.z =  0.0;
+              s.head.rotation.y = 0;
+              s.head.rotation.x = 0;
+              s.head.rotation.z = 0;
             }
 
-            // ── LEGS: stable stance, tiny weight-shift ────────────────
-            s.rightLeg.rotation.z = -0.05;
-            s.leftLeg.rotation.z  =  0.05;
-            s.rightLeg.rotation.x =  Math.sin(t * 0.9) * 0.04;
-            s.leftLeg.rotation.x  = -Math.sin(t * 0.9) * 0.04;
+            // ── LEGS: slight split stance ──────────────────────────────
+            s.rightLeg.rotation.z = -0.10;
+            s.leftLeg.rotation.z  =  0.10;
+            s.rightLeg.rotation.x =  0.0;
+            s.leftLeg.rotation.x  =  0.0;
 
-            // ── ROOT: smooth gentle bounce ────────────────────────────
-            player.position.y =  Math.sin(t * 2.2) * -0.15;
-            player.position.x =  Math.sin(t * 0.8) * 0.08;
-            player.rotation.y =  0;
+            // ── ROOT: tiny hover bounce while spinning ─────────────────
+            player.position.y = Math.sin(t * 2) * -0.12;
+            player.position.x = 0;
           } catch(_){}
         });
 
