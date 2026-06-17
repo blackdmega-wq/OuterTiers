@@ -278,6 +278,44 @@ function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
   }
 }
 
+
+/** Draw a pixel-art Minecraft Firework Rocket.
+ *  cx/cy = center-bottom of the fuse. s = pixel scale (1.5 = small).
+ *  Layout (upward from fuse):
+ *    fuse → base+fins → 5× candy-stripe stripes → gray nose → white tip
+ */
+function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+  const bl = (x: number, y: number, w: number, h: number, r: number, g: number, b: number, a = 1.0) => {
+    dc.fillStyle = `rgba(${r},${g},${b},${a})`;
+    dc.fillRect(cx + x * s, cy + y * s, w * s, h * s);
+  };
+
+  // Fuse (thin dark stem below base)
+  bl(-0.5, -2,  1, 2,  65, 45, 20);
+
+  // Fins (jut out left/right from bottom of body)
+  bl(-3.5, -4,  1, 2,  65, 45, 20);   // left fin
+  bl( 2.5, -4,  1, 2,  65, 45, 20);   // right fin
+
+  // Base (dark brown cap, 5 units wide)
+  bl(-2.5, -4,  5, 2,  95, 68, 38);
+
+  // Body — alternating Red / White candy stripes (5 wide × 2 tall each, 5 stripes)
+  bl(-2.5,  -6, 5, 2, 218, 32, 32);   // red
+  bl(-2.5,  -8, 5, 2, 248,248,248);   // white
+  bl(-2.5, -10, 5, 2, 218, 32, 32);   // red
+  bl(-2.5, -12, 5, 2, 248,248,248);   // white
+  bl(-2.5, -14, 5, 2, 218, 32, 32);   // red
+
+  // Shade: left 1-pixel darkening on body for slight 3D depth
+  bl(-2.5,  -6, 1, 10, 0, 0, 0, 0.18);
+
+  // Nose cone lower (3 wide, light gray)
+  bl(-1.5, -16, 3, 2, 215,215,215);
+  // Nose tip (1 wide, bright white)
+  bl(-0.5, -18, 1, 2, 255,255,255);
+}
+
 function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
   cv.width  = FW_W;
   cv.height = FW_H;
@@ -332,52 +370,44 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
         continue;
       }
 
-      // Rocket trail — bright spark dots
+      // Minecraft rocket trail — white/silver smoke sparks (authentic)
       for (let t = 0; t < rk.trail.length; t++) {
         const tr = rk.trail[t];
         const frac  = t / rk.trail.length;
-        const alpha = frac * 0.90;
-        const radius = 1.0 + frac * 2.8; // grows from 1px to 3.8px toward head
+        const alpha = frac * 0.85;
+        const radius = 0.8 + frac * 2.4;
+        // Mix white smoke with a slight tint of the firework color
+        const smokeR = Math.round(230 * (1 - frac * 0.3) + rk.cr * frac * 0.3);
+        const smokeG = Math.round(230 * (1 - frac * 0.3) + rk.cg * frac * 0.3);
+        const smokeB = Math.round(230 * (1 - frac * 0.3) + rk.cb * frac * 0.3);
         dc.beginPath();
         dc.arc(tr.x, tr.y, radius, 0, Math.PI * 2);
-        dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},${alpha.toFixed(2)})`;
+        dc.fillStyle = `rgba(${smokeR},${smokeG},${smokeB},${alpha.toFixed(2)})`;
         dc.fill();
-        // Tiny glow around each trail dot
-        if (frac > 0.5) {
-          const gl = dc.createRadialGradient(tr.x, tr.y, 0, tr.x, tr.y, radius * 2.5);
-          gl.addColorStop(0, `rgba(${rk.cr},${rk.cg},${rk.cb},${(alpha*0.35).toFixed(2)})`);
-          gl.addColorStop(1, `rgba(${rk.cr},${rk.cg},${rk.cb},0)`);
-          dc.beginPath(); dc.arc(tr.x, tr.y, radius * 2.5, 0, Math.PI * 2);
+        // Glow around the trail dots nearest to rocket
+        if (frac > 0.55) {
+          const gl = dc.createRadialGradient(tr.x, tr.y, 0, tr.x, tr.y, radius * 2.8);
+          gl.addColorStop(0, `rgba(255,240,180,${(alpha*0.4).toFixed(2)})`);
+          gl.addColorStop(1, `rgba(255,140,0,0)`);
+          dc.beginPath(); dc.arc(tr.x, tr.y, radius * 2.8, 0, Math.PI * 2);
           dc.fillStyle = gl; dc.fill();
         }
       }
 
-      // Rocket body — clearly visible pixel-art style (4px wide × 12px tall)
-      // Main candy-stripe body
-      dc.fillStyle = `rgba(${rk.cr},${rk.cg},${rk.cb},1.0)`;
-      dc.fillRect(rk.x - 2, rk.y - 9, 4, 10);
-      // White stripes on body
-      dc.fillStyle = `rgba(255,255,255,0.55)`;
-      dc.fillRect(rk.x - 2, rk.y - 9, 4, 2);
-      dc.fillRect(rk.x - 2, rk.y - 4, 4, 2);
-      // Nose cone (bright white point)
-      dc.fillStyle = `rgba(255,255,255,1.0)`;
-      dc.fillRect(rk.x - 1, rk.y - 13, 2, 4);
-      dc.fillRect(rk.x,     rk.y - 15, 1, 2); // tip pixel
-      // Dark outline for visibility
-      dc.strokeStyle = `rgba(0,0,0,0.45)`;
-      dc.lineWidth = 0.8;
-      dc.strokeRect(rk.x - 2, rk.y - 9, 4, 10);
-      // Exhaust flame glow — big and bright
-      const flicker = 0.7 + Math.random() * 0.3;
-      const exR = 7 * flicker;
-      const exGrd = dc.createRadialGradient(rk.x, rk.y+3, 0, rk.x, rk.y+3, exR);
-      exGrd.addColorStop(0,   `rgba(255,255,220,1.0)`);
-      exGrd.addColorStop(0.25,`rgba(255,200,40,0.95)`);
-      exGrd.addColorStop(0.55,`rgba(255,100,0,0.7)`);
-      exGrd.addColorStop(0.85,`rgba(255,30,0,0.3)`);
-      exGrd.addColorStop(1,   `rgba(200,0,0,0)`);
-      dc.beginPath(); dc.arc(rk.x, rk.y+3, exR, 0, Math.PI * 2);
+      // Minecraft pixel-art rocket sprite (scale 1.5 = small but clear)
+      drawMcRocket(dc, rk.x, rk.y, 1.5);
+
+      // Exhaust flame glow below the fuse (at cy + ~3 units = +4.5px)
+      const flicker = 0.75 + Math.random() * 0.25;
+      const exR = 6 * flicker;
+      const fuseY = rk.y + 1.5 * 2; // fuse bottom = cy + 2 units * scale
+      const exGrd = dc.createRadialGradient(rk.x, fuseY, 0, rk.x, fuseY, exR);
+      exGrd.addColorStop(0,    `rgba(255,255,220,1.0)`);
+      exGrd.addColorStop(0.20, `rgba(255,200,40,0.95)`);
+      exGrd.addColorStop(0.55, `rgba(255,100,0,0.7)`);
+      exGrd.addColorStop(0.85, `rgba(255,30,0,0.3)`);
+      exGrd.addColorStop(1,    `rgba(200,0,0,0)`);
+      dc.beginPath(); dc.arc(rk.x, fuseY, exR, 0, Math.PI * 2);
       dc.fillStyle = exGrd; dc.fill();
     }
 
