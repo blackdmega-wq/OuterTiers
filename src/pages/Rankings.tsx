@@ -31,32 +31,60 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
   );
 }
 
-/* ── Mojang live-profile lookup (cached per session) ──────────────────────
-   Resolves the *current* username + UUID from Mojang via the Ashcon proxy.
-   Falls back silently to whatever the backend stored.
-   Results are cached module-level so each player is only fetched once.
-──────────────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   AUTO-CHECK: Live Mojang profile lookup
+   ─────────────────────────────────────────────────────────────────────────
+   Strategy:
+   1. UUID available  → playerdb.co by UUID  → Ashcon by UUID  (most accurate)
+   2. UUID empty      → playerdb.co by name  → Ashcon by name  (best-effort)
+   Cache entries expire after CACHE_TTL ms so renames are picked up on
+   the next page load without needing a full app reload.
+   ══════════════════════════════════════════════════════════════════════════ */
 interface MojangProfile { username: string; uuid: string; }
-const _mojangCache = new Map<string, MojangProfile | null>();
+interface CacheEntry { profile: MojangProfile | null; expiry: number; }
+const _mojangCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function fetchWithTimeout(url: string, ms = 7000): Promise<Response> {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id));
+}
 
 async function fetchMojangProfile(identifier: string): Promise<MojangProfile | null> {
   const key = identifier.toLowerCase();
-  if (_mojangCache.has(key)) return _mojangCache.get(key)!;
+  const cached = _mojangCache.get(key);
+  if (cached && Date.now() < cached.expiry) return cached.profile;
+
+  const set = (p: MojangProfile | null) => {
+    _mojangCache.set(key, { profile: p, expiry: Date.now() + CACHE_TTL });
+    return p;
+  };
+
+  // ── Try playerdb.co (reliable, no auth needed) ──
   try {
-    const r = await fetch(
-      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`,
-      { signal: AbortSignal.timeout(6000) }
+    const r = await fetchWithTimeout(
+      `https://playerdb.co/api/player/minecraft/${encodeURIComponent(identifier)}`
     );
-    if (!r.ok) { _mojangCache.set(key, null); return null; }
-    const d = await r.json();
-    if (d?.username) {
-      const profile: MojangProfile = { username: d.username, uuid: d.uuid ?? '' };
-      _mojangCache.set(key, profile);
-      return profile;
+    if (r.ok) {
+      const d = await r.json();
+      const p = d?.data?.player;
+      if (p?.username) return set({ username: p.username, uuid: p.id ?? '' });
     }
-  } catch { /* network / timeout */ }
-  _mojangCache.set(key, null);
-  return null;
+  } catch { /* timeout / network */ }
+
+  // ── Fallback: Ashcon proxy ──
+  try {
+    const r = await fetchWithTimeout(
+      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.username) return set({ username: d.username, uuid: d.uuid ?? '' });
+    }
+  } catch { /* timeout / network */ }
+
+  return set(null);
 }
 
 function useLiveProfile(storedUsername: string, storedUuid: string) {
@@ -66,10 +94,11 @@ function useLiveProfile(storedUsername: string, storedUuid: string) {
   });
 
   React.useEffect(() => {
-    // Use UUID when available (most accurate), else username
+    // UUID lookup is the most accurate (handles renames).
+    // Fall back to username if UUID is absent.
     const identifier = storedUuid || storedUsername;
-    // Stagger requests slightly to avoid API rate limits (0–1.5 s random offset)
-    const delay = Math.random() * 1500;
+    // Small stagger (0–300 ms) to avoid hammering APIs for 100+ players at once
+    const delay = Math.random() * 300;
     const timer = setTimeout(async () => {
       const p = await fetchMojangProfile(identifier);
       if (p) setProfile(p);
@@ -81,7 +110,7 @@ function useLiveProfile(storedUsername: string, storedUuid: string) {
 }
 
 /* ── Skin URL with daily cache-bust so browsers reload changed skins ── */
-const TODAY = new Date().toISOString().slice(0, 10); // "2025-06-17"
+const TODAY = new Date().toISOString().slice(0, 10);
 
 /* ── Custom rank icons — trophy shape ── */
 /* ── Overall rankings — full list with ring-avatar + tier badges ── */
