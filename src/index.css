@@ -1995,8 +1995,6 @@ img { display: block; }
   pointer-events: none;
   z-index: 0;
   animation: ot-aura-pulse 2.2s ease-in-out infinite;
-  will-change: opacity;
-  isolation: isolate;
 }
 .ot-rl-skin-outer--rank1 .ot-rl-aura {
   background: radial-gradient(ellipse 90% 80% at 50% 60%,
@@ -2026,8 +2024,8 @@ img { display: block; }
   box-shadow: 0 0 12px 3px rgba(220,160,70,0.11), 0 0 26px 7px rgba(180,110,30,0.05);
 }
 @keyframes ot-aura-pulse {
-  0%, 100% { opacity: 0.60; }
-  50%       { opacity: 1.00; }
+  0%, 100% { transform: scale(1); opacity: 0.65; }
+  50%       { transform: scale(1.10); opacity: 0.90; }
 }
 
 /* ── Animated outline ring around skin for top 3 (reduced glow) ── */
@@ -2216,10 +2214,12 @@ img { display: block; }
   isolation: isolate; /* own stacking context — forces Chrome to clip child z-index layers */
 }
 .lb-pod--rank2 {
-  background: linear-gradient(180deg, rgba(148,163,184,0.10)animation: lb-pod-silver-pulse 3.4s ease-in-out infinite;
-  isolation: isolate;
-  overflow: hidden;
-  will-change: box-shadow;
+  background: linear-gradient(180deg, rgba(148,163,184,0.10) 0%, rgba(148,163,184,0.03) 60%, transparent 100%);
+  border-left: 1px solid rgba(148,163,184,0.14);
+  border-right: 1px solid rgba(148,163,184,0.06);
+  border-top: 1px solid rgba(148,163,184,0.16);
+  border-radius: 18px 18px 0 0;
+  animation: lb-pod-silver-pulse 3.4s ease-in-out infinite;
 }
 @keyframes lb-pod-silver-pulse {
   0%,100% { box-shadow: 0 0 0 1px rgba(148,163,184,0.14) inset, 0 0 18px rgba(148,163,184,0.06); }
@@ -2270,9 +2270,11 @@ img { display: block; }
   100% { transform: translateY(-160px) scale(0)    rotate(260deg); opacity: 0;    }
 }
 .lb-pod--rank3 {
-  background: linear-gradient(180deg, rgba(192,120,48,0.10)border-radius: 18px 18px 0 0;
-  isolation: isolate;
-  overflow: hidden;
+  background: linear-gradient(180deg, rgba(192,120,48,0.10) 0%, rgba(192,120,48,0.03) 60%, transparent 100%);
+  border-left: 1px solid rgba(192,120,48,0.06);
+  border-right: 1px solid rgba(192,120,48,0.14);
+  border-top: 1px solid rgba(192,120,48,0.16);
+  border-radius: 18px 18px 0 0;
 }
 
 /* ── TROPHY ICON ── */
@@ -2556,7 +2558,6 @@ img { display: block; }
              lb-skin-floss-glow 0.55s ease-in-out infinite;
   transform-origin: bottom center;
   filter: drop-shadow(0 0 12px rgba(203,213,225,0.70));
-  will-change: transform;
 }
 
 /* ─────────────────────────────────────────────
@@ -2585,7 +2586,6 @@ img { display: block; }
              lb-skin-sprint-glow 0.64s ease-in-out infinite;
   transform-origin: bottom center;
   filter: drop-shadow(0 0 10px rgba(201,119,56,0.65));
-  will-change: transform;
 }
 /* Crown overlay (rank 1) */
 .lb-pod-crown {
@@ -2737,30 +2737,6 @@ img { display: block; }
   font-size: 0.48rem; font-weight: 600; color: var(--text-muted);
   display: block; text-align: right; text-transform: uppercase;
   letter-spacing: 0.08em; margin-top: 1px;
-}
-
-/* ── Mobile: kill wobble on rank 2 & 3 podium cards ── */
-@keyframes lb-skin-mobile-float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-5px); }
-}
-@media (max-width: 768px) {
-  /* Kill silver-pulse — box-shadow animation forces full repaint on mobile */
-  .lb-pod--rank2 { animation: none !important; will-change: auto !important; }
-  /* Replace 0.55s floss dance (skewY) with gentle float — no more card shake */
-  .lb-pod-skin--pose2 {
-    animation: lb-skin-mobile-float 2.8s ease-in-out infinite !important;
-    filter: drop-shadow(0 0 12px rgba(203,213,225,0.70)) !important;
-    transform-origin: bottom center !important;
-  }
-  /* Replace 0.32s sprint (rotate) with gentle float — no more card shake */
-  .lb-pod-skin--pose3 {
-    animation: lb-skin-mobile-float 3.0s ease-in-out infinite !important;
-    filter: drop-shadow(0 0 10px rgba(201,119,56,0.65)) !important;
-    transform-origin: bottom center !important;
-  }
-  /* Remove 10 animating sparkle particles — compositor churn on mobile */
-  .lb-silver-wrap { display: none !important; }
 }
 
 /* ── Mobile responsive ── */
