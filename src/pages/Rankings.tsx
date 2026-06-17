@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getCategoryTiers, getTitle } from '../data/players';
 import type { Player, PlayerTiers } from '../data/players';
 import { usePlayers } from '../hooks/usePlayers';
+import { useLiveProfile, SKIN_DATE as TODAY } from '../hooks/useMojangProfile';
 import InfoModal from '../components/InfoModal';
 import { Info } from 'lucide-react';
 
@@ -30,102 +31,6 @@ function TierArrows({ rawTier }: { rawTier?: string | null }) {
     </span>
   );
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   UUID OVERRIDES — permanent fix for players whose Mojang account was
-   renamed AND whose UUID is missing from the backend.
-   ─────────────────────────────────────────────────────────────────────────
-   HOW TO USE:
-   Add:  'old-backend-username': 'correct-mojang-uuid'
-   The UUID can be found at namemc.com, laby.net, or by asking the player.
-   Format: 32 hex chars (with or without dashes).
-   ══════════════════════════════════════════════════════════════════════════ */
-const UUID_OVERRIDES: Record<string, string> = {
-  // 'karajic': 'paste-karajic-uuid-here',   ← fill this in once you have it
-};
-
-/* ══════════════════════════════════════════════════════════════════════════
-   AUTO-CHECK: Live Mojang profile lookup
-   ─────────────────────────────────────────────────────────────────────────
-   Strategy:
-   1. UUID available  → playerdb.co by UUID  → Ashcon by UUID  (most accurate)
-   2. UUID empty      → playerdb.co by name  → Ashcon by name  (best-effort)
-   Cache entries expire after CACHE_TTL ms so renames are picked up on
-   the next page load without needing a full app reload.
-   ══════════════════════════════════════════════════════════════════════════ */
-interface MojangProfile { username: string; uuid: string; }
-interface CacheEntry { profile: MojangProfile | null; expiry: number; }
-const _mojangCache = new Map<string, CacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-function fetchWithTimeout(url: string, ms = 7000): Promise<Response> {
-  const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), ms);
-  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id));
-}
-
-async function fetchMojangProfile(identifier: string): Promise<MojangProfile | null> {
-  const key = identifier.toLowerCase();
-  const cached = _mojangCache.get(key);
-  if (cached && Date.now() < cached.expiry) return cached.profile;
-
-  const set = (p: MojangProfile | null) => {
-    _mojangCache.set(key, { profile: p, expiry: Date.now() + CACHE_TTL });
-    return p;
-  };
-
-  // ── Try playerdb.co (reliable, no auth needed) ──
-  try {
-    const r = await fetchWithTimeout(
-      `https://playerdb.co/api/player/minecraft/${encodeURIComponent(identifier)}`
-    );
-    if (r.ok) {
-      const d = await r.json();
-      const p = d?.data?.player;
-      if (p?.username) return set({ username: p.username, uuid: p.id ?? '' });
-    }
-  } catch { /* timeout / network */ }
-
-  // ── Fallback: Ashcon proxy ──
-  try {
-    const r = await fetchWithTimeout(
-      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`
-    );
-    if (r.ok) {
-      const d = await r.json();
-      if (d?.username) return set({ username: d.username, uuid: d.uuid ?? '' });
-    }
-  } catch { /* timeout / network */ }
-
-  return set(null);
-}
-
-function useLiveProfile(storedUsername: string, storedUuid: string) {
-  const [profile, setProfile] = React.useState<MojangProfile>({
-    username: storedUsername,
-    uuid: storedUuid,
-  });
-
-  React.useEffect(() => {
-    // UUID_OVERRIDES takes priority — fixes players with empty backend UUID
-    const overrideUuid = UUID_OVERRIDES[storedUsername.toLowerCase()];
-    const uuid        = overrideUuid || storedUuid;
-    // UUID lookup is most accurate (survives renames). Fallback to username.
-    const identifier  = uuid || storedUsername;
-    // Small stagger (0–300 ms) so 100+ rows don't all hit the API at once
-    const delay = Math.random() * 300;
-    const timer = setTimeout(async () => {
-      const p = await fetchMojangProfile(identifier);
-      if (p) setProfile(p);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [storedUsername, storedUuid]);
-
-  return profile;
-}
-
-/* ── Skin URL with daily cache-bust so browsers reload changed skins ── */
-const TODAY = new Date().toISOString().slice(0, 10);
 
 /* ── Custom rank icons — trophy shape ── */
 /* ── Overall rankings — full list with ring-avatar + tier badges ── */
