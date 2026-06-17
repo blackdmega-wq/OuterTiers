@@ -205,16 +205,16 @@ function startDustCanvas(
   let animId = 0;
 
   function spawnStep(fx: number, outDir: number) {
-    // 2–4 puffs per step — bigger and smoother
-    const puffCount = 2 + Math.floor(Math.random() * 3);
+    // 2–3 small puffs per step — subtle and clean
+    const puffCount = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < puffCount; i++) {
-      const ml = 0.70 + Math.random() * 0.55;
+      const ml = 0.55 + Math.random() * 0.40;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 10,
-        y:  FY + (Math.random() - 0.5) * 4,
-        vx: (Math.random() * 1.0 + 0.25) * outDir,
+        x:  fx + (Math.random() - 0.5) * 7,
+        y:  FY + (Math.random() - 0.5) * 3,
+        vx: (Math.random() * 0.8 + 0.20) * outDir,
         vy: -(Math.random() * 0.60 + 0.18),
-        r:  4 + Math.random() * 9,
+        r:  2.2 + Math.random() * 4.5,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
@@ -229,7 +229,7 @@ function startDustCanvas(
         y:  FY + (Math.random() - 0.5) * 3,
         vx: (Math.random() * 1.8 + 0.6) * outDir,
         vy: -(Math.random() * 1.3 + 0.4),
-        r:  0.5 + Math.random() * 1.5,
+        r:  0.4 + Math.random() * 1.0,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: true,
