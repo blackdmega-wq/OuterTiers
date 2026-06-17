@@ -193,34 +193,52 @@ function startDustCanvas(
   const dc: CanvasRenderingContext2D = dcRaw;
 
   const parts: DPart[] = [];
+  // Foot positions: 36% and 64% of width
   const LFX = w * 0.36;
   const RFX = w * 0.64;
-  const FY  = h - 38; // behind calves at footstep level
+  // Spawn at lower-leg / calf height (behind legs, not below feet)
+  const FY  = h - 38;
 
   let spawnClock = 0;
-  let spawnSide  = 0;
+  let spawnSide  = 0; // 0=left foot, 1=right foot
   let lastT      = performance.now();
   let animId     = 0;
 
   function spawn() {
     const isLeft = spawnSide === 0;
     const fx     = isLeft ? LFX : RFX;
-    const outDir = isLeft ? -1 : 1; // always spread outward from center
+    const outDir = isLeft ? -1 : 1; // puffs spread outward from center
     spawnSide = 1 - spawnSide;
 
-    // 1–2 tight footstep puffs — only outward + gently upward
-    const puffCount = 1 + Math.floor(Math.random() * 2);
+    // 2–3 footstep puffs per step
+    const puffCount = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < puffCount; i++) {
-      const ml = 0.38 + Math.random() * 0.28;
+      const ml = 0.55 + Math.random() * 0.45;
       parts.push({
-        x: fx + (Math.random() - 0.5) * 5,
-        y: FY + (Math.random() - 0.5) * 3,
-        vx: (Math.random() * 0.7 + 0.15) * outDir,
-        vy: -(Math.random() * 0.45 + 0.12),
-        r:  2 + Math.random() * 4,
+        x:  fx + (Math.random() - 0.5) * 8,
+        y:  FY + (Math.random() - 0.5) * 4,
+        vx: (Math.random() * 0.8 + 0.2) * outDir,
+        vy: -(Math.random() * 0.5 + 0.15),
+        r:  3 + Math.random() * 7,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
+      });
+    }
+
+    // 1–2 tiny debris specks
+    const debrisCount = 1 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < debrisCount; i++) {
+      const ml = 0.22 + Math.random() * 0.20;
+      parts.push({
+        x:  fx + (Math.random() - 0.5) * 6,
+        y:  FY + (Math.random() - 0.5) * 4,
+        vx: (Math.random() * 1.4 + 0.4) * outDir,
+        vy: -(Math.random() * 1.0 + 0.3),
+        r:  0.7 + Math.random() * 1.8,
+        life: ml, maxLife: ml,
+        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
+        isDebris: true,
       });
     }
   }
@@ -234,9 +252,9 @@ function startDustCanvas(
     const delta = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
 
-    // Spawn new particles every ~5 frames (≈6 times/sec at 30fps)
+    // Spawn every ~7 frames — matches walking footstep pace
     spawnClock += delta;
-    if (spawnClock >= 16) {
+    if (spawnClock >= 7) {
       spawnClock = 0;
       spawn();
     }
@@ -250,30 +268,29 @@ function startDustCanvas(
 
       p.x  += p.vx * delta;
       p.y  += p.vy * delta;
-      p.vy += 0.016 * delta; // soft gravity
-      p.vx *= Math.pow(0.972, delta); // air drag
+      p.vy += 0.018 * delta; // soft gravity
+      p.vx *= Math.pow(0.968, delta); // air drag
 
       const lifeRatio = p.life / p.maxLife;
-      // Fade in quickly, hold, then fade out
+      // Fade in fast, hold, fade out
       const alpha = lifeRatio > 0.75
-        ? 0.55
+        ? 0.68
         : lifeRatio > 0.2
-          ? 0.55 * ((lifeRatio - 0.2) / 0.55)
-          : (lifeRatio / 0.2) * 0.55;
+          ? 0.68 * ((lifeRatio - 0.2) / 0.55)
+          : (lifeRatio / 0.2) * 0.68;
 
       if (p.isDebris) {
         dc.beginPath();
         dc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        dc.fillStyle = `rgba(${p.color},${Math.min(0.9, alpha * 1.1)})`;
+        dc.fillStyle = `rgba(${p.color},${Math.min(0.9, alpha * 1.2)})`;
         dc.fill();
       } else {
-        // Puffs expand as they age
-        const expandR = p.r * (1 + (1 - lifeRatio) * 0.75);
+        const expandR = p.r * (1 + (1 - lifeRatio) * 0.8);
         const grad = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, expandR);
-        grad.addColorStop(0,   `rgba(${p.color},${alpha * 0.80})`);
-        grad.addColorStop(0.45,`rgba(${p.color},${alpha * 0.48})`);
-        grad.addColorStop(0.80,`rgba(${p.color},${alpha * 0.18})`);
-        grad.addColorStop(1,   `rgba(${p.color},0)`);
+        grad.addColorStop(0,    `rgba(${p.color},${alpha * 0.82})`);
+        grad.addColorStop(0.45, `rgba(${p.color},${alpha * 0.50})`);
+        grad.addColorStop(0.80, `rgba(${p.color},${alpha * 0.20})`);
+        grad.addColorStop(1,    `rgba(${p.color},0)`);
         dc.beginPath();
         dc.arc(p.x, p.y, expandR, 0, Math.PI * 2);
         dc.fillStyle = grad;
