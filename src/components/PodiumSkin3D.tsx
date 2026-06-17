@@ -193,47 +193,43 @@ function startDustCanvas(
   const dc: CanvasRenderingContext2D = dcRaw;
 
   const parts: DPart[] = [];
-  const LFX = w * 0.36;   // left foot X
-  const RFX = w * 0.64;   // right foot X
-  const FY  = h - 62;     // upper-leg / thigh height — visually behind legs
+  const LFX = w * 0.35;  // left foot X
+  const RFX = w * 0.65;  // right foot X
+  const FY  = h - 50;    // calf height — behind legs, not feet
 
-  let spawnClock = 0;
-  let spawnSide  = 0;
-  let lastT      = performance.now();
-  let animId     = 0;
+  // Sprint animation uses t = progress * 10.5, cy = sin(t)
+  // cy > 0 → right foot on ground; cy < 0 → left foot on ground
+  const START_T = performance.now();
+  let prevCy = 0;
+  let lastT  = performance.now();
+  let animId = 0;
 
-  function spawn() {
-    const isLeft = spawnSide === 0;
-    const fx     = isLeft ? LFX : RFX;
-    const outDir = isLeft ? -1 : 1;
-    spawnSide = 1 - spawnSide;
-
-    // 2–3 puffs per step, drift outward + gently upward
-    const puffCount = 2 + Math.floor(Math.random() * 2);
+  function spawnStep(fx: number, outDir: number) {
+    // 2–4 puffs per step — bigger and smoother
+    const puffCount = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < puffCount; i++) {
-      const ml = 0.60 + Math.random() * 0.50;
+      const ml = 0.70 + Math.random() * 0.55;
       parts.push({
-        x:  fx + (Math.random() - 0.5) * 9,
+        x:  fx + (Math.random() - 0.5) * 10,
         y:  FY + (Math.random() - 0.5) * 4,
-        vx: (Math.random() * 0.9 + 0.2) * outDir,
-        vy: -(Math.random() * 0.55 + 0.15), // drifts upward
-        r:  3.5 + Math.random() * 7.5,
+        vx: (Math.random() * 1.0 + 0.25) * outDir,
+        vy: -(Math.random() * 0.60 + 0.18),
+        r:  4 + Math.random() * 9,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
       });
     }
-
-    // 1–2 tiny debris specks
+    // 1–2 sharp debris specks
     const debrisCount = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < debrisCount; i++) {
-      const ml = 0.20 + Math.random() * 0.18;
+      const ml = 0.18 + Math.random() * 0.20;
       parts.push({
         x:  fx + (Math.random() - 0.5) * 7,
-        y:  FY + (Math.random() - 0.5) * 4,
-        vx: (Math.random() * 1.5 + 0.5) * outDir,
-        vy: -(Math.random() * 1.1 + 0.3),
-        r:  0.6 + Math.random() * 1.6,
+        y:  FY + (Math.random() - 0.5) * 3,
+        vx: (Math.random() * 1.8 + 0.6) * outDir,
+        vy: -(Math.random() * 1.3 + 0.4),
+        r:  0.5 + Math.random() * 1.5,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: true,
@@ -250,43 +246,51 @@ function startDustCanvas(
     const delta = Math.min((now - lastT) / 16.67, 2.5);
     lastT = now;
 
-    spawnClock += delta;
-    if (spawnClock >= 7) {
-      spawnClock = 0;
-      spawn();
+    // Sync with sprint animation: same formula as FunctionAnimation
+    const progress = (now - START_T) / 1000;
+    const t = progress * 10.5;
+    const cy = Math.sin(t);
+
+    // Detect zero-crossing → footstep impact
+    if (prevCy <= 0 && cy > 0) {
+      spawnStep(RFX,  1); // right foot hits ground → dust spreads right
+    } else if (prevCy >= 0 && cy < 0) {
+      spawnStep(LFX, -1); // left foot hits ground  → dust spreads left
     }
+    prevCy = cy;
 
     dc.clearRect(0, 0, w, h);
 
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
-      p.life -= 0.020 * delta;
+      p.life -= 0.018 * delta;
       if (p.life <= 0) { parts.splice(i, 1); continue; }
 
       p.x  += p.vx * delta;
       p.y  += p.vy * delta;
-      // Near-zero gravity for puffs so they stay high; debris falls
-      p.vy += (p.isDebris ? 0.030 : 0.004) * delta;
-      p.vx *= Math.pow(0.968, delta);
+      // Puffs nearly float (tiny gravity); debris falls normally
+      p.vy += (p.isDebris ? 0.040 : 0.005) * delta;
+      p.vx *= Math.pow(0.960, delta); // air resistance
 
       const lifeRatio = p.life / p.maxLife;
-      const alpha = lifeRatio > 0.75
-        ? 0.70
-        : lifeRatio > 0.2
-          ? 0.70 * ((lifeRatio - 0.2) / 0.55)
-          : (lifeRatio / 0.2) * 0.70;
+      // Fade: quick fade-in → hold → smooth fade-out
+      const alpha = lifeRatio > 0.80
+        ? lifeRatio * 0.75                              // fade in
+        : lifeRatio > 0.25
+          ? 0.75                                        // hold
+          : (lifeRatio / 0.25) * 0.75;                 // fade out
 
       if (p.isDebris) {
         dc.beginPath();
         dc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        dc.fillStyle = `rgba(${p.color},${Math.min(0.9, alpha * 1.2)})`;
+        dc.fillStyle = `rgba(${p.color},${Math.min(0.95, alpha * 1.3)})`;
         dc.fill();
       } else {
-        const expandR = p.r * (1 + (1 - lifeRatio) * 0.8);
+        const expandR = p.r * (1 + (1 - lifeRatio) * 0.90);
         const grad = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, expandR);
-        grad.addColorStop(0,    `rgba(${p.color},${alpha * 0.82})`);
-        grad.addColorStop(0.45, `rgba(${p.color},${alpha * 0.50})`);
-        grad.addColorStop(0.80, `rgba(${p.color},${alpha * 0.20})`);
+        grad.addColorStop(0,    `rgba(${p.color},${alpha * 0.85})`);
+        grad.addColorStop(0.40, `rgba(${p.color},${alpha * 0.55})`);
+        grad.addColorStop(0.75, `rgba(${p.color},${alpha * 0.22})`);
         grad.addColorStop(1,    `rgba(${p.color},0)`);
         dc.beginPath();
         dc.arc(p.x, p.y, expandR, 0, Math.PI * 2);
