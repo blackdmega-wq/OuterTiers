@@ -188,8 +188,9 @@ function startDustCanvas(
 ): () => void {
   cv.width = w;
   cv.height = h;
-  const dc = cv.getContext('2d');
-  if (!dc) return () => {};
+  const dcRaw = cv.getContext('2d');
+  if (!dcRaw) return () => {};
+  const dc: CanvasRenderingContext2D = dcRaw;
 
   const parts: DPart[] = [];
   const LFX = w * 0.36;
