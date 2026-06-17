@@ -2739,6 +2739,30 @@ img { display: block; }
   letter-spacing: 0.08em; margin-top: 1px;
 }
 
+/* ── Mobile: kill wobble on rank 2 & 3 podium cards ── */
+@keyframes lb-skin-mobile-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+@media (max-width: 768px) {
+  /* Kill silver-pulse — box-shadow animation forces full repaint on mobile */
+  .lb-pod--rank2 { animation: none !important; will-change: auto !important; }
+  /* Replace 0.55s floss dance (skewY) with gentle float — no more card shake */
+  .lb-pod-skin--pose2 {
+    animation: lb-skin-mobile-float 2.8s ease-in-out infinite !important;
+    filter: drop-shadow(0 0 12px rgba(203,213,225,0.70)) !important;
+    transform-origin: bottom center !important;
+  }
+  /* Replace 0.32s sprint (rotate) with gentle float — no more card shake */
+  .lb-pod-skin--pose3 {
+    animation: lb-skin-mobile-float 3.0s ease-in-out infinite !important;
+    filter: drop-shadow(0 0 10px rgba(201,119,56,0.65)) !important;
+    transform-origin: bottom center !important;
+  }
+  /* Remove 10 animating sparkle particles — compositor churn on mobile */
+  .lb-silver-wrap { display: none !important; }
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 580px) {
   .lb-podium { padding: 24px 0 0; }
