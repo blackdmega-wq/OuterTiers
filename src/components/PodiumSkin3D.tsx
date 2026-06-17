@@ -560,57 +560,50 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
-      // Compute yOff dynamically from actual wrap height so it works on all screen sizes.
-      // On mobile (max-width:580px) wrap heights shrink (rank1=100px, rank3=76px) but the
-      // 3D canvas stays at SIZES height — so yOff must go NEGATIVE to shift the canvas up.
-      // skinview3d with target=(0,0,0) renders feet at ~71% of canvas height for ranks 1 & 3.
-      // Rank 2 (zoom=0.82) has a different ratio and yOff=14 is known-good, kept hardcoded.
-      //
-      // URL overrides for live tuning — PC and mobile are separate so changing one won't affect the other.
+      // ── Skin vertical position (yOff) ─────────────────────────────────────────
       // Positive = skin moves DOWN, Negative = skin moves UP.
       //
-      // PC   (screen width ≥ 580px): ?yoff1pc=XX  and  ?yoff3pc=XX
-      // Mobile (screen width < 580px): ?yoff1m=XX  and  ?yoff3m=XX
+      // PC defaults confirmed by visual testing:
+      //   rank1 = -20,  rank2 = 14,  rank3 = 15
       //
-      // Examples:
-      //   https://yoursite.com?yoff1pc=-5&yoff3pc=10     ← tune PC only
-      //   https://yoursite.com?yoff1m=-20&yoff3m=-8      ← tune mobile only
-      //   https://yoursite.com?yoff1pc=5&yoff1m=-15      ← tune rank1 on both separately
-      let yOff: number;
-      // ── URL tuning parameters ──────────────────────────────────────────────────
-      // PC   position:  ?yoff1pc=  ?yoff2pc=  ?yoff3pc=
-      // Mobile position:?yoff1m=   ?yoff2m=   ?yoff3m=
-      // Mobile scale:   ?scale1m=  ?scale2m=  ?scale3m=   (default ~0.68–0.82; bigger = larger skin)
+      // Mobile defaults are derived automatically:
+      //   yOff_mobile = yOff_pc + (mobileWrapH - pcWrapH)
+      //   This keeps the same visual gap above the gold line on all screen sizes.
       //
-      // Positive yoff = skin moves DOWN, Negative = UP.
-      // Scale 1.0 = normal, 0.5 = half size, 1.5 = 50% bigger.
+      // URL overrides (PC and mobile are INDEPENDENT — changing one won't affect the other):
+      //   PC   position:  ?yoff1pc=  ?yoff2pc=  ?yoff3pc=
+      //   Mobile position:?yoff1m=   ?yoff2m=   ?yoff3m=
+      //   Mobile scale:   ?scale1m=  ?scale2m=  ?scale3m=  (0.5=small  1.0=normal  1.5=big)
       //
-      // Example (all mobile):
-      //   ?yoff1m=-25&scale1m=0.9&yoff2m=10&scale2m=1.1&yoff3m=-10&scale3m=0.85
+      // Full mobile example:
+      //   ?yoff1m=-72&scale1m=0.9&yoff2m=-30&scale2m=1.0&yoff3m=-27&scale3m=0.85
       const urlParams = new URLSearchParams(window.location.search);
       const onMobile  = window.innerWidth < 580;
 
-      const yoffPcKey    = `yoff${rank}pc`;
-      const yoffMobKey   = `yoff${rank}m`;
-      const scaleMobKey  = `scale${rank}m`;
+      const yoffPcKey   = `yoff${rank}pc`;
+      const yoffMobKey  = `yoff${rank}m`;
+      const scaleMobKey = `scale${rank}m`;
 
-      const yoffOverrideRaw = onMobile
-        ? urlParams.get(yoffMobKey)
-        : urlParams.get(yoffPcKey);
+      const yoffOverrideRaw  = onMobile ? urlParams.get(yoffMobKey)  : urlParams.get(yoffPcKey);
       const scaleOverrideRaw = onMobile ? urlParams.get(scaleMobKey) : null;
 
-      // Confirmed PC defaults (tuned visually): rank1=-20, rank2=14, rank3=15
-      // Mobile uses dynamic formula until tuned via URL params
-      const PC_DEFAULT: Record<number, number> = { 1: -20, 2: 14, 3: 15 };
-      const mobileFallback = () => {
-        const wrapH = wrap.offsetHeight || (rank === 1 ? 100 : rank === 2 ? 84 : 76);
-        return Math.round(wrapH - 0.71 * height);
-      };
+      // Confirmed PC defaults
+      const PC_DEFAULT:  Record<number, number> = { 1: -20, 2:  14, 3:  15 };
+      // Desktop wrap heights (from CSS)
+      const PC_WRAP_H:   Record<number, number> = { 1: 152, 2: 128, 3: 118 };
+      // Mobile wrap heights (from CSS @media max-width:580px)
+      const MOB_WRAP_H:  Record<number, number> = { 1: 100, 2:  84, 3:  76 };
 
+      let yOff: number;
       if (yoffOverrideRaw !== null && !isNaN(Number(yoffOverrideRaw))) {
+        // URL param takes priority
         yOff = Number(yoffOverrideRaw);
       } else if (onMobile) {
-        yOff = mobileFallback();
+        // Scale PC yOff to mobile by adjusting for the smaller wrap height
+        const pcYoff  = PC_DEFAULT[rank]  ?? 14;
+        const pcWrapH = PC_WRAP_H[rank]   ?? 128;
+        const mobWrapH = MOB_WRAP_H[rank] ?? 84;
+        yOff = pcYoff + (mobWrapH - pcWrapH);
       } else {
         yOff = PC_DEFAULT[rank] ?? 14;
       }
