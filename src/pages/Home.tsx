@@ -19,7 +19,10 @@ function useCountUp(target: number, duration = 900) {
     if (diff === 0) return;
     const startTime = performance.now();
     let raf: number;
+    let lastTick = 0;
     const tick = (now: number) => {
+      if (now - lastTick < 33.34) { raf = requestAnimationFrame(tick); return; }
+      lastTick = now;
       const t = Math.min(1, (now - startTime) / duration);
       const ease = 1 - Math.pow(1 - t, 3);
       setDisplay(Math.round(start + diff * ease));
