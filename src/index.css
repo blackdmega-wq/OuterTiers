@@ -1995,6 +1995,8 @@ img { display: block; }
   pointer-events: none;
   z-index: 0;
   animation: ot-aura-pulse 2.2s ease-in-out infinite;
+  will-change: opacity;
+  isolation: isolate;
 }
 .ot-rl-skin-outer--rank1 .ot-rl-aura {
   background: radial-gradient(ellipse 90% 80% at 50% 60%,
@@ -2024,8 +2026,8 @@ img { display: block; }
   box-shadow: 0 0 12px 3px rgba(220,160,70,0.11), 0 0 26px 7px rgba(180,110,30,0.05);
 }
 @keyframes ot-aura-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.65; }
-  50%       { transform: scale(1.10); opacity: 0.90; }
+  0%, 100% { opacity: 0.60; }
+  50%       { opacity: 1.00; }
 }
 
 /* ── Animated outline ring around skin for top 3 (reduced glow) ── */
