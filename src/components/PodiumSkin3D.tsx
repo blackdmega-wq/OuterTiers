@@ -55,29 +55,36 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  FLOSS DANCE  — v16
+         #2  FLOSS DANCE  — v18  (WikiHow 1:1)
 
-         ACHSEN-WAHRHEIT (aus Victory-Pose Rank 1 verifiziert):
-           leftArm.z  NEGATIV = Arm geht nach LINKS  (outward links)
-           leftArm.z  POSITIV = Arm kreuzt nach RECHTS
-           rightArm.z POSITIV = Arm geht nach RECHTS (outward rechts)
-           rightArm.z NEGATIV = Arm kreuzt nach LINKS
-           arm.x      POSITIV = Arm geht nach VORNE  (Kamera)
-           arm.x      NEGATIV = Arm geht nach HINTEN (Rücken)
+         ACHSEN (verifiziert aus Victory-Pose Rank 1):
+           arm.z NEGATIV  = Arm geht nach LINKS
+           arm.z POSITIV  = Arm geht nach RECHTS
+           arm.x POSITIV  = Arm geht nach VORNE (Kamera)
+           arm.x NEGATIV  = Arm geht nach HINTEN (Rücken)
 
-         FLOSS: beide Arme zur gleichen Seite, Hüfte entgegengesetzt.
-           KREUZUNGS-Arm braucht großen z (kommt von der Gegenseite).
-           AUSSEN-Arm braucht kleinen z (geht nur zur eigenen Seite).
-           KREUZUNGS-Arm → VORNE (x positiv) sichtbar vor Brust.
-           AUSSEN-Arm    → HINTEN (x negativ) hinter dem Rücken.
+         SCHLÜSSEL-ERKENNTNISSE aus WikiHow:
+           1. Beide Arme schwingen zur GLEICHEN Seite (swing-Wert bestimmt Richtung)
+           2. Arme hängen in der MITTE nach UNTEN (z≈0) und "flossen" durch die Hüfte
+              → z skaliert mit Math.abs(swing): 0 in der Mitte, max an den Extremen
+           3. Links-Schwung:  LINKER Arm vorne, rechter Arm hinten
+              Rechts-Schwung: RECHTER Arm vorne, linker Arm hinten
+              → x skaliert mit swing: links-x = -swing, rechts-x = +swing
+           4. Kreuzungs-Arm (von gegenüber) braucht größeres z als Außen-Arm
 
-         ph=0 → Arme zu Char-LINKS (swing=−1):
-           rightArm = KREUZUNGS-Arm: z=−1.10 (kreuzt links, groß), x=+0.50 (vorne)
-           leftArm  = AUSSEN-Arm:   z=−0.65 (außen links, klein), x=−0.50 (hinten)
+         swing=−1 (LINKS):
+           rightArm = Kreuzungs-Arm: z=−1.10, x=−0.55 (HINTEN)
+           leftArm  = Außen-Arm:    z=−0.90, x=+0.55 (VORNE)
+           Hüfte → RECHTS (+x)
 
-         ph=1 → Arme zu Char-RECHTS (swing=+1):
-           rightArm = AUSSEN-Arm:   z=+0.65 (außen rechts, klein), x=−0.50 (hinten)
-           leftArm  = KREUZUNGS-Arm: z=+1.10 (kreuzt rechts, groß), x=+0.50 (vorne)
+         swing=0 (MITTE, Übergang):
+           Beide Arme: z=0 (hängen runter, bürsten die Hüfte)
+           Beide Arme: x=0 (neutral)
+
+         swing=+1 (RECHTS):
+           rightArm = Außen-Arm:    z=+0.90, x=+0.55 (VORNE)
+           leftArm  = Kreuzungs-Arm: z=+1.10, x=−0.55 (HINTEN)
+           Hüfte → LINKS (−x)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -85,54 +92,51 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
+            /* ~0.9 Hz — Floss-Tempo */
+            const t   = progress * 5.7;
+            const raw = Math.sin(t);
 
-            /* ~0.9 Hz — authentisches Floss-Tempo */
-            const t     = progress * 5.7;
-            const raw   = Math.sin(t);
-
-            /* Power-Easing: Posen halten, Übergänge schnell */
-            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.40);
-            const ph    = (swing + 1) * 0.5;
+            /* Power-Easing: Posen halten, Übergänge flüssig durch Mitte */
+            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.42);
+            /* swing: −1=voll links, 0=Mitte (Arme unten), +1=voll rechts */
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
-               WikiHow Step 2: arms LEFT → LEFT arm in FRONT, right BEHIND
-               WikiHow Step 6: arms RIGHT → RIGHT arm in FRONT, left BEHIND
-               ph=0 (swing=−1, arms LEFT): rightArm = HINTER-Arm → x NEGATIV
-               ph=1 (swing=+1, arms RIGHT): rightArm = VORDER-Arm → x POSITIV */
-            s.rightArm.rotation.x = lerp(-0.55, +0.55, ph);
-            s.rightArm.rotation.z = lerp(-1.10, +0.90, ph);
+               Kreuzungs-Arm wenn LINKS (swing<0, z groß negativ, x hinten)
+               Außen-Arm wenn RECHTS    (swing>0, z klein positiv, x vorne) */
+            s.rightArm.rotation.z = swing * (swing < 0 ? 1.10 : 0.90);
+            s.rightArm.rotation.x = swing * 0.55;
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               ph=0 (arms LEFT): leftArm = VORDER-Arm → x POSITIV
-               ph=1 (arms RIGHT): leftArm = HINTER-Arm → x NEGATIV */
-            s.leftArm.rotation.x = lerp(+0.55, -0.55, ph);
-            s.leftArm.rotation.z = lerp(-0.90, +1.10, ph);
+               Außen-Arm wenn LINKS    (swing<0, z klein negativ, x vorne)
+               Kreuzungs-Arm wenn RECHTS (swing>0, z groß positiv, x hinten) */
+            s.leftArm.rotation.z = swing * (swing < 0 ? 0.90 : 1.10);
+            s.leftArm.rotation.x = -swing * 0.55;
             s.leftArm.rotation.y = 0;
 
-            /* ── KÖRPER — leichte Gegendrehung ───────────────────────────  */
-            s.body.rotation.y =  swing * 0.14;
-            s.body.rotation.x =  0;
-            s.body.rotation.z = -swing * 0.05;
+            /* ── KÖRPER — bleibt gerade, leichter z-Tilt (Gewichtsverlagerung) */
+            s.body.rotation.y = 0;
+            s.body.rotation.x = 0;
+            s.body.rotation.z = -swing * 0.04;
 
-            /* ── HÜFTE gegenläufig zu den Armen ──────────────────────────  */
+            /* ── HÜFTE — gegenläufig zu den Armen (WikiHow Step 3) ─────────
+               Arme LINKS (swing<0) → Hüfte RECHTS (+x) ✓                   */
             player.position.x = -swing * 0.55;
-            player.position.y = (1 - Math.abs(swing)) * 0.25 - 0.12;
+            player.position.y = 0;
             player.rotation.y = 0;
 
-            /* ── KOPF ─────────────────────────────────────────────────────  */
+            /* ── KOPF — schaut geradeaus ─────────────────────────────────── */
             if (s.head) {
-              s.head.rotation.y = -swing * 0.10;
-              s.head.rotation.x =  0;
-              s.head.rotation.z =  0;
+              s.head.rotation.y = 0;
+              s.head.rotation.x = 0;
+              s.head.rotation.z = 0;
             }
 
-            /* ── BEINE — leichter Weight-Shift ───────────────────────────  */
-            s.leftLeg.rotation.z  =  swing * 0.10;
+            /* ── BEINE — leichter Gewichts-Shift ────────────────────────── */
+            s.leftLeg.rotation.z  =  swing * 0.08;
             s.leftLeg.rotation.x  =  0;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z = -swing * 0.10;
+            s.rightLeg.rotation.z = -swing * 0.08;
             s.rightLeg.rotation.x =  0;
             s.rightLeg.rotation.y =  0;
 
