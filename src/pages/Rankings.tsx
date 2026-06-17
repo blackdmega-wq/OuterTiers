@@ -86,7 +86,10 @@ function PlayerBustImg({ username }: { username: string }) {
       viewer.zoom = 1.15;       // tighter crop = bust view
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch (_) {}
-      viewer.animation = null;  // static pose
+      // FunctionAnimation forces yaw=-25deg same way sprint anim forces yaw=0
+      viewer.animation = new sv3d.FunctionAnimation((player: any) => {
+        try { player.rotation.y = -0.44; } catch (_) {}
+      });
     });
 
     return () => {
