@@ -55,36 +55,28 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  FLOSS DANCE  — v18  (WikiHow 1:1)
+         #2  FLOSS DANCE  — v19  (WikiHow 1:1)
 
-         ACHSEN (verifiziert aus Victory-Pose Rank 1):
-           arm.z NEGATIV  = Arm geht nach LINKS
-           arm.z POSITIV  = Arm geht nach RECHTS
-           arm.x POSITIV  = Arm geht nach VORNE (Kamera)
-           arm.x NEGATIV  = Arm geht nach HINTEN (Rücken)
+         ACHSEN:
+           arm.z NEGATIV  = Arm geht nach LINKS  (arm.z POSITIV = RECHTS)
+           arm.x POSITIV  = Arm geht nach VORNE  (arm.x NEGATIV = HINTEN)
 
-         SCHLÜSSEL-ERKENNTNISSE aus WikiHow:
-           1. Beide Arme schwingen zur GLEICHEN Seite (swing-Wert bestimmt Richtung)
-           2. Arme hängen in der MITTE nach UNTEN (z≈0) und "flossen" durch die Hüfte
-              → z skaliert mit Math.abs(swing): 0 in der Mitte, max an den Extremen
-           3. Links-Schwung:  LINKER Arm vorne, rechter Arm hinten
-              Rechts-Schwung: RECHTER Arm vorne, linker Arm hinten
-              → x skaliert mit swing: links-x = -swing, rechts-x = +swing
-           4. Kreuzungs-Arm (von gegenüber) braucht größeres z als Außen-Arm
+         WIKIHOW-ZYKLUS (swing −1 → 0 → +1 → 0 → −1):
+           swing=−1 (voll LINKS, Step 2):
+             Arme beide LINKS. LINKER Arm VORNE (Außen), RECHTER Arm HINTEN (Kreuzung).
+             Hüfte → RECHTS (gegenläufig).
+             rightArm: z=−1.40 (weit links, kreuzt über Körper), x=−0.30 (HINTEN)
+             leftArm:  z=−1.00 (links, Außenseite),              x=+0.30 (VORNE)
 
-         swing=−1 (LINKS):
-           rightArm = Kreuzungs-Arm: z=−1.10, x=−0.55 (HINTEN)
-           leftArm  = Außen-Arm:    z=−0.90, x=+0.55 (VORNE)
-           Hüfte → RECHTS (+x)
+           swing=0 (MITTE, Steps 3+4 — "brushing hips"):
+             Beide Arme hängen UNTEN VOR DEM KÖRPER (z=0, x=+0.30).
+             Das ist der "Floss"-Moment: beide Arme streifen die Hüfte von vorne.
 
-         swing=0 (MITTE, Übergang):
-           Beide Arme: z=0 (hängen runter, bürsten die Hüfte)
-           Beide Arme: x=0 (neutral)
-
-         swing=+1 (RECHTS):
-           rightArm = Außen-Arm:    z=+0.90, x=+0.55 (VORNE)
-           leftArm  = Kreuzungs-Arm: z=+1.10, x=−0.55 (HINTEN)
-           Hüfte → LINKS (−x)
+           swing=+1 (voll RECHTS, Step 5):
+             Arme beide RECHTS. RECHTER Arm VORNE (Außen), LINKER Arm HINTEN (Kreuzung).
+             Hüfte → LINKS (gegenläufig).
+             rightArm: z=+1.00 (rechts, Außenseite),              x=+0.30 (VORNE)
+             leftArm:  z=+1.40 (weit rechts, kreuzt über Körper), x=−0.30 (HINTEN)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -92,46 +84,43 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin;
             if (!s?.leftArm) return;
 
-            /* ~0.9 Hz — Floss-Tempo */
-            const t   = progress * 5.7;
+            /* ~1.0 Hz — Floss-Tempo */
+            const t   = progress * 6.3;
             const raw = Math.sin(t);
 
-            /* Power-Easing: Posen halten, Übergänge flüssig durch Mitte */
-            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.42);
-            /* swing: −1=voll links, 0=Mitte (Arme unten), +1=voll rechts */
+            /* Moderate easing (0.55): Posen halten, Übergang durch Mitte sichtbar genug */
+            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.55);
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
-               swing=-1 (voll LINKS): z=-1.15 (links), x=-0.55 (HINTEN)
-               swing= 0 (MITTE):      z= 0   (unten),  x=+0.55 (VORNE) ← beide vorne!
-               swing=+1 (voll RECHTS): z=+0.95 (rechts), x=+0.55 (VORNE)
-               Formel x: 0.55*(1 + 2*min(0,swing)) → -0.55 nur bei voll links */
-            s.rightArm.rotation.z = swing * (swing < 0 ? 1.15 : 0.95);
-            s.rightArm.rotation.x = 0.55 * (1 + 2 * Math.min(0, swing));
+               Kreuzungs-Arm (voll links): z=−1.40, x=−0.30
+               Außen-Arm    (voll rechts): z=+1.00, x=+0.30
+               Mitte (swing=0):            z=0,     x=+0.30 (vorne beim "brushing") */
+            s.rightArm.rotation.z = swing * (swing < 0 ? 1.40 : 1.00);
+            s.rightArm.rotation.x = 0.30 * (1 + 2 * Math.min(0, swing));
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               swing=-1 (voll LINKS):  z=-0.95 (links),  x=+0.55 (VORNE)
-               swing= 0 (MITTE):       z= 0   (unten),   x=+0.55 (VORNE) ← beide vorne!
-               swing=+1 (voll RECHTS): z=+1.15 (rechts), x=-0.55 (HINTEN)
-               Formel x: 0.55*(1 - 2*max(0,swing)) → -0.55 nur bei voll rechts */
-            s.leftArm.rotation.z = swing * (swing < 0 ? 0.95 : 1.15);
-            s.leftArm.rotation.x = 0.55 * (1 - 2 * Math.max(0, swing));
+               Außen-Arm    (voll links):  z=−1.00, x=+0.30
+               Kreuzungs-Arm (voll rechts): z=+1.40, x=−0.30
+               Mitte (swing=0):             z=0,     x=+0.30 */
+            s.leftArm.rotation.z = swing * (swing < 0 ? 1.00 : 1.40);
+            s.leftArm.rotation.x = 0.30 * (1 - 2 * Math.max(0, swing));
             s.leftArm.rotation.y = 0;
 
-            /* ── KÖRPER — bleibt gerade, leichter z-Tilt (Gewichtsverlagerung) */
+            /* ── KÖRPER — leichter Tilt in Arm-Richtung (sichtbare Körperbewegung) */
             s.body.rotation.y = 0;
             s.body.rotation.x = 0;
-            s.body.rotation.z = -swing * 0.04;
+            s.body.rotation.z = swing * 0.12;
 
-            /* ── HÜFTE — gegenläufig zu den Armen (WikiHow Step 3) ─────────
-               Arme LINKS (swing<0) → Hüfte RECHTS (+x) ✓                   */
-            player.position.x = -swing * 0.55;
+            /* ── HÜFTE — gegenläufig zu den Armen ────────────────────────
+               Arme LINKS (swing<0) → Hüfte RECHTS → player.x positiv       */
+            player.position.x = -swing * 0.65;
             player.position.y = 0;
             player.rotation.y = 0;
 
-            /* ── KOPF — schaut geradeaus ─────────────────────────────────── */
+            /* ── KOPF — folgt Armen leicht ───────────────────────────────── */
             if (s.head) {
-              s.head.rotation.y = 0;
+              s.head.rotation.y = swing * 0.10;
               s.head.rotation.x = 0;
               s.head.rotation.z = 0;
             }
