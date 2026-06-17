@@ -61,7 +61,7 @@ export default function ParticleBackground() {
 
     // ── Mobile: 20 fps is smooth-enough for ambient background particles and
     //    burns ≈30% less GPU time than 28 fps.
-    const TARGET_FPS = reducedMotion ? 15 : compact ? 20 : 38;
+    const TARGET_FPS = reducedMotion ? 15 : compact ? 20 : 28;
     const FRAME_MS   = 1000 / TARGET_FPS;
 
     // ── Particle counts: mobile gets fewer of everything.
