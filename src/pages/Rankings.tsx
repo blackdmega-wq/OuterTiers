@@ -89,7 +89,7 @@ function PlayerBustImg({ username }: { username: string }) {
       // FunctionAnimation: hold yaw=-30deg (diagonal right) every frame
       // Same mechanism as sprint anim which locks player.rotation.y = 0
       viewer.animation = new sv3d.FunctionAnimation((player: any) => {
-        try { player.rotation.y = -0.55; } catch (_) {}
+        try { player.rotation.y = 0.55; } catch (_) {}
       });
     });
 
