@@ -55,27 +55,29 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         viewer.animation = anim;
 
       /* ═══════════════════════════════════════════════════════════════
-         #2  FLOSS DANCE  — v15
+         #2  FLOSS DANCE  — v16
 
-         CANVAS: 82×128px, zoom=0.68. Arme müssen sichtbar bleiben.
+         ACHSEN-WAHRHEIT (aus Victory-Pose Rank 1 verifiziert):
+           leftArm.z  NEGATIV = Arm geht nach LINKS  (outward links)
+           leftArm.z  POSITIV = Arm kreuzt nach RECHTS
+           rightArm.z POSITIV = Arm geht nach RECHTS (outward rechts)
+           rightArm.z NEGATIV = Arm kreuzt nach LINKS
+           arm.x      POSITIV = Arm geht nach VORNE  (Kamera)
+           arm.x      NEGATIV = Arm geht nach HINTEN (Rücken)
 
-         ECHTE FLOSS-LOGIK (von vorne gesehen):
-           Beide Arme schwingen zur GLEICHEN Seite → dominante z-Rotation.
-           KREUZUNGS-Arm kommt von gegenüber, liegt VOR dem Körper.
-           AUSSEN-Arm geht zur natürlichen Seite, liegt HINTER dem Körper.
+         FLOSS: beide Arme zur gleichen Seite, Hüfte entgegengesetzt.
+           KREUZUNGS-Arm braucht großen z (kommt von der Gegenseite).
+           AUSSEN-Arm braucht kleinen z (geht nur zur eigenen Seite).
+           KREUZUNGS-Arm → VORNE (x positiv) sichtbar vor Brust.
+           AUSSEN-Arm    → HINTEN (x negativ) hinter dem Rücken.
 
-         x-Achse (aus Victory-Pose + RunningAnimation abgeleitet):
-           Negativ → Arm lehnt leicht NACH HINTEN (sichtbar bleibt, geht "hinter")
-           Positiv → Arm lehnt leicht NACH VORNE  (kommt vor die Brust)
-           WICHTIG: bei ±1.30 verschwindet der Arm aus dem Canvas → ±0.45 nutzen!
+         ph=0 → Arme zu Char-LINKS (swing=−1):
+           rightArm = KREUZUNGS-Arm: z=−1.10 (kreuzt links, groß), x=+0.50 (vorne)
+           leftArm  = AUSSEN-Arm:   z=−0.65 (außen links, klein), x=−0.50 (hinten)
 
-         ph=1 → Arme zu Char-LINKS:
-           rightArm KREUZUNGS-Arm:  x=+0.45 (leicht vorne),  z=+1.10 (kreuzt links)
-           leftArm  AUSSEN-Arm:     x=−0.45 (leicht hinten), z=+0.82 (außen links)
-
-         ph=0 → Arme zu Char-RECHTS:
-           leftArm  KREUZUNGS-Arm:  x=+0.45 (leicht vorne),  z=−1.10 (kreuzt rechts)
-           rightArm AUSSEN-Arm:     x=−0.45 (leicht hinten), z=−0.82 (außen rechts)
+         ph=1 → Arme zu Char-RECHTS (swing=+1):
+           rightArm = AUSSEN-Arm:   z=+0.65 (außen rechts, klein), x=−0.50 (hinten)
+           leftArm  = KREUZUNGS-Arm: z=+1.10 (kreuzt rechts, groß), x=+0.50 (vorne)
          ═══════════════════════════════════════════════════════════════ */
       } else if (rank === 2) {
         viewer.animation = new sv3d.FunctionAnimation((player: any, progress: number) => {
@@ -85,25 +87,26 @@ export default function PodiumSkin3D({ username, rank }: Props) {
 
             const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 
-            /* ~0.85 Hz — Floss-Tempo wie im Fortnite-Emote */
-            const t     = progress * 5.4;
+            /* ~0.9 Hz — authentisches Floss-Tempo */
+            const t     = progress * 5.7;
             const raw   = Math.sin(t);
 
-            /* Power-Easing: hält die Posen, schnelle Übergänge */
-            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.42);
+            /* Power-Easing: Posen halten, Übergänge schnell */
+            const swing = Math.sign(raw) * Math.pow(Math.abs(raw), 0.40);
             const ph    = (swing + 1) * 0.5;
-            /* ph=0 → Arme zu Char-RECHTS  |  ph=1 → Arme zu Char-LINKS */
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
-               ph=0: AUSSEN-rechts (hinten), ph=1: KREUZUNGS-links (vorne) */
-            s.rightArm.rotation.x = lerp(-0.45, +0.45, ph);
-            s.rightArm.rotation.z = lerp(-0.82, +1.10, ph);
+               ph=0: KREUZUNGS-Arm nach LINKS  → z negativ groß, x vorne
+               ph=1: AUSSEN-Arm nach RECHTS    → z positiv klein, x hinten */
+            s.rightArm.rotation.x = lerp(+0.50, -0.50, ph);
+            s.rightArm.rotation.z = lerp(-1.10, +0.65, ph);
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               ph=0: KREUZUNGS-rechts (vorne), ph=1: AUSSEN-links (hinten) */
-            s.leftArm.rotation.x = lerp(+0.45, -0.45, ph);
-            s.leftArm.rotation.z = lerp(-1.10, +0.82, ph);
+               ph=0: AUSSEN-Arm nach LINKS     → z negativ klein, x hinten
+               ph=1: KREUZUNGS-Arm nach RECHTS → z positiv groß, x vorne */
+            s.leftArm.rotation.x = lerp(-0.50, +0.50, ph);
+            s.leftArm.rotation.z = lerp(-0.65, +1.10, ph);
             s.leftArm.rotation.y = 0;
 
             /* ── KÖRPER — leichte Gegendrehung ───────────────────────────  */
@@ -111,9 +114,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             s.body.rotation.x =  0;
             s.body.rotation.z = -swing * 0.05;
 
-            /* ── GANZKÖRPER — Hüfte gegenläufig zu Armen ─────────────────  */
+            /* ── HÜFTE gegenläufig zu den Armen ──────────────────────────  */
             player.position.x = -swing * 0.55;
             player.position.y = (1 - Math.abs(swing)) * 0.25 - 0.12;
+            player.rotation.y = 0;
 
             /* ── KOPF ─────────────────────────────────────────────────────  */
             if (s.head) {
