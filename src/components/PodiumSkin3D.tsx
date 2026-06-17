@@ -175,6 +175,16 @@ const CREEPER_PX: [number,number][] = [
 const FW_W = 220;
 const FW_H = 340;
 
+// Preloaded rocket image (shared across all canvas instances)
+let _rocketImg: HTMLImageElement | null = null;
+let _rocketReady = false;
+function ensureRocketImage() {
+  if (_rocketImg) return;
+  _rocketImg = new Image();
+  _rocketImg.onload = () => { _rocketReady = true; };
+  _rocketImg.src = '/firework-rocket.webp';
+}
+
 function explode(particles: FWParticle[], x: number, y: number, def: FWDef) {
   const pc = (arr: [number,number,number][]) => arr[Math.floor(Math.random() * arr.length)];
   const fc = (): [number,number,number] => def.fadeColors ? pc(def.fadeColors) : [0,0,0];
@@ -316,11 +326,13 @@ function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: n
   bl(-0.5, -18, 1, 2, 255,255,255);
 }
 
-function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
+function startFireworksCanvas(cv: HTMLCanvasElement, isMobile: boolean): () => void {
   cv.width  = FW_W;
   cv.height = FW_H;
   const dc = cv.getContext('2d')!;
   if (!dc) return () => {};
+
+  ensureRocketImage();
 
   const rockets: FWRocket[] = [];
   const particles: FWParticle[] = [];
@@ -337,8 +349,12 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
     // X: keep 60px away from each edge so explosion particles stay on-screen
     const startX = FW_W * 0.28 + Math.random() * FW_W * 0.44; // 61..158 px
 
-    // Y explosion target: 65..185 px from canvas top (always above skin, always on canvas)
-    const targetExpY = 65 + Math.random() * 120;
+    // Y explosion target — adjusted per device:
+    // Mobile (portrait): explosions closer to the skin so they stay visible on small screens
+    // PC: wider vertical range for a more dramatic effect
+    const targetExpY = isMobile
+      ? 130 + Math.random() * 80   // 130-210 px from top (closer to skin)
+      : 55 + Math.random() * 130;  // 55-185 px from top (full range on PC)
     const startY    = FW_H - 12; // 328
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
@@ -405,8 +421,20 @@ function startFireworksCanvas(cv: HTMLCanvasElement): () => void {
         }
       }
 
-      // Minecraft pixel-art rocket sprite (scale 1.5 = small but clear)
-      drawMcRocket(dc, rk.x, rk.y, 1.5);
+      // Draw rocket sprite — use the loaded image if available, else fall back to canvas drawing
+      if (_rocketReady && _rocketImg) {
+        // The firework-rocket.webp image shows the rocket pointing upward.
+        // Draw it centered horizontally, with the bottom of the rocket at rk.y.
+        const RW = 18, RH = 44; // display size on canvas (proportional to original)
+        dc.save();
+        dc.translate(rk.x, rk.y);
+        // Rotate slightly so the rocket leans in its flight direction (natural look)
+        dc.rotate(-0.10);
+        dc.drawImage(_rocketImg, -RW / 2, -RH, RW, RH);
+        dc.restore();
+      } else {
+        drawMcRocket(dc, rk.x, rk.y, 1.5);
+      }
 
       // Exhaust flame glow below the fuse (at cy + ~3 units = +4.5px)
       const flicker = 0.75 + Math.random() * 0.25;
@@ -530,7 +558,8 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
     if (rank === 1 && fireworkCanvasRef.current) {
-      stopFW = startFireworksCanvas(fireworkCanvasRef.current);
+      const isMobile = window.innerWidth < 768;
+      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
     }
 
     const isMobile = window.innerWidth < 768;
