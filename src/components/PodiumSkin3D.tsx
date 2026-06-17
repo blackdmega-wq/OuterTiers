@@ -449,8 +449,8 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
         }
       }
 
-      // Draw the Minecraft-style pixel rocket — scale 3 = each MC pixel is 3×3 screen pixels
-      drawMcRocket(dc, rk.x, rk.y, 3.0);
+      // Draw the Minecraft-style pixel rocket — scale 2 = each MC pixel is 2×2 screen pixels
+      drawMcRocket(dc, rk.x, rk.y, 2.0);
 
       // Exhaust flame glow below the fuse
       const flicker = 0.75 + Math.random() * 0.25;
@@ -666,7 +666,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             if (s.head) { s.head.rotation.y = 0; s.head.rotation.x = 0; s.head.rotation.z = 0; }
             s.rightLeg.rotation.z = -0.10; s.leftLeg.rotation.z = 0.10;
             s.rightLeg.rotation.x = 0.0;   s.leftLeg.rotation.x = 0.0;
-            player.position.y = Math.sin(t * 2) * -0.12;
+            player.position.y = 0;
             player.position.x = 0;
           } catch(_){}
         });
@@ -681,7 +681,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const rD=Math.sin(t/2),depth=Math.sign(rD)*Math.pow(Math.abs(rD),.50);
             s.rightArm.rotation.z=swing*1.35;s.rightArm.rotation.x=depth*.62;s.rightArm.rotation.y=0;
             s.leftArm.rotation.z=swing*1.35;s.leftArm.rotation.x=-depth*.62;s.leftArm.rotation.y=0;
-            player.position.x=-swing*.70;player.position.y=0;player.rotation.y=0;
+            player.position.x=0;player.position.y=0;player.rotation.y=0;
             s.body.rotation.z=swing*.10;s.body.rotation.x=0;s.body.rotation.y=0;
             if(s.head){s.head.rotation.y=swing*.12;s.head.rotation.x=0;s.head.rotation.z=0;}
             s.leftLeg.rotation.z=.18;s.leftLeg.rotation.x=.05;s.leftLeg.rotation.y=0;
