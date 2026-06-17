@@ -101,17 +101,21 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             /* swing: −1=voll links, 0=Mitte (Arme unten), +1=voll rechts */
 
             /* ── RECHTER ARM ──────────────────────────────────────────────
-               Kreuzungs-Arm wenn LINKS (swing<0, z groß negativ, x hinten)
-               Außen-Arm wenn RECHTS    (swing>0, z klein positiv, x vorne) */
-            s.rightArm.rotation.z = swing * (swing < 0 ? 1.10 : 0.90);
-            s.rightArm.rotation.x = swing * 0.55;
+               swing=-1 (voll LINKS): z=-1.15 (links), x=-0.55 (HINTEN)
+               swing= 0 (MITTE):      z= 0   (unten),  x=+0.55 (VORNE) ← beide vorne!
+               swing=+1 (voll RECHTS): z=+0.95 (rechts), x=+0.55 (VORNE)
+               Formel x: 0.55*(1 + 2*min(0,swing)) → -0.55 nur bei voll links */
+            s.rightArm.rotation.z = swing * (swing < 0 ? 1.15 : 0.95);
+            s.rightArm.rotation.x = 0.55 * (1 + 2 * Math.min(0, swing));
             s.rightArm.rotation.y = 0;
 
             /* ── LINKER ARM ───────────────────────────────────────────────
-               Außen-Arm wenn LINKS    (swing<0, z klein negativ, x vorne)
-               Kreuzungs-Arm wenn RECHTS (swing>0, z groß positiv, x hinten) */
-            s.leftArm.rotation.z = swing * (swing < 0 ? 0.90 : 1.10);
-            s.leftArm.rotation.x = -swing * 0.55;
+               swing=-1 (voll LINKS):  z=-0.95 (links),  x=+0.55 (VORNE)
+               swing= 0 (MITTE):       z= 0   (unten),   x=+0.55 (VORNE) ← beide vorne!
+               swing=+1 (voll RECHTS): z=+1.15 (rechts), x=-0.55 (HINTEN)
+               Formel x: 0.55*(1 - 2*max(0,swing)) → -0.55 nur bei voll rechts */
+            s.leftArm.rotation.z = swing * (swing < 0 ? 0.95 : 1.15);
+            s.leftArm.rotation.x = 0.55 * (1 - 2 * Math.max(0, swing));
             s.leftArm.rotation.y = 0;
 
             /* ── KÖRPER — bleibt gerade, leichter z-Tilt (Gewichtsverlagerung) */
@@ -132,11 +136,11 @@ export default function PodiumSkin3D({ username, rank }: Props) {
               s.head.rotation.z = 0;
             }
 
-            /* ── BEINE — leichter Gewichts-Shift ────────────────────────── */
-            s.leftLeg.rotation.z  =  swing * 0.08;
+            /* ── BEINE — leicht gespreizt, statisch (keine Bewegung) ─────── */
+            s.leftLeg.rotation.z  = -0.10;
             s.leftLeg.rotation.x  =  0;
             s.leftLeg.rotation.y  =  0;
-            s.rightLeg.rotation.z = -swing * 0.08;
+            s.rightLeg.rotation.z =  0.10;
             s.rightLeg.rotation.x =  0;
             s.rightLeg.rotation.y =  0;
 
