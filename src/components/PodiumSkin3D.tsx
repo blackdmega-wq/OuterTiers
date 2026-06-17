@@ -195,7 +195,7 @@ function startDustCanvas(
   const parts: DPart[] = [];
   const LFX = w * 0.36;
   const RFX = w * 0.64;
-  const FY  = h - 58; // behind legs, not at ground
+  const FY  = h - 38; // behind calves at footstep level
 
   let spawnClock = 0;
   let spawnSide  = 0;
@@ -203,39 +203,24 @@ function startDustCanvas(
   let animId     = 0;
 
   function spawn() {
-    const fx  = spawnSide === 0 ? LFX : RFX;
-    const dir = spawnSide === 0 ? -1 : 1;
+    const isLeft = spawnSide === 0;
+    const fx     = isLeft ? LFX : RFX;
+    const outDir = isLeft ? -1 : 1; // always spread outward from center
     spawnSide = 1 - spawnSide;
 
-    // 2–4 soft puffs
+    // 1–2 tight footstep puffs — only outward + gently upward
     const puffCount = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < puffCount; i++) {
-      const ml = 0.65 + Math.random() * 0.55;
+      const ml = 0.38 + Math.random() * 0.28;
       parts.push({
-        x: fx + (Math.random() - 0.5) * 10,
-        y: FY  + (Math.random() - 0.5) * 5,
-        vx: (Math.random() * 0.9 + 0.15) * (Math.random() > 0.38 ? dir : -dir),
-        vy: -(Math.random() * 0.55 + 0.18),
-        r:  3 + Math.random() * 8,
+        x: fx + (Math.random() - 0.5) * 5,
+        y: FY + (Math.random() - 0.5) * 3,
+        vx: (Math.random() * 0.7 + 0.15) * outDir,
+        vy: -(Math.random() * 0.45 + 0.12),
+        r:  2 + Math.random() * 4,
         life: ml, maxLife: ml,
         color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
         isDebris: false,
-      });
-    }
-
-    // 1–3 small debris specks
-    const debrisCount = Math.floor(Math.random() * 2);
-    for (let i = 0; i < debrisCount; i++) {
-      const ml = 0.28 + Math.random() * 0.32;
-      parts.push({
-        x: fx + (Math.random() - 0.5) * 7,
-        y: FY,
-        vx: (Math.random() * 1.6 + 0.4) * (Math.random() > 0.5 ? 1 : -1),
-        vy: -(Math.random() * 1.3 + 0.4),
-        r:  0.8 + Math.random() * 2.4,
-        life: ml, maxLife: ml,
-        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
-        isDebris: true,
       });
     }
   }
@@ -251,7 +236,7 @@ function startDustCanvas(
 
     // Spawn new particles every ~5 frames (≈6 times/sec at 30fps)
     spawnClock += delta;
-    if (spawnClock >= 9) {
+    if (spawnClock >= 16) {
       spawnClock = 0;
       spawn();
     }
