@@ -416,12 +416,12 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
       }
 
       // Draw the Minecraft-style pixel rocket (always — the webp sprite is a placeholder)
-      drawMcRocket(dc, rk.x, rk.y, 5.0);
+      drawMcRocket(dc, rk.x, rk.y, 1.5);
 
-      // Exhaust flame glow below the fuse (at cy + ~3 units = +4.5px)
+      // Exhaust flame glow below the fuse
       const flicker = 0.75 + Math.random() * 0.25;
-      const exR = 6 * flicker;
-      const fuseY = rk.y + 1.5 * 2; // fuse bottom = cy + 2 units * scale
+      const exR = 2.5 * flicker;
+      const fuseY = rk.y + 3; // fuse bottom = just below cy
       const exGrd = dc.createRadialGradient(rk.x, fuseY, 0, rk.x, fuseY, exR);
       exGrd.addColorStop(0,    `rgba(255,255,220,1.0)`);
       exGrd.addColorStop(0.20, `rgba(255,200,40,0.95)`);
@@ -551,7 +551,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
       // Shift the 3D skin canvas down so the character's feet sit on the pedestal line
-      const yOff = rank === 1 ? 24 : rank === 2 ? 14 : 22;
+      const yOff = rank === 1 ? 42 : rank === 2 ? 14 : 34;
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
