@@ -1,0 +1,13 @@
+{
+  "_readme": "HOW TO FIX A RENAMED PLAYER — edit this file directly on GitHub (no deployment needed)",
+  "_steps": [
+    "1. Find the player's current Minecraft name (ask them directly)",
+    "2. Go to https://playerdb.co/api/player/minecraft/THEIR_NEW_NAME",
+    "3. Copy the 'id' field (their permanent UUID)",
+    "4. Add a line below: \"old-stored-name\": \"their-uuid\"",
+    "5. Click 'Commit changes' on GitHub — done! Site updates within minutes."
+  ],
+  "overrides": {
+    "_example_remove_this_line": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  }
+}
