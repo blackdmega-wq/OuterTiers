@@ -8,11 +8,11 @@ interface Props {
 const SIZES = { 1:{width:100,height:160}, 2:{width:82,height:128}, 3:{width:76,height:118} } as const;
 const ZOOM: Record<1|2|3,number> = { 1:0.58, 2:0.68, 3:0.64 };
 
-const STYLE_ID = 'podium-skin-3d-v9';
+const STYLE_ID = 'podium-skin-3d-v10';
 function ensureStyles() {
   if (document.getElementById(STYLE_ID)) return;
   ['podium-skin-3d-css','podium-skin-3d-css-v4','podium-skin-3d-css-v5',
-   'podium-skin-3d-v6','podium-skin-3d-v7','podium-skin-3d-v8']
+   'podium-skin-3d-v6','podium-skin-3d-v7','podium-skin-3d-v8','podium-skin-3d-v9']
     .forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
   const s = document.createElement('style');
   s.id = STYLE_ID;
@@ -30,12 +30,10 @@ function ensureStyles() {
 .mc-fw-slot--b { left:20px; }
 .mc-fw-slot--c { right:20px; }
 
-/* Per-slot burst colors */
 .mc-fw-slot--a { --pc:#ff3322; --sc:#ff9944; --gc:#ffdd88; }
 .mc-fw-slot--b { --pc:#ffdd00; --sc:#ffe855; --gc:#ffffff;  }
 .mc-fw-slot--c { --pc:#3399ff; --sc:#88ddff; --gc:#ccf0ff;  }
 
-/* SMOOTH, STRAIGHT FLIGHT — single animation, no wobble */
 .mc-fw-rocket {
   display:flex; flex-direction:column; align-items:center;
   image-rendering:pixelated; transform-origin:bottom center;
@@ -53,7 +51,6 @@ function ensureStyles() {
   100% { transform:translateY(0px);    opacity:0; }
 }
 
-/* ── Pixel-art rocket body ── */
 .mc-fw-cap  { position:relative; width:14px; height:10px; margin-bottom:-1px; }
 .mc-fw-cap-bar {
   position:absolute; top:5px; left:0; width:14px; height:4px; background:#5c2e0e;
@@ -98,7 +95,6 @@ function ensureStyles() {
   width:64px; height:64px; pointer-events:none;
 }
 
-/* Flash */
 .mc-burst-flash { position:absolute; top:50%; left:50%; width:22px; height:22px; border-radius:50%; opacity:0; }
 .mc-fw-slot--a .mc-burst-flash { animation:mc-bflash 3.5s linear infinite  0.0s; }
 .mc-fw-slot--b .mc-burst-flash { animation:mc-bflash 4.0s linear infinite -1.2s; }
@@ -113,7 +109,6 @@ function ensureStyles() {
   100%    { transform:translate(-50%,-50%) scale(3.0); opacity:0; }
 }
 
-/* Primary rays */
 .mc-burst-pr {
   position:absolute; top:50%; left:50%;
   width:5px; height:28px; border-radius:4px 4px 1px 1px;
@@ -132,7 +127,6 @@ function ensureStyles() {
   100%    { opacity:0;  transform:rotate(var(--ra,0deg)) scaleY(1.9); }
 }
 
-/* Secondary rays */
 .mc-burst-sr {
   position:absolute; top:50%; left:50%;
   width:2.5px; height:18px; border-radius:2px;
@@ -151,7 +145,6 @@ function ensureStyles() {
   100%    { opacity:0;  transform:rotate(var(--ra,0deg)) scaleY(1.65); }
 }
 
-/* Tip sparkles */
 .mc-burst-tp {
   position:absolute; top:50%; left:50%;
   width:6px; height:6px; border-radius:50%;
@@ -168,59 +161,6 @@ function ensureStyles() {
   95%     { opacity:.4; transform:rotate(var(--ra,0deg)) translateY(-35px) scale(.6); }
   100%    { opacity:0;  transform:rotate(var(--ra,0deg)) translateY(-40px) scale(0); }
 }
-
-/* ══════════════════════════════════════════════════════════
-   DUST CLOUD (#3)  — clipped behind skin, no platform bleed
-   clip wrapper (overflow:hidden, z-index:0) keeps puffs
-   strictly inside the skin frame; canvas z-index:1 sits above.
-   ══════════════════════════════════════════════════════════ */
-.dust-cloud-wrap {
-  position:absolute;
-  bottom:46px;
-  left:50%;
-  transform:translateX(-50%);
-  width:68px;
-  height:42px;
-  pointer-events:none;
-}
-.dc-puff { position:absolute; border-radius:50%; }
-
-/* Tight clusters directly under each hand — closer together, small puffs */
-/* Under left hand */
-.dc-1  { width:12px; height:11px; left:20px; bottom:0;   background:rgba(175,148,108,.64); animation:dc-l  .42s ease-out infinite; animation-delay:.00s; }
-.dc-2  { width: 9px; height: 8px; left:16px; bottom:6px; background:rgba(198,170,128,.55); animation:dc-l  .42s ease-out infinite; animation-delay:.21s; }
-.dc-3  { width: 7px; height: 7px; left:22px; bottom:12px;background:rgba(160,135,96,.58);  animation:dc-sl .42s ease-out infinite; animation-delay:.11s; }
-.dc-4  { width: 6px; height: 6px; left:14px; bottom:20px;background:rgba(186,160,120,.48); animation:dc-sl .42s ease-out infinite; animation-delay:.30s; }
-/* Under right hand */
-.dc-5  { width:12px; height:11px; left:36px; bottom:0;   background:rgba(175,148,108,.64); animation:dc-r  .42s ease-out infinite; animation-delay:.10s; }
-.dc-6  { width: 9px; height: 8px; left:43px; bottom:6px; background:rgba(198,170,128,.55); animation:dc-r  .42s ease-out infinite; animation-delay:.32s; }
-.dc-7  { width: 7px; height: 7px; left:36px; bottom:12px;background:rgba(160,135,96,.58);  animation:dc-sr .42s ease-out infinite; animation-delay:.20s; }
-.dc-8  { width: 6px; height: 6px; left:44px; bottom:20px;background:rgba(186,160,120,.48); animation:dc-sr .42s ease-out infinite; animation-delay:.06s; }
-
-@keyframes dc-l {
-  0%   { transform:translate(  0px, 0px) scale(.12); opacity:0;    }
-  10%  { transform:translate( -4px,-2px) scale(.86); opacity:0.80; }
-  50%  { transform:translate(-12px,-6px) scale(1.04); opacity:.45; }
-  100% { transform:translate(-18px,-9px) scale(0.86); opacity:0;   }
-}
-@keyframes dc-sl {
-  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
-  10%  { transform:translate(-3px,-5px) scale(.78); opacity:0.74;  }
-  50%  { transform:translate(-8px,-13px) scale(1.00); opacity:.40; }
-  100% { transform:translate(-12px,-19px) scale(0.78); opacity:0;  }
-}
-@keyframes dc-r {
-  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
-  10%  { transform:translate( 4px,-2px) scale(.86); opacity:0.80;  }
-  50%  { transform:translate(12px,-6px) scale(1.04); opacity:.45;  }
-  100% { transform:translate(18px,-9px) scale(0.86); opacity:0;    }
-}
-@keyframes dc-sr {
-  0%   { transform:translate( 0px, 0px) scale(.12); opacity:0;    }
-  10%  { transform:translate( 3px,-5px) scale(.78); opacity:0.74;  }
-  50%  { transform:translate( 8px,-13px) scale(1.00); opacity:.40; }
-  100% { transform:translate(12px,-19px) scale(0.78); opacity:0;   }
-}
 `;
   document.head.appendChild(s);
 }
@@ -228,22 +168,163 @@ function ensureStyles() {
 const PR = [0,45,90,135,180,225,270,315];
 const SR = [22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5];
 
+/* ── Canvas-based dust particle system for rank 3 ── */
+interface DPart {
+  x: number; y: number; vx: number; vy: number;
+  r: number; life: number; maxLife: number;
+  color: string; isDebris: boolean;
+}
+
+const DUST_COLORS = [
+  '200,173,133','175,150,110','215,195,160',
+  '150,125,90', '225,215,200','185,165,130',
+  '235,220,190','160,135,98', '210,185,150',
+];
+
+function startDustCanvas(
+  cv: HTMLCanvasElement,
+  w: number,
+  h: number
+): () => void {
+  cv.width = w;
+  cv.height = h;
+  const dc = cv.getContext('2d');
+  if (!dc) return () => {};
+
+  const parts: DPart[] = [];
+  const LFX = w * 0.36;
+  const RFX = w * 0.64;
+  const FY  = h - 24;
+
+  let spawnClock = 0;
+  let spawnSide  = 0;
+  let lastT      = performance.now();
+  let animId     = 0;
+
+  function spawn() {
+    const fx  = spawnSide === 0 ? LFX : RFX;
+    const dir = spawnSide === 0 ? -1 : 1;
+    spawnSide = 1 - spawnSide;
+
+    // 2–4 soft puffs
+    const puffCount = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < puffCount; i++) {
+      const ml = 0.65 + Math.random() * 0.55;
+      parts.push({
+        x: fx + (Math.random() - 0.5) * 10,
+        y: FY  + (Math.random() - 0.5) * 5,
+        vx: (Math.random() * 0.9 + 0.15) * (Math.random() > 0.38 ? dir : -dir),
+        vy: -(Math.random() * 0.55 + 0.18),
+        r:  6 + Math.random() * 11,
+        life: ml, maxLife: ml,
+        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
+        isDebris: false,
+      });
+    }
+
+    // 1–3 small debris specks
+    const debrisCount = 1 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < debrisCount; i++) {
+      const ml = 0.28 + Math.random() * 0.32;
+      parts.push({
+        x: fx + (Math.random() - 0.5) * 7,
+        y: FY,
+        vx: (Math.random() * 1.6 + 0.4) * (Math.random() > 0.5 ? 1 : -1),
+        vy: -(Math.random() * 1.3 + 0.4),
+        r:  0.8 + Math.random() * 2.4,
+        life: ml, maxLife: ml,
+        color: DUST_COLORS[Math.floor(Math.random() * DUST_COLORS.length)],
+        isDebris: true,
+      });
+    }
+  }
+
+  const DUST_FPS = 30;
+  const DUST_MS  = 1000 / DUST_FPS;
+
+  function tick(now: number) {
+    animId = requestAnimationFrame(tick);
+    if (now - lastT < DUST_MS) return;
+    const delta = Math.min((now - lastT) / 16.67, 2.5);
+    lastT = now;
+
+    // Spawn new particles every ~5 frames (≈6 times/sec at 30fps)
+    spawnClock += delta;
+    if (spawnClock >= 5) {
+      spawnClock = 0;
+      spawn();
+    }
+
+    dc.clearRect(0, 0, w, h);
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.life -= 0.022 * delta;
+      if (p.life <= 0) { parts.splice(i, 1); continue; }
+
+      p.x  += p.vx * delta;
+      p.y  += p.vy * delta;
+      p.vy += 0.016 * delta; // soft gravity
+      p.vx *= Math.pow(0.972, delta); // air drag
+
+      const lifeRatio = p.life / p.maxLife;
+      // Fade in quickly, hold, then fade out
+      const alpha = lifeRatio > 0.75
+        ? 0.88
+        : lifeRatio > 0.2
+          ? 0.88 * ((lifeRatio - 0.2) / 0.55)
+          : (lifeRatio / 0.2) * 0.88;
+
+      if (p.isDebris) {
+        dc.beginPath();
+        dc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        dc.fillStyle = `rgba(${p.color},${Math.min(0.9, alpha * 1.1)})`;
+        dc.fill();
+      } else {
+        // Puffs expand as they age
+        const expandR = p.r * (1 + (1 - lifeRatio) * 0.75);
+        const grad = dc.createRadialGradient(p.x, p.y, 0, p.x, p.y, expandR);
+        grad.addColorStop(0,   `rgba(${p.color},${alpha * 0.80})`);
+        grad.addColorStop(0.45,`rgba(${p.color},${alpha * 0.48})`);
+        grad.addColorStop(0.80,`rgba(${p.color},${alpha * 0.18})`);
+        grad.addColorStop(1,   `rgba(${p.color},0)`);
+        dc.beginPath();
+        dc.arc(p.x, p.y, expandR, 0, Math.PI * 2);
+        dc.fillStyle = grad;
+        dc.fill();
+      }
+    }
+  }
+
+  animId = requestAnimationFrame(tick);
+  return () => cancelAnimationFrame(animId);
+}
+
 export default function PodiumSkin3D({ username, rank }: Props) {
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const wrapRef      = useRef<HTMLDivElement>(null);
+  const dustCanvasRef = useRef<HTMLCanvasElement>(null);
   const { width, height } = SIZES[rank];
 
   useEffect(() => {
     ensureStyles();
     const wrap = wrapRef.current;
     if (!wrap) return;
-    let disposed = false, viewer: any, canvas: HTMLCanvasElement | null = null;
+    let disposed = false;
+    let viewer: any;
+    let canvas: HTMLCanvasElement | null = null;
+    let stopDust: (() => void) | null = null;
+
+    // Start canvas dust for rank 3
+    if (rank === 3 && dustCanvasRef.current) {
+      stopDust = startDustCanvas(dustCanvasRef.current, width, height);
+    }
+
+    const isMobile = window.innerWidth < 768;
+    const targetFps = isMobile ? 15 : 45;
 
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
-      /* NO z-index, NO position:relative — canvas sits in normal DOM
-         flow, painted on top of the earlier-rendered dust div.
-         Transparent WebGL pixels let the dust show through. */
       canvas.style.cssText = 'display:block;background:transparent;position:relative;z-index:1;';
       wrap.appendChild(canvas);
 
@@ -253,9 +334,10 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       viewer.zoom = ZOOM[rank];
       viewer.autoRotate = false;
       try { viewer.controls.enabled = false; } catch(_){}
-      // Cap WebGL render to 30 fps — 3 simultaneous canvases at 60 fps hammers the GPU
+
+      // Cap render FPS — reduces GPU load significantly on mobile
       try {
-        const _ms = 1000 / 45; let _lt = 0;
+        const _ms = 1000 / targetFps; let _lt = 0;
         const _orig = viewer.render.bind(viewer);
         viewer.renderer.setAnimationLoop((t: number) => { if (t - _lt >= _ms) { _lt = t; _orig(); } });
       } catch(_) {}
@@ -267,28 +349,23 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             const s = player?.skin; if (!s) return;
             const t = progress * 10.5;
             const cy = Math.sin(t), c2 = Math.sin(t * 2);
-            // deep forward lean + subtle side sway
             s.body.rotation.x = 0.34 + c2 * 0.04;
             s.body.rotation.y = 0;
             s.body.rotation.z = c2 * 0.08;
-            // aggressive arm pump with outward flare
             const armX = cy * 1.40;
             s.rightArm.rotation.x =  armX; s.leftArm.rotation.x = -armX;
             s.rightArm.rotation.z = -0.14 - Math.abs(cy) * 0.10;
             s.leftArm.rotation.z  =  0.14 + Math.abs(cy) * 0.10;
             s.rightArm.rotation.y =  cy * 0.10; s.leftArm.rotation.y = -cy * 0.10;
-            // high leg kick
             const legX = cy * 1.30;
             s.rightLeg.rotation.x = -legX; s.leftLeg.rotation.x = legX;
             s.rightLeg.rotation.z =  Math.abs(cy) * 0.05;
             s.leftLeg.rotation.z  = -Math.abs(cy) * 0.05;
-            // head bob
             if (s.head) {
               s.head.rotation.x = 0.20 + c2 * 0.07;
               s.head.rotation.y = cy * 0.07;
               s.head.rotation.z = c2 * 0.03;
             }
-            // strong vertical bounce + slight side drift
             player.position.y = -Math.abs(cy) * 1.0;
             player.position.x =  cy * 0.06;
             player.rotation.y = 0;
@@ -354,29 +431,31 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     }).catch(console.error);
 
     return () => {
-      disposed=true;
-      if(viewer){try{viewer.dispose();}catch(_){}}
-      if(canvas&&wrap.contains(canvas)){wrap.removeChild(canvas);}
+      disposed = true;
+      if (stopDust) stopDust();
+      if (viewer) { try { viewer.dispose(); } catch(_) {} }
+      if (canvas && wrap.contains(canvas)) { wrap.removeChild(canvas); }
     };
-  }, [username, rank]);
+  }, [username, rank, width, height]);
 
   return (
     <div
       ref={wrapRef}
       style={{width,height,position:'relative',zIndex:1,flexShrink:0,margin:'0 auto',overflow:'visible'}}
     >
-      {/* Dust rendered FIRST by React — canvas appended SECOND by useEffect.
-          No z-index on either → canvas sits on top in natural paint order.
-          Transparent WebGL pixels reveal the dust underneath. */}
+      {/* Canvas dust rendered FIRST (z-index 0) — WebGL canvas appended SECOND (z-index 1) by useEffect.
+          Transparent WebGL pixels let the dust canvas show through underneath. */}
       {rank === 3 && (
-        <div style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none',zIndex:0}}>
-          <div className="dust-cloud-wrap">
-            <div className="dc-puff dc-1"/><div className="dc-puff dc-2"/>
-            <div className="dc-puff dc-3"/><div className="dc-puff dc-4"/>
-            <div className="dc-puff dc-5"/><div className="dc-puff dc-6"/>
-            <div className="dc-puff dc-7"/><div className="dc-puff dc-8"/>
-          </div>
-        </div>
+        <canvas
+          ref={dustCanvasRef}
+          style={{
+            position:'absolute', bottom:0, left:0,
+            width:`${width}px`, height:`${height}px`,
+            pointerEvents:'none', zIndex:0,
+          }}
+          width={width}
+          height={height}
+        />
       )}
 
       {rank === 1 && (
