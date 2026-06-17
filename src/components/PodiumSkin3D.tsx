@@ -423,11 +423,11 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
       }
 
       // Draw the Minecraft-style pixel rocket
-      drawMcRocket(dc, rk.x, rk.y, 2.0);
+      drawMcRocket(dc, rk.x, rk.y, 2.5);
 
       // Exhaust flame glow below the fuse
       const flicker = 0.75 + Math.random() * 0.25;
-      const exR = 2.5 * flicker;
+      const exR = 3.5 * flicker;
       const fuseY = rk.y + 3; // fuse bottom = just below cy
       const exGrd = dc.createRadialGradient(rk.x, fuseY, 0, rk.x, fuseY, exR);
       exGrd.addColorStop(0,    `rgba(255,255,220,1.0)`);
@@ -547,6 +547,9 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
     if (rank === 1 && fireworkCanvasRef.current) {
+      // Clip fireworks dynamically so they never bleed below the skin-wrap onto the number/pedestal
+      const wrapH = wrap.offsetHeight || 152;
+      fireworkCanvasRef.current.style.clipPath = `inset(0 0 ${Math.max(0, FW_H - wrapH)}px 0)`;
       const isMobile = window.innerWidth < 768;
       stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
     }
@@ -557,8 +560,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
     import('skinview3d').then((sv3d) => {
       if (disposed || !wrapRef.current) return;
       canvas = document.createElement('canvas');
-      // Shift the 3D skin canvas down so the character's feet sit on the pedestal line
-      const yOff = rank === 1 ? 32 : rank === 2 ? 14 : 34;
+      // Compute yOff dynamically from actual wrap height so it works on all screen sizes.
+      // On mobile (max-width:580px) wrap heights shrink (rank1=100px, rank3=76px) but the
+      // 3D canvas stays at SIZES height — so yOff must go NEGATIVE to shift the canvas up.
+      // skinview3d with target=(0,0,0) renders feet at ~71% of canvas height for ranks 1 & 3.
+      // Rank 2 (zoom=0.82) has a different ratio and yOff=14 is known-good, kept hardcoded.
+      let yOff: number;
+      if (rank === 2) {
+        yOff = 14;
+      } else {
+        const wrapH = wrap.offsetHeight || (rank === 1 ? 152 : 118);
+        yOff = Math.round(wrapH - 0.71 * height);
+      }
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
@@ -693,8 +706,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
             height: `${FW_H}px`,
             pointerEvents: 'none',
             zIndex: 50,
-            // Clip the bottom so fireworks stay inside the skin-wrap area (152px) and don't bleed onto the number
-            clipPath: `inset(0 0 ${FW_H - 152}px 0)`,
+            // clipPath set dynamically in useEffect (adapts to mobile/desktop wrap height)
           }}
           width={FW_W}
           height={FW_H}
