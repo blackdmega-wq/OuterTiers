@@ -53,29 +53,37 @@ function tierNumCls(tier: string): string {
 const OV_PAGE = 25;
 
 
-
-
-/* ── Bust image with diagonal-right fallback via mc-heads.net/player ── */
+/* ── PlayerBustImg: visage(yaw) → mc-heads+CSS-rotateY → crafthead+CSS-rotateY → avatar ── */
 function PlayerBustImg({ username }: { username: string }) {
   const [src, setSrc] = React.useState(
     `https://visage.surgeplay.com/bust/128/${username}?yaw=-25`
   );
-  const [crop, setCrop] = React.useState(false);
+  const [extraStyle, setExtraStyle] = React.useState<React.CSSProperties | undefined>(undefined);
   const triedRef = React.useRef(0);
+
+  // CSS perspective rotateY: fakes diagonal-right look for any front-facing image
+  const fakeYaw: React.CSSProperties = {
+    objectFit: "cover",
+    objectPosition: "top center",
+    transform: "perspective(140px) rotateY(-22deg) scaleX(1.15)",
+    transformOrigin: "center center",
+  };
 
   const handleError = React.useCallback(() => {
     const t = triedRef.current;
     triedRef.current += 1;
     if (t === 0) {
-      // mc-heads player renders full body at diagonal angle — works offline
+      // Full-body render cropped to upper body + CSS diagonal
       setSrc(`https://mc-heads.net/player/${username}/256`);
-      setCrop(true);
+      setExtraStyle(fakeYaw);
     } else if (t === 1) {
       setSrc(`https://crafthead.net/bust/${username}/128`);
-      setCrop(false);
+      setExtraStyle({ transform: "perspective(140px) rotateY(-22deg) scaleX(1.15)" });
     } else if (t === 2) {
       setSrc(`https://mc-heads.net/avatar/${username}/64`);
+      setExtraStyle(undefined);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
   return (
@@ -83,7 +91,7 @@ function PlayerBustImg({ username }: { username: string }) {
       src={src}
       alt={username}
       className="ot-ov-av-img ot-ov-av-img--bust"
-      style={crop ? { objectFit: "cover", objectPosition: "top center" } : undefined}
+      style={extraStyle}
       loading="lazy"
       onError={handleError}
     />
