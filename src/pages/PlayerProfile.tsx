@@ -63,7 +63,7 @@ type RankKey = keyof typeof RANK_CFG;
 function RankEmblem({ rank, rankClass, cfg }: {
   rank: number;
   rankClass: RankKey;
-  cfg: typeof RANK_CFG['rank-gold'];
+  cfg: typeof RANK_CFG[RankKey];
 }) {
   if (!rankClass || rank < 1 || rank > 3) return null;
 
