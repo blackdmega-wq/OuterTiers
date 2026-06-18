@@ -53,7 +53,7 @@ const TIER_BG: Record<string, string> = {
   HT5: 'rgba(164,213,255,0.05)',  LT5: 'rgba(164,213,255,0.04)',
 };
 
-/* ── Profile Crown SVGs (unique gradient IDs to avoid conflicts) ── */
+/* ── Crown SVGs ── */
 function ProfileCrownGold() {
   return (
     <svg viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -199,13 +199,7 @@ function UuidBadge({ uuid }: { uuid: string }) {
     <button
       onClick={copy}
       title={uuid}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
-        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: 'var(--text-dim)',
-        fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.03em',
-        transition: 'all 0.15s', marginTop: 6,
-      }}
+      className="ppv2-uuid-btn"
     >
       {copied
         ? <><Check size={10} style={{ color: '#4ade80' }} /><span style={{ color: '#4ade80' }}>Copied!</span></>
@@ -220,10 +214,8 @@ export default function PlayerProfile() {
   const { player, loading } = usePlayer(username);
   const { players } = usePlayers();
   const animPts = useCountUp(player?.points ?? 0);
-  // Must be called unconditionally before any early returns (Rules of Hooks)
   const live = useLiveProfile(player?.username ?? '', player?.uuid ?? '');
 
-  // If player not found, check aliases (e.g. "clawmc" → "karajic")
   useEffect(() => {
     if (loading || player || !username) return;
     resolveAlias(username).then(stored => {
@@ -258,6 +250,7 @@ export default function PlayerProfile() {
       </div>
     );
   }
+
   const sorted = [...players].sort((a, b) => b.points - a.points);
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
@@ -267,65 +260,85 @@ export default function PlayerProfile() {
 
   return (
     <div className="profile-page ppv2-page">
+
       {/* ── Hero ── */}
       <div className="ppv2-hero">
         <div className="ppv2-hero-glow" />
         <div className="ppv2-hero-grid" />
         <div className="ppv2-hero-inner">
+
+          {/* Back button */}
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
             <ArrowLeft size={14} /> Back to Rankings
           </Link>
 
-          <div className="ppv2-header">
+          {/* ── Centered profile card ── */}
+          <div className="ppv2-profile-center">
+
+            {/* Avatar */}
             <div className={`ppv2-avatar-wrap${rankClass ? ` ppv2-avatar-${rankClass}` : ''}`}>
               <div className="ppv2-avatar-bg" />
-              <PlayerAvatar username={live.uuid || player.uuid || live.username} size={106} />
-              {/* Epic tilted crown for top 3 */}
+              <div className="ppv2-avatar-inner">
+                <PlayerAvatar username={live.uuid || player.uuid || live.username} size={110} />
+              </div>
               {rank > 0 && rank <= 3 && (
                 <div className={`ppv2-crown-svg ppv2-crown-svg--${rank}`}>
                   {rank === 1 ? <ProfileCrownGold /> : rank === 2 ? <ProfileCrownSilver /> : <ProfileCrownBronze />}
                 </div>
               )}
+              {/* Outer glow ring */}
+              <div className="ppv2-avatar-glow-ring" />
             </div>
 
-            <div className="ppv2-header-info">
-              <div className="ppv2-eyebrow">
-                <Zap size={10} style={{ opacity: 0.7 }} />
-                OuterTiers Player
-              </div>
-              <h1 className="ppv2-username">{live.username}</h1>
-              <div className="ppv2-title-row">
-                <img src="/tier_icons/overall.svg" alt="" width={13} height={13} style={{ opacity: 0.6 }} />
-                <span>{getTitle(player.points)}</span>
-              </div>
-              <div className="ppv2-badges-row">
-                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-                {rank > 0 && (
-                  <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
-                    <Trophy size={10} /> #{rank} Overall
-                  </span>
-                )}
-              </div>
-              <UuidBadge uuid={live.uuid || player.uuid || ''} />
+            {/* Eyebrow */}
+            <div className="ppv2-eyebrow">
+              <Zap size={10} style={{ opacity: 0.8 }} />
+              OuterTiers Player
             </div>
+
+            {/* Name */}
+            <h1 className="ppv2-username">{live.username}</h1>
+
+            {/* Achievement title — directly under name */}
+            <div className="ppv2-achievement-title">
+              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.55 }} />
+              <span>{getTitle(player.points)}</span>
+            </div>
+
+            {/* Divider */}
+            <div className="ppv2-hero-divider" />
+
+            {/* Badges row */}
+            <div className="ppv2-badges-row">
+              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+              {rank > 0 && (
+                <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
+                  <Trophy size={10} /> #{rank} Overall
+                </span>
+              )}
+            </div>
+
+            {/* UUID */}
+            <UuidBadge uuid={live.uuid || player.uuid || ''} />
+
           </div>
 
-          {/* Stats */}
+          {/* ── Stats row ── */}
           <div className="ppv2-stats-row">
             <div className="ppv2-stat-box">
-              <Star size={14} className="ppv2-stat-icon" />
+              <Star size={13} className="ppv2-stat-icon" />
               <div className="ppv2-stat-num">{animPts}</div>
               <div className="ppv2-stat-lbl">Total Points</div>
             </div>
             <div className="ppv2-stat-sep" />
             <div className="ppv2-stat-box">
-              <Trophy size={14} className="ppv2-stat-icon" />
+              <Trophy size={13} className="ppv2-stat-icon" />
               <div className="ppv2-stat-num">{rank > 0 ? `#${rank}` : '—'}</div>
               <div className="ppv2-stat-lbl">Overall Rank</div>
             </div>
             <div className="ppv2-stat-sep" />
             <div className="ppv2-stat-box">
-              <Globe size={14} className="ppv2-stat-icon" />
+              <Globe size={13} className="ppv2-stat-icon" />
               <div className="ppv2-stat-num">{player.region}</div>
               <div className="ppv2-stat-lbl">Region</div>
             </div>
@@ -338,10 +351,11 @@ export default function PlayerProfile() {
               <div className="ppv2-stat-lbl">Modes Ranked</div>
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* ── Tier Rankings ── */}
+      {/* ── Tier Rankings (unchanged) ── */}
       <div className="profile-container ppv2-content">
         {rankedModes.length > 0 && (
           <>
