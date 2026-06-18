@@ -6,7 +6,7 @@ import { usePlayer, usePlayers } from '../hooks/usePlayers';
 import { useLiveProfile, resolveAlias } from '../hooks/useMojangProfile';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
-import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check, Shield } from 'lucide-react';
 import '../styles/profile-v2.css';
 
 function formatDate(ts: number | undefined): string | null {
@@ -16,7 +16,7 @@ function formatDate(ts: number | undefined): string | null {
   });
 }
 
-function useCountUp(target: number, duration = 1100) {
+function useCountUp(target: number, duration = 1200) {
   const [val, setVal] = useState(0);
   const rafRef = useRef(0);
   useEffect(() => {
@@ -53,39 +53,25 @@ const TIER_BG: Record<string, string> = {
   HT5: 'rgba(164,213,255,0.05)',  LT5: 'rgba(164,213,255,0.04)',
 };
 
-/* ── Crown SVGs ── */
+/* Rank accent colors for hero theming */
+const RANK_ACCENT: Record<string, { primary: string; secondary: string; glow: string; dim: string }> = {
+  'rank-gold':   { primary: '#fbbf24', secondary: '#f59e0b', glow: 'rgba(251,191,36,0.55)', dim: 'rgba(251,191,36,0.12)' },
+  'rank-silver': { primary: '#94a3b8', secondary: '#64748b', glow: 'rgba(148,163,184,0.45)', dim: 'rgba(148,163,184,0.10)' },
+  'rank-bronze': { primary: '#c97940', secondary: '#b45309', glow: 'rgba(180,120,60,0.50)', dim: 'rgba(180,120,60,0.10)' },
+  '':            { primary: '#60a5fa', secondary: '#3b82f6', glow: 'rgba(96,165,250,0.40)', dim: 'rgba(96,165,250,0.08)' },
+};
+
+/* Crown SVGs */
 function ProfileCrownGold() {
   return (
     <svg viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="pcg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fde68a"/>
-          <stop offset="45%" stopColor="#fbbf24"/>
-          <stop offset="100%" stopColor="#92400e"/>
-        </linearGradient>
-        <linearGradient id="pcg2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fcd34d"/>
-          <stop offset="100%" stopColor="#78350f"/>
-        </linearGradient>
-        <radialGradient id="pcruby" cx="50%" cy="30%" r="60%">
-          <stop offset="0%" stopColor="#fecaca"/>
-          <stop offset="55%" stopColor="#ef4444"/>
-          <stop offset="100%" stopColor="#7f1d1d"/>
-        </radialGradient>
-        <radialGradient id="pcsapp" cx="50%" cy="30%" r="60%">
-          <stop offset="0%" stopColor="#dbeafe"/>
-          <stop offset="55%" stopColor="#3b82f6"/>
-          <stop offset="100%" stopColor="#1e3a5f"/>
-        </radialGradient>
-        <radialGradient id="pcemer" cx="50%" cy="30%" r="60%">
-          <stop offset="0%" stopColor="#d1fae5"/>
-          <stop offset="55%" stopColor="#10b981"/>
-          <stop offset="100%" stopColor="#064e3b"/>
-        </radialGradient>
-        <filter id="pcglow">
-          <feGaussianBlur stdDeviation="2.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <linearGradient id="pcg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="45%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#92400e"/></linearGradient>
+        <linearGradient id="pcg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fcd34d"/><stop offset="100%" stopColor="#78350f"/></linearGradient>
+        <radialGradient id="pcruby" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#fecaca"/><stop offset="55%" stopColor="#ef4444"/><stop offset="100%" stopColor="#7f1d1d"/></radialGradient>
+        <radialGradient id="pcsapp" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#dbeafe"/><stop offset="55%" stopColor="#3b82f6"/><stop offset="100%" stopColor="#1e3a5f"/></radialGradient>
+        <radialGradient id="pcemer" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#d1fae5"/><stop offset="55%" stopColor="#10b981"/><stop offset="100%" stopColor="#064e3b"/></radialGradient>
+        <filter id="pcglow"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       <path d="M15 68 L15 36 L36 56 L55 8 L74 56 L95 36 L95 68 Z" fill="url(#pcg1)" filter="url(#pcglow)"/>
       <rect x="12" y="62" width="86" height="20" rx="5" fill="url(#pcg2)"/>
@@ -101,29 +87,14 @@ function ProfileCrownGold() {
     </svg>
   );
 }
-
 function ProfileCrownSilver() {
   return (
     <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="psg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f1f5f9"/>
-          <stop offset="40%" stopColor="#94a3b8"/>
-          <stop offset="100%" stopColor="#334155"/>
-        </linearGradient>
-        <linearGradient id="psg2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#cbd5e1"/>
-          <stop offset="100%" stopColor="#1e293b"/>
-        </linearGradient>
-        <radialGradient id="psdia" cx="50%" cy="25%" r="60%">
-          <stop offset="0%" stopColor="#e2e8f0"/>
-          <stop offset="50%" stopColor="#bfdbfe"/>
-          <stop offset="100%" stopColor="#1e3a5f"/>
-        </radialGradient>
-        <filter id="psglow">
-          <feGaussianBlur stdDeviation="1.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <linearGradient id="psg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f1f5f9"/><stop offset="40%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#334155"/></linearGradient>
+        <linearGradient id="psg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#cbd5e1"/><stop offset="100%" stopColor="#1e293b"/></linearGradient>
+        <radialGradient id="psdia" cx="50%" cy="25%" r="60%"><stop offset="0%" stopColor="#e2e8f0"/><stop offset="50%" stopColor="#bfdbfe"/><stop offset="100%" stopColor="#1e3a5f"/></radialGradient>
+        <filter id="psglow"><feGaussianBlur stdDeviation="1.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       <path d="M12 64 L12 38 L28 54 L50 12 L72 54 L88 38 L88 64 Z" fill="url(#psg1)" filter="url(#psglow)"/>
       <rect x="10" y="58" width="80" height="16" rx="4" fill="url(#psg2)"/>
@@ -137,41 +108,17 @@ function ProfileCrownSilver() {
     </svg>
   );
 }
-
 function ProfileCrownBronze() {
   return (
     <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="pbg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fed7aa"/>
-          <stop offset="45%" stopColor="#c07838"/>
-          <stop offset="100%" stopColor="#7c2d12"/>
-        </linearGradient>
-        <linearGradient id="pbg2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fdba74"/>
-          <stop offset="100%" stopColor="#431407"/>
-        </linearGradient>
-        <radialGradient id="pbopal" cx="50%" cy="25%" r="60%">
-          <stop offset="0%" stopColor="#fef3c7"/>
-          <stop offset="55%" stopColor="#f97316"/>
-          <stop offset="100%" stopColor="#7c2d12"/>
-        </radialGradient>
-        <radialGradient id="pbfl" cx="50%" cy="80%" r="80%">
-          <stop offset="0%" stopColor="#fef08a"/>
-          <stop offset="40%" stopColor="#f97316"/>
-          <stop offset="100%" stopColor="#ef444400"/>
-        </radialGradient>
-        <filter id="pbglow">
-          <feGaussianBlur stdDeviation="1.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <linearGradient id="pbg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fed7aa"/><stop offset="45%" stopColor="#c07838"/><stop offset="100%" stopColor="#7c2d12"/></linearGradient>
+        <linearGradient id="pbg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fdba74"/><stop offset="100%" stopColor="#431407"/></linearGradient>
+        <radialGradient id="pbopal" cx="50%" cy="25%" r="60%"><stop offset="0%" stopColor="#fef3c7"/><stop offset="55%" stopColor="#f97316"/><stop offset="100%" stopColor="#7c2d12"/></radialGradient>
+        <filter id="pbglow"><feGaussianBlur stdDeviation="1.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-      <ellipse cx="18" cy="28" rx="5" ry="8" fill="url(#pbfl)" opacity="0.8"/>
-      <ellipse cx="50" cy="8" rx="6" ry="10" fill="url(#pbfl)" opacity="0.9"/>
-      <ellipse cx="82" cy="28" rx="5" ry="8" fill="url(#pbfl)" opacity="0.8"/>
       <path d="M14 66 L14 38 L30 54 L50 16 L70 54 L86 38 L86 66 Z" fill="url(#pbg1)" filter="url(#pbglow)"/>
       <rect x="12" y="60" width="76" height="18" rx="4" fill="url(#pbg2)"/>
-      <rect x="12" y="60" width="76" height="6" rx="4" fill="rgba(255,255,255,0.12)"/>
       <ellipse cx="50" cy="18" rx="7" ry="8" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.8"/>
       <ellipse cx="14" cy="40" rx="5.5" ry="6.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.7"/>
       <ellipse cx="86" cy="40" rx="5.5" ry="6.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.7"/>
@@ -190,17 +137,11 @@ function UuidBadge({ uuid }: { uuid: string }) {
       setTimeout(() => setCopied(false), 1800);
     });
   }, [uuid]);
-
   if (!uuid) return null;
   const display = uuid.replace(/-/g, '');
   const short = display.slice(0, 8) + '…' + display.slice(-4);
-
   return (
-    <button
-      onClick={copy}
-      title={uuid}
-      className="ppv2-uuid-btn"
-    >
+    <button onClick={copy} title={uuid} className="ppv2-uuid-btn">
       {copied
         ? <><Check size={10} style={{ color: '#4ade80' }} /><span style={{ color: '#4ade80' }}>Copied!</span></>
         : <><Copy size={10} /><span>UUID: {short}</span></>}
@@ -255,103 +196,191 @@ export default function PlayerProfile() {
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
   const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
+  const accent = RANK_ACCENT[rankClass] ?? RANK_ACCENT[''];
   const rankedModes = modeCats.filter(c => { const t = player.tiers[c.id as keyof PlayerTiers]; return t && t !== '-'; });
   const unrankedModes = modeCats.filter(c => { const t = player.tiers[c.id as keyof PlayerTiers]; return !t || t === '-'; });
+  const rankLabel = rank === 1 ? '#1' : rank === 2 ? '#2' : rank === 3 ? '#3' : `#${rank}`;
 
   return (
     <div className="profile-page ppv2-page">
+      <div
+        className={`ppv2-hero${rankClass ? ` ppv2-hero--${rankClass}` : ''}`}
+        style={{
+          '--accent': accent.primary,
+          '--accent-sec': accent.secondary,
+          '--accent-glow': accent.glow,
+          '--accent-dim': accent.dim,
+        } as React.CSSProperties}
+      >
+        {/* Background layers */}
+        <div className="ppv2-bg-noise" />
+        <div className="ppv2-bg-beam" />
+        <div className="ppv2-bg-grid" />
+        <div className="ppv2-bg-gradient" />
 
-      {/* ── Hero ── */}
-      <div className="ppv2-hero">
-        <div className="ppv2-hero-glow" />
-        <div className="ppv2-hero-grid" />
+        {/* Scanlines */}
+        <div className="ppv2-scanlines" />
+
         <div className="ppv2-hero-inner">
-
-          {/* Back button */}
+          {/* Back */}
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
             <ArrowLeft size={14} /> Back to Rankings
           </Link>
 
-          {/* ── Centered profile card ── */}
-          <div className="ppv2-profile-center">
+          {/* ── Main card ── */}
+          <div className="ppv2-card">
+            {/* Card shine sweep */}
+            <div className="ppv2-card-shine" />
+            {/* Card border glow */}
+            <div className="ppv2-card-edge" />
 
-            {/* Avatar */}
-            <div className={`ppv2-avatar-wrap${rankClass ? ` ppv2-avatar-${rankClass}` : ''}`}>
-              <div className="ppv2-avatar-bg" />
-              <div className="ppv2-avatar-inner">
-                <PlayerAvatar username={live.uuid || player.uuid || live.username} size={110} />
-              </div>
-              {rank > 0 && rank <= 3 && (
-                <div className={`ppv2-crown-svg ppv2-crown-svg--${rank}`}>
-                  {rank === 1 ? <ProfileCrownGold /> : rank === 2 ? <ProfileCrownSilver /> : <ProfileCrownBronze />}
+            {/* Left: Avatar block */}
+            <div className="ppv2-card-left">
+
+              {/* Ghost rank number behind avatar */}
+              {rank > 0 && rank <= 999 && (
+                <div className="ppv2-ghost-rank" aria-hidden="true">
+                  {rankLabel}
                 </div>
               )}
-              {/* Outer glow ring */}
-              <div className="ppv2-avatar-glow-ring" />
-            </div>
 
-            {/* Eyebrow */}
-            <div className="ppv2-eyebrow">
-              <Zap size={10} style={{ opacity: 0.8 }} />
-              OuterTiers Player
-            </div>
+              {/* Octagonal avatar frame */}
+              <div className={`ppv2-avatar-frame${rankClass ? ` ppv2-avatar-frame--${rankClass}` : ''}`}>
+                {/* Animated border ring */}
+                <svg className="ppv2-frame-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="frameGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={accent.primary} stopOpacity="0.9"/>
+                      <stop offset="40%" stopColor={accent.secondary} stopOpacity="0.5"/>
+                      <stop offset="100%" stopColor={accent.primary} stopOpacity="0.0"/>
+                    </linearGradient>
+                  </defs>
+                  <polygon
+                    points="80,4 136,28 156,84 136,140 80,156 24,140 4,84 24,28"
+                    stroke="url(#frameGrad)"
+                    strokeWidth="2"
+                    fill="none"
+                    className="ppv2-frame-poly"
+                  />
+                  <polygon
+                    points="80,12 130,33 149,84 130,135 80,148 30,135 11,84 30,33"
+                    stroke={accent.primary}
+                    strokeWidth="0.5"
+                    strokeDasharray="6 18"
+                    fill="none"
+                    className="ppv2-frame-dash"
+                  />
+                </svg>
 
-            {/* Name */}
-            <h1 className="ppv2-username">{live.username}</h1>
+                {/* Corner accents */}
+                <div className="ppv2-frame-corner ppv2-frame-corner--tl" />
+                <div className="ppv2-frame-corner ppv2-frame-corner--tr" />
+                <div className="ppv2-frame-corner ppv2-frame-corner--bl" />
+                <div className="ppv2-frame-corner ppv2-frame-corner--br" />
 
-            {/* Achievement title — directly under name */}
-            <div className="ppv2-achievement-title">
-              <img src="/tier_icons/overall.svg" alt="" width={12} height={12} style={{ opacity: 0.55 }} />
-              <span>{getTitle(player.points)}</span>
-            </div>
+                {/* Avatar clipped to octagon */}
+                <div className="ppv2-avatar-clip">
+                  <div className="ppv2-avatar-glow" />
+                  <PlayerAvatar username={live.uuid || player.uuid || live.username} size={118} />
+                </div>
 
-            {/* Divider */}
-            <div className="ppv2-hero-divider" />
+                {/* Crown for top 3 */}
+                {rank > 0 && rank <= 3 && (
+                  <div className={`ppv2-crown ppv2-crown--${rank}`}>
+                    {rank === 1 ? <ProfileCrownGold /> : rank === 2 ? <ProfileCrownSilver /> : <ProfileCrownBronze />}
+                  </div>
+                )}
 
-            {/* Badges row */}
-            <div className="ppv2-badges-row">
-              <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
-              {rank > 0 && (
-                <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
-                  <Trophy size={10} /> #{rank} Overall
-                </span>
-              )}
-            </div>
-
-            {/* UUID */}
-            <UuidBadge uuid={live.uuid || player.uuid || ''} />
-
-          </div>
-
-          {/* ── Stats row ── */}
-          <div className="ppv2-stats-row">
-            <div className="ppv2-stat-box">
-              <Star size={13} className="ppv2-stat-icon" />
-              <div className="ppv2-stat-num">{animPts}</div>
-              <div className="ppv2-stat-lbl">Total Points</div>
-            </div>
-            <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat-box">
-              <Trophy size={13} className="ppv2-stat-icon" />
-              <div className="ppv2-stat-num">{rank > 0 ? `#${rank}` : '—'}</div>
-              <div className="ppv2-stat-lbl">Overall Rank</div>
-            </div>
-            <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat-box">
-              <Globe size={13} className="ppv2-stat-icon" />
-              <div className="ppv2-stat-num">{player.region}</div>
-              <div className="ppv2-stat-lbl">Region</div>
-            </div>
-            <div className="ppv2-stat-sep" />
-            <div className="ppv2-stat-box">
-              <div className="ppv2-stat-num">
-                {rankedModes.length}
-                <span className="ppv2-stat-of">/{modeCats.length}</span>
+                {/* Rank badge on frame */}
+                {rank > 0 && rank <= 3 && (
+                  <div className={`ppv2-rank-badge ppv2-rank-badge--${rankClass}`}>
+                    <Trophy size={9} />
+                    {rankLabel}
+                  </div>
+                )}
               </div>
-              <div className="ppv2-stat-lbl">Modes Ranked</div>
+
+              {/* Vertical accent line left of avatar */}
+              <div className="ppv2-accent-bar" />
+            </div>
+
+            {/* Right: Info block */}
+            <div className="ppv2-card-right">
+
+              {/* Eyebrow */}
+              <div className="ppv2-eyebrow">
+                <Zap size={9} />
+                <span>OuterTiers Player</span>
+                <span className="ppv2-eyebrow-dot" />
+                <span className="ppv2-eyebrow-region">{player.region}</span>
+              </div>
+
+              {/* Name */}
+              <h1 className="ppv2-username">{live.username}</h1>
+
+              {/* Achievement title — RIGHT UNDER name */}
+              <div className="ppv2-achievement-title">
+                <Shield size={11} className="ppv2-title-icon" />
+                <span>{getTitle(player.points)}</span>
+              </div>
+
+              {/* Rank + region pills */}
+              <div className="ppv2-pills-row">
+                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                {rank > 0 && (
+                  <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
+                    <Trophy size={10} /> {rankLabel} Overall
+                  </span>
+                )}
+              </div>
+
+              {/* UUID */}
+              <UuidBadge uuid={live.uuid || player.uuid || ''} />
+
+              {/* Horizontal accent line */}
+              <div className="ppv2-info-line" />
+
+              {/* Inline mini stats */}
+              <div className="ppv2-mini-stats">
+                <div className="ppv2-mini-stat">
+                  <span className="ppv2-mini-val">{animPts}</span>
+                  <span className="ppv2-mini-lbl">pts</span>
+                </div>
+                <div className="ppv2-mini-sep" />
+                <div className="ppv2-mini-stat">
+                  <span className="ppv2-mini-val">{rankedModes.length}</span>
+                  <span className="ppv2-mini-lbl">/{modeCats.length} modes</span>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* ── Stat cards row ── */}
+          <div className="ppv2-stat-cards">
+            <div className="ppv2-stat-card">
+              <div className="ppv2-stat-card-icon"><Star size={16} /></div>
+              <div className="ppv2-stat-card-num">{animPts}</div>
+              <div className="ppv2-stat-card-lbl">Total Points</div>
+            </div>
+            <div className="ppv2-stat-card">
+              <div className="ppv2-stat-card-icon"><Trophy size={16} /></div>
+              <div className="ppv2-stat-card-num">{rank > 0 ? rankLabel : '—'}</div>
+              <div className="ppv2-stat-card-lbl">Overall Rank</div>
+            </div>
+            <div className="ppv2-stat-card">
+              <div className="ppv2-stat-card-icon"><Globe size={16} /></div>
+              <div className="ppv2-stat-card-num">{player.region}</div>
+              <div className="ppv2-stat-card-lbl">Region</div>
+            </div>
+            <div className="ppv2-stat-card">
+              <div className="ppv2-stat-card-icon"><Zap size={16} /></div>
+              <div className="ppv2-stat-card-num">
+                {rankedModes.length}
+                <span className="ppv2-stat-card-of">/{modeCats.length}</span>
+              </div>
+              <div className="ppv2-stat-card-lbl">Modes Ranked</div>
+            </div>
+          </div>
         </div>
       </div>
 
