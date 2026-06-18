@@ -220,8 +220,6 @@ export default function PlayerProfile() {
   const rankedModes = modeCats.filter(c => { const t=player.tiers[c.id as keyof PlayerTiers]; return t&&t!=='-'; });
   const unrankedModes = modeCats.filter(c => { const t=player.tiers[c.id as keyof PlayerTiers]; return !t||t==='-'; });
   const rankLabel = rank>0?`#${rank}`:'—';
-  const rankPct = players.length > 1 ? Math.max(0, Math.min(100, ((players.length - rank) / (players.length - 1)) * 100)) : 100;
-
   const cssVars = {
     '--accent':cfg.p,'--accent-sec':cfg.s,'--accent-tri':cfg.t,
     '--accent-glow':cfg.g,'--accent-dim':cfg.d,
@@ -249,9 +247,7 @@ export default function PlayerProfile() {
         <div className="ppv2-float-orb ppv2-float-orb--1" aria-hidden="true"/>
         <div className="ppv2-float-orb ppv2-float-orb--2" aria-hidden="true"/>
         <div className="ppv2-float-orb ppv2-float-orb--3" aria-hidden="true"/>
-
-        {/* ── Spotlight beam ── */}
-        <div className="ppv2-spotlight" aria-hidden="true"/>
+        <div className="ppv2-float-orb ppv2-float-orb--4" aria-hidden="true"/>
 
         <div className="ppv2-hero-inner">
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
@@ -390,24 +386,19 @@ export default function PlayerProfile() {
                     <span className="ppv2-meta-val">{rankedModes.length}<span className="ppv2-meta-dim">/{modeCats.length}</span></span>
                     <span className="ppv2-meta-lbl">modes</span>
                   </div>
+                  <div className="ppv2-meta-sep"/>
+                  <div className="ppv2-meta-item">
+                    <span className="ppv2-meta-val">{rank > 0 ? `#${rank}` : '—'}</span>
+                    <span className="ppv2-meta-lbl">rank</span>
+                  </div>
                 </div>
 
-                {/* Rank progress bar */}
-                {rank > 0 && players.length > 1 && (
-                  <div className="ppv2-rank-progress">
-                    <div className="ppv2-rank-progress-labels">
-                      <span className="ppv2-rank-progress-lbl">Global Percentile</span>
-                      <span className="ppv2-rank-progress-val">{Math.round(rankPct)}%</span>
-                    </div>
-                    <div className="ppv2-rank-progress-track">
-                      <div
-                        className={`ppv2-rank-progress-fill${rankClass?` ppv2-rank-progress-fill--${rankClass}`:''}`}
-                        style={{width:`${rankPct}%`}}
-                      />
-                      <div className="ppv2-rank-progress-glow" style={{left:`${rankPct}%`}}/>
-                    </div>
-                  </div>
-                )}
+                {/* Decorative bottom rule */}
+                <div className="ppv2-right-bottom-deco" aria-hidden="true">
+                  <div className="ppv2-deco-line"/>
+                  <div className="ppv2-deco-diamond"/>
+                  <div className="ppv2-deco-line"/>
+                </div>
               </div>
             </div>
           </div>
