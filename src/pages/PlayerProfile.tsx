@@ -344,12 +344,12 @@ export default function PlayerProfile() {
                   <div className="ppv2-spark ppv2-spark--bl"/>
                   <div className="ppv2-spark ppv2-spark--br"/>
 
-                  {/* ── FULL head, no clip ── */}
+                  {/* ── 3D HEAD — full visibility, no clip ── */}
                   <div className="ppv2-avatar-box">
                     <div className="ppv2-avatar-pedestal"/>
                     <div className="ppv2-avatar-glow-bg"/>
                     <div className="ppv2-avatar-inner">
-                      <PlayerAvatar username={live.uuid||player.uuid||live.username} size={136}/>
+                      <PlayerAvatar username={live.uuid||player.uuid||live.username} size={220} mode="face3d"/>
                     </div>
                     <div className="ppv2-avatar-reflection"/>
                   </div>
