@@ -32,14 +32,16 @@
 .ppv2-bg-mesh {
   position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 110% 80% at 22%   0%,  var(--accent-glow)      0%, transparent 55%),
-    radial-gradient(ellipse  80% 60% at 80%  12%,  rgba(167,139,250,0.10)  0%, transparent 55%),
-    radial-gradient(ellipse  55% 50% at  4% 100%,  var(--accent-ray)       0%, transparent 55%),
-    radial-gradient(ellipse  55% 50% at 96% 100%,  var(--accent-ray)       0%, transparent 55%),
-    radial-gradient(ellipse 190% 70% at 50%  82%,  rgba(0,0,0,0.65)        0%, transparent 65%);
-  animation: ppv2-mesh-breathe 9s ease-in-out infinite;
+    radial-gradient(ellipse 130% 90% at 20%  -5%,  var(--accent-glow)       0%, transparent 50%),
+    radial-gradient(ellipse  70% 55% at 82%  10%,  rgba(167,139,250,0.13)   0%, transparent 50%),
+    radial-gradient(ellipse  50% 45% at  2% 100%,  var(--accent-ray)        0%, transparent 55%),
+    radial-gradient(ellipse  50% 45% at 98% 100%,  var(--accent-ray)        0%, transparent 55%),
+    radial-gradient(ellipse  65% 55% at 50%  55%,  rgba(167,139,250,0.055)  0%, transparent 60%),
+    radial-gradient(ellipse 200% 75% at 50%  90%,  rgba(0,0,0,0.80)         0%, transparent 65%),
+    linear-gradient(180deg, rgba(0,0,0,0.30) 0%, transparent 40%, transparent 70%, rgba(0,0,0,0.50) 100%);
+  animation: ppv2-mesh-breathe 10s ease-in-out infinite;
 }
-@keyframes ppv2-mesh-breathe { 0%,100%{opacity:0.72} 50%{opacity:1} }
+@keyframes ppv2-mesh-breathe { 0%,100%{opacity:0.78} 50%{opacity:1} }
 
 .ppv2-bg-grid {
   position: absolute; inset: 0; pointer-events: none;
@@ -63,31 +65,66 @@
   background: linear-gradient(to bottom, transparent, var(--bg, #020308));
 }
 
-/* ── Gold ray burst ── */
-.ppv2-rays {
-  position: absolute; left: 50%; top: -60px;
-  transform: translateX(-50%);
-  width: 1200px; height: 750px;
-  pointer-events: none; z-index: 0; overflow: hidden;
+/* ── Star field ── */
+.ppv2-stars {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.90) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+  background-size: 180px 180px, 110px 110px, 240px 240px;
+  background-position: 0 0, 55px 30px, 90px 90px;
+  opacity: 0.32;
+  animation: ppv2-stars-drift 80s linear infinite;
 }
-.ppv2-rays::before {
+@keyframes ppv2-stars-drift {
+  from { background-position: 0 0, 55px 30px, 90px 90px; }
+  to   { background-position: 180px 180px, 235px 210px, 330px 330px; }
+}
+/* Twinkling layer */
+.ppv2-stars::after {
   content: '';
-  position: absolute; bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 100%; height: 100%;
-  background: conic-gradient(
-    from 270deg at 50% 100%,
-    transparent  0deg,  rgba(251,191,36,0.055)  4deg, transparent  9deg,
-    transparent 14deg,  rgba(251,191,36,0.040) 18deg, transparent 23deg,
-    transparent 28deg,  rgba(251,191,36,0.065) 32deg, transparent 37deg,
-    transparent 43deg,  rgba(251,191,36,0.042) 47deg, transparent 52deg,
-    transparent 58deg,  rgba(251,191,36,0.055) 62deg, transparent 67deg,
-    transparent 73deg,  rgba(251,191,36,0.035) 77deg, transparent 82deg,
-    transparent 88deg,  rgba(251,191,36,0.060) 92deg, transparent 97deg
-  );
-  animation: ppv2-rays-spin 32s linear infinite;
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.80) 1px, transparent 1px),
+    radial-gradient(circle, rgba(180,200,255,0.60) 1px, transparent 1px);
+  background-size: 290px 290px, 130px 130px;
+  background-position: 140px 70px, 20px 80px;
+  animation: ppv2-stars-twinkle 5s ease-in-out infinite;
 }
-@keyframes ppv2-rays-spin { to { transform: translateX(-50%) rotate(360deg); } }
+@keyframes ppv2-stars-twinkle { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+/* ── Nebula color clouds ── */
+.ppv2-nebula {
+  position: absolute; inset: 0; pointer-events: none;
+  border-radius: 50%; filter: blur(80px);
+}
+.ppv2-nebula--a {
+  width: 60%; height: 70%; top: -20%; left: -10%;
+  background: radial-gradient(ellipse, rgba(96,165,250,0.10) 0%, transparent 65%);
+  animation: ppv2-nebula-drift 20s ease-in-out infinite;
+}
+.ppv2-nebula--b {
+  width: 55%; height: 65%; bottom: -20%; right: -5%;
+  background: radial-gradient(ellipse, rgba(167,139,250,0.09) 0%, transparent 65%);
+  animation: ppv2-nebula-drift 24s ease-in-out infinite reverse;
+}
+.ppv2-nebula--rank {
+  width: 70%; height: 80%; top: -10%; left: 50%;
+  transform: translateX(-50%);
+  animation: ppv2-nebula-rank 14s ease-in-out infinite;
+}
+.ppv2-nebula--rank-gold   { background: radial-gradient(ellipse, rgba(251,191,36,0.09) 0%, transparent 65%); }
+.ppv2-nebula--rank-silver { background: radial-gradient(ellipse, rgba(203,213,225,0.07) 0%, transparent 65%); }
+.ppv2-nebula--rank-bronze { background: radial-gradient(ellipse, rgba(251,146,60,0.08) 0%, transparent 65%); }
+@keyframes ppv2-nebula-drift {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%     { transform: translateY(30px) scale(1.15); }
+}
+@keyframes ppv2-nebula-rank {
+  0%,100% { transform: translateX(-50%) scale(1);   opacity: 0.7; }
+  50%     { transform: translateX(-50%) scale(1.20); opacity: 1;   }
+}
 
 /* ════════════════════════════════════════
    FLOATING AMBIENT ORBS — new decoration
@@ -198,22 +235,24 @@
   position: absolute; inset: -100%;
   background: conic-gradient(
     from 0deg,
-    transparent    0deg,
-    var(--accent-glow) 40deg,
-    var(--accent)      65deg,
-    var(--accent-tri)  78deg,
-    var(--accent)      90deg,
-    var(--accent-glow) 115deg,
-    transparent        170deg,
-    transparent        210deg,
-    var(--accent-glow) 255deg,
-    var(--accent)      275deg,
-    var(--accent-tri)  285deg,
-    var(--accent)      295deg,
-    var(--accent-glow) 315deg,
+    transparent         0deg,
+    var(--accent-glow)  35deg,
+    var(--accent-tri)   52deg,
+    var(--accent)       68deg,
+    rgba(255,255,255,0.75) 78deg,
+    var(--accent)       88deg,
+    var(--accent-tri)   98deg,
+    var(--accent-glow) 120deg,
+    transparent        175deg,
+    transparent        205deg,
+    var(--accent-glow) 245deg,
+    var(--accent)      268deg,
+    rgba(255,255,255,0.55) 278deg,
+    var(--accent)      288deg,
+    var(--accent-glow) 308deg,
     transparent        360deg
   );
-  animation: ppv2-border-rot 4.5s linear infinite;
+  animation: ppv2-border-rot 5s linear infinite;
   transform-origin: 50% 50%;
 }
 @keyframes ppv2-border-rot { to { transform: rotate(360deg); } }
@@ -424,6 +463,25 @@
 }
 @keyframes ppv2-aura-pulse  { 0%,100%{opacity:0.60;transform:scale(1)}   50%{opacity:1;transform:scale(1.22)} }
 @keyframes ppv2-aura2-pulse { 0%,100%{opacity:0.20;transform:scale(1)}   50%{opacity:0.45;transform:scale(1.30)} }
+
+/* ── Expanding ripple rings ── */
+.ppv2-ripple {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  border-radius: 30px; border: 1px solid var(--accent);
+  pointer-events: none; opacity: 0;
+  width: 260px; height: 260px;
+  animation: ppv2-ripple-out 3.6s ease-out infinite;
+  box-shadow: 0 0 14px var(--accent-glow), inset 0 0 8px var(--accent-glow);
+}
+.ppv2-ripple--1 { animation-delay: 0s; }
+.ppv2-ripple--2 { animation-delay: 1.2s; }
+.ppv2-ripple--3 { animation-delay: 2.4s; }
+@keyframes ppv2-ripple-out {
+  0%   { transform: translate(-50%,-50%) scale(0.72); opacity: 0.60; }
+  80%  { opacity: 0.05; }
+  100% { transform: translate(-50%,-50%) scale(1.90); opacity: 0; }
+}
 
 /* CSS ring decorations */
 .ppv2-ring {
@@ -684,18 +742,23 @@
   font-weight: 900; letter-spacing: -0.065em;
   line-height: 0.92; margin: 0 0 6px;
   background: linear-gradient(125deg,
-    #ffffff 0%,  #ffffff 18%,
-    var(--accent-tri) 46%,
-    var(--accent)     72%,
-    var(--accent-sec) 100%);
-  background-size: 260% auto;
+    #ffffff     0%,
+    #ffffff    15%,
+    var(--accent-tri) 40%,
+    var(--accent)     65%,
+    var(--accent-tri) 80%,
+    #ffffff    95%,
+    #ffffff   100%);
+  background-size: 320% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  animation: ppv2-name-shine 6s ease-in-out infinite;
-  filter: drop-shadow(0 0 36px var(--accent-glow));
+  animation: ppv2-name-shine 7s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 40px var(--accent-glow))
+    drop-shadow(0 0 80px var(--accent-glow));
 }
 @keyframes ppv2-name-shine {
-  0%,100% { background-position:0% center; }
-  50%     { background-position:100% center; }
+  0%,100% { background-position: 0% center; filter: drop-shadow(0 0 28px var(--accent-glow)); }
+  50%     { background-position: 100% center; filter: drop-shadow(0 0 60px var(--accent-glow)) drop-shadow(0 0 100px var(--accent-glow)); }
 }
 
 .ppv2-achievement-title {
