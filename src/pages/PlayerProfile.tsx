@@ -39,26 +39,44 @@ function useCountUp(target: number, duration = 1200) {
 }
 
 const TIER_GLOW: Record<string, string> = {
-  HT1: 'rgba(241,196,15,0.7)',   LT1: 'rgba(212,179,84,0.6)',
-  HT2: 'rgba(164,178,199,0.65)', LT2: 'rgba(136,141,149,0.5)',
-  HT3: 'rgba(223,135,70,0.7)',   LT3: 'rgba(179,105,50,0.6)',
-  HT4: 'rgba(70,223,93,0.65)',   LT4: 'rgba(49,146,40,0.55)',
-  HT5: 'rgba(164,213,255,0.5)',  LT5: 'rgba(164,213,255,0.4)',
+  HT1:'rgba(241,196,15,0.7)',LT1:'rgba(212,179,84,0.6)',
+  HT2:'rgba(164,178,199,0.65)',LT2:'rgba(136,141,149,0.5)',
+  HT3:'rgba(223,135,70,0.7)',LT3:'rgba(179,105,50,0.6)',
+  HT4:'rgba(70,223,93,0.65)',LT4:'rgba(49,146,40,0.55)',
+  HT5:'rgba(164,213,255,0.5)',LT5:'rgba(164,213,255,0.4)',
 };
 const TIER_BG: Record<string, string> = {
-  HT1: 'rgba(241,196,15,0.06)',   LT1: 'rgba(212,179,84,0.05)',
-  HT2: 'rgba(164,178,199,0.06)',  LT2: 'rgba(136,141,149,0.05)',
-  HT3: 'rgba(223,135,70,0.06)',   LT3: 'rgba(179,105,50,0.05)',
-  HT4: 'rgba(70,223,93,0.06)',    LT4: 'rgba(49,146,40,0.05)',
-  HT5: 'rgba(164,213,255,0.05)',  LT5: 'rgba(164,213,255,0.04)',
+  HT1:'rgba(241,196,15,0.06)',LT1:'rgba(212,179,84,0.05)',
+  HT2:'rgba(164,178,199,0.06)',LT2:'rgba(136,141,149,0.05)',
+  HT3:'rgba(223,135,70,0.06)',LT3:'rgba(179,105,50,0.05)',
+  HT4:'rgba(70,223,93,0.06)',LT4:'rgba(49,146,40,0.05)',
+  HT5:'rgba(164,213,255,0.05)',LT5:'rgba(164,213,255,0.04)',
 };
 
-/* Rank accent colors for hero theming */
-const RANK_ACCENT: Record<string, { primary: string; secondary: string; glow: string; dim: string }> = {
-  'rank-gold':   { primary: '#fbbf24', secondary: '#f59e0b', glow: 'rgba(251,191,36,0.55)', dim: 'rgba(251,191,36,0.12)' },
-  'rank-silver': { primary: '#94a3b8', secondary: '#64748b', glow: 'rgba(148,163,184,0.45)', dim: 'rgba(148,163,184,0.10)' },
-  'rank-bronze': { primary: '#c97940', secondary: '#b45309', glow: 'rgba(180,120,60,0.50)', dim: 'rgba(180,120,60,0.10)' },
-  '':            { primary: '#60a5fa', secondary: '#3b82f6', glow: 'rgba(96,165,250,0.40)', dim: 'rgba(96,165,250,0.08)' },
+const RANK_CFG: Record<string, {
+  primary: string; secondary: string; tertiary: string;
+  glow: string; dim: string; label: string; labelColor: string;
+}> = {
+  'rank-gold': {
+    primary:'#fbbf24', secondary:'#f59e0b', tertiary:'#fde68a',
+    glow:'rgba(251,191,36,0.55)', dim:'rgba(251,191,36,0.10)',
+    label:'Champion', labelColor:'#fde68a',
+  },
+  'rank-silver': {
+    primary:'#cbd5e1', secondary:'#94a3b8', tertiary:'#e2e8f0',
+    glow:'rgba(203,213,225,0.45)', dim:'rgba(148,163,184,0.09)',
+    label:'Runner Up', labelColor:'#e2e8f0',
+  },
+  'rank-bronze': {
+    primary:'#fb923c', secondary:'#c97940', tertiary:'#fed7aa',
+    glow:'rgba(251,146,60,0.48)', dim:'rgba(180,120,60,0.09)',
+    label:'Bronze Finish', labelColor:'#fed7aa',
+  },
+  '': {
+    primary:'#60a5fa', secondary:'#3b82f6', tertiary:'#bfdbfe',
+    glow:'rgba(96,165,250,0.40)', dim:'rgba(96,165,250,0.08)',
+    label:'', labelColor:'#60a5fa',
+  },
 };
 
 /* Crown SVGs */
@@ -83,7 +101,6 @@ function ProfileCrownGold() {
       <circle cx="34" cy="72" r="5" fill="url(#pcsapp)" stroke="#93c5fd" strokeWidth="0.6"/>
       <circle cx="55" cy="72" r="5" fill="url(#pcruby)" stroke="#fca5a5" strokeWidth="0.6"/>
       <circle cx="76" cy="72" r="5" fill="url(#pcemer)" stroke="#6ee7b7" strokeWidth="0.6"/>
-      <path d="M20 48 Q55 38 90 50" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
     </svg>
   );
 }
@@ -102,9 +119,6 @@ function ProfileCrownSilver() {
       <polygon points="50,6 56,15 50,22 44,15" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.7"/>
       <polygon points="12,31 17,38 12,44 7,38" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.6"/>
       <polygon points="88,31 93,38 88,44 83,38" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.6"/>
-      <rect x="27" y="62" width="8" height="8" rx="1" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.5" transform="rotate(45 31 66)"/>
-      <rect x="46" y="62" width="8" height="8" rx="1" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.5" transform="rotate(45 50 66)"/>
-      <rect x="65" y="62" width="8" height="8" rx="1" fill="url(#psdia)" stroke="#bfdbfe" strokeWidth="0.5" transform="rotate(45 69 66)"/>
     </svg>
   );
 }
@@ -122,9 +136,6 @@ function ProfileCrownBronze() {
       <ellipse cx="50" cy="18" rx="7" ry="8" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.8"/>
       <ellipse cx="14" cy="40" rx="5.5" ry="6.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.7"/>
       <ellipse cx="86" cy="40" rx="5.5" ry="6.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.7"/>
-      <circle cx="32" cy="70" r="4.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.6"/>
-      <circle cx="50" cy="70" r="4.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.6"/>
-      <circle cx="68" cy="70" r="4.5" fill="url(#pbopal)" stroke="#fdba74" strokeWidth="0.6"/>
     </svg>
   );
 }
@@ -179,15 +190,12 @@ export default function PlayerProfile() {
         <div className="not-found-glow" />
         <div className="not-found-icon">
           <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
         </div>
         <h1>Player Not Found</h1>
         <p>No player named <strong style={{ color: 'var(--text-dim)' }}>"{username}"</strong> exists in the system.</p>
-        <Link to="/" className="go-home-btn btn-press">
-          <ArrowLeft size={15} /> Go Home
-        </Link>
+        <Link to="/" className="go-home-btn btn-press"><ArrowLeft size={15} /> Go Home</Link>
       </div>
     );
   }
@@ -196,190 +204,221 @@ export default function PlayerProfile() {
   const rank = sorted.findIndex(p => p.id === player.id) + 1;
   const modeCats = CATEGORIES.filter(c => c.id !== 'overall');
   const rankClass = rank === 1 ? 'rank-gold' : rank === 2 ? 'rank-silver' : rank === 3 ? 'rank-bronze' : '';
-  const accent = RANK_ACCENT[rankClass] ?? RANK_ACCENT[''];
+  const cfg = RANK_CFG[rankClass] ?? RANK_CFG[''];
   const rankedModes = modeCats.filter(c => { const t = player.tiers[c.id as keyof PlayerTiers]; return t && t !== '-'; });
   const unrankedModes = modeCats.filter(c => { const t = player.tiers[c.id as keyof PlayerTiers]; return !t || t === '-'; });
-  const rankLabel = rank === 1 ? '#1' : rank === 2 ? '#2' : rank === 3 ? '#3' : `#${rank}`;
+  const rankLabel = rank > 0 ? `#${rank}` : '—';
+
+  const cssVars = {
+    '--accent':     cfg.primary,
+    '--accent-sec': cfg.secondary,
+    '--accent-tri': cfg.tertiary,
+    '--accent-glow':cfg.glow,
+    '--accent-dim': cfg.dim,
+  } as React.CSSProperties;
 
   return (
     <div className="profile-page ppv2-page">
-      <div
-        className={`ppv2-hero${rankClass ? ` ppv2-hero--${rankClass}` : ''}`}
-        style={{
-          '--accent': accent.primary,
-          '--accent-sec': accent.secondary,
-          '--accent-glow': accent.glow,
-          '--accent-dim': accent.dim,
-        } as React.CSSProperties}
-      >
-        {/* Background layers */}
-        <div className="ppv2-bg-noise" />
-        <div className="ppv2-bg-beam" />
-        <div className="ppv2-bg-grid" />
-        <div className="ppv2-bg-gradient" />
+      <div className={`ppv2-hero${rankClass ? ` ppv2-hero--${rankClass}` : ''}`} style={cssVars}>
 
-        {/* Scanlines */}
-        <div className="ppv2-scanlines" />
+        {/* Layered background */}
+        <div className="ppv2-bg-orb ppv2-bg-orb--1" />
+        <div className="ppv2-bg-orb ppv2-bg-orb--2" />
+        <div className="ppv2-bg-grid" />
+        <div className="ppv2-bg-vignette" />
 
         <div className="ppv2-hero-inner">
-          {/* Back */}
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
             <ArrowLeft size={14} /> Back to Rankings
           </Link>
 
-          {/* ── Main card ── */}
-          <div className="ppv2-card">
-            {/* Card shine sweep */}
-            <div className="ppv2-card-shine" />
-            {/* Card border glow */}
-            <div className="ppv2-card-edge" />
-
-            {/* Left: Avatar block */}
-            <div className="ppv2-card-left">
-
-              {/* Ghost rank number behind avatar */}
-              {rank > 0 && rank <= 999 && (
-                <div className="ppv2-ghost-rank" aria-hidden="true">
-                  {rankLabel}
-                </div>
-              )}
-
-              {/* Octagonal avatar frame */}
-              <div className={`ppv2-avatar-frame${rankClass ? ` ppv2-avatar-frame--${rankClass}` : ''}`}>
-                {/* Animated border ring */}
-                <svg className="ppv2-frame-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="frameGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor={accent.primary} stopOpacity="0.9"/>
-                      <stop offset="40%" stopColor={accent.secondary} stopOpacity="0.5"/>
-                      <stop offset="100%" stopColor={accent.primary} stopOpacity="0.0"/>
-                    </linearGradient>
-                  </defs>
-                  <polygon
-                    points="80,4 136,28 156,84 136,140 80,156 24,140 4,84 24,28"
-                    stroke="url(#frameGrad)"
-                    strokeWidth="2"
-                    fill="none"
-                    className="ppv2-frame-poly"
-                  />
-                  <polygon
-                    points="80,12 130,33 149,84 130,135 80,148 30,135 11,84 30,33"
-                    stroke={accent.primary}
-                    strokeWidth="0.5"
-                    strokeDasharray="6 18"
-                    fill="none"
-                    className="ppv2-frame-dash"
-                  />
-                </svg>
-
-                {/* Corner accents */}
-                <div className="ppv2-frame-corner ppv2-frame-corner--tl" />
-                <div className="ppv2-frame-corner ppv2-frame-corner--tr" />
-                <div className="ppv2-frame-corner ppv2-frame-corner--bl" />
-                <div className="ppv2-frame-corner ppv2-frame-corner--br" />
-
-                {/* Avatar clipped to octagon */}
-                <div className="ppv2-avatar-clip">
-                  <div className="ppv2-avatar-glow" />
-                  <PlayerAvatar username={live.uuid || player.uuid || live.username} size={118} />
-                </div>
-
-                {/* Crown for top 3 */}
-                {rank > 0 && rank <= 3 && (
-                  <div className={`ppv2-crown ppv2-crown--${rank}`}>
-                    {rank === 1 ? <ProfileCrownGold /> : rank === 2 ? <ProfileCrownSilver /> : <ProfileCrownBronze />}
-                  </div>
-                )}
-
-                {/* Rank badge on frame */}
-                {rank > 0 && rank <= 3 && (
-                  <div className={`ppv2-rank-badge ppv2-rank-badge--${rankClass}`}>
-                    <Trophy size={9} />
-                    {rankLabel}
-                  </div>
-                )}
-              </div>
-
-              {/* Vertical accent line left of avatar */}
-              <div className="ppv2-accent-bar" />
+          {/* Champion banner for top 3 */}
+          {rankClass && cfg.label && (
+            <div className={`ppv2-champion-banner ppv2-champion-banner--${rankClass}`}>
+              <div className="ppv2-champion-banner-line" />
+              <Trophy size={12} />
+              <span>{cfg.label}</span>
+              <Trophy size={12} />
+              <div className="ppv2-champion-banner-line" />
             </div>
+          )}
 
-            {/* Right: Info block */}
-            <div className="ppv2-card-right">
+          {/* ── The main card ── */}
+          <div className="ppv2-card-wrap">
+            {/* animated border */}
+            <div className="ppv2-card-border-anim" />
 
-              {/* Eyebrow */}
-              <div className="ppv2-eyebrow">
-                <Zap size={9} />
-                <span>OuterTiers Player</span>
-                <span className="ppv2-eyebrow-dot" />
-                <span className="ppv2-eyebrow-region">{player.region}</span>
-              </div>
+            <div className="ppv2-card">
+              {/* Top highlight line */}
+              <div className="ppv2-card-top-line" />
 
-              {/* Name */}
-              <h1 className="ppv2-username">{live.username}</h1>
+              {/* ── LEFT: Avatar ── */}
+              <div className="ppv2-card-left">
+                {/* Diagonal stripes background */}
+                <div className="ppv2-card-left-stripes" />
 
-              {/* Achievement title — RIGHT UNDER name */}
-              <div className="ppv2-achievement-title">
-                <Shield size={11} className="ppv2-title-icon" />
-                <span>{getTitle(player.points)}</span>
-              </div>
-
-              {/* Rank + region pills */}
-              <div className="ppv2-pills-row">
-                <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                {/* Ghost rank */}
                 {rank > 0 && (
-                  <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
-                    <Trophy size={10} /> {rankLabel} Overall
-                  </span>
+                  <div className="ppv2-ghost-rank" aria-hidden="true">{rankLabel}</div>
                 )}
+
+                {/* Particles for top 3 */}
+                {rankClass && (
+                  <div className="ppv2-particles" aria-hidden="true">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className={`ppv2-particle ppv2-particle--${i + 1}`} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Avatar frame */}
+                <div className={`ppv2-avatar-frame${rankClass ? ` ppv2-avatar-frame--${rankClass}` : ''}`}>
+                  {/* Outer glow disc */}
+                  <div className="ppv2-avatar-disc" />
+
+                  {/* Double SVG rings */}
+                  <svg className="ppv2-frame-svg ppv2-frame-svg--outer" viewBox="0 0 180 180" fill="none">
+                    <defs>
+                      <linearGradient id="outerRingGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor={cfg.tertiary} stopOpacity="0.9"/>
+                        <stop offset="35%" stopColor={cfg.primary} stopOpacity="0.6"/>
+                        <stop offset="70%" stopColor={cfg.secondary} stopOpacity="0.3"/>
+                        <stop offset="100%" stopColor={cfg.tertiary} stopOpacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <polygon
+                      points="90,5 151,33 175,90 151,147 90,175 29,147 5,90 29,33"
+                      stroke="url(#outerRingGrad)"
+                      strokeWidth="1.5"
+                      fill="none"
+                      className="ppv2-ring-spin"
+                    />
+                    <polygon
+                      points="90,14 145,40 167,90 145,140 90,166 35,140 13,90 35,40"
+                      stroke={cfg.primary}
+                      strokeWidth="0.7"
+                      strokeDasharray="5 20"
+                      fill="none"
+                      className="ppv2-ring-spin-rev"
+                    />
+                  </svg>
+
+                  {/* Inner tight ring */}
+                  <svg className="ppv2-frame-svg ppv2-frame-svg--inner" viewBox="0 0 140 140" fill="none">
+                    <polygon
+                      points="70,3 117,27 137,70 117,113 70,137 23,113 3,70 23,27"
+                      stroke={cfg.primary}
+                      strokeWidth="1.2"
+                      strokeOpacity="0.5"
+                      fill="none"
+                    />
+                  </svg>
+
+                  {/* Corner sparks */}
+                  <div className="ppv2-spark ppv2-spark--tl" />
+                  <div className="ppv2-spark ppv2-spark--tr" />
+                  <div className="ppv2-spark ppv2-spark--bl" />
+                  <div className="ppv2-spark ppv2-spark--br" />
+
+                  {/* Avatar clipped to octagon */}
+                  <div className="ppv2-avatar-clip">
+                    <div className="ppv2-avatar-inner-glow" />
+                    <PlayerAvatar username={live.uuid || player.uuid || live.username} size={124} />
+                  </div>
+
+                  {/* Crown */}
+                  {rank > 0 && rank <= 3 && (
+                    <div className={`ppv2-crown ppv2-crown--${rank}`}>
+                      {rank === 1 ? <ProfileCrownGold /> : rank === 2 ? <ProfileCrownSilver /> : <ProfileCrownBronze />}
+                    </div>
+                  )}
+
+                  {/* Rank pill at bottom of frame */}
+                  {rank > 0 && (
+                    <div className={`ppv2-frame-rank${rankClass ? ` ppv2-frame-rank--${rankClass}` : ''}`}>
+                      <Trophy size={8} />
+                      {rankLabel}
+                    </div>
+                  )}
+                </div>
+
+                {/* Left accent bar */}
+                <div className="ppv2-accent-bar" />
               </div>
 
-              {/* UUID */}
-              <UuidBadge uuid={live.uuid || player.uuid || ''} />
+              {/* ── RIGHT: Info ── */}
+              <div className="ppv2-card-right">
 
-              {/* Horizontal accent line */}
-              <div className="ppv2-info-line" />
-
-              {/* Inline mini stats */}
-              <div className="ppv2-mini-stats">
-                <div className="ppv2-mini-stat">
-                  <span className="ppv2-mini-val">{animPts}</span>
-                  <span className="ppv2-mini-lbl">pts</span>
+                <div className="ppv2-eyebrow">
+                  <Zap size={9} />
+                  <span>OuterTiers Player</span>
+                  <span className="ppv2-eyebrow-sep">·</span>
+                  <span className={`ppv2-eyebrow-region region-badge region-${player.region.toLowerCase()}`}>
+                    {player.region}
+                  </span>
                 </div>
-                <div className="ppv2-mini-sep" />
-                <div className="ppv2-mini-stat">
-                  <span className="ppv2-mini-val">{rankedModes.length}</span>
-                  <span className="ppv2-mini-lbl">/{modeCats.length} modes</span>
+
+                {/* Name — main focus */}
+                <h1 className="ppv2-username">{live.username}</h1>
+
+                {/* Achievement title — DIRECTLY under name, tight */}
+                <div className="ppv2-achievement-title">
+                  <Shield size={11} className="ppv2-title-icon" />
+                  <span>{getTitle(player.points)}</span>
+                </div>
+
+                {/* Accent divider */}
+                <div className="ppv2-divider" />
+
+                {/* Rank pill */}
+                <div className="ppv2-pills-row">
+                  {rank > 0 && (
+                    <span className={`ppv2-rank-pill${rankClass ? ` ppv2-rank-pill--${rankClass}` : ''}`}>
+                      <Trophy size={10} /> {rankLabel} Overall
+                    </span>
+                  )}
+                  <span className={`region-badge region-${player.region.toLowerCase()}`}>{player.region}</span>
+                </div>
+
+                {/* UUID */}
+                <UuidBadge uuid={live.uuid || player.uuid || ''} />
+
+                {/* Bottom meta row */}
+                <div className="ppv2-meta-row">
+                  <div className="ppv2-meta-item">
+                    <span className="ppv2-meta-val">{animPts}</span>
+                    <span className="ppv2-meta-lbl">points</span>
+                  </div>
+                  <div className="ppv2-meta-sep" />
+                  <div className="ppv2-meta-item">
+                    <span className="ppv2-meta-val">{rankedModes.length}<span className="ppv2-meta-dim">/{modeCats.length}</span></span>
+                    <span className="ppv2-meta-lbl">modes</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Stat cards row ── */}
+          {/* ── Stat cards ── */}
           <div className="ppv2-stat-cards">
-            <div className="ppv2-stat-card">
-              <div className="ppv2-stat-card-icon"><Star size={16} /></div>
-              <div className="ppv2-stat-card-num">{animPts}</div>
-              <div className="ppv2-stat-card-lbl">Total Points</div>
-            </div>
-            <div className="ppv2-stat-card">
-              <div className="ppv2-stat-card-icon"><Trophy size={16} /></div>
-              <div className="ppv2-stat-card-num">{rank > 0 ? rankLabel : '—'}</div>
-              <div className="ppv2-stat-card-lbl">Overall Rank</div>
-            </div>
-            <div className="ppv2-stat-card">
-              <div className="ppv2-stat-card-icon"><Globe size={16} /></div>
-              <div className="ppv2-stat-card-num">{player.region}</div>
-              <div className="ppv2-stat-card-lbl">Region</div>
-            </div>
-            <div className="ppv2-stat-card">
-              <div className="ppv2-stat-card-icon"><Zap size={16} /></div>
-              <div className="ppv2-stat-card-num">
-                {rankedModes.length}
-                <span className="ppv2-stat-card-of">/{modeCats.length}</span>
+            {[
+              { icon: <Star size={15}/>, val: animPts, lbl: 'Total Points', color: 'var(--accent)', glow: 'var(--accent-glow)' },
+              { icon: <Trophy size={15}/>, val: rank > 0 ? rankLabel : '—', lbl: 'Overall Rank', color: 'var(--accent)', glow: 'var(--accent-glow)' },
+              { icon: <Globe size={15}/>, val: player.region, lbl: 'Region', color: '#34d399', glow: 'rgba(52,211,153,0.35)' },
+              { icon: <Zap size={15}/>, val: <>{rankedModes.length}<span className="ppv2-stat-card-of">/{modeCats.length}</span></>, lbl: 'Modes Ranked', color: '#a78bfa', glow: 'rgba(167,139,250,0.35)' },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className="ppv2-stat-card"
+                style={{ '--sc': s.color, '--sg': s.glow, animationDelay: `${i * 60}ms` } as React.CSSProperties}
+              >
+                <div className="ppv2-stat-card-bg" />
+                <div className="ppv2-stat-card-top-line" />
+                <div className="ppv2-stat-card-icon">{s.icon}</div>
+                <div className="ppv2-stat-card-num">{s.val}</div>
+                <div className="ppv2-stat-card-lbl">{s.lbl}</div>
               </div>
-              <div className="ppv2-stat-card-lbl">Modes Ranked</div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -402,11 +441,8 @@ export default function PlayerProfile() {
                 const glow = TIER_GLOW[rawUp] ?? 'rgba(91,164,245,0.35)';
                 const bg   = TIER_BG[rawUp]   ?? 'rgba(91,164,245,0.04)';
                 return (
-                  <div
-                    key={cat.id}
-                    className="ppv2-tier-card"
-                    style={{ '--tier-glow': glow, '--tier-bg': bg, animationDelay: `${i * 55}ms` } as React.CSSProperties}
-                  >
+                  <div key={cat.id} className="ppv2-tier-card"
+                    style={{ '--tier-glow': glow, '--tier-bg': bg, animationDelay: `${i * 55}ms` } as React.CSSProperties}>
                     <div className="ppv2-card-orb" />
                     <div className="ppv2-card-icon"><img src={cat.icon} alt={cat.label} width={24} height={24} /></div>
                     <div className="ppv2-card-mode">{cat.label}</div>
@@ -423,14 +459,9 @@ export default function PlayerProfile() {
             </div>
           </>
         )}
-
         {rankedModes.length === 0 && (
-          <div className="ppv2-no-ranks">
-            <Trophy size={28} style={{ opacity: 0.3 }} />
-            <p>No ranked modes yet</p>
-          </div>
+          <div className="ppv2-no-ranks"><Trophy size={28} style={{ opacity: 0.3 }} /><p>No ranked modes yet</p></div>
         )}
-
         {unrankedModes.length > 0 && (
           <div className="ppv2-unranked">
             <div className="ppv2-unranked-lbl">Not yet ranked in</div>
