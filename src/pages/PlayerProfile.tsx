@@ -52,17 +52,100 @@ const TIER_BG: Record<string,string> = {
 };
 
 const RANK_CFG = {
-  'rank-gold':  {p:'#fbbf24',s:'#f59e0b',t:'#fde68a',g:'rgba(251,191,36,0.55)',d:'rgba(251,191,36,0.10)',label:'OuterTiers Champion'},
-  'rank-silver':{p:'#cbd5e1',s:'#94a3b8',t:'#e2e8f0',g:'rgba(203,213,225,0.42)',d:'rgba(148,163,184,0.08)',label:'Runner Up'},
-  'rank-bronze':{p:'#fb923c',s:'#c97940',t:'#fed7aa',g:'rgba(251,146,60,0.46)',d:'rgba(180,120,60,0.09)',label:'Bronze Finish'},
-  '':           {p:'#60a5fa',s:'#3b82f6',t:'#bfdbfe',g:'rgba(96,165,250,0.40)',d:'rgba(96,165,250,0.08)',label:''},
+  'rank-gold':  {p:'#fbbf24',s:'#f59e0b',t:'#fde68a',g:'rgba(251,191,36,0.55)',d:'rgba(251,191,36,0.10)'},
+  'rank-silver':{p:'#cbd5e1',s:'#94a3b8',t:'#e2e8f0',g:'rgba(203,213,225,0.42)',d:'rgba(148,163,184,0.08)'},
+  'rank-bronze':{p:'#fb923c',s:'#c97940',t:'#fed7aa',g:'rgba(251,146,60,0.46)',d:'rgba(180,120,60,0.09)'},
+  '':           {p:'#60a5fa',s:'#3b82f6',t:'#bfdbfe',g:'rgba(96,165,250,0.40)',d:'rgba(96,165,250,0.08)'},
 } as const;
 type RankKey = keyof typeof RANK_CFG;
+
+/* ── Rank Emblem (replaces champion banner) ── */
+function RankEmblem({ rank, rankClass, cfg }: {
+  rank: number;
+  rankClass: RankKey;
+  cfg: typeof RANK_CFG['rank-gold'];
+}) {
+  if (!rankClass || rank < 1 || rank > 3) return null;
+
+  const symbols = { 1: 'I', 2: 'II', 3: 'III' } as Record<number, string>;
+  const numeral = symbols[rank];
+
+  // Gold: starburst seal  Silver: hexagonal crest  Bronze: laurel-style shield
+  return (
+    <div className={`ppv2-rank-emblem ppv2-rank-emblem--${rankClass}`} aria-label={`Rank ${rank}`}>
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="ppv2-emblem-svg">
+        <defs>
+          <radialGradient id={`eg${rank}`} cx="50%" cy="40%" r="55%">
+            <stop offset="0%"   stopColor={cfg.t} stopOpacity="0.95"/>
+            <stop offset="60%"  stopColor={cfg.p} stopOpacity="0.70"/>
+            <stop offset="100%" stopColor={cfg.s} stopOpacity="0.20"/>
+          </radialGradient>
+          <filter id={`ef${rank}`}>
+            <feGaussianBlur stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id={`eg2${rank}`}>
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        {/* Outer glow disc */}
+        <circle cx="60" cy="60" r="52" fill={cfg.g} filter={`url(#eg2${rank})`} opacity="0.6"/>
+
+        {/* Outer decorative ring — dashed */}
+        <circle cx="60" cy="60" r="52" stroke={cfg.p} strokeWidth="0.8" strokeDasharray="3 9" strokeOpacity="0.65" className="ppv2-emblem-ring-outer"/>
+
+        {/* Mid ring */}
+        <circle cx="60" cy="60" r="44" stroke={cfg.p} strokeWidth="1.4" strokeOpacity="0.90" filter={`url(#ef${rank})`}/>
+
+        {/* Filled inner circle */}
+        <circle cx="60" cy="60" r="38" fill={cfg.d}/>
+        <circle cx="60" cy="60" r="38" stroke={cfg.p} strokeWidth="0.6" strokeOpacity="0.40"/>
+
+        {/* Rank numeral */}
+        <text
+          x="60" y="70"
+          textAnchor="middle"
+          fill={`url(#eg${rank})`}
+          fontSize={rank === 1 ? 34 : rank === 2 ? 28 : 26}
+          fontWeight="900"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          letterSpacing="-1"
+          filter={`url(#ef${rank})`}
+        >{numeral}</text>
+
+        {/* 4 cardinal diamonds */}
+        {[[60,5],[60,115],[5,60],[115,60]].map(([cx,cy],i) => (
+          <rect key={i}
+            x={cx-4} y={cy-4} width="8" height="8"
+            fill={cfg.p} opacity="0.85"
+            transform={`rotate(45,${cx},${cy})`}
+            filter={`url(#ef${rank})`}
+          />
+        ))}
+
+        {/* 4 diagonal small diamonds */}
+        {[[23,23],[97,23],[23,97],[97,97]].map(([cx,cy],i) => (
+          <rect key={i}
+            x={cx-3} y={cy-3} width="6" height="6"
+            fill={cfg.p} opacity="0.45"
+            transform={`rotate(45,${cx},${cy})`}
+          />
+        ))}
+      </svg>
+
+      {/* Horizontal decorative lines either side */}
+      <div className="ppv2-emblem-line ppv2-emblem-line--left"/>
+      <div className="ppv2-emblem-line ppv2-emblem-line--right"/>
+    </div>
+  );
+}
 
 /* Crowns */
 function CrownGold() {
   return (
-    <svg viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 110 90" fill="none">
       <defs>
         <linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="45%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#92400e"/></linearGradient>
         <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fcd34d"/><stop offset="100%" stopColor="#78350f"/></linearGradient>
@@ -86,7 +169,7 @@ function CrownGold() {
 }
 function CrownSilver() {
   return (
-    <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 100 80" fill="none">
       <defs>
         <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f1f5f9"/><stop offset="40%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#334155"/></linearGradient>
         <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#cbd5e1"/><stop offset="100%" stopColor="#1e293b"/></linearGradient>
@@ -104,7 +187,7 @@ function CrownSilver() {
 }
 function CrownBronze() {
   return (
-    <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 100 90" fill="none">
       <defs>
         <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fed7aa"/><stop offset="45%" stopColor="#c07838"/><stop offset="100%" stopColor="#7c2d12"/></linearGradient>
         <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fdba74"/><stop offset="100%" stopColor="#431407"/></linearGradient>
@@ -165,7 +248,7 @@ export default function PlayerProfile() {
         </svg>
       </div>
       <h1>Player Not Found</h1>
-      <p>No player named <strong style={{color:'var(--text-dim)'}}>&ldquo;{username}&rdquo;</strong> exists in the system.</p>
+      <p>No player named <strong style={{color:'var(--text-dim)'}}>&ldquo;{username}&rdquo;</strong> exists.</p>
       <Link to="/" className="go-home-btn btn-press"><ArrowLeft size={15}/> Go Home</Link>
     </div>
   );
@@ -185,9 +268,9 @@ export default function PlayerProfile() {
   } as React.CSSProperties;
 
   const statCards = [
-    {icon:<Star size={15}/>,   val:animPts,              lbl:'Total Points',  sc:cfg.p, sg:cfg.g},
-    {icon:<Trophy size={15}/>, val:rankLabel,             lbl:'Overall Rank',  sc:cfg.p, sg:cfg.g},
-    {icon:<Globe size={15}/>,  val:player.region,         lbl:'Region',        sc:'#34d399', sg:'rgba(52,211,153,0.35)'},
+    {icon:<Star size={15}/>,   val:animPts,     lbl:'Total Points', sc:cfg.p, sg:cfg.g},
+    {icon:<Trophy size={15}/>, val:rankLabel,    lbl:'Overall Rank', sc:cfg.p, sg:cfg.g},
+    {icon:<Globe size={15}/>,  val:player.region,lbl:'Region',       sc:'#34d399', sg:'rgba(52,211,153,0.35)'},
     {icon:<Zap size={15}/>,    val:<>{rankedModes.length}<span className="ppv2-stat-card-of">/{modeCats.length}</span></>, lbl:'Modes Ranked', sc:'#a78bfa', sg:'rgba(167,139,250,0.35)'},
   ];
 
@@ -207,22 +290,8 @@ export default function PlayerProfile() {
             <ArrowLeft size={14}/> Back to Rankings
           </Link>
 
-          {/* Champion banner */}
-          {rankClass && cfg.label && (
-            <div className={`ppv2-champion-banner ppv2-champion-banner--${rankClass}`}>
-              <div className="ppv2-champion-banner-deco">
-                <div className="ppv2-champion-banner-line"/>
-                <div className="ppv2-champion-banner-diamond"/>
-                <div className="ppv2-champion-banner-line"/>
-              </div>
-              <span>{cfg.label}</span>
-              <div className="ppv2-champion-banner-deco ppv2-champion-banner-deco--right">
-                <div className="ppv2-champion-banner-line"/>
-                <div className="ppv2-champion-banner-diamond"/>
-                <div className="ppv2-champion-banner-line"/>
-              </div>
-            </div>
-          )}
+          {/* ── Rank Emblem (replaces champion banner) ── */}
+          <RankEmblem rank={rank} rankClass={rankClass} cfg={cfg}/>
 
           {/* ── Card ── */}
           <div className="ppv2-card-wrap">
@@ -248,7 +317,7 @@ export default function PlayerProfile() {
                 <div className={`ppv2-avatar-frame${rankClass?` ppv2-avatar-frame--${rankClass}`:''}`}>
                   <div className="ppv2-avatar-aura"/>
 
-                  {/* SVG frame — flat-top hex */}
+                  {/* SVG hex rings */}
                   <svg className="ppv2-frame-svg" viewBox="0 0 188 188" fill="none">
                     <defs>
                       <linearGradient id="fgA" x1="0" y1="0" x2="1" y2="1">
@@ -258,28 +327,15 @@ export default function PlayerProfile() {
                         <stop offset="100%" stopColor={cfg.t} stopOpacity="0.05"/>
                       </linearGradient>
                     </defs>
-                    {/* Outer hex — spinning */}
-                    <polygon
-                      points="94,8 164,48 164,140 94,180 24,140 24,48"
+                    <polygon points="94,8 164,48 164,140 94,180 24,140 24,48"
                       stroke="url(#fgA)" strokeWidth="2" fill="none"
-                      className="ppv2-ring-a"
-                      style={{transformOrigin:'94px 94px'}}
-                    />
-                    {/* Middle dashed — counter */}
-                    <polygon
-                      points="94,18 156,55 156,133 94,170 32,133 32,55"
+                      className="ppv2-ring-a" style={{transformOrigin:'94px 94px'}}/>
+                    <polygon points="94,18 156,55 156,133 94,170 32,133 32,55"
                       stroke={cfg.p} strokeWidth="0.8" strokeDasharray="6 22"
                       strokeOpacity="0.55" fill="none"
-                      className="ppv2-ring-b"
-                      style={{transformOrigin:'94px 94px'}}
-                    />
-                    {/* Inner static */}
-                    <polygon
-                      points="94,28 148,62 148,126 94,160 40,126 40,62"
-                      stroke={cfg.p} strokeWidth="0.5"
-                      strokeOpacity="0.30" fill="none"
-                      className="ppv2-ring-c"
-                    />
+                      className="ppv2-ring-b" style={{transformOrigin:'94px 94px'}}/>
+                    <polygon points="94,28 148,62 148,126 94,160 40,126 40,62"
+                      stroke={cfg.p} strokeWidth="0.5" strokeOpacity="0.28" fill="none"/>
                   </svg>
 
                   {/* Corner sparks */}
@@ -288,10 +344,14 @@ export default function PlayerProfile() {
                   <div className="ppv2-spark ppv2-spark--bl"/>
                   <div className="ppv2-spark ppv2-spark--br"/>
 
-                  {/* Hexagonal avatar */}
-                  <div className="ppv2-avatar-clip">
-                    <div className="ppv2-avatar-highlight"/>
-                    <PlayerAvatar username={live.uuid||player.uuid||live.username} size={130}/>
+                  {/* ── FULL head, no clip ── */}
+                  <div className="ppv2-avatar-box">
+                    <div className="ppv2-avatar-pedestal"/>
+                    <div className="ppv2-avatar-glow-bg"/>
+                    <div className="ppv2-avatar-inner">
+                      <PlayerAvatar username={live.uuid||player.uuid||live.username} size={136}/>
+                    </div>
+                    <div className="ppv2-avatar-reflection"/>
                   </div>
 
                   {/* Crown */}
@@ -362,11 +422,8 @@ export default function PlayerProfile() {
           {/* Stat cards */}
           <div className="ppv2-stat-cards">
             {statCards.map((s,i)=>(
-              <div
-                key={i}
-                className="ppv2-stat-card"
-                style={{'--sc':s.sc,'--sg':s.sg,animationDelay:`${i*65}ms`} as React.CSSProperties}
-              >
+              <div key={i} className="ppv2-stat-card"
+                style={{'--sc':s.sc,'--sg':s.sg,animationDelay:`${i*65}ms`} as React.CSSProperties}>
                 <div className="ppv2-stat-card-bg"/>
                 <div className="ppv2-stat-card-icon">{s.icon}</div>
                 <div className="ppv2-stat-card-num">{s.val}</div>
@@ -404,8 +461,7 @@ export default function PlayerProfile() {
                       <CategoryTierBadge categoryId={cat.id} tier={tierLevel} rawTier={rawTier??null}/>
                     </div>
                     <div className={`ppv2-card-date${!dateStr?' ppv2-card-date--unknown':''}`}>
-                      <Calendar size={9}/>
-                      <span>{dateStr?`Since ${dateStr}`:'Date unknown'}</span>
+                      <Calendar size={9}/><span>{dateStr?`Since ${dateStr}`:'Date unknown'}</span>
                     </div>
                   </div>
                 );
