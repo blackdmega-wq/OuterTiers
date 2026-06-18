@@ -1,4 +1,13 @@
-/* ===== PLAYER PROFILE V3 — CINEMATIC REDESIGN ===== */
+/* ===== PLAYER PROFILE V4 — PERFORMANCE OPTIMIZED ===== */
+/*
+  Animation rules:
+  ✅ transform (translateY, rotate, scale) — GPU-composited, free
+  ✅ opacity — GPU-composited, free
+  ❌ filter: blur()        — forces CPU repaint every frame, VERY hot
+  ❌ box-shadow animation  — forces CPU repaint every frame
+  ❌ background-position   — forces CPU repaint every frame
+  ❌ filter: drop-shadow() animation — CPU repaint
+*/
 
 .ppv2-spinner {
   width: 40px; height: 40px;
@@ -6,6 +15,7 @@
   border-top-color: #60a5fa;
   border-radius: 50%;
   animation: ppv2-spin 0.75s linear infinite;
+  will-change: transform;
 }
 @keyframes ppv2-spin { to { transform: rotate(360deg); } }
 .ppv2-page { padding: 0; }
@@ -27,21 +37,20 @@
 }
 
 /* ════════════════════════════════════════
-   BACKGROUND
+   BACKGROUND — static, no animations
 ════════════════════════════════════════ */
 .ppv2-bg-mesh {
   position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 130% 90% at 20%  -5%,  var(--accent-glow)       0%, transparent 50%),
-    radial-gradient(ellipse  70% 55% at 82%  10%,  rgba(167,139,250,0.13)   0%, transparent 50%),
-    radial-gradient(ellipse  50% 45% at  2% 100%,  var(--accent-ray)        0%, transparent 55%),
-    radial-gradient(ellipse  50% 45% at 98% 100%,  var(--accent-ray)        0%, transparent 55%),
-    radial-gradient(ellipse  65% 55% at 50%  55%,  rgba(167,139,250,0.055)  0%, transparent 60%),
-    radial-gradient(ellipse 200% 75% at 50%  90%,  rgba(0,0,0,0.80)         0%, transparent 65%),
+    radial-gradient(ellipse 130% 90% at 20%  -5%,  var(--accent-glow)      0%, transparent 50%),
+    radial-gradient(ellipse  70% 55% at 82%  10%,  rgba(167,139,250,0.13)  0%, transparent 50%),
+    radial-gradient(ellipse  50% 45% at  2% 100%,  var(--accent-ray)       0%, transparent 55%),
+    radial-gradient(ellipse  50% 45% at 98% 100%,  var(--accent-ray)       0%, transparent 55%),
+    radial-gradient(ellipse  65% 55% at 50%  55%,  rgba(167,139,250,0.05)  0%, transparent 60%),
+    radial-gradient(ellipse 200% 75% at 50%  90%,  rgba(0,0,0,0.80)        0%, transparent 65%),
     linear-gradient(180deg, rgba(0,0,0,0.30) 0%, transparent 40%, transparent 70%, rgba(0,0,0,0.50) 100%);
-  animation: ppv2-mesh-breathe 10s ease-in-out infinite;
+  /* No animation — static is free */
 }
-@keyframes ppv2-mesh-breathe { 0%,100%{opacity:0.78} 50%{opacity:1} }
 
 .ppv2-bg-grid {
   position: absolute; inset: 0; pointer-events: none;
@@ -57,129 +66,13 @@
     0deg, transparent, transparent 3px,
     rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
   );
-  opacity: 0.28;
+  opacity: 0.22;
 }
 .ppv2-bg-fade {
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 250px; pointer-events: none;
   background: linear-gradient(to bottom, transparent, var(--bg, #020308));
 }
-
-/* ── Star field ── */
-.ppv2-stars {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,0.90) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
-  background-size: 180px 180px, 110px 110px, 240px 240px;
-  background-position: 0 0, 55px 30px, 90px 90px;
-  opacity: 0.32;
-  animation: ppv2-stars-drift 80s linear infinite;
-}
-@keyframes ppv2-stars-drift {
-  from { background-position: 0 0, 55px 30px, 90px 90px; }
-  to   { background-position: 180px 180px, 235px 210px, 330px 330px; }
-}
-/* Twinkling layer */
-.ppv2-stars::after {
-  content: '';
-  position: absolute; inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,0.80) 1px, transparent 1px),
-    radial-gradient(circle, rgba(180,200,255,0.60) 1px, transparent 1px);
-  background-size: 290px 290px, 130px 130px;
-  background-position: 140px 70px, 20px 80px;
-  animation: ppv2-stars-twinkle 5s ease-in-out infinite;
-}
-@keyframes ppv2-stars-twinkle { 0%,100%{opacity:0.4} 50%{opacity:1} }
-
-/* ── Nebula color clouds ── */
-.ppv2-nebula {
-  position: absolute; inset: 0; pointer-events: none;
-  border-radius: 50%; filter: blur(80px);
-}
-.ppv2-nebula--a {
-  width: 60%; height: 70%; top: -20%; left: -10%;
-  background: radial-gradient(ellipse, rgba(96,165,250,0.10) 0%, transparent 65%);
-  animation: ppv2-nebula-drift 20s ease-in-out infinite;
-}
-.ppv2-nebula--b {
-  width: 55%; height: 65%; bottom: -20%; right: -5%;
-  background: radial-gradient(ellipse, rgba(167,139,250,0.09) 0%, transparent 65%);
-  animation: ppv2-nebula-drift 24s ease-in-out infinite reverse;
-}
-.ppv2-nebula--rank {
-  width: 70%; height: 80%; top: -10%; left: 50%;
-  transform: translateX(-50%);
-  animation: ppv2-nebula-rank 14s ease-in-out infinite;
-}
-.ppv2-nebula--rank-gold   { background: radial-gradient(ellipse, rgba(251,191,36,0.09) 0%, transparent 65%); }
-.ppv2-nebula--rank-silver { background: radial-gradient(ellipse, rgba(203,213,225,0.07) 0%, transparent 65%); }
-.ppv2-nebula--rank-bronze { background: radial-gradient(ellipse, rgba(251,146,60,0.08) 0%, transparent 65%); }
-@keyframes ppv2-nebula-drift {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%     { transform: translateY(30px) scale(1.15); }
-}
-@keyframes ppv2-nebula-rank {
-  0%,100% { transform: translateX(-50%) scale(1);   opacity: 0.7; }
-  50%     { transform: translateX(-50%) scale(1.20); opacity: 1;   }
-}
-
-/* ════════════════════════════════════════
-   FLOATING AMBIENT ORBS — new decoration
-════════════════════════════════════════ */
-.ppv2-float-orb {
-  position: absolute; pointer-events: none; border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-  filter: blur(40px);
-}
-.ppv2-float-orb--1 {
-  width: 340px; height: 340px;
-  top: -80px; left: -60px;
-  opacity: 0.40;
-  animation: ppv2-orb1 12s ease-in-out infinite;
-}
-.ppv2-float-orb--2 {
-  width: 260px; height: 260px;
-  top: 40%; right: -40px;
-  background: radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%);
-  opacity: 0.35;
-  animation: ppv2-orb2 15s ease-in-out infinite;
-}
-.ppv2-float-orb--3 {
-  width: 200px; height: 200px;
-  bottom: 60px; left: 38%;
-  opacity: 0.25;
-  animation: ppv2-orb3 10s ease-in-out infinite;
-}
-.ppv2-float-orb--4 {
-  width: 180px; height: 180px;
-  top: 30%; left: 52%;
-  background: radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%);
-  opacity: 0.28;
-  animation: ppv2-orb4 18s ease-in-out infinite 4s;
-}
-@keyframes ppv2-orb1 {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(40px,30px) scale(1.12); }
-  66%     { transform: translate(-20px,50px) scale(0.90); }
-}
-@keyframes ppv2-orb2 {
-  0%,100% { transform: translate(0,0) scale(1); }
-  40%     { transform: translate(-30px,-40px) scale(1.15); }
-  70%     { transform: translate(20px,20px) scale(0.88); }
-}
-@keyframes ppv2-orb3 {
-  0%,100% { transform: translate(0,0) scale(1); }
-  50%     { transform: translate(25px,-35px) scale(1.20); }
-}
-@keyframes ppv2-orb4 {
-  0%,100% { transform: translate(0,0) scale(1); }
-  35%     { transform: translate(-40px,20px) scale(1.18); }
-  70%     { transform: translate(30px,40px) scale(0.88); }
-}
-
 
 .ppv2-hero-inner {
   max-width: 1020px; margin: 0 auto; padding: 0 32px;
@@ -188,12 +81,13 @@
 .ppv2-back { display: inline-flex; margin-bottom: 24px; }
 
 /* ════════════════════════════════════════
-   RANK EMBLEM
+   RANK EMBLEM — only transform animations
 ════════════════════════════════════════ */
 .ppv2-rank-emblem {
   display: flex; align-items: center; justify-content: center;
   gap: 22px; margin-bottom: 22px;
   animation: ppv2-emblem-in 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  will-change: transform, opacity;
 }
 @keyframes ppv2-emblem-in {
   from { opacity:0; transform:translateY(-16px) scale(0.82); }
@@ -201,13 +95,18 @@
 }
 .ppv2-emblem-svg {
   width: 88px; height: 88px; flex-shrink: 0;
+  /* Static drop-shadow — no animation */
   filter: drop-shadow(0 0 22px var(--accent-glow));
-  animation: ppv2-emblem-float 4.2s ease-in-out infinite,
-             ppv2-emblem-glow  3.2s ease-in-out infinite;
+  animation: ppv2-emblem-float 4.2s ease-in-out infinite;
+  will-change: transform;
 }
+/* Only transform — no filter change */
 @keyframes ppv2-emblem-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-@keyframes ppv2-emblem-glow  { 0%,100%{filter:drop-shadow(0 0 16px var(--accent-glow))} 50%{filter:drop-shadow(0 0 40px var(--accent-glow)) drop-shadow(0 0 70px var(--accent-glow))} }
-.ppv2-emblem-ring-outer { animation: ppv2-emblem-ring-spin 14s linear infinite; transform-origin: 60px 60px; }
+.ppv2-emblem-ring-outer {
+  animation: ppv2-emblem-ring-spin 14s linear infinite;
+  transform-origin: 60px 60px;
+  will-change: transform;
+}
 @keyframes ppv2-emblem-ring-spin { to { transform: rotate(360deg); } }
 .ppv2-emblem-line { flex: 1; max-width: 180px; height: 1px; }
 .ppv2-emblem-line--left  { background: linear-gradient(90deg, transparent, var(--accent)); opacity: 0.38; }
@@ -222,6 +121,7 @@
   animation: ppv2-card-enter 0.75s cubic-bezier(0.22,1,0.36,1) 0.05s both;
   isolation: isolate;
   box-shadow: 0 44px 110px rgba(0,0,0,0.78), 0 0 0 1px rgba(255,255,255,0.03);
+  will-change: transform, opacity;
 }
 @keyframes ppv2-card-enter {
   from { opacity:0; transform:translateY(34px) scale(0.968); }
@@ -235,25 +135,26 @@
   position: absolute; inset: -100%;
   background: conic-gradient(
     from 0deg,
-    transparent         0deg,
-    var(--accent-glow)  35deg,
-    var(--accent-tri)   52deg,
-    var(--accent)       68deg,
+    transparent            0deg,
+    var(--accent-glow)    35deg,
+    var(--accent-tri)     52deg,
+    var(--accent)         68deg,
     rgba(255,255,255,0.75) 78deg,
-    var(--accent)       88deg,
-    var(--accent-tri)   98deg,
-    var(--accent-glow) 120deg,
-    transparent        175deg,
-    transparent        205deg,
-    var(--accent-glow) 245deg,
-    var(--accent)      268deg,
+    var(--accent)         88deg,
+    var(--accent-tri)     98deg,
+    var(--accent-glow)   120deg,
+    transparent          175deg,
+    transparent          205deg,
+    var(--accent-glow)   245deg,
+    var(--accent)        268deg,
     rgba(255,255,255,0.55) 278deg,
-    var(--accent)      288deg,
-    var(--accent-glow) 308deg,
-    transparent        360deg
+    var(--accent)        288deg,
+    var(--accent-glow)   308deg,
+    transparent          360deg
   );
   animation: ppv2-border-rot 5s linear infinite;
   transform-origin: 50% 50%;
+  will-change: transform;
 }
 @keyframes ppv2-border-rot { to { transform: rotate(360deg); } }
 
@@ -267,10 +168,10 @@
   position: absolute;
   background: var(--accent);
   border-radius: 2px;
+  /* Static glow — no box-shadow animation */
   box-shadow: 0 0 10px var(--accent-glow), 0 0 24px var(--accent-glow);
-  animation: ppv2-corner-glow 3s ease-in-out infinite;
+  opacity: 0.70;
 }
-@keyframes ppv2-corner-glow { 0%,100%{opacity:0.55} 50%{opacity:1} }
 .ppv2-card-corner::before { width: 2.5px; height: 100%; top: 0; left: 0; }
 .ppv2-card-corner::after  { width: 100%; height: 2.5px; top: 0; left: 0; }
 .ppv2-card-corner--tl { top: 0;    left: 0;    border-radius: 28px 0 0 0; }
@@ -300,6 +201,7 @@
   background: linear-gradient(90deg, transparent, var(--accent-glow) 50%, transparent);
   opacity: 0.35;
 }
+/* Sheen sweep — one pass per 9s, acceptable cost */
 .ppv2-card-sheen {
   position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: linear-gradient(
@@ -311,7 +213,8 @@
     transparent 62%, transparent 100%
   );
   background-size: 300% 100%;
-  animation: ppv2-sheen 8s ease-in-out infinite;
+  animation: ppv2-sheen 9s ease-in-out infinite;
+  will-change: background-position;
 }
 @keyframes ppv2-sheen { 0%{background-position:200% 0} 100%{background-position:-100% 0} }
 
@@ -336,79 +239,43 @@
     rgba(255,255,255,0.007) 19px
   );
 }
-
-/* Diagonal sweep lines behind avatar */
+/* Static diagonal pattern — no animation */
 .ppv2-left-sweep {
   position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(
     60deg,
     transparent, transparent 38px,
-    rgba(255,255,255,0.012) 38px,
-    rgba(255,255,255,0.012) 39px
+    rgba(255,255,255,0.010) 38px,
+    rgba(255,255,255,0.010) 39px
   );
   mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(0,0,0,0.8) 0%, transparent 70%);
-  animation: ppv2-sweep-drift 20s linear infinite;
+  /* No animation */
 }
-@keyframes ppv2-sweep-drift { from{background-position:0 0} to{background-position:200px 200px} }
 
-/* Ghost rank number */
+/* Ghost rank — static, no animation */
 .ppv2-ghost-rank {
   position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 20rem; font-weight: 900; letter-spacing: -0.14em;
+  font-size: 18rem; font-weight: 900; letter-spacing: -0.14em;
   line-height: 1; user-select: none; pointer-events: none;
   color: var(--accent);
-  opacity: 0.042; filter: blur(4px);
-  animation: ppv2-ghost-breathe 7s ease-in-out infinite;
+  opacity: 0.040; filter: blur(3px);
   white-space: nowrap;
 }
-@keyframes ppv2-ghost-breathe { 0%,100%{opacity:0.030} 50%{opacity:0.068} }
 
-/* Particles */
-.ppv2-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.ppv2-particle {
-  position: absolute; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent-glow), 0 0 22px var(--accent-glow);
-  animation: ppv2-pfloat linear infinite; opacity: 0;
-}
-.ppv2-particle--1  { left:8%;  width:5px; height:5px; animation-duration:4.6s; animation-delay:0.0s; }
-.ppv2-particle--2  { left:20%; width:3px; height:3px; animation-duration:6.3s; animation-delay:0.9s; }
-.ppv2-particle--3  { left:35%; width:6px; height:6px; animation-duration:4.1s; animation-delay:1.6s; }
-.ppv2-particle--4  { left:50%; width:3px; height:3px; animation-duration:5.9s; animation-delay:2.3s; }
-.ppv2-particle--5  { left:63%; width:5px; height:5px; animation-duration:5.0s; animation-delay:0.5s; }
-.ppv2-particle--6  { left:77%; width:3px; height:3px; animation-duration:6.7s; animation-delay:1.2s; }
-.ppv2-particle--7  { left:87%; width:4px; height:4px; animation-duration:5.2s; animation-delay:2.0s; }
-.ppv2-particle--8  { left:14%; width:3px; height:3px; animation-duration:4.4s; animation-delay:2.8s; }
-.ppv2-particle--9  { left:29%; width:4px; height:4px; animation-duration:5.5s; animation-delay:0.4s; }
-.ppv2-particle--10 { left:43%; width:6px; height:6px; animation-duration:3.9s; animation-delay:1.9s; }
-.ppv2-particle--11 { left:57%; width:3px; height:3px; animation-duration:7.0s; animation-delay:0.7s; }
-.ppv2-particle--12 { left:71%; width:5px; height:5px; animation-duration:4.8s; animation-delay:2.5s; }
-.ppv2-particle--13 { left:84%; width:4px; height:4px; animation-duration:5.7s; animation-delay:1.4s; }
-.ppv2-particle--14 { left:3%;  width:3px; height:3px; animation-duration:7.3s; animation-delay:1.0s; }
-.ppv2-particle--15 { left:92%; width:5px; height:5px; animation-duration:4.2s; animation-delay:2.2s; }
-.ppv2-particle--16 { left:54%; width:4px; height:4px; animation-duration:6.1s; animation-delay:3.3s; }
-.ppv2-particle--17 { left:38%; width:3px; height:3px; animation-duration:5.4s; animation-delay:0.2s; }
-.ppv2-particle--18 { left:68%; width:5px; height:5px; animation-duration:4.9s; animation-delay:1.7s; }
-@keyframes ppv2-pfloat {
-  0%   { bottom:-12px; opacity:0; transform:translateX(0) scale(0.4); }
-  7%   { opacity:1; }
-  82%  { opacity:0.80; }
-  100% { bottom:118%; opacity:0; transform:translateX(28px) scale(1.5); }
-}
-
-/* Left accent bar */
+/* Left accent bar — opacity only, cheap */
 .ppv2-accent-bar {
   position: absolute; left: 0; top: 12%; bottom: 12%; width: 3px;
   background: linear-gradient(180deg,
     transparent, var(--accent-tri) 18%, var(--accent) 50%, var(--accent-tri) 82%, transparent);
   border-radius: 0 3px 3px 0;
   box-shadow: 0 0 16px var(--accent-glow), 2px 0 24px var(--accent-glow);
-  animation: ppv2-bar-breathe 4.5s ease-in-out infinite;
+  animation: ppv2-opacity-breathe 4.5s ease-in-out infinite;
+  will-change: opacity;
 }
-@keyframes ppv2-bar-breathe { 0%,100%{opacity:0.50} 50%{opacity:1} }
+@keyframes ppv2-opacity-breathe { 0%,100%{opacity:0.45} 50%{opacity:0.90} }
 
-/* ── Bottom decoration row in left panel ── */
+/* ── Bottom decoration row ── */
 .ppv2-left-deco-row {
   position: absolute; bottom: 20px; left: 50%;
   transform: translateX(-50%);
@@ -418,7 +285,8 @@
   width: 5px; height: 5px; border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);
-  animation: ppv2-dot-pulse 2.5s ease-in-out infinite;
+  animation: ppv2-dot-scale 2.5s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .ppv2-deco-line {
   height: 1px; width: 36px;
@@ -431,10 +299,12 @@
   background: var(--accent);
   transform: rotate(45deg);
   box-shadow: 0 0 10px var(--accent-glow);
-  animation: ppv2-diamond-pulse 2.2s ease-in-out infinite;
+  animation: ppv2-diamond-scale 2.2s ease-in-out infinite;
+  will-change: transform;
 }
-@keyframes ppv2-diamond-pulse { 0%,100%{transform:rotate(45deg) scale(1);opacity:0.65} 50%{transform:rotate(45deg) scale(1.4);opacity:1} }
-@keyframes ppv2-dot-pulse     { 0%,100%{transform:scale(1);opacity:0.65} 50%{transform:scale(1.6);opacity:1} }
+/* Scale only — no box-shadow change */
+@keyframes ppv2-diamond-scale { 0%,100%{transform:rotate(45deg) scale(1);opacity:0.65} 50%{transform:rotate(45deg) scale(1.4);opacity:1} }
+@keyframes ppv2-dot-scale     { 0%,100%{transform:scale(1);opacity:0.65} 50%{transform:scale(1.6);opacity:1} }
 
 /* ════════════════════════════════════════
    AVATAR FRAME
@@ -445,42 +315,21 @@
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Primary aura */
+/* Aura — opacity only, cheap */
 .ppv2-avatar-aura {
   position: absolute; inset: -80px; pointer-events: none;
   background:
     radial-gradient(ellipse 65% 65% at 50% 52%, var(--accent-glow) 0%, transparent 52%),
     radial-gradient(ellipse 90% 90% at 50% 52%, rgba(0,0,0,0.20) 0%, transparent 68%);
   border-radius: 50%;
-  animation: ppv2-aura-pulse 4.5s ease-in-out infinite;
+  animation: ppv2-opacity-breathe 5s ease-in-out infinite;
+  will-change: opacity;
 }
-/* Secondary wider aura */
 .ppv2-avatar-aura--2 {
   inset: -130px;
   background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--accent-glow) 0%, transparent 60%);
-  opacity: 0.30;
-  animation: ppv2-aura2-pulse 6s ease-in-out infinite 1s;
-}
-@keyframes ppv2-aura-pulse  { 0%,100%{opacity:0.60;transform:scale(1)}   50%{opacity:1;transform:scale(1.22)} }
-@keyframes ppv2-aura2-pulse { 0%,100%{opacity:0.20;transform:scale(1)}   50%{opacity:0.45;transform:scale(1.30)} }
-
-/* ── Expanding ripple rings ── */
-.ppv2-ripple {
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%) scale(0.5);
-  border-radius: 30px; border: 1px solid var(--accent);
-  pointer-events: none; opacity: 0;
-  width: 260px; height: 260px;
-  animation: ppv2-ripple-out 3.6s ease-out infinite;
-  box-shadow: 0 0 14px var(--accent-glow), inset 0 0 8px var(--accent-glow);
-}
-.ppv2-ripple--1 { animation-delay: 0s; }
-.ppv2-ripple--2 { animation-delay: 1.2s; }
-.ppv2-ripple--3 { animation-delay: 2.4s; }
-@keyframes ppv2-ripple-out {
-  0%   { transform: translate(-50%,-50%) scale(0.72); opacity: 0.60; }
-  80%  { opacity: 0.05; }
-  100% { transform: translate(-50%,-50%) scale(1.90); opacity: 0; }
+  opacity: 0.25;
+  animation: ppv2-opacity-breathe 7s ease-in-out infinite 1.5s;
 }
 
 /* CSS ring decorations */
@@ -492,20 +341,17 @@
 .ppv2-ring--1 {
   inset: -14px; border-radius: 30px;
   border: 2px solid var(--accent);
-  opacity: 0.65;
-  box-shadow: 0 0 0 1px var(--accent-glow) inset, 0 0 28px var(--accent-glow);
-  animation: ppv2-ring1-breathe 3.5s ease-in-out infinite;
-}
-@keyframes ppv2-ring1-breathe {
-  0%,100%{opacity:0.52;box-shadow:0 0 14px var(--accent-glow)}
-  50%{opacity:0.92;box-shadow:0 0 36px var(--accent-glow),0 0 70px var(--accent-glow)}
+  /* Static glow, animated opacity only */
+  box-shadow: 0 0 28px var(--accent-glow);
+  animation: ppv2-opacity-breathe 3.5s ease-in-out infinite;
+  will-change: opacity;
 }
 .ppv2-ring--2 {
   inset: -30px; border-radius: 40px;
   border: 1px dashed rgba(255,255,255,0.12);
-  opacity: 0.52;
   animation: ppv2-ring2-spin 28s linear infinite;
   transform-origin: center;
+  will-change: transform;
 }
 .ppv2-ring--2::after {
   content: ''; position: absolute; inset: 0;
@@ -518,32 +364,30 @@
   opacity: 0.14;
   animation: ppv2-ring3-spin 42s linear infinite reverse;
   transform-origin: center;
+  will-change: transform;
 }
 @keyframes ppv2-ring3-spin { to { transform: rotate(360deg); } }
 
-/* Corner sparks */
+/* Corner sparks — static glow */
 .ppv2-spark {
   position: absolute; width: 28px; height: 28px; z-index: 8; pointer-events: none;
 }
 .ppv2-spark::before, .ppv2-spark::after {
   content: ''; position: absolute;
   background: var(--accent); border-radius: 2px;
-  box-shadow:
-    0 0 8px var(--accent-glow),
-    0 0 22px var(--accent-glow),
-    0 0 50px var(--accent-glow);
-  animation: ppv2-spark-pulse 2.4s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--accent-glow), 0 0 22px var(--accent-glow);
+  /* No animation — static glow only */
+  opacity: 0.75;
 }
 .ppv2-spark::before { width: 3px; height: 100%; top: 0; left: 0; }
 .ppv2-spark::after  { width: 100%; height: 3px; top: 0; left: 0; }
-@keyframes ppv2-spark-pulse { 0%,100%{opacity:0.48;transform:scale(1)} 50%{opacity:1;transform:scale(1.12)} }
 .ppv2-spark--tl { top: 5px;    left: 5px; }
 .ppv2-spark--tr { top: 5px;    right: 5px;  transform: scaleX(-1); }
 .ppv2-spark--bl { bottom: 5px; left: 5px;   transform: scaleY(-1); }
 .ppv2-spark--br { bottom: 5px; right: 5px;  transform: scale(-1,-1); }
 
 /* ════════════════════════════════════════
-   AVATAR BOX — levitation container
+   AVATAR BOX — transform animations only
    Crown is INSIDE here → floats in sync
 ════════════════════════════════════════ */
 .ppv2-avatar-box {
@@ -551,72 +395,62 @@
   top: 50%; left: 50%;
   z-index: 4;
   width: 210px; height: 210px;
-  /* overflow visible so crown can extend above */
   overflow: visible;
   animation: ppv2-head-levitate 5.2s ease-in-out infinite;
+  will-change: transform;
 }
 @keyframes ppv2-head-levitate {
   0%,100% { transform: translate(-50%, -50%) translateY(0px); }
-  50%     { transform: translate(-50%, -50%) translateY(-15px); }
+  50%     { transform: translate(-50%, -50%) translateY(-14px); }
 }
 
-/* ── Crown — now inside avatar-box, floats in sync ── */
+/* ── Crown — inside avatar-box, synced ── */
 .ppv2-crown { position: absolute; z-index: 6; pointer-events: none; }
-
-/* Positions are relative to the 210×210px avatar-box */
-/* Rock animation only — parent handles the up/down float */
 .ppv2-crown--1 {
-  width: 84px;
-  top: -42px;         /* above the top edge of avatar-box */
-  left: 50%;
-  transform: translateX(-50%) rotate(-8deg);
+  width: 84px; top: -42px; left: 50%;
+  filter: drop-shadow(0 4px 20px rgba(251,191,36,0.85));
   animation: ppv2-crown-rock1 3s ease-in-out infinite;
-  filter: drop-shadow(0 4px 28px rgba(251,191,36,0.95)) drop-shadow(0 0 12px rgba(251,191,36,0.70));
+  will-change: transform;
 }
 .ppv2-crown--2 {
-  width: 66px;
-  top: -34px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-6deg);
+  width: 66px; top: -34px; left: 50%;
+  filter: drop-shadow(0 3px 16px rgba(203,213,225,0.80));
   animation: ppv2-crown-rock2 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 3px 20px rgba(203,213,225,0.88));
+  will-change: transform;
 }
 .ppv2-crown--3 {
-  width: 58px;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-5deg);
+  width: 58px; top: -30px; left: 50%;
+  filter: drop-shadow(0 3px 14px rgba(251,146,60,0.75));
   animation: ppv2-crown-rock3 3.8s ease-in-out infinite;
-  filter: drop-shadow(0 3px 18px rgba(251,146,60,0.82));
+  will-change: transform;
 }
-
-/* Rock left ↔ right in sync with the levitation rhythm */
+/* Transform only — no filter change during animation */
 @keyframes ppv2-crown-rock1 {
   0%,100% { transform: translateX(-50%) rotate(-8deg); }
-  50%     { transform: translateX(-50%) rotate(7deg);  }
+  50%     { transform: translateX(-50%) rotate(7deg); }
 }
 @keyframes ppv2-crown-rock2 {
   0%,100% { transform: translateX(-50%) rotate(-6deg); }
-  50%     { transform: translateX(-50%) rotate(5deg);  }
+  50%     { transform: translateX(-50%) rotate(5deg); }
 }
 @keyframes ppv2-crown-rock3 {
   0%,100% { transform: translateX(-50%) rotate(-5deg); }
-  50%     { transform: translateX(-50%) rotate(4deg);  }
+  50%     { transform: translateX(-50%) rotate(4deg); }
 }
 
-/* Pulsing glow orb behind head */
+/* Glow behind head — static gradient, opacity animation */
 .ppv2-avatar-glow-bg {
   position: absolute; inset: -70px;
   background:
     radial-gradient(ellipse 75% 75% at 50% 50%, var(--accent-glow) 0%, transparent 55%),
     radial-gradient(ellipse 55% 38% at 50% 90%, rgba(0,0,0,0.70) 0%, transparent 70%);
   border-radius: 50%;
-  animation: ppv2-head-glow 3.5s ease-in-out infinite;
+  animation: ppv2-opacity-breathe 4s ease-in-out infinite;
+  will-change: opacity;
   pointer-events: none;
 }
-@keyframes ppv2-head-glow { 0%,100%{opacity:0.75;transform:scale(1)} 50%{opacity:1;transform:scale(1.32)} }
 
-/* Avatar inner — triple-ring border */
+/* Avatar inner — static box-shadow, no animation */
 .ppv2-avatar-inner {
   position: relative; z-index: 2;
   width: 100%; height: 100%;
@@ -628,64 +462,48 @@
     0 0 0 8px rgba(0,0,0,0.95),
     0 0 0 11px var(--accent),
     0 0 40px var(--accent-glow),
-    0 0 90px var(--accent-glow),
-    0 0 160px var(--accent-glow),
+    0 0 80px var(--accent-glow),
     0 36px 80px rgba(0,0,0,0.98),
-    inset 0 0 0 1px rgba(255,255,255,0.25);
-  animation: ppv2-avatar-glow-pulse 3.5s ease-in-out infinite;
+    inset 0 0 0 1px rgba(255,255,255,0.22);
+  /* No box-shadow animation — static is free */
 }
-@keyframes ppv2-avatar-glow-pulse {
-  0%,100% {
-    box-shadow:
-      0 0 0 3px var(--accent), 0 0 0 8px rgba(0,0,0,0.95), 0 0 0 11px var(--accent),
-      0 0 28px var(--accent-glow), 0 0 70px var(--accent-glow), 0 0 140px var(--accent-glow),
-      0 36px 80px rgba(0,0,0,0.98), inset 0 0 0 1px rgba(255,255,255,0.20);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px var(--accent), 0 0 0 8px rgba(0,0,0,0.95), 0 0 0 11px var(--accent),
-      0 0 60px var(--accent-glow), 0 0 130px var(--accent-glow), 0 0 240px var(--accent-glow),
-      0 36px 80px rgba(0,0,0,0.98), inset 0 0 0 1px rgba(255,255,255,0.32);
-  }
-}
+/* Simple scanline overlay — static */
 .ppv2-avatar-inner::after {
   content: ''; position: absolute; inset: 0; z-index: 10;
   background: repeating-linear-gradient(
-    0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 4px
+    0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 4px
   );
   pointer-events: none; border-radius: 20px;
 }
-.ppv2-avatar-inner::before {
-  content: ''; position: absolute; left: 0; right: 0; height: 50%;
-  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0.07) 62%, transparent 100%);
-  animation: ppv2-scan-sweep 3s ease-in-out infinite;
-  pointer-events: none; z-index: 11;
+/* No scan sweep animation — removed */
+.ppv2-avatar-inner img {
+  width: 100%; height: 100%; display: block;
+  image-rendering: pixelated; image-rendering: crisp-edges;
 }
-@keyframes ppv2-scan-sweep { 0%{top:-55%} 100%{top:165%} }
-.ppv2-avatar-inner img { width: 100%; height: 100%; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
 
-/* Pedestal glow */
+/* Pedestal — opacity only */
 .ppv2-avatar-pedestal {
   position: absolute; bottom: -42px; left: 50%;
   transform: translateX(-50%);
   width: 190px; height: 42px;
   background: radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 72%);
-  filter: blur(18px);
+  /* No filter: blur — expensive. Use opacity only */
+  opacity: 0.65;
   pointer-events: none; z-index: 1;
-  animation: ppv2-pedestal-pulse 3.5s ease-in-out infinite;
+  animation: ppv2-opacity-breathe 4s ease-in-out infinite 0.5s;
+  will-change: opacity;
 }
-@keyframes ppv2-pedestal-pulse { 0%,100%{opacity:0.65} 50%{opacity:1} }
 .ppv2-avatar-reflection {
   position: absolute; bottom: -62px; left: 50%;
   transform: translateX(-50%);
   width: 155px; height: 28px;
   background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
   border-radius: 50%;
-  filter: blur(9px); opacity: 0.45;
+  opacity: 0.35;
   pointer-events: none;
 }
 
-/* Rank pill — stays on frame (not on avatar-box) */
+/* Rank pill */
 .ppv2-frame-rank {
   position: absolute; bottom: -2px; left: 50%; z-index: 7;
   transform: translateX(-50%) translateY(50%);
@@ -699,9 +517,9 @@
   box-shadow: 0 6px 24px rgba(0,0,0,0.65);
   color: var(--text-dim, #7589b0);
 }
-.ppv2-frame-rank--rank-gold   { border-color:rgba(251,191,36,0.48);  color:#fbbf24; box-shadow:0 0 20px rgba(251,191,36,0.45); }
-.ppv2-frame-rank--rank-silver { border-color:rgba(203,213,225,0.40); color:#cbd5e1; box-shadow:0 0 18px rgba(203,213,225,0.32); }
-.ppv2-frame-rank--rank-bronze { border-color:rgba(251,146,60,0.44);  color:#fb923c; box-shadow:0 0 18px rgba(251,146,60,0.36); }
+.ppv2-frame-rank--rank-gold   { border-color:rgba(251,191,36,0.48);  color:#fbbf24; box-shadow:0 0 20px rgba(251,191,36,0.35); }
+.ppv2-frame-rank--rank-silver { border-color:rgba(203,213,225,0.40); color:#cbd5e1; box-shadow:0 0 18px rgba(203,213,225,0.25); }
+.ppv2-frame-rank--rank-bronze { border-color:rgba(251,146,60,0.44);  color:#fb923c; box-shadow:0 0 18px rgba(251,146,60,0.28); }
 
 /* ════════════════════════════════════════
    RIGHT PANEL
@@ -712,12 +530,12 @@
   display: flex; flex-direction: column; justify-content: center;
   position: relative; z-index: 2;
   animation: ppv2-right-in 0.78s cubic-bezier(0.22,1,0.36,1) 0.12s both;
+  will-change: transform, opacity;
 }
 @keyframes ppv2-right-in {
   from { opacity:0; transform:translateX(32px); }
   to   { opacity:1; transform:translateX(0); }
 }
-/* Subtle texture on right panel */
 .ppv2-right-tex {
   position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(
@@ -737,6 +555,7 @@
 .ppv2-eyebrow-sep { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.40; }
 .ppv2-eyebrow-region { font-size: 0.58rem; }
 
+/* Username — static glow, no filter animation */
 .ppv2-username {
   font-size: clamp(3.2rem, 5.5vw, 5.2rem);
   font-weight: 900; letter-spacing: -0.065em;
@@ -747,18 +566,18 @@
     var(--accent-tri) 40%,
     var(--accent)     65%,
     var(--accent-tri) 80%,
-    #ffffff    95%,
-    #ffffff   100%);
-  background-size: 320% auto;
+    #ffffff    95%);
+  background-size: 280% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  /* background-position animation only — GPU handles clip, acceptable */
   animation: ppv2-name-shine 7s ease-in-out infinite;
-  filter:
-    drop-shadow(0 0 40px var(--accent-glow))
-    drop-shadow(0 0 80px var(--accent-glow));
+  will-change: background-position;
+  /* Static drop-shadow — no animation */
+  filter: drop-shadow(0 0 32px var(--accent-glow));
 }
 @keyframes ppv2-name-shine {
-  0%,100% { background-position: 0% center; filter: drop-shadow(0 0 28px var(--accent-glow)); }
-  50%     { background-position: 100% center; filter: drop-shadow(0 0 60px var(--accent-glow)) drop-shadow(0 0 100px var(--accent-glow)); }
+  0%,100% { background-position: 0% center; }
+  50%     { background-position: 100% center; }
 }
 
 .ppv2-achievement-title {
@@ -772,7 +591,8 @@
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent); flex-shrink: 0;
   box-shadow: 0 0 10px var(--accent-glow);
-  animation: ppv2-dot-pulse 2.5s ease-in-out infinite;
+  animation: ppv2-dot-scale 2.5s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .ppv2-divider {
@@ -783,6 +603,7 @@
   position: absolute; top:0; left:0; right:100%; height:1px;
   background: linear-gradient(90deg, var(--accent), var(--accent-sec), rgba(255,255,255,0.05));
   animation: ppv2-divider-draw 1s cubic-bezier(0.22,1,0.36,1) 0.42s both;
+  will-change: right;
 }
 @keyframes ppv2-divider-draw { from{right:100%} to{right:0%} }
 
@@ -796,14 +617,14 @@
   font-size: 0.71rem; font-weight: 800; letter-spacing: 0.06em;
   background: var(--accent-dim); border: 1px solid var(--accent-glow);
   color: var(--accent);
-  animation: ppv2-pill-glow 3.2s ease-in-out infinite;
+  /* No box-shadow animation — static */
+  box-shadow: 0 0 12px var(--accent-glow);
   transition: transform 0.18s;
 }
 .ppv2-rank-pill:hover { transform: scale(1.05); }
-@keyframes ppv2-pill-glow { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 22px 2px var(--accent-glow)} }
-.ppv2-rank-pill--rank-gold   { background:rgba(251,191,36,0.11); border-color:rgba(251,191,36,0.44); color:#fbbf24; }
-.ppv2-rank-pill--rank-silver { background:rgba(203,213,225,0.09); border-color:rgba(203,213,225,0.33); color:#cbd5e1; }
-.ppv2-rank-pill--rank-bronze { background:rgba(251,146,60,0.10);  border-color:rgba(251,146,60,0.35);  color:#fb923c; }
+.ppv2-rank-pill--rank-gold   { background:rgba(251,191,36,0.11); border-color:rgba(251,191,36,0.44); color:#fbbf24; box-shadow:0 0 12px rgba(251,191,36,0.35); }
+.ppv2-rank-pill--rank-silver { background:rgba(203,213,225,0.09); border-color:rgba(203,213,225,0.33); color:#cbd5e1; box-shadow:0 0 10px rgba(203,213,225,0.25); }
+.ppv2-rank-pill--rank-bronze { background:rgba(251,146,60,0.10);  border-color:rgba(251,146,60,0.35);  color:#fb923c; box-shadow:0 0 12px rgba(251,146,60,0.30); }
 
 .ppv2-uuid-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -812,11 +633,12 @@
   cursor: pointer; color: var(--text-dim, #7589b0);
   font-size: 11.5px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
   letter-spacing: 0.04em;
-  transition: all 0.20s; margin-bottom: 24px;
+  transition: background 0.20s, border-color 0.20s, color 0.20s;
+  margin-bottom: 24px;
 }
 .ppv2-uuid-btn:hover {
   background: rgba(255,255,255,0.065); border-color: var(--accent-glow);
-  color: var(--text, #eef2ff); box-shadow: 0 0 16px var(--accent-glow);
+  color: var(--text, #eef2ff);
 }
 
 .ppv2-meta-row { display: flex; align-items: center; margin-bottom: 20px; }
@@ -831,14 +653,13 @@
   text-transform: uppercase; color: var(--text-muted, #374166);
 }
 .ppv2-meta-sep {
-  width: 1px; height: 36px; margin: 0 24px;
+  width: 1px; height: 36px; margin: 0 20px;
   background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent);
 }
 
-/* ── Right panel bottom decoration ── */
 .ppv2-right-bottom-deco {
   display: flex; align-items: center; gap: 10px;
-  margin-top: 22px; opacity: 0.30;
+  margin-top: 22px; opacity: 0.28;
 }
 
 /* ════════════════════════════════════════
@@ -847,6 +668,7 @@
 .ppv2-stat-cards {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
   animation: ppv2-stats-in 0.75s cubic-bezier(0.22,1,0.36,1) 0.22s both;
+  will-change: transform, opacity;
 }
 @keyframes ppv2-stats-in { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:translateY(0)} }
 
@@ -858,41 +680,42 @@
   border-radius: 20px;
   padding: 26px 20px 22px;
   display: flex; flex-direction: column; gap: 8px;
-  transition: transform 0.30s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.30s, border-color 0.24s;
+  transition: transform 0.30s cubic-bezier(0.34,1.56,0.64,1), border-color 0.24s;
   cursor: default;
 }
 .ppv2-stat-card-bg {
   position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse 95% 80% at 12% 95%, var(--sg) 0%, transparent 65%);
-  opacity: 0.24; transition: opacity 0.30s;
+  opacity: 0.22; transition: opacity 0.30s;
 }
-/* Moving inner shine */
+/* Card shine — one slow pass, acceptable */
 .ppv2-stat-card-shine {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(
     112deg,
     transparent 0%, transparent 42%,
-    rgba(255,255,255,0.030) 48%,
+    rgba(255,255,255,0.028) 48%,
     rgba(255,255,255,0.010) 52%,
     transparent 58%, transparent 100%
   );
   background-size: 300% 100%;
-  animation: ppv2-card-shine 5s ease-in-out infinite;
+  animation: ppv2-sheen 7s ease-in-out infinite;
+  will-change: background-position;
 }
-@keyframes ppv2-card-shine { 0%{background-position:200% 0} 100%{background-position:-100% 0} }
 .ppv2-stat-card::before {
   content: ''; position: absolute;
   top: 0; left: 15%; right: 15%; height: 1px;
   background: linear-gradient(90deg, transparent, var(--sc), transparent);
-  opacity: 0.42; transition: left 0.30s, right 0.30s, opacity 0.30s;
+  opacity: 0.42; transition: left 0.30s, right 0.30s;
 }
 .ppv2-stat-card:hover {
-  transform: translateY(-8px) scale(1.02);
+  transform: translateY(-6px) scale(1.02);
   border-color: rgba(255,255,255,0.12);
-  box-shadow: 0 26px 64px rgba(0,0,0,0.60), 0 0 36px var(--sg);
+  /* Box-shadow only on hover — not animated in a loop */
+  box-shadow: 0 22px 50px rgba(0,0,0,0.55), 0 0 28px var(--sg);
 }
-.ppv2-stat-card:hover .ppv2-stat-card-bg { opacity: 0.65; }
-.ppv2-stat-card:hover::before { left: 5%; right: 5%; opacity: 0.85; }
+.ppv2-stat-card:hover .ppv2-stat-card-bg { opacity: 0.55; }
+.ppv2-stat-card:hover::before { left: 5%; right: 5%; opacity: 0.75; }
 .ppv2-stat-card-icon { color: var(--sc); opacity: 0.70; display: flex; align-items: center; }
 .ppv2-stat-card-num {
   font-size: 2.3rem; font-weight: 900;
@@ -916,11 +739,9 @@
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   text-decoration: none !important; border-bottom: none !important;
 }
-/* Section decoration row */
 .ppv2-section-deco {
   display: flex; align-items: center; gap: 10px;
-  margin-top: 14px;
-  opacity: 0.50;
+  margin-top: 14px; opacity: 0.45;
 }
 
 .ppv2-tiers-grid {
@@ -938,42 +759,48 @@
   animation: ppv2-card-in 0.52s cubic-bezier(0.34,1.56,0.64,1) both;
   transition: transform 0.24s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s, box-shadow 0.24s;
   cursor: default;
+  will-change: transform;
 }
 @keyframes ppv2-card-in { from{opacity:0;transform:translateY(18px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
 .ppv2-card-orb {
   position: absolute; inset: 0;
   background: radial-gradient(ellipse 65% 130% at 0% 50%, var(--tier-glow,rgba(96,165,250,0.20)), transparent 70%);
-  opacity: 0.55; pointer-events: none; transition: opacity 0.26s; border-radius: inherit;
+  opacity: 0.50; pointer-events: none; transition: opacity 0.26s; border-radius: inherit;
 }
 .ppv2-tier-card::before {
   content: ''; position: absolute;
   top: 14%; left: 0; bottom: 14%; width: 1.5px;
   background: linear-gradient(180deg, transparent, var(--tier-glow,rgba(96,165,250,0.80)) 50%, transparent);
-  opacity: 0.48; transition: opacity 0.26s;
+  opacity: 0.45;
 }
 .ppv2-tier-card::after {
   content: ''; position: absolute;
   bottom: 0; left: 10%; right: 10%; height: 1px;
   background: linear-gradient(90deg, transparent, var(--tier-glow,rgba(96,165,250,0.45)) 50%, transparent);
-  opacity: 0.30; transition: opacity 0.26s;
+  opacity: 0.28;
 }
-.ppv2-tier-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,0.16); box-shadow:0 14px 44px rgba(0,0,0,0.48),0 0 36px var(--tier-glow,rgba(96,165,250,0.18)),0 0 0 1px rgba(255,255,255,0.05) inset; }
-.ppv2-tier-card:hover .ppv2-card-orb { opacity:1; }
-.ppv2-tier-card:hover::before { opacity:0.88; }
-.ppv2-tier-card:hover::after  { opacity:0.75; }
+.ppv2-tier-card:hover {
+  transform:translateY(-4px);
+  border-color:rgba(255,255,255,0.16);
+  box-shadow:0 14px 44px rgba(0,0,0,0.48),0 0 28px var(--tier-glow,rgba(96,165,250,0.15));
+}
+.ppv2-tier-card:hover .ppv2-card-orb { opacity:0.85; }
 .ppv2-tier-card > * { position:relative; z-index:1; }
-.ppv2-card-icon { grid-column:1; grid-row:1/3; width:58px; height:58px; border-radius:16px; background:rgba(255,255,255,0.048); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; transition:background 0.22s,box-shadow 0.24s,transform 0.24s cubic-bezier(0.34,1.56,0.64,1); }
+.ppv2-card-icon {
+  grid-column:1; grid-row:1/3;
+  width:58px; height:58px; border-radius:16px;
+  background:rgba(255,255,255,0.048); border:1px solid rgba(255,255,255,0.10);
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.22s, transform 0.24s cubic-bezier(0.34,1.56,0.64,1);
+}
 .ppv2-card-icon img { width:32px; height:32px; }
-.ppv2-tier-card:hover .ppv2-card-icon { background:rgba(255,255,255,0.10); box-shadow:0 0 26px var(--tier-glow,rgba(96,165,250,0.40)); transform:scale(1.10) rotate(-3deg); }
+.ppv2-tier-card:hover .ppv2-card-icon { background:rgba(255,255,255,0.10); transform:scale(1.10) rotate(-3deg); }
 .ppv2-card-mode { grid-column:2; grid-row:1; font-size:0.71rem; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; align-self:end; }
 .ppv2-card-date { grid-column:2; grid-row:2; display:flex; align-items:center; gap:5px; font-size:0.61rem; color:var(--text-muted); white-space:nowrap; align-self:start; }
 .ppv2-card-date--unknown { opacity:0.32; font-style:italic; }
 .ppv2-card-badge { grid-column:3; grid-row:1/3; display:flex; align-items:center; justify-content:center; padding-left:10px; }
-.ppv2-card-badge .tier-badge { font-size:0.95rem !important; padding:5px 15px !important; letter-spacing:0.06em !important; animation:ppv2-tier-glow 3s ease-in-out infinite; }
-@keyframes ppv2-tier-glow { 0%,100%{box-shadow:0 0 9px var(--tier-glow,rgba(96,165,250,0.32))} 50%{box-shadow:0 0 26px var(--tier-glow,rgba(96,165,250,0.70)),0 0 50px var(--tier-glow,rgba(96,165,250,0.18))} }
+.ppv2-card-badge .tier-badge { font-size:0.95rem !important; padding:5px 15px !important; letter-spacing:0.06em !important; }
 .ppv2-card-badge .cat-tier-badge { transform:scale(1.12); }
-.ppv2-card-badge .cat-tier-circle { animation:ppv2-circle-glow 3s ease-in-out infinite; }
-@keyframes ppv2-circle-glow { 0%,100%{box-shadow:0 0 9px var(--tier-glow,rgba(96,165,250,0.44))} 50%{box-shadow:0 0 28px var(--tier-glow,rgba(96,165,250,0.88))} }
 
 .ppv2-no-ranks { display:flex; flex-direction:column; align-items:center; gap:12px; padding:72px 0; color:var(--text-muted); font-size:0.88rem; }
 .ppv2-unranked { margin-top:10px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.06); }
@@ -993,7 +820,6 @@
   .ppv2-stat-cards { grid-template-columns:repeat(2,1fr); gap:11px; }
   .ppv2-ghost-rank { font-size:11rem; }
   .ppv2-emblem-line { max-width:90px; }
-  .ppv2-spotlight { left:50%; }
 }
 @media (max-width: 500px) {
   .ppv2-username { font-size:2.4rem; }
@@ -1009,8 +835,7 @@
   .ppv2-crown--3 { width:42px; top:-20px; }
   .ppv2-emblem-svg { width:72px; height:72px; }
   .ppv2-card-right { padding:28px 20px 36px; }
-  .ppv2-float-orb { display:none; }
-  .ppv2-float-orb--4 { display:none; }
+  .ppv2-meta-sep { margin:0 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation:none !important; transition:none !important; }
