@@ -21,25 +21,25 @@
   --accent-dim:  rgba(96,165,250,0.09);
   --accent-ray:  rgba(96,165,250,0.12);
   position: relative;
-  padding: 36px 0 72px;
+  padding: 36px 0 76px;
   overflow: hidden;
-  min-height: 640px;
+  min-height: 660px;
 }
 
 /* ════════════════════════════════════════
-   BACKGROUND — cinematic, layered depth
+   BACKGROUND
 ════════════════════════════════════════ */
 .ppv2-bg-mesh {
   position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 110% 80% at 20%  0%,  var(--accent-glow)       0%, transparent 55%),
-    radial-gradient(ellipse  80% 60% at 80% 10%,  rgba(167,139,250,0.10)   0%, transparent 55%),
-    radial-gradient(ellipse  60% 50% at  5% 100%, var(--accent-ray)        0%, transparent 55%),
-    radial-gradient(ellipse  60% 50% at 95% 100%, var(--accent-ray)        0%, transparent 55%),
-    radial-gradient(ellipse 180% 70% at 50%  80%, rgba(0,0,0,0.60)         0%, transparent 65%);
+    radial-gradient(ellipse 110% 80% at 22%   0%,  var(--accent-glow)      0%, transparent 55%),
+    radial-gradient(ellipse  80% 60% at 80%  12%,  rgba(167,139,250,0.10)  0%, transparent 55%),
+    radial-gradient(ellipse  55% 50% at  4% 100%,  var(--accent-ray)       0%, transparent 55%),
+    radial-gradient(ellipse  55% 50% at 96% 100%,  var(--accent-ray)       0%, transparent 55%),
+    radial-gradient(ellipse 190% 70% at 50%  82%,  rgba(0,0,0,0.65)        0%, transparent 65%);
   animation: ppv2-mesh-breathe 9s ease-in-out infinite;
 }
-@keyframes ppv2-mesh-breathe { 0%,100%{opacity:0.75} 50%{opacity:1} }
+@keyframes ppv2-mesh-breathe { 0%,100%{opacity:0.72} 50%{opacity:1} }
 
 .ppv2-bg-grid {
   position: absolute; inset: 0; pointer-events: none;
@@ -47,29 +47,27 @@
     linear-gradient(var(--accent-dim) 1px, transparent 1px),
     linear-gradient(90deg, var(--accent-dim) 1px, transparent 1px);
   background-size: 56px 56px;
-  mask-image: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 88%);
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.48) 0%, transparent 90%);
 }
-
 .ppv2-bg-scanlines {
   position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(
     0deg, transparent, transparent 3px,
     rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
   );
-  opacity: 0.30;
+  opacity: 0.28;
 }
-
 .ppv2-bg-fade {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 240px; pointer-events: none;
+  height: 250px; pointer-events: none;
   background: linear-gradient(to bottom, transparent, var(--bg, #020308));
 }
 
-/* Gold ray burst */
+/* ── Gold ray burst ── */
 .ppv2-rays {
   position: absolute; left: 50%; top: -60px;
   transform: translateX(-50%);
-  width: 1100px; height: 720px;
+  width: 1200px; height: 750px;
   pointer-events: none; z-index: 0; overflow: hidden;
 }
 .ppv2-rays::before {
@@ -79,17 +77,82 @@
   width: 100%; height: 100%;
   background: conic-gradient(
     from 270deg at 50% 100%,
-    transparent  0deg,  rgba(251,191,36,0.05)  4deg, transparent  9deg,
-    transparent 14deg,  rgba(251,191,36,0.04) 18deg, transparent 23deg,
-    transparent 28deg,  rgba(251,191,36,0.06) 32deg, transparent 37deg,
-    transparent 43deg,  rgba(251,191,36,0.04) 47deg, transparent 52deg,
-    transparent 58deg,  rgba(251,191,36,0.05) 62deg, transparent 67deg,
-    transparent 73deg,  rgba(251,191,36,0.03) 77deg, transparent 82deg,
-    transparent 88deg,  rgba(251,191,36,0.055) 92deg, transparent 97deg
+    transparent  0deg,  rgba(251,191,36,0.055)  4deg, transparent  9deg,
+    transparent 14deg,  rgba(251,191,36,0.040) 18deg, transparent 23deg,
+    transparent 28deg,  rgba(251,191,36,0.065) 32deg, transparent 37deg,
+    transparent 43deg,  rgba(251,191,36,0.042) 47deg, transparent 52deg,
+    transparent 58deg,  rgba(251,191,36,0.055) 62deg, transparent 67deg,
+    transparent 73deg,  rgba(251,191,36,0.035) 77deg, transparent 82deg,
+    transparent 88deg,  rgba(251,191,36,0.060) 92deg, transparent 97deg
   );
   animation: ppv2-rays-spin 32s linear infinite;
 }
 @keyframes ppv2-rays-spin { to { transform: translateX(-50%) rotate(360deg); } }
+
+/* ════════════════════════════════════════
+   FLOATING AMBIENT ORBS — new decoration
+════════════════════════════════════════ */
+.ppv2-float-orb {
+  position: absolute; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  filter: blur(40px);
+}
+.ppv2-float-orb--1 {
+  width: 340px; height: 340px;
+  top: -80px; left: -60px;
+  opacity: 0.40;
+  animation: ppv2-orb1 12s ease-in-out infinite;
+}
+.ppv2-float-orb--2 {
+  width: 260px; height: 260px;
+  top: 40%; right: -40px;
+  background: radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%);
+  opacity: 0.35;
+  animation: ppv2-orb2 15s ease-in-out infinite;
+}
+.ppv2-float-orb--3 {
+  width: 200px; height: 200px;
+  bottom: 60px; left: 38%;
+  opacity: 0.25;
+  animation: ppv2-orb3 10s ease-in-out infinite;
+}
+@keyframes ppv2-orb1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(40px,30px) scale(1.12); }
+  66%     { transform: translate(-20px,50px) scale(0.90); }
+}
+@keyframes ppv2-orb2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40%     { transform: translate(-30px,-40px) scale(1.15); }
+  70%     { transform: translate(20px,20px) scale(0.88); }
+}
+@keyframes ppv2-orb3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(25px,-35px) scale(1.20); }
+}
+
+/* ════════════════════════════════════════
+   SPOTLIGHT BEAM — hits the avatar
+════════════════════════════════════════ */
+.ppv2-spotlight {
+  position: absolute;
+  left: calc(390px / 2);   /* center of left panel */
+  top: 0;
+  width: 260px;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none; z-index: 0;
+  background: linear-gradient(
+    180deg,
+    var(--accent-glow)       0%,
+    rgba(255,255,255,0.025)  22%,
+    transparent              65%
+  );
+  clip-path: polygon(30% 0%, 70% 0%, 95% 100%, 5% 100%);
+  opacity: 0.55;
+  animation: ppv2-spotlight-breathe 6s ease-in-out infinite;
+}
+@keyframes ppv2-spotlight-breathe { 0%,100%{opacity:0.40} 50%{opacity:0.70} }
 
 .ppv2-hero-inner {
   max-width: 1020px; margin: 0 auto; padding: 0 32px;
@@ -115,13 +178,11 @@
   animation: ppv2-emblem-float 4.2s ease-in-out infinite,
              ppv2-emblem-glow  3.2s ease-in-out infinite;
 }
-@keyframes ppv2-emblem-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
-@keyframes ppv2-emblem-glow  { 0%,100%{filter:drop-shadow(0 0 16px var(--accent-glow))} 50%{filter:drop-shadow(0 0 36px var(--accent-glow)) drop-shadow(0 0 60px var(--accent-glow))} }
+@keyframes ppv2-emblem-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes ppv2-emblem-glow  { 0%,100%{filter:drop-shadow(0 0 16px var(--accent-glow))} 50%{filter:drop-shadow(0 0 40px var(--accent-glow)) drop-shadow(0 0 70px var(--accent-glow))} }
 .ppv2-emblem-ring-outer { animation: ppv2-emblem-ring-spin 14s linear infinite; transform-origin: 60px 60px; }
 @keyframes ppv2-emblem-ring-spin { to { transform: rotate(360deg); } }
-.ppv2-emblem-line {
-  flex: 1; max-width: 180px; height: 1px;
-}
+.ppv2-emblem-line { flex: 1; max-width: 180px; height: 1px; }
 .ppv2-emblem-line--left  { background: linear-gradient(90deg, transparent, var(--accent)); opacity: 0.38; }
 .ppv2-emblem-line--right { background: linear-gradient(90deg, var(--accent), transparent); opacity: 0.38; }
 
@@ -133,10 +194,10 @@
   border-radius: 28px; padding: 1.5px;
   animation: ppv2-card-enter 0.75s cubic-bezier(0.22,1,0.36,1) 0.05s both;
   isolation: isolate;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.03);
+  box-shadow: 0 44px 110px rgba(0,0,0,0.78), 0 0 0 1px rgba(255,255,255,0.03);
 }
 @keyframes ppv2-card-enter {
-  from { opacity:0; transform:translateY(32px) scale(0.970); }
+  from { opacity:0; transform:translateY(34px) scale(0.968); }
   to   { opacity:1; transform:translateY(0) scale(1); }
 }
 .ppv2-card-border-wrap {
@@ -167,6 +228,27 @@
 }
 @keyframes ppv2-border-rot { to { transform: rotate(360deg); } }
 
+/* ── Card corner ornaments ── */
+.ppv2-card-corner {
+  position: absolute; width: 22px; height: 22px;
+  pointer-events: none; z-index: 10;
+}
+.ppv2-card-corner::before, .ppv2-card-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--accent-glow), 0 0 24px var(--accent-glow);
+  animation: ppv2-corner-glow 3s ease-in-out infinite;
+}
+@keyframes ppv2-corner-glow { 0%,100%{opacity:0.55} 50%{opacity:1} }
+.ppv2-card-corner::before { width: 2.5px; height: 100%; top: 0; left: 0; }
+.ppv2-card-corner::after  { width: 100%; height: 2.5px; top: 0; left: 0; }
+.ppv2-card-corner--tl { top: 0;    left: 0;    border-radius: 28px 0 0 0; }
+.ppv2-card-corner--tr { top: 0;    right: 0;   transform: scaleX(-1); }
+.ppv2-card-corner--bl { bottom: 0; left: 0;    transform: scaleY(-1); }
+.ppv2-card-corner--br { bottom: 0; right: 0;   transform: scale(-1); }
+
 .ppv2-card {
   position: relative;
   display: flex; align-items: stretch;
@@ -184,14 +266,19 @@
     transparent, var(--accent-tri) 25%, var(--accent) 50%, var(--accent-tri) 75%, transparent);
   opacity: 0.55;
 }
+.ppv2-card-bottom-line {
+  position: absolute; bottom: 0; left: 20%; right: 20%; height: 1px; z-index: 10;
+  background: linear-gradient(90deg, transparent, var(--accent-glow) 50%, transparent);
+  opacity: 0.35;
+}
 .ppv2-card-sheen {
   position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: linear-gradient(
     115deg,
     transparent 0%, transparent 38%,
-    rgba(255,255,255,0.014) 44%,
-    rgba(255,255,255,0.040) 50%,
-    rgba(255,255,255,0.014) 56%,
+    rgba(255,255,255,0.013) 44%,
+    rgba(255,255,255,0.038) 50%,
+    rgba(255,255,255,0.013) 56%,
     transparent 62%, transparent 100%
   );
   background-size: 300% 100%;
@@ -205,10 +292,10 @@
 .ppv2-card-left {
   position: relative;
   width: 390px; flex-shrink: 0;
-  padding: 52px 24px 52px 24px;
+  padding: 52px 24px 72px 24px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  background: radial-gradient(ellipse 100% 75% at 50% 50%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.14) 100%);
+  background: radial-gradient(ellipse 100% 75% at 50% 50%, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.14) 100%);
   border-right: 1px solid rgba(255,255,255,0.038);
 }
 .ppv2-card-left-tex {
@@ -216,10 +303,24 @@
   background: repeating-linear-gradient(
     -48deg,
     transparent, transparent 18px,
-    rgba(255,255,255,0.008) 18px,
-    rgba(255,255,255,0.008) 19px
+    rgba(255,255,255,0.007) 18px,
+    rgba(255,255,255,0.007) 19px
   );
 }
+
+/* Diagonal sweep lines behind avatar */
+.ppv2-left-sweep {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    60deg,
+    transparent, transparent 38px,
+    rgba(255,255,255,0.012) 38px,
+    rgba(255,255,255,0.012) 39px
+  );
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(0,0,0,0.8) 0%, transparent 70%);
+  animation: ppv2-sweep-drift 20s linear infinite;
+}
+@keyframes ppv2-sweep-drift { from{background-position:0 0} to{background-position:200px 200px} }
 
 /* Ghost rank number */
 .ppv2-ghost-rank {
@@ -228,11 +329,11 @@
   font-size: 20rem; font-weight: 900; letter-spacing: -0.14em;
   line-height: 1; user-select: none; pointer-events: none;
   color: var(--accent);
-  opacity: 0.045; filter: blur(4px);
+  opacity: 0.042; filter: blur(4px);
   animation: ppv2-ghost-breathe 7s ease-in-out infinite;
   white-space: nowrap;
 }
-@keyframes ppv2-ghost-breathe { 0%,100%{opacity:0.032} 50%{opacity:0.072} }
+@keyframes ppv2-ghost-breathe { 0%,100%{opacity:0.030} 50%{opacity:0.068} }
 
 /* Particles */
 .ppv2-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -258,6 +359,8 @@
 .ppv2-particle--14 { left:3%;  width:3px; height:3px; animation-duration:7.3s; animation-delay:1.0s; }
 .ppv2-particle--15 { left:92%; width:5px; height:5px; animation-duration:4.2s; animation-delay:2.2s; }
 .ppv2-particle--16 { left:54%; width:4px; height:4px; animation-duration:6.1s; animation-delay:3.3s; }
+.ppv2-particle--17 { left:38%; width:3px; height:3px; animation-duration:5.4s; animation-delay:0.2s; }
+.ppv2-particle--18 { left:68%; width:5px; height:5px; animation-duration:4.9s; animation-delay:1.7s; }
 @keyframes ppv2-pfloat {
   0%   { bottom:-12px; opacity:0; transform:translateX(0) scale(0.4); }
   7%   { opacity:1; }
@@ -276,16 +379,44 @@
 }
 @keyframes ppv2-bar-breathe { 0%,100%{opacity:0.50} 50%{opacity:1} }
 
+/* ── Bottom decoration row in left panel ── */
+.ppv2-left-deco-row {
+  position: absolute; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+}
+.ppv2-deco-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: ppv2-dot-pulse 2.5s ease-in-out infinite;
+}
+.ppv2-deco-line {
+  height: 1px; width: 36px;
+  background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+  opacity: 0.45;
+}
+.ppv2-deco-line--long { width: 80px; }
+.ppv2-deco-diamond {
+  width: 7px; height: 7px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px var(--accent-glow);
+  animation: ppv2-diamond-pulse 2.2s ease-in-out infinite;
+}
+@keyframes ppv2-diamond-pulse { 0%,100%{transform:rotate(45deg) scale(1);opacity:0.65} 50%{transform:rotate(45deg) scale(1.4);opacity:1} }
+@keyframes ppv2-dot-pulse     { 0%,100%{transform:scale(1);opacity:0.65} 50%{transform:scale(1.6);opacity:1} }
+
 /* ════════════════════════════════════════
-   AVATAR FRAME — completely redesigned
+   AVATAR FRAME
 ════════════════════════════════════════ */
 .ppv2-avatar-frame {
   position: relative; z-index: 3;
-  width: 300px; height: 300px;
+  width: 310px; height: 310px;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Outer ambient aura */
+/* Primary aura */
 .ppv2-avatar-aura {
   position: absolute; inset: -80px; pointer-events: none;
   background:
@@ -294,54 +425,55 @@
   border-radius: 50%;
   animation: ppv2-aura-pulse 4.5s ease-in-out infinite;
 }
-@keyframes ppv2-aura-pulse { 0%,100%{opacity:0.60;transform:scale(1)} 50%{opacity:1;transform:scale(1.22)} }
+/* Secondary wider aura */
+.ppv2-avatar-aura--2 {
+  inset: -130px;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--accent-glow) 0%, transparent 60%);
+  opacity: 0.30;
+  animation: ppv2-aura2-pulse 6s ease-in-out infinite 1s;
+}
+@keyframes ppv2-aura-pulse  { 0%,100%{opacity:0.60;transform:scale(1)}   50%{opacity:1;transform:scale(1.22)} }
+@keyframes ppv2-aura2-pulse { 0%,100%{opacity:0.20;transform:scale(1)}   50%{opacity:0.45;transform:scale(1.30)} }
 
-/* ── CSS ring decorations (replace SVG hex) ── */
+/* CSS ring decorations */
 .ppv2-ring {
   position: absolute;
   border-radius: 30px;
   pointer-events: none;
 }
 .ppv2-ring--1 {
-  inset: -14px;
-  border-radius: 30px;
+  inset: -14px; border-radius: 30px;
   border: 2px solid var(--accent);
   opacity: 0.65;
-  filter: blur(0.5px);
-  box-shadow: 0 0 0 1px var(--accent-glow) inset, 0 0 24px var(--accent-glow);
+  box-shadow: 0 0 0 1px var(--accent-glow) inset, 0 0 28px var(--accent-glow);
   animation: ppv2-ring1-breathe 3.5s ease-in-out infinite;
 }
-@keyframes ppv2-ring1-breathe { 0%,100%{opacity:0.55;box-shadow:0 0 12px var(--accent-glow)} 50%{opacity:0.90;box-shadow:0 0 30px var(--accent-glow),0 0 60px var(--accent-glow)} }
-
+@keyframes ppv2-ring1-breathe {
+  0%,100%{opacity:0.52;box-shadow:0 0 14px var(--accent-glow)}
+  50%{opacity:0.92;box-shadow:0 0 36px var(--accent-glow),0 0 70px var(--accent-glow)}
+}
 .ppv2-ring--2 {
-  inset: -30px;
-  border-radius: 40px;
+  inset: -30px; border-radius: 40px;
   border: 1px dashed rgba(255,255,255,0.12);
-  opacity: 0.50;
+  opacity: 0.52;
   animation: ppv2-ring2-spin 28s linear infinite;
   transform-origin: center;
 }
-@keyframes ppv2-ring2-spin { to { transform: rotate(360deg); } }
 .ppv2-ring--2::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid var(--accent);
-  opacity: 0.20;
+  content: ''; position: absolute; inset: 0;
+  border-radius: inherit; border: 1px solid var(--accent); opacity: 0.20;
 }
-
+@keyframes ppv2-ring2-spin { to { transform: rotate(360deg); } }
 .ppv2-ring--3 {
-  inset: -48px;
-  border-radius: 52px;
+  inset: -50px; border-radius: 54px;
   border: 0.5px solid var(--accent);
-  opacity: 0.12;
-  animation: ppv2-ring3-spin 40s linear infinite reverse;
+  opacity: 0.14;
+  animation: ppv2-ring3-spin 42s linear infinite reverse;
   transform-origin: center;
 }
 @keyframes ppv2-ring3-spin { to { transform: rotate(360deg); } }
 
-/* ── Corner sparks ── */
+/* Corner sparks */
 .ppv2-spark {
   position: absolute; width: 28px; height: 28px; z-index: 8; pointer-events: none;
 }
@@ -350,31 +482,78 @@
   background: var(--accent); border-radius: 2px;
   box-shadow:
     0 0 8px var(--accent-glow),
-    0 0 20px var(--accent-glow),
-    0 0 44px var(--accent-glow);
-  animation: ppv2-spark-pulse 2.2s ease-in-out infinite;
+    0 0 22px var(--accent-glow),
+    0 0 50px var(--accent-glow);
+  animation: ppv2-spark-pulse 2.4s ease-in-out infinite;
 }
 .ppv2-spark::before { width: 3px; height: 100%; top: 0; left: 0; }
 .ppv2-spark::after  { width: 100%; height: 3px; top: 0; left: 0; }
-@keyframes ppv2-spark-pulse { 0%,100%{opacity:0.50;transform:scale(1)} 50%{opacity:1;transform:scale(1.10)} }
+@keyframes ppv2-spark-pulse { 0%,100%{opacity:0.48;transform:scale(1)} 50%{opacity:1;transform:scale(1.12)} }
 .ppv2-spark--tl { top: 5px;    left: 5px; }
 .ppv2-spark--tr { top: 5px;    right: 5px;  transform: scaleX(-1); }
 .ppv2-spark--bl { bottom: 5px; left: 5px;   transform: scaleY(-1); }
 .ppv2-spark--br { bottom: 5px; right: 5px;  transform: scale(-1,-1); }
 
 /* ════════════════════════════════════════
-   AVATAR BOX — larger, more dramatic
+   AVATAR BOX — levitation container
+   Crown is INSIDE here → floats in sync
 ════════════════════════════════════════ */
 .ppv2-avatar-box {
   position: absolute;
   top: 50%; left: 50%;
   z-index: 4;
   width: 210px; height: 210px;
+  /* overflow visible so crown can extend above */
+  overflow: visible;
   animation: ppv2-head-levitate 5.2s ease-in-out infinite;
 }
 @keyframes ppv2-head-levitate {
   0%,100% { transform: translate(-50%, -50%) translateY(0px); }
-  50%     { transform: translate(-50%, -50%) translateY(-14px); }
+  50%     { transform: translate(-50%, -50%) translateY(-15px); }
+}
+
+/* ── Crown — now inside avatar-box, floats in sync ── */
+.ppv2-crown { position: absolute; z-index: 6; pointer-events: none; }
+
+/* Positions are relative to the 210×210px avatar-box */
+/* Rock animation only — parent handles the up/down float */
+.ppv2-crown--1 {
+  width: 84px;
+  top: -42px;         /* above the top edge of avatar-box */
+  left: 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  animation: ppv2-crown-rock1 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 28px rgba(251,191,36,0.95)) drop-shadow(0 0 12px rgba(251,191,36,0.70));
+}
+.ppv2-crown--2 {
+  width: 66px;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-6deg);
+  animation: ppv2-crown-rock2 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 3px 20px rgba(203,213,225,0.88));
+}
+.ppv2-crown--3 {
+  width: 58px;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-5deg);
+  animation: ppv2-crown-rock3 3.8s ease-in-out infinite;
+  filter: drop-shadow(0 3px 18px rgba(251,146,60,0.82));
+}
+
+/* Rock left ↔ right in sync with the levitation rhythm */
+@keyframes ppv2-crown-rock1 {
+  0%,100% { transform: translateX(-50%) rotate(-8deg); }
+  50%     { transform: translateX(-50%) rotate(7deg);  }
+}
+@keyframes ppv2-crown-rock2 {
+  0%,100% { transform: translateX(-50%) rotate(-6deg); }
+  50%     { transform: translateX(-50%) rotate(5deg);  }
+}
+@keyframes ppv2-crown-rock3 {
+  0%,100% { transform: translateX(-50%) rotate(-5deg); }
+  50%     { transform: translateX(-50%) rotate(4deg);  }
 }
 
 /* Pulsing glow orb behind head */
@@ -389,7 +568,7 @@
 }
 @keyframes ppv2-head-glow { 0%,100%{opacity:0.75;transform:scale(1)} 50%{opacity:1;transform:scale(1.32)} }
 
-/* The actual avatar — premium triple-ring treatment */
+/* Avatar inner — triple-ring border */
 .ppv2-avatar-inner {
   position: relative; z-index: 2;
   width: 100%; height: 100%;
@@ -410,95 +589,55 @@
 @keyframes ppv2-avatar-glow-pulse {
   0%,100% {
     box-shadow:
-      0 0 0 3px var(--accent),
-      0 0 0 8px rgba(0,0,0,0.95),
-      0 0 0 11px var(--accent),
-      0 0 28px var(--accent-glow),
-      0 0 65px var(--accent-glow),
-      0 0 130px var(--accent-glow),
-      0 36px 80px rgba(0,0,0,0.98),
-      inset 0 0 0 1px rgba(255,255,255,0.20);
+      0 0 0 3px var(--accent), 0 0 0 8px rgba(0,0,0,0.95), 0 0 0 11px var(--accent),
+      0 0 28px var(--accent-glow), 0 0 70px var(--accent-glow), 0 0 140px var(--accent-glow),
+      0 36px 80px rgba(0,0,0,0.98), inset 0 0 0 1px rgba(255,255,255,0.20);
   }
   50% {
     box-shadow:
-      0 0 0 3px var(--accent),
-      0 0 0 8px rgba(0,0,0,0.95),
-      0 0 0 11px var(--accent),
-      0 0 55px var(--accent-glow),
-      0 0 120px var(--accent-glow),
-      0 0 220px var(--accent-glow),
-      0 36px 80px rgba(0,0,0,0.98),
-      inset 0 0 0 1px rgba(255,255,255,0.30);
+      0 0 0 3px var(--accent), 0 0 0 8px rgba(0,0,0,0.95), 0 0 0 11px var(--accent),
+      0 0 60px var(--accent-glow), 0 0 130px var(--accent-glow), 0 0 240px var(--accent-glow),
+      0 36px 80px rgba(0,0,0,0.98), inset 0 0 0 1px rgba(255,255,255,0.32);
   }
 }
-
-/* Scanline overlay */
 .ppv2-avatar-inner::after {
-  content: '';
-  position: absolute; inset: 0; z-index: 10;
+  content: ''; position: absolute; inset: 0; z-index: 10;
   background: repeating-linear-gradient(
-    0deg,
-    rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px,
-    transparent 1px, transparent 4px
+    0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 4px
   );
-  pointer-events: none;
-  border-radius: 20px;
+  pointer-events: none; border-radius: 20px;
 }
-/* Holographic sweep */
 .ppv2-avatar-inner::before {
-  content: '';
-  position: absolute; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(180deg,
-    transparent 0%,
-    rgba(255,255,255,0.12) 38%,
-    rgba(255,255,255,0.07) 62%,
-    transparent 100%);
+  content: ''; position: absolute; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0.07) 62%, transparent 100%);
   animation: ppv2-scan-sweep 3s ease-in-out infinite;
   pointer-events: none; z-index: 11;
 }
 @keyframes ppv2-scan-sweep { 0%{top:-55%} 100%{top:165%} }
-.ppv2-avatar-inner img {
-  width: 100%; height: 100%;
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
+.ppv2-avatar-inner img { width: 100%; height: 100%; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
 
 /* Pedestal glow */
 .ppv2-avatar-pedestal {
-  position: absolute; bottom: -40px; left: 50%;
+  position: absolute; bottom: -42px; left: 50%;
   transform: translateX(-50%);
-  width: 180px; height: 40px;
+  width: 190px; height: 42px;
   background: radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 72%);
-  filter: blur(16px);
+  filter: blur(18px);
   pointer-events: none; z-index: 1;
   animation: ppv2-pedestal-pulse 3.5s ease-in-out infinite;
 }
 @keyframes ppv2-pedestal-pulse { 0%,100%{opacity:0.65} 50%{opacity:1} }
-
-/* Floor reflection */
 .ppv2-avatar-reflection {
-  position: absolute; bottom: -60px; left: 50%;
+  position: absolute; bottom: -62px; left: 50%;
   transform: translateX(-50%);
-  width: 150px; height: 26px;
+  width: 155px; height: 28px;
   background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
   border-radius: 50%;
-  filter: blur(8px);
-  opacity: 0.45;
+  filter: blur(9px); opacity: 0.45;
   pointer-events: none;
 }
 
-/* Crown */
-.ppv2-crown { position: absolute; z-index: 6; pointer-events: none; }
-.ppv2-crown--1 { width:82px; top:-24px; left:50%; transform:translateX(-50%) rotate(-8deg); animation:ppv2-cf1 3s ease-in-out infinite; filter:drop-shadow(0 4px 28px rgba(251,191,36,0.95)) drop-shadow(0 0 10px rgba(251,191,36,0.65)); }
-.ppv2-crown--2 { width:64px; top:-14px; left:50%; transform:translateX(-50%) rotate(-6deg); animation:ppv2-cf2 3.4s ease-in-out infinite; filter:drop-shadow(0 3px 18px rgba(203,213,225,0.85)); }
-.ppv2-crown--3 { width:58px; top:-10px; left:50%; transform:translateX(-50%) rotate(-5deg); animation:ppv2-cf3 3.8s ease-in-out infinite; filter:drop-shadow(0 3px 16px rgba(251,146,60,0.80)); }
-@keyframes ppv2-cf1 { 0%,100%{transform:translateX(-50%) translateY(0) rotate(-8deg)} 50%{transform:translateX(-50%) translateY(-10px) rotate(7deg)} }
-@keyframes ppv2-cf2 { 0%,100%{transform:translateX(-50%) translateY(0) rotate(-6deg)} 50%{transform:translateX(-50%) translateY(-8px) rotate(5deg)} }
-@keyframes ppv2-cf3 { 0%,100%{transform:translateX(-50%) translateY(0) rotate(-5deg)} 50%{transform:translateX(-50%) translateY(-7px) rotate(4deg)} }
-
-/* Rank pill at base */
+/* Rank pill — stays on frame (not on avatar-box) */
 .ppv2-frame-rank {
   position: absolute; bottom: -2px; left: 50%; z-index: 7;
   transform: translateX(-50%) translateY(50%);
@@ -511,14 +650,13 @@
   white-space: nowrap;
   box-shadow: 0 6px 24px rgba(0,0,0,0.65);
   color: var(--text-dim, #7589b0);
-  transition: box-shadow 0.3s;
 }
 .ppv2-frame-rank--rank-gold   { border-color:rgba(251,191,36,0.48);  color:#fbbf24; box-shadow:0 0 20px rgba(251,191,36,0.45); }
 .ppv2-frame-rank--rank-silver { border-color:rgba(203,213,225,0.40); color:#cbd5e1; box-shadow:0 0 18px rgba(203,213,225,0.32); }
 .ppv2-frame-rank--rank-bronze { border-color:rgba(251,146,60,0.44);  color:#fb923c; box-shadow:0 0 18px rgba(251,146,60,0.36); }
 
 /* ════════════════════════════════════════
-   RIGHT PANEL — redesigned for impact
+   RIGHT PANEL
 ════════════════════════════════════════ */
 .ppv2-card-right {
   flex: 1; min-width: 0;
@@ -531,8 +669,17 @@
   from { opacity:0; transform:translateX(32px); }
   to   { opacity:1; transform:translateX(0); }
 }
+/* Subtle texture on right panel */
+.ppv2-right-tex {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    -30deg,
+    transparent, transparent 22px,
+    rgba(255,255,255,0.006) 22px,
+    rgba(255,255,255,0.006) 23px
+  );
+}
 
-/* Eyebrow */
 .ppv2-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.60rem; font-weight: 800; letter-spacing: 0.18em;
@@ -542,7 +689,6 @@
 .ppv2-eyebrow-sep { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.40; }
 .ppv2-eyebrow-region { font-size: 0.58rem; }
 
-/* USERNAME — the big statement */
 .ppv2-username {
   font-size: clamp(3.2rem, 5.5vw, 5.2rem);
   font-weight: 900; letter-spacing: -0.065em;
@@ -562,7 +708,6 @@
   50%     { background-position:100% center; }
 }
 
-/* Achievement title */
 .ppv2-achievement-title {
   display: inline-flex; align-items: center; gap: 8px;
   color: var(--text-dim, #7589b0);
@@ -576,9 +721,7 @@
   box-shadow: 0 0 10px var(--accent-glow);
   animation: ppv2-dot-pulse 2.5s ease-in-out infinite;
 }
-@keyframes ppv2-dot-pulse { 0%,100%{transform:scale(1);opacity:0.65} 50%{transform:scale(1.7);opacity:1} }
 
-/* Animated divider */
 .ppv2-divider {
   position: relative; height: 1px; margin-bottom: 22px; overflow: hidden;
 }
@@ -590,7 +733,6 @@
 }
 @keyframes ppv2-divider-draw { from{right:100%} to{right:0%} }
 
-/* Pills row */
 .ppv2-pills-row {
   display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
   margin-bottom: 14px;
@@ -605,12 +747,11 @@
   transition: transform 0.18s;
 }
 .ppv2-rank-pill:hover { transform: scale(1.05); }
-@keyframes ppv2-pill-glow { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 20px 2px var(--accent-glow)} }
+@keyframes ppv2-pill-glow { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 22px 2px var(--accent-glow)} }
 .ppv2-rank-pill--rank-gold   { background:rgba(251,191,36,0.11); border-color:rgba(251,191,36,0.44); color:#fbbf24; }
 .ppv2-rank-pill--rank-silver { background:rgba(203,213,225,0.09); border-color:rgba(203,213,225,0.33); color:#cbd5e1; }
 .ppv2-rank-pill--rank-bronze { background:rgba(251,146,60,0.10);  border-color:rgba(251,146,60,0.35);  color:#fb923c; }
 
-/* UUID button */
 .ppv2-uuid-btn {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.030); border: 1px solid rgba(255,255,255,0.070);
@@ -618,15 +759,14 @@
   cursor: pointer; color: var(--text-dim, #7589b0);
   font-size: 11.5px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
   letter-spacing: 0.04em;
-  transition: all 0.20s; margin-bottom: 28px;
+  transition: all 0.20s; margin-bottom: 24px;
 }
 .ppv2-uuid-btn:hover {
   background: rgba(255,255,255,0.065); border-color: var(--accent-glow);
   color: var(--text, #eef2ff); box-shadow: 0 0 16px var(--accent-glow);
 }
 
-/* Quick stats */
-.ppv2-meta-row { display: flex; align-items: center; }
+.ppv2-meta-row { display: flex; align-items: center; margin-bottom: 20px; }
 .ppv2-meta-item { display: flex; align-items: baseline; gap: 6px; }
 .ppv2-meta-val {
   font-size: 1.85rem; font-weight: 900; letter-spacing: -0.05em;
@@ -642,8 +782,46 @@
   background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent);
 }
 
+/* ── Rank progress bar ── */
+.ppv2-rank-progress { margin-top: 4px; }
+.ppv2-rank-progress-labels {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 7px;
+}
+.ppv2-rank-progress-lbl {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--text-muted, #374166);
+}
+.ppv2-rank-progress-val {
+  font-size: 0.68rem; font-weight: 800;
+  color: var(--accent); letter-spacing: 0.04em;
+}
+.ppv2-rank-progress-track {
+  position: relative;
+  height: 4px; border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  overflow: visible;
+}
+.ppv2-rank-progress-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-sec), var(--accent), var(--accent-tri));
+  transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
+  position: relative;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.ppv2-rank-progress-fill--rank-gold   { background: linear-gradient(90deg,#92400e,#f59e0b,#fde68a); box-shadow:0 0 14px rgba(251,191,36,0.60); }
+.ppv2-rank-progress-fill--rank-silver { background: linear-gradient(90deg,#334155,#94a3b8,#e2e8f0); box-shadow:0 0 12px rgba(203,213,225,0.45); }
+.ppv2-rank-progress-fill--rank-bronze { background: linear-gradient(90deg,#7c2d12,#c07838,#fed7aa); box-shadow:0 0 14px rgba(251,146,60,0.50); }
+.ppv2-rank-progress-glow {
+  position: absolute; top: 50%; transform: translate(-50%,-50%);
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow), 0 0 24px var(--accent-glow);
+  animation: ppv2-dot-pulse 2s ease-in-out infinite;
+}
+
 /* ════════════════════════════════════════
-   STAT CARDS — premium redesign
+   STAT CARDS
 ════════════════════════════════════════ */
 .ppv2-stat-cards {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
@@ -665,31 +843,41 @@
 .ppv2-stat-card-bg {
   position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse 95% 80% at 12% 95%, var(--sg) 0%, transparent 65%);
-  opacity: 0.25; transition: opacity 0.30s;
+  opacity: 0.24; transition: opacity 0.30s;
 }
+/* Moving inner shine */
+.ppv2-stat-card-shine {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 0%, transparent 42%,
+    rgba(255,255,255,0.030) 48%,
+    rgba(255,255,255,0.010) 52%,
+    transparent 58%, transparent 100%
+  );
+  background-size: 300% 100%;
+  animation: ppv2-card-shine 5s ease-in-out infinite;
+}
+@keyframes ppv2-card-shine { 0%{background-position:200% 0} 100%{background-position:-100% 0} }
 .ppv2-stat-card::before {
   content: ''; position: absolute;
   top: 0; left: 15%; right: 15%; height: 1px;
   background: linear-gradient(90deg, transparent, var(--sc), transparent);
-  opacity: 0.45; transition: left 0.30s, right 0.30s, opacity 0.30s;
+  opacity: 0.42; transition: left 0.30s, right 0.30s, opacity 0.30s;
 }
 .ppv2-stat-card:hover {
   transform: translateY(-8px) scale(1.02);
   border-color: rgba(255,255,255,0.12);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.58), 0 0 32px var(--sg);
+  box-shadow: 0 26px 64px rgba(0,0,0,0.60), 0 0 36px var(--sg);
 }
 .ppv2-stat-card:hover .ppv2-stat-card-bg { opacity: 0.65; }
-.ppv2-stat-card:hover::before { left: 6%; right: 6%; opacity: 0.85; }
-
-.ppv2-stat-card-icon {
-  color: var(--sc); opacity: 0.70;
-  display: flex; align-items: center;
-}
+.ppv2-stat-card:hover::before { left: 5%; right: 5%; opacity: 0.85; }
+.ppv2-stat-card-icon { color: var(--sc); opacity: 0.70; display: flex; align-items: center; }
 .ppv2-stat-card-num {
-  font-size: 2.25rem; font-weight: 900;
+  font-size: 2.3rem; font-weight: 900;
   color: #fff; line-height: 1; letter-spacing: -0.06em;
 }
-.ppv2-stat-card-of  { font-size: 0.56em; opacity: 0.25; }
+.ppv2-stat-card-of  { font-size: 0.56em; opacity: 0.24; }
 .ppv2-stat-card-lbl {
   font-size: 0.57rem; text-transform: uppercase;
   letter-spacing: 0.15em; color: var(--text-muted, #374166);
@@ -697,7 +885,7 @@
 }
 
 /* ════════════════════════════════════════
-   CONTENT / TIER SECTION
+   TIER SECTION
 ════════════════════════════════════════ */
 .ppv2-content { padding-top: 56px; padding-bottom: 80px; max-width: 1020px; }
 .ppv2-section-head { margin-bottom: 26px; border-bottom: none !important; }
@@ -707,13 +895,17 @@
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   text-decoration: none !important; border-bottom: none !important;
 }
+/* Section decoration row */
+.ppv2-section-deco {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px;
+  opacity: 0.50;
+}
 
 .ppv2-tiers-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 11px; margin-bottom: 48px;
 }
-
-/* ── Tier card — elevated ── */
 .ppv2-tier-card {
   position: relative; overflow: hidden;
   display: grid; grid-template-columns: 58px 1fr auto; grid-template-rows: auto auto;
@@ -727,7 +919,6 @@
   cursor: default;
 }
 @keyframes ppv2-card-in { from{opacity:0;transform:translateY(18px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
-
 .ppv2-card-orb {
   position: absolute; inset: 0;
   background: radial-gradient(ellipse 65% 130% at 0% 50%, var(--tier-glow,rgba(96,165,250,0.20)), transparent 70%);
@@ -745,46 +936,22 @@
   background: linear-gradient(90deg, transparent, var(--tier-glow,rgba(96,165,250,0.45)) 50%, transparent);
   opacity: 0.30; transition: opacity 0.26s;
 }
-.ppv2-tier-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255,255,255,0.16);
-  box-shadow: 0 14px 44px rgba(0,0,0,0.48), 0 0 36px var(--tier-glow,rgba(96,165,250,0.18)), 0 0 0 1px rgba(255,255,255,0.05) inset;
-}
-.ppv2-tier-card:hover .ppv2-card-orb { opacity: 1; }
-.ppv2-tier-card:hover::before { opacity: 0.88; }
-.ppv2-tier-card:hover::after  { opacity: 0.75; }
-.ppv2-tier-card > * { position: relative; z-index: 1; }
-
-.ppv2-card-icon {
-  grid-column: 1; grid-row: 1/3;
-  width: 58px; height: 58px; border-radius: 16px;
-  background: rgba(255,255,255,0.048); border: 1px solid rgba(255,255,255,0.10);
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.22s, box-shadow 0.24s, transform 0.24s cubic-bezier(0.34,1.56,0.64,1);
-}
-.ppv2-card-icon img { width: 32px; height: 32px; }
-.ppv2-tier-card:hover .ppv2-card-icon {
-  background: rgba(255,255,255,0.10);
-  box-shadow: 0 0 26px var(--tier-glow, rgba(96,165,250,0.40));
-  transform: scale(1.10) rotate(-3deg);
-}
-.ppv2-card-mode {
-  grid-column: 2; grid-row: 1;
-  font-size: 0.71rem; font-weight: 700; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--text-dim); white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; align-self: end;
-}
-.ppv2-card-date {
-  grid-column: 2; grid-row: 2;
-  display: flex; align-items: center; gap: 5px;
-  font-size: 0.61rem; color: var(--text-muted); white-space: nowrap; align-self: start;
-}
-.ppv2-card-date--unknown { opacity: 0.32; font-style: italic; }
-.ppv2-card-badge { grid-column: 3; grid-row: 1/3; display: flex; align-items: center; justify-content: center; padding-left: 10px; }
-.ppv2-card-badge .tier-badge { font-size: 0.95rem !important; padding: 5px 15px !important; letter-spacing: 0.06em !important; animation: ppv2-tier-glow 3s ease-in-out infinite; }
+.ppv2-tier-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,0.16); box-shadow:0 14px 44px rgba(0,0,0,0.48),0 0 36px var(--tier-glow,rgba(96,165,250,0.18)),0 0 0 1px rgba(255,255,255,0.05) inset; }
+.ppv2-tier-card:hover .ppv2-card-orb { opacity:1; }
+.ppv2-tier-card:hover::before { opacity:0.88; }
+.ppv2-tier-card:hover::after  { opacity:0.75; }
+.ppv2-tier-card > * { position:relative; z-index:1; }
+.ppv2-card-icon { grid-column:1; grid-row:1/3; width:58px; height:58px; border-radius:16px; background:rgba(255,255,255,0.048); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; transition:background 0.22s,box-shadow 0.24s,transform 0.24s cubic-bezier(0.34,1.56,0.64,1); }
+.ppv2-card-icon img { width:32px; height:32px; }
+.ppv2-tier-card:hover .ppv2-card-icon { background:rgba(255,255,255,0.10); box-shadow:0 0 26px var(--tier-glow,rgba(96,165,250,0.40)); transform:scale(1.10) rotate(-3deg); }
+.ppv2-card-mode { grid-column:2; grid-row:1; font-size:0.71rem; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; align-self:end; }
+.ppv2-card-date { grid-column:2; grid-row:2; display:flex; align-items:center; gap:5px; font-size:0.61rem; color:var(--text-muted); white-space:nowrap; align-self:start; }
+.ppv2-card-date--unknown { opacity:0.32; font-style:italic; }
+.ppv2-card-badge { grid-column:3; grid-row:1/3; display:flex; align-items:center; justify-content:center; padding-left:10px; }
+.ppv2-card-badge .tier-badge { font-size:0.95rem !important; padding:5px 15px !important; letter-spacing:0.06em !important; animation:ppv2-tier-glow 3s ease-in-out infinite; }
 @keyframes ppv2-tier-glow { 0%,100%{box-shadow:0 0 9px var(--tier-glow,rgba(96,165,250,0.32))} 50%{box-shadow:0 0 26px var(--tier-glow,rgba(96,165,250,0.70)),0 0 50px var(--tier-glow,rgba(96,165,250,0.18))} }
-.ppv2-card-badge .cat-tier-badge { transform: scale(1.12); }
-.ppv2-card-badge .cat-tier-circle { animation: ppv2-circle-glow 3s ease-in-out infinite; }
+.ppv2-card-badge .cat-tier-badge { transform:scale(1.12); }
+.ppv2-card-badge .cat-tier-circle { animation:ppv2-circle-glow 3s ease-in-out infinite; }
 @keyframes ppv2-circle-glow { 0%,100%{box-shadow:0 0 9px var(--tier-glow,rgba(96,165,250,0.44))} 50%{box-shadow:0 0 28px var(--tier-glow,rgba(96,165,250,0.88))} }
 
 .ppv2-no-ranks { display:flex; flex-direction:column; align-items:center; gap:12px; padding:72px 0; color:var(--text-muted); font-size:0.88rem; }
@@ -797,27 +964,32 @@
    RESPONSIVE
 ════════════════════════════════════════ */
 @media (max-width: 820px) {
-  .ppv2-card { flex-direction: column; }
-  .ppv2-card-left { width: 100%; padding: 48px 24px 40px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.036); }
-  .ppv2-avatar-frame { margin: 0 auto; }
-  .ppv2-card-right { padding: 32px 28px 42px; }
-  .ppv2-username { font-size: clamp(2.6rem, 8vw, 3.6rem); }
-  .ppv2-stat-cards { grid-template-columns: repeat(2, 1fr); gap: 11px; }
-  .ppv2-ghost-rank { font-size: 11rem; }
-  .ppv2-emblem-line { max-width: 90px; }
+  .ppv2-card { flex-direction:column; }
+  .ppv2-card-left { width:100%; padding:48px 24px 56px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.036); }
+  .ppv2-avatar-frame { margin:0 auto; }
+  .ppv2-card-right { padding:32px 28px 42px; }
+  .ppv2-username { font-size:clamp(2.6rem,8vw,3.6rem); }
+  .ppv2-stat-cards { grid-template-columns:repeat(2,1fr); gap:11px; }
+  .ppv2-ghost-rank { font-size:11rem; }
+  .ppv2-emblem-line { max-width:90px; }
+  .ppv2-spotlight { left:50%; }
 }
 @media (max-width: 500px) {
-  .ppv2-username { font-size: 2.4rem; }
-  .ppv2-tiers-grid { grid-template-columns: 1fr; gap: 9px; }
-  .ppv2-content { padding-top: 32px; }
-  .ppv2-avatar-frame { width: 220px; height: 220px; }
-  .ppv2-avatar-box { width: 150px; height: 150px; }
-  .ppv2-ring--1 { inset: -8px; }
-  .ppv2-ring--2 { inset: -18px; }
-  .ppv2-ring--3 { inset: -30px; }
-  .ppv2-emblem-svg { width: 72px; height: 72px; }
-  .ppv2-card-right { padding: 28px 20px 36px; }
+  .ppv2-username { font-size:2.4rem; }
+  .ppv2-tiers-grid { grid-template-columns:1fr; gap:9px; }
+  .ppv2-content { padding-top:32px; }
+  .ppv2-avatar-frame { width:220px; height:220px; }
+  .ppv2-avatar-box { width:150px; height:150px; }
+  .ppv2-ring--1 { inset:-8px; }
+  .ppv2-ring--2 { inset:-18px; }
+  .ppv2-ring--3 { inset:-30px; }
+  .ppv2-crown--1 { width:60px; top:-30px; }
+  .ppv2-crown--2 { width:48px; top:-24px; }
+  .ppv2-crown--3 { width:42px; top:-20px; }
+  .ppv2-emblem-svg { width:72px; height:72px; }
+  .ppv2-card-right { padding:28px 20px 36px; }
+  .ppv2-float-orb { display:none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  * { animation:none !important; transition:none !important; }
 }
