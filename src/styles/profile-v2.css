@@ -294,104 +294,132 @@
 @keyframes ppv2-ra { to { transform: rotate(360deg); } }
 @keyframes ppv2-rb { to { transform: rotate(-360deg); } }
 
+/* Bigger epic corner bracket sparks */
 .ppv2-spark {
-  position: absolute; width: 14px; height: 14px; z-index: 5; pointer-events: none;
+  position: absolute; width: 24px; height: 24px; z-index: 8; pointer-events: none;
 }
 .ppv2-spark::before, .ppv2-spark::after {
   content: ''; position: absolute;
   background: var(--accent); border-radius: 2px;
-  box-shadow: 0 0 10px var(--accent-glow), 0 0 22px var(--accent-glow);
-  animation: ppv2-spark-pulse 2.6s ease-in-out infinite;
+  box-shadow:
+    0 0 8px var(--accent-glow),
+    0 0 20px var(--accent-glow),
+    0 0 40px var(--accent-glow);
+  animation: ppv2-spark-pulse 2.2s ease-in-out infinite;
 }
-.ppv2-spark::before { width:2.5px; height:100%; top:0; left:0; }
-.ppv2-spark::after  { width:100%; height:2.5px; top:0; left:0; }
-@keyframes ppv2-spark-pulse { 0%,100%{opacity:0.55} 50%{opacity:1} }
-.ppv2-spark--tl { top:20px;    left:20px; }
-.ppv2-spark--tr { top:20px;    right:20px; transform:scaleX(-1); }
-.ppv2-spark--bl { bottom:20px; left:20px;  transform:scaleY(-1); }
-.ppv2-spark--br { bottom:20px; right:20px; transform:scale(-1,-1); }
+.ppv2-spark::before { width: 3px; height: 100%; top: 0; left: 0; }
+.ppv2-spark::after  { width: 100%; height: 3px; top: 0; left: 0; }
+@keyframes ppv2-spark-pulse { 0%,100%{opacity:0.60;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+.ppv2-spark--tl { top: 12px; left: 12px; }
+.ppv2-spark--tr { top: 12px; right: 12px; transform: scaleX(-1); }
+.ppv2-spark--bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+.ppv2-spark--br { bottom: 12px; right: 12px; transform: scale(-1,-1); }
 
 /* ════════════════════════════════════════
-   AVATAR BOX — 3D head, full visibility
+   AVATAR BOX — front-facing, dead center
 ════════════════════════════════════════ */
 .ppv2-avatar-box {
-  position: relative; z-index: 4;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  overflow: visible;
+  position: absolute;
+  top: 50%; left: 50%;
+  z-index: 4;
+  width: 156px; height: 156px;
+  animation: ppv2-head-levitate 5s ease-in-out infinite;
 }
 
-/* Glow blob behind head */
+@keyframes ppv2-head-levitate {
+  0%,100% { transform: translate(-50%, -50%) translateY(0px); }
+  50%     { transform: translate(-50%, -50%) translateY(-10px); }
+}
+
+/* Pulsing glow orb behind head */
 .ppv2-avatar-glow-bg {
-  position: absolute; inset: -30px;
+  position: absolute; inset: -44px;
   background:
-    radial-gradient(ellipse 90% 90% at 50% 45%, var(--accent-glow) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 50% at 50% 80%, rgba(0,0,0,0.5) 0%, transparent 70%);
+    radial-gradient(ellipse 85% 85% at 50% 50%, var(--accent-glow) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 40% at 50% 90%, rgba(0,0,0,0.55) 0%, transparent 70%);
   border-radius: 50%;
   animation: ppv2-head-glow 3.5s ease-in-out infinite;
   pointer-events: none;
 }
-@keyframes ppv2-head-glow { 0%,100%{opacity:0.70;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
+@keyframes ppv2-head-glow { 0%,100%{opacity:0.75;transform:scale(1)} 50%{opacity:1;transform:scale(1.20)} }
 
-/* The actual head container — 3D render, no clip, full visibility */
+/* The actual head — square, centered, front-facing */
 .ppv2-avatar-inner {
   position: relative; z-index: 2;
-  width: 200px; height: 200px;
-  border-radius: 0;
-  overflow: visible;
-  image-rendering: auto;
-  animation: ppv2-head-levitate 5s ease-in-out infinite;
-  filter:
-    drop-shadow(0 0 18px var(--accent-glow))
-    drop-shadow(0 0 40px var(--accent-glow))
-    drop-shadow(0 28px 40px rgba(0,0,0,0.75));
+  width: 100%; height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  image-rendering: pixelated;
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 0 5px rgba(0,0,0,0.75),
+    0 0 28px var(--accent-glow),
+    0 0 56px var(--accent-glow),
+    0 0 90px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(255,255,255,0.18);
 }
-/* 3D render inside — auto rendering, no pixelation */
-.ppv2-avatar-inner .player-avatar--3d {
-  image-rendering: auto;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
+
+/* Scanline overlay */
+.ppv2-avatar-inner::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 10;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.13) 0px,
+    rgba(0,0,0,0.13) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  border-radius: 14px;
+}
+
+/* Moving scan sweep */
+.ppv2-avatar-inner::before {
+  content: '';
+  position: absolute; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(255,255,255,0.07) 35%,
+    rgba(255,255,255,0.04) 65%,
+    transparent 100%);
+  animation: ppv2-scan-sweep 3.2s ease-in-out infinite;
+  pointer-events: none; z-index: 11;
+}
+@keyframes ppv2-scan-sweep {
+  0%   { top: -60%; }
+  100% { top: 160%; }
+}
+
+.ppv2-avatar-inner img {
+  width: 100%; height: 100%;
   display: block;
-}
-/* 2D fallback — keep pixelated */
-.ppv2-avatar-inner img:not(.player-avatar--3d) {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  border-radius: 14px;
-  box-shadow:
-    0 0 0 2px var(--accent-glow),
-    0 0 24px var(--accent-glow),
-    inset 0 0 0 1px rgba(255,255,255,0.12);
-}
-@keyframes ppv2-head-levitate {
-  0%,100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 16px var(--accent-glow)) drop-shadow(0 0 36px var(--accent-glow)) drop-shadow(0 24px 36px rgba(0,0,0,0.75)); }
-  50%     { transform: translateY(-10px) scale(1.03); filter: drop-shadow(0 0 26px var(--accent-glow)) drop-shadow(0 0 60px var(--accent-glow)) drop-shadow(0 36px 52px rgba(0,0,0,0.65)); }
 }
 
 /* Pedestal glow under head */
 .ppv2-avatar-pedestal {
-  position: absolute; bottom: -22px; left: 50%;
+  position: absolute; bottom: -28px; left: 50%;
   transform: translateX(-50%);
-  width: 150px; height: 36px;
-  background: radial-gradient(ellipse at 50% 100%,
-    var(--accent-glow) 0%, transparent 70%);
+  width: 130px; height: 32px;
+  background: radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 70%);
   filter: blur(10px);
   pointer-events: none; z-index: 1;
   animation: ppv2-pedestal-pulse 3.5s ease-in-out infinite;
 }
-@keyframes ppv2-pedestal-pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+@keyframes ppv2-pedestal-pulse { 0%,100%{opacity:0.65} 50%{opacity:1} }
 
-/* Floor reflection under head */
+/* Floor reflection */
 .ppv2-avatar-reflection {
-  width: 120px; height: 24px; margin-top: 4px;
-  background: linear-gradient(180deg,
-    rgba(255,255,255,0.07) 0%,
-    transparent 100%);
+  position: absolute; bottom: -44px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, transparent 100%);
   border-radius: 50%;
-  transform: scaleY(-0.30) scaleX(0.90);
   filter: blur(5px);
-  opacity: 0.45;
+  opacity: 0.42;
   pointer-events: none;
 }
 
