@@ -13,9 +13,9 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
 
   if (mode === 'face3d') {
     const srcs = [
-      `https://crafatar.com/renders/head/${username}?size=256&overlay&default=MHF_Steve`,
-      `https://visage.surgeplay.com/head/256/${username}`,
+      `https://crafatar.com/avatars/${username}?size=256&overlay&default=MHF_Steve`,
       `https://mc-heads.net/avatar/${username}/256`,
+      `https://visage.surgeplay.com/face/256/${username}`,
       `https://ui-avatars.com/api/?name=${username}&size=256&background=0d1117&color=60a5fa&bold=true&format=png`,
     ];
     const src = srcs[Math.min(stage, srcs.length - 1)];
@@ -25,15 +25,14 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
         alt={username}
         loading="eager"
         decoding="async"
-        className={`player-avatar player-avatar--3d ${className}`}
+        className={`player-avatar player-avatar--face ${className}`}
         onError={advance}
         style={{
-          imageRendering: stage >= 2 ? 'pixelated' : 'auto',
+          imageRendering: 'pixelated',
           display: 'block',
           width: '100%',
           height: '100%',
-          objectFit: 'contain',
-          filter: stage === 0 ? 'drop-shadow(0 8px 24px rgba(0,0,0,0.6))' : undefined,
+          objectFit: 'cover',
         }}
       />
     );
