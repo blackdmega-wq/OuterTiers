@@ -59,18 +59,15 @@ const RANK_CFG = {
 } as const;
 type RankKey = keyof typeof RANK_CFG;
 
-/* ── Rank Emblem (replaces champion banner) ── */
+/* ── Rank Emblem ── */
 function RankEmblem({ rank, rankClass, cfg }: {
   rank: number;
   rankClass: RankKey;
   cfg: typeof RANK_CFG[RankKey];
 }) {
   if (!rankClass || rank < 1 || rank > 3) return null;
-
   const symbols = { 1: 'I', 2: 'II', 3: 'III' } as Record<number, string>;
   const numeral = symbols[rank];
-
-  // Gold: starburst seal  Silver: hexagonal crest  Bronze: laurel-style shield
   return (
     <div className={`ppv2-rank-emblem ppv2-rank-emblem--${rankClass}`} aria-label={`Rank ${rank}`}>
       <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="ppv2-emblem-svg">
@@ -89,21 +86,11 @@ function RankEmblem({ rank, rankClass, cfg }: {
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-
-        {/* Outer glow disc */}
         <circle cx="60" cy="60" r="52" fill={cfg.g} filter={`url(#eg2${rank})`} opacity="0.6"/>
-
-        {/* Outer decorative ring — dashed */}
         <circle cx="60" cy="60" r="52" stroke={cfg.p} strokeWidth="0.8" strokeDasharray="3 9" strokeOpacity="0.65" className="ppv2-emblem-ring-outer"/>
-
-        {/* Mid ring */}
         <circle cx="60" cy="60" r="44" stroke={cfg.p} strokeWidth="1.4" strokeOpacity="0.90" filter={`url(#ef${rank})`}/>
-
-        {/* Filled inner circle */}
         <circle cx="60" cy="60" r="38" fill={cfg.d}/>
         <circle cx="60" cy="60" r="38" stroke={cfg.p} strokeWidth="0.6" strokeOpacity="0.40"/>
-
-        {/* Rank numeral */}
         <text
           x="60" y="70"
           textAnchor="middle"
@@ -114,35 +101,22 @@ function RankEmblem({ rank, rankClass, cfg }: {
           letterSpacing="-1"
           filter={`url(#ef${rank})`}
         >{numeral}</text>
-
-        {/* 4 cardinal diamonds */}
         {[[60,5],[60,115],[5,60],[115,60]].map(([cx,cy],i) => (
-          <rect key={i}
-            x={cx-4} y={cy-4} width="8" height="8"
-            fill={cfg.p} opacity="0.85"
-            transform={`rotate(45,${cx},${cy})`}
-            filter={`url(#ef${rank})`}
-          />
+          <rect key={i} x={cx-4} y={cy-4} width="8" height="8" fill={cfg.p} opacity="0.85"
+            transform={`rotate(45,${cx},${cy})`} filter={`url(#ef${rank})`}/>
         ))}
-
-        {/* 4 diagonal small diamonds */}
         {[[23,23],[97,23],[23,97],[97,97]].map(([cx,cy],i) => (
-          <rect key={i}
-            x={cx-3} y={cy-3} width="6" height="6"
-            fill={cfg.p} opacity="0.45"
-            transform={`rotate(45,${cx},${cy})`}
-          />
+          <rect key={i} x={cx-3} y={cy-3} width="6" height="6" fill={cfg.p} opacity="0.45"
+            transform={`rotate(45,${cx},${cy})`}/>
         ))}
       </svg>
-
-      {/* Horizontal decorative lines either side */}
       <div className="ppv2-emblem-line ppv2-emblem-line--left"/>
       <div className="ppv2-emblem-line ppv2-emblem-line--right"/>
     </div>
   );
 }
 
-/* Crowns */
+/* ── Crowns ── */
 function CrownGold() {
   return (
     <svg viewBox="0 0 110 90" fill="none">
@@ -235,7 +209,7 @@ export default function PlayerProfile() {
   if (loading) return (
     <div className="not-found-page">
       <div className="ppv2-spinner"/>
-      <p style={{color:'var(--text-dim)',marginTop:18}}>Loading player…</p>
+      <p style={{color:'var(--text-dim)',marginTop:20}}>Loading player…</p>
     </div>
   );
 
@@ -268,17 +242,17 @@ export default function PlayerProfile() {
   } as React.CSSProperties;
 
   const statCards = [
-    {icon:<Star size={15}/>,   val:animPts,     lbl:'Total Points', sc:cfg.p, sg:cfg.g},
-    {icon:<Trophy size={15}/>, val:rankLabel,    lbl:'Overall Rank', sc:cfg.p, sg:cfg.g},
-    {icon:<Globe size={15}/>,  val:player.region,lbl:'Region',       sc:'#34d399', sg:'rgba(52,211,153,0.35)'},
-    {icon:<Zap size={15}/>,    val:<>{rankedModes.length}<span className="ppv2-stat-card-of">/{modeCats.length}</span></>, lbl:'Modes Ranked', sc:'#a78bfa', sg:'rgba(167,139,250,0.35)'},
+    {icon:<Star size={16}/>,   val:animPts,      lbl:'Total Points',  sc:cfg.p, sg:cfg.g},
+    {icon:<Trophy size={16}/>, val:rankLabel,     lbl:'Overall Rank',  sc:cfg.p, sg:cfg.g},
+    {icon:<Globe size={16}/>,  val:player.region, lbl:'Region',        sc:'#34d399', sg:'rgba(52,211,153,0.38)'},
+    {icon:<Zap size={16}/>,    val:<>{rankedModes.length}<span className="ppv2-stat-card-of">/{modeCats.length}</span></>, lbl:'Modes Ranked', sc:'#a78bfa', sg:'rgba(167,139,250,0.38)'},
   ];
 
   return (
     <div className="profile-page ppv2-page">
       <div className={`ppv2-hero${rankClass?` ppv2-hero--${rankClass}`:''}`} style={cssVars}>
 
-        {/* Background */}
+        {/* Background layers */}
         <div className="ppv2-bg-mesh"/>
         <div className="ppv2-bg-grid"/>
         <div className="ppv2-bg-scanlines"/>
@@ -290,10 +264,10 @@ export default function PlayerProfile() {
             <ArrowLeft size={14}/> Back to Rankings
           </Link>
 
-          {/* ── Rank Emblem (replaces champion banner) ── */}
+          {/* Rank emblem for top 3 */}
           <RankEmblem rank={rank} rankClass={rankClass} cfg={cfg}/>
 
-          {/* ── Card ── */}
+          {/* ── Main Card ── */}
           <div className="ppv2-card-wrap">
             <div className="ppv2-card-border-wrap">
               <div className="ppv2-card-border-rot"/>
@@ -303,7 +277,7 @@ export default function PlayerProfile() {
               <div className="ppv2-card-top-line"/>
               <div className="ppv2-card-sheen"/>
 
-              {/* LEFT */}
+              {/* LEFT — avatar */}
               <div className="ppv2-card-left">
                 <div className="ppv2-card-left-tex"/>
                 {rank>0 && <div className="ppv2-ghost-rank" aria-hidden="true">{rankLabel}</div>}
@@ -314,63 +288,22 @@ export default function PlayerProfile() {
                   </div>
                 )}
 
+                {/* ── Avatar frame — CSS rings (no SVG hex) ── */}
                 <div className={`ppv2-avatar-frame${rankClass?` ppv2-avatar-frame--${rankClass}`:''}`}>
                   <div className="ppv2-avatar-aura"/>
 
-                  {/* SVG hex rings + vertex dots */}
-                  <svg className="ppv2-frame-svg" viewBox="0 0 240 240" fill="none">
-                    <defs>
-                      <linearGradient id="fgA" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%"   stopColor={cfg.t} stopOpacity="1"/>
-                        <stop offset="35%"  stopColor={cfg.p} stopOpacity="0.75"/>
-                        <stop offset="70%"  stopColor={cfg.s} stopOpacity="0.40"/>
-                        <stop offset="100%" stopColor={cfg.t} stopOpacity="0.08"/>
-                      </linearGradient>
-                      <filter id="vtxGlow">
-                        <feGaussianBlur stdDeviation="3" result="b"/>
-                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                      </filter>
-                    </defs>
-                    {/* Outer solid hex — main frame */}
-                    <polygon points="120,10 208,60 208,180 120,230 32,180 32,60"
-                      stroke="url(#fgA)" strokeWidth="2.5" fill="none"
-                      className="ppv2-ring-a" style={{transformOrigin:'120px 120px'}}/>
-                    {/* Mid dashed hex */}
-                    <polygon points="120,22 198,70 198,170 120,218 42,170 42,70"
-                      stroke={cfg.p} strokeWidth="1" strokeDasharray="7 24"
-                      strokeOpacity="0.60" fill="none"
-                      className="ppv2-ring-b" style={{transformOrigin:'120px 120px'}}/>
-                    {/* Inner thin hex */}
-                    <polygon points="120,38 184,78 184,162 120,202 56,162 56,78"
-                      stroke={cfg.p} strokeWidth="0.6" strokeOpacity="0.32" fill="none"/>
-                    {/* Vertex glow dots at outer hex corners */}
-                    <circle cx="120" cy="10"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    <circle cx="208" cy="60"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    <circle cx="208" cy="180" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    <circle cx="120" cy="230" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    <circle cx="32"  cy="180" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    <circle cx="32"  cy="60"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
-                    {/* Inner vertex accent dots */}
-                    <circle cx="120" cy="10"  r="2.5" fill={cfg.t}/>
-                    <circle cx="208" cy="60"  r="2.5" fill={cfg.t}/>
-                    <circle cx="208" cy="180" r="2.5" fill={cfg.t}/>
-                    <circle cx="120" cy="230" r="2.5" fill={cfg.t}/>
-                    <circle cx="32"  cy="180" r="2.5" fill={cfg.t}/>
-                    <circle cx="32"  cy="60"  r="2.5" fill={cfg.t}/>
-                  </svg>
+                  {/* CSS decorative rings */}
+                  <div className="ppv2-ring ppv2-ring--1"/>
+                  <div className="ppv2-ring ppv2-ring--2"/>
+                  <div className="ppv2-ring ppv2-ring--3"/>
 
-                  {/* Corner sparks */}
+                  {/* Corner accent sparks */}
                   <div className="ppv2-spark ppv2-spark--tl"/>
                   <div className="ppv2-spark ppv2-spark--tr"/>
                   <div className="ppv2-spark ppv2-spark--bl"/>
                   <div className="ppv2-spark ppv2-spark--br"/>
 
-                  {/* Orbiting energy dots */}
-                  {[1,2,3,4,5,6].map(i => (
-                    <div key={i} className={`ppv2-orbit-dot ppv2-orbit-dot--${i}`}/>
-                  ))}
-
-                  {/* ── 3D HEAD — full visibility, no clip ── */}
+                  {/* Avatar */}
                   <div className="ppv2-avatar-box">
                     <div className="ppv2-avatar-pedestal"/>
                     <div className="ppv2-avatar-glow-bg"/>
@@ -387,7 +320,7 @@ export default function PlayerProfile() {
                     </div>
                   )}
 
-                  {/* Frame rank pill */}
+                  {/* Rank pill */}
                   {rank>0&&(
                     <div className={`ppv2-frame-rank${rankClass?` ppv2-frame-rank--${rankClass}`:''}`}>
                       <Trophy size={8}/> {rankLabel}
@@ -398,12 +331,12 @@ export default function PlayerProfile() {
                 <div className="ppv2-accent-bar"/>
               </div>
 
-              {/* RIGHT */}
+              {/* RIGHT — player info */}
               <div className="ppv2-card-right">
                 <div className="ppv2-eyebrow">
                   <Zap size={9}/>
                   <span>OuterTiers Player</span>
-                  <span className="ppv2-eyebrow-sep">·</span>
+                  <span className="ppv2-eyebrow-sep"/>
                   <span className={`ppv2-eyebrow-region region-badge region-${player.region.toLowerCase()}`}>
                     {player.region}
                   </span>
@@ -445,11 +378,11 @@ export default function PlayerProfile() {
             </div>
           </div>
 
-          {/* Stat cards */}
+          {/* ── Stat cards ── */}
           <div className="ppv2-stat-cards">
             {statCards.map((s,i)=>(
               <div key={i} className="ppv2-stat-card"
-                style={{'--sc':s.sc,'--sg':s.sg,animationDelay:`${i*65}ms`} as React.CSSProperties}>
+                style={{'--sc':s.sc,'--sg':s.sg,animationDelay:`${i*70}ms`} as React.CSSProperties}>
                 <div className="ppv2-stat-card-bg"/>
                 <div className="ppv2-stat-card-icon">{s.icon}</div>
                 <div className="ppv2-stat-card-num">{s.val}</div>
@@ -460,7 +393,7 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      {/* ── Tier Rankings (unchanged) ── */}
+      {/* ── Tier Rankings ── */}
       <div className="profile-container ppv2-content">
         {rankedModes.length>0&&(
           <>
