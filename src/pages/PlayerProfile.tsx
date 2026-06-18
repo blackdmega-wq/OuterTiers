@@ -240,7 +240,12 @@ export default function PlayerProfile() {
         <div className="ppv2-bg-mesh"/>
         <div className="ppv2-bg-grid"/>
         <div className="ppv2-bg-scanlines"/>
-        {rankClass==='rank-gold' && <div className="ppv2-rays"/>}
+        {/* ── Star field ── */}
+        <div className="ppv2-stars" aria-hidden="true"/>
+        {/* ── Nebula color clouds ── */}
+        <div className="ppv2-nebula ppv2-nebula--a" aria-hidden="true"/>
+        <div className="ppv2-nebula ppv2-nebula--b" aria-hidden="true"/>
+        {rankClass && <div className={`ppv2-nebula ppv2-nebula--rank ppv2-nebula--${rankClass}`} aria-hidden="true"/>}
         <div className="ppv2-bg-fade"/>
 
         {/* ── Floating ambient orbs ── */}
@@ -292,6 +297,11 @@ export default function PlayerProfile() {
                 <div className={`ppv2-avatar-frame${rankClass?` ppv2-avatar-frame--${rankClass}`:''}`}>
                   <div className="ppv2-avatar-aura"/>
                   <div className="ppv2-avatar-aura ppv2-avatar-aura--2"/>
+
+                  {/* Expanding ripple rings */}
+                  <div className="ppv2-ripple ppv2-ripple--1" aria-hidden="true"/>
+                  <div className="ppv2-ripple ppv2-ripple--2" aria-hidden="true"/>
+                  <div className="ppv2-ripple ppv2-ripple--3" aria-hidden="true"/>
 
                   {/* CSS rings */}
                   <div className="ppv2-ring ppv2-ring--1"/>
