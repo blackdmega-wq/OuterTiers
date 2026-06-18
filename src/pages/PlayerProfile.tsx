@@ -61,13 +61,10 @@ type RankKey = keyof typeof RANK_CFG;
 
 /* ── Rank Emblem ── */
 function RankEmblem({ rank, rankClass, cfg }: {
-  rank: number;
-  rankClass: RankKey;
-  cfg: typeof RANK_CFG[RankKey];
+  rank: number; rankClass: RankKey; cfg: typeof RANK_CFG[RankKey];
 }) {
   if (!rankClass || rank < 1 || rank > 3) return null;
   const symbols = { 1: 'I', 2: 'II', 3: 'III' } as Record<number, string>;
-  const numeral = symbols[rank];
   return (
     <div className={`ppv2-rank-emblem ppv2-rank-emblem--${rankClass}`} aria-label={`Rank ${rank}`}>
       <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="ppv2-emblem-svg">
@@ -77,35 +74,23 @@ function RankEmblem({ rank, rankClass, cfg }: {
             <stop offset="60%"  stopColor={cfg.p} stopOpacity="0.70"/>
             <stop offset="100%" stopColor={cfg.s} stopOpacity="0.20"/>
           </radialGradient>
-          <filter id={`ef${rank}`}>
-            <feGaussianBlur stdDeviation="3.5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id={`eg2${rank}`}>
-            <feGaussianBlur stdDeviation="8" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
+          <filter id={`ef${rank}`}><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id={`eg2${rank}`}><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
         <circle cx="60" cy="60" r="52" fill={cfg.g} filter={`url(#eg2${rank})`} opacity="0.6"/>
         <circle cx="60" cy="60" r="52" stroke={cfg.p} strokeWidth="0.8" strokeDasharray="3 9" strokeOpacity="0.65" className="ppv2-emblem-ring-outer"/>
         <circle cx="60" cy="60" r="44" stroke={cfg.p} strokeWidth="1.4" strokeOpacity="0.90" filter={`url(#ef${rank})`}/>
         <circle cx="60" cy="60" r="38" fill={cfg.d}/>
         <circle cx="60" cy="60" r="38" stroke={cfg.p} strokeWidth="0.6" strokeOpacity="0.40"/>
-        <text
-          x="60" y="70"
-          textAnchor="middle"
-          fill={`url(#eg${rank})`}
-          fontSize={rank === 1 ? 34 : rank === 2 ? 28 : 26}
-          fontWeight="900"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          letterSpacing="-1"
-          filter={`url(#ef${rank})`}
-        >{numeral}</text>
-        {[[60,5],[60,115],[5,60],[115,60]].map(([cx,cy],i) => (
+        <text x="60" y="70" textAnchor="middle" fill={`url(#eg${rank})`}
+          fontSize={rank===1?34:rank===2?28:26} fontWeight="900"
+          fontFamily="system-ui,-apple-system,sans-serif" letterSpacing="-1"
+          filter={`url(#ef${rank})`}>{symbols[rank]}</text>
+        {[[60,5],[60,115],[5,60],[115,60]].map(([cx,cy],i)=>(
           <rect key={i} x={cx-4} y={cy-4} width="8" height="8" fill={cfg.p} opacity="0.85"
             transform={`rotate(45,${cx},${cy})`} filter={`url(#ef${rank})`}/>
         ))}
-        {[[23,23],[97,23],[23,97],[97,97]].map(([cx,cy],i) => (
+        {[[23,23],[97,23],[23,97],[97,97]].map(([cx,cy],i)=>(
           <rect key={i} x={cx-3} y={cy-3} width="6" height="6" fill={cfg.p} opacity="0.45"
             transform={`rotate(45,${cx},${cy})`}/>
         ))}
@@ -235,6 +220,7 @@ export default function PlayerProfile() {
   const rankedModes = modeCats.filter(c => { const t=player.tiers[c.id as keyof PlayerTiers]; return t&&t!=='-'; });
   const unrankedModes = modeCats.filter(c => { const t=player.tiers[c.id as keyof PlayerTiers]; return !t||t==='-'; });
   const rankLabel = rank>0?`#${rank}`:'—';
+  const rankPct = players.length > 1 ? Math.max(0, Math.min(100, ((players.length - rank) / (players.length - 1)) * 100)) : 100;
 
   const cssVars = {
     '--accent':cfg.p,'--accent-sec':cfg.s,'--accent-tri':cfg.t,
@@ -252,12 +238,20 @@ export default function PlayerProfile() {
     <div className="profile-page ppv2-page">
       <div className={`ppv2-hero${rankClass?` ppv2-hero--${rankClass}`:''}`} style={cssVars}>
 
-        {/* Background layers */}
+        {/* ── Background layers ── */}
         <div className="ppv2-bg-mesh"/>
         <div className="ppv2-bg-grid"/>
         <div className="ppv2-bg-scanlines"/>
         {rankClass==='rank-gold' && <div className="ppv2-rays"/>}
         <div className="ppv2-bg-fade"/>
+
+        {/* ── Floating ambient orbs ── */}
+        <div className="ppv2-float-orb ppv2-float-orb--1" aria-hidden="true"/>
+        <div className="ppv2-float-orb ppv2-float-orb--2" aria-hidden="true"/>
+        <div className="ppv2-float-orb ppv2-float-orb--3" aria-hidden="true"/>
+
+        {/* ── Spotlight beam ── */}
+        <div className="ppv2-spotlight" aria-hidden="true"/>
 
         <div className="ppv2-hero-inner">
           <Link to="/rankings/overall" className="back-link btn-press ppv2-back">
@@ -273,38 +267,56 @@ export default function PlayerProfile() {
               <div className="ppv2-card-border-rot"/>
             </div>
 
+            {/* Card corner ornaments */}
+            <div className="ppv2-card-corner ppv2-card-corner--tl" aria-hidden="true"/>
+            <div className="ppv2-card-corner ppv2-card-corner--tr" aria-hidden="true"/>
+            <div className="ppv2-card-corner ppv2-card-corner--bl" aria-hidden="true"/>
+            <div className="ppv2-card-corner ppv2-card-corner--br" aria-hidden="true"/>
+
             <div className="ppv2-card">
               <div className="ppv2-card-top-line"/>
+              <div className="ppv2-card-bottom-line"/>
               <div className="ppv2-card-sheen"/>
 
-              {/* LEFT — avatar */}
+              {/* ══ LEFT — avatar ══ */}
               <div className="ppv2-card-left">
                 <div className="ppv2-card-left-tex"/>
                 {rank>0 && <div className="ppv2-ghost-rank" aria-hidden="true">{rankLabel}</div>}
 
+                {/* Diagonal sweep lines */}
+                <div className="ppv2-left-sweep" aria-hidden="true"/>
+
                 {rankClass && (
                   <div className="ppv2-particles" aria-hidden="true">
-                    {[...Array(16)].map((_,i)=><div key={i} className={`ppv2-particle ppv2-particle--${i+1}`}/>)}
+                    {[...Array(18)].map((_,i)=><div key={i} className={`ppv2-particle ppv2-particle--${i+1}`}/>)}
                   </div>
                 )}
 
-                {/* ── Avatar frame — CSS rings (no SVG hex) ── */}
+                {/* ── Avatar frame with CSS rings ── */}
                 <div className={`ppv2-avatar-frame${rankClass?` ppv2-avatar-frame--${rankClass}`:''}`}>
                   <div className="ppv2-avatar-aura"/>
+                  <div className="ppv2-avatar-aura ppv2-avatar-aura--2"/>
 
-                  {/* CSS decorative rings */}
+                  {/* CSS rings */}
                   <div className="ppv2-ring ppv2-ring--1"/>
                   <div className="ppv2-ring ppv2-ring--2"/>
                   <div className="ppv2-ring ppv2-ring--3"/>
 
-                  {/* Corner accent sparks */}
+                  {/* Corner sparks */}
                   <div className="ppv2-spark ppv2-spark--tl"/>
                   <div className="ppv2-spark ppv2-spark--tr"/>
                   <div className="ppv2-spark ppv2-spark--bl"/>
                   <div className="ppv2-spark ppv2-spark--br"/>
 
-                  {/* Avatar */}
+                  {/* ── Avatar box — crown is INSIDE so it levitates with the head ── */}
                   <div className="ppv2-avatar-box">
+                    {/* Crown is now a child of avatar-box — floats in sync */}
+                    {rank>0&&rank<=3&&(
+                      <div className={`ppv2-crown ppv2-crown--${rank}`}>
+                        {rank===1?<CrownGold/>:rank===2?<CrownSilver/>:<CrownBronze/>}
+                      </div>
+                    )}
+
                     <div className="ppv2-avatar-pedestal"/>
                     <div className="ppv2-avatar-glow-bg"/>
                     <div className="ppv2-avatar-inner">
@@ -313,14 +325,7 @@ export default function PlayerProfile() {
                     <div className="ppv2-avatar-reflection"/>
                   </div>
 
-                  {/* Crown */}
-                  {rank>0&&rank<=3&&(
-                    <div className={`ppv2-crown ppv2-crown--${rank}`}>
-                      {rank===1?<CrownGold/>:rank===2?<CrownSilver/>:<CrownBronze/>}
-                    </div>
-                  )}
-
-                  {/* Rank pill */}
+                  {/* Rank pill (stays on frame, not on box) */}
                   {rank>0&&(
                     <div className={`ppv2-frame-rank${rankClass?` ppv2-frame-rank--${rankClass}`:''}`}>
                       <Trophy size={8}/> {rankLabel}
@@ -329,10 +334,22 @@ export default function PlayerProfile() {
                 </div>
 
                 <div className="ppv2-accent-bar"/>
+
+                {/* Left panel bottom deco */}
+                <div className="ppv2-left-deco-row" aria-hidden="true">
+                  <div className="ppv2-deco-dot"/>
+                  <div className="ppv2-deco-line"/>
+                  <div className="ppv2-deco-diamond"/>
+                  <div className="ppv2-deco-line"/>
+                  <div className="ppv2-deco-dot"/>
+                </div>
               </div>
 
-              {/* RIGHT — player info */}
+              {/* ══ RIGHT — player info ══ */}
               <div className="ppv2-card-right">
+                {/* Subtle diagonal mesh on right */}
+                <div className="ppv2-right-tex" aria-hidden="true"/>
+
                 <div className="ppv2-eyebrow">
                   <Zap size={9}/>
                   <span>OuterTiers Player</span>
@@ -374,6 +391,23 @@ export default function PlayerProfile() {
                     <span className="ppv2-meta-lbl">modes</span>
                   </div>
                 </div>
+
+                {/* Rank progress bar */}
+                {rank > 0 && players.length > 1 && (
+                  <div className="ppv2-rank-progress">
+                    <div className="ppv2-rank-progress-labels">
+                      <span className="ppv2-rank-progress-lbl">Global Percentile</span>
+                      <span className="ppv2-rank-progress-val">{Math.round(rankPct)}%</span>
+                    </div>
+                    <div className="ppv2-rank-progress-track">
+                      <div
+                        className={`ppv2-rank-progress-fill${rankClass?` ppv2-rank-progress-fill--${rankClass}`:''}`}
+                        style={{width:`${rankPct}%`}}
+                      />
+                      <div className="ppv2-rank-progress-glow" style={{left:`${rankPct}%`}}/>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -384,6 +418,7 @@ export default function PlayerProfile() {
               <div key={i} className="ppv2-stat-card"
                 style={{'--sc':s.sc,'--sg':s.sg,animationDelay:`${i*70}ms`} as React.CSSProperties}>
                 <div className="ppv2-stat-card-bg"/>
+                <div className="ppv2-stat-card-shine"/>
                 <div className="ppv2-stat-card-icon">{s.icon}</div>
                 <div className="ppv2-stat-card-num">{s.val}</div>
                 <div className="ppv2-stat-card-lbl">{s.lbl}</div>
@@ -400,6 +435,11 @@ export default function PlayerProfile() {
             <div className="ppv2-section-head">
               <div className="section-label">Performance</div>
               <h2 className="section-heading ppv2-section-title">Tier Rankings by Category</h2>
+              <div className="ppv2-section-deco" aria-hidden="true">
+                <div className="ppv2-deco-line ppv2-deco-line--long"/>
+                <div className="ppv2-deco-diamond"/>
+                <div className="ppv2-deco-line ppv2-deco-line--long"/>
+              </div>
             </div>
             <div className="ppv2-tiers-grid">
               {rankedModes.map((cat,i)=>{
