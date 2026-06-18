@@ -310,32 +310,53 @@ export default function PlayerProfile() {
 
                 {rankClass && (
                   <div className="ppv2-particles" aria-hidden="true">
-                    {[...Array(8)].map((_,i)=><div key={i} className={`ppv2-particle ppv2-particle--${i+1}`}/>)}
+                    {[...Array(16)].map((_,i)=><div key={i} className={`ppv2-particle ppv2-particle--${i+1}`}/>)}
                   </div>
                 )}
 
                 <div className={`ppv2-avatar-frame${rankClass?` ppv2-avatar-frame--${rankClass}`:''}`}>
                   <div className="ppv2-avatar-aura"/>
 
-                  {/* SVG hex rings */}
-                  <svg className="ppv2-frame-svg" viewBox="0 0 188 188" fill="none">
+                  {/* SVG hex rings + vertex dots */}
+                  <svg className="ppv2-frame-svg" viewBox="0 0 240 240" fill="none">
                     <defs>
                       <linearGradient id="fgA" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%"   stopColor={cfg.t} stopOpacity="0.95"/>
-                        <stop offset="40%"  stopColor={cfg.p} stopOpacity="0.60"/>
-                        <stop offset="75%"  stopColor={cfg.s} stopOpacity="0.30"/>
-                        <stop offset="100%" stopColor={cfg.t} stopOpacity="0.05"/>
+                        <stop offset="0%"   stopColor={cfg.t} stopOpacity="1"/>
+                        <stop offset="35%"  stopColor={cfg.p} stopOpacity="0.75"/>
+                        <stop offset="70%"  stopColor={cfg.s} stopOpacity="0.40"/>
+                        <stop offset="100%" stopColor={cfg.t} stopOpacity="0.08"/>
                       </linearGradient>
+                      <filter id="vtxGlow">
+                        <feGaussianBlur stdDeviation="3" result="b"/>
+                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                      </filter>
                     </defs>
-                    <polygon points="94,8 164,48 164,140 94,180 24,140 24,48"
-                      stroke="url(#fgA)" strokeWidth="2" fill="none"
-                      className="ppv2-ring-a" style={{transformOrigin:'94px 94px'}}/>
-                    <polygon points="94,18 156,55 156,133 94,170 32,133 32,55"
-                      stroke={cfg.p} strokeWidth="0.8" strokeDasharray="6 22"
-                      strokeOpacity="0.55" fill="none"
-                      className="ppv2-ring-b" style={{transformOrigin:'94px 94px'}}/>
-                    <polygon points="94,28 148,62 148,126 94,160 40,126 40,62"
-                      stroke={cfg.p} strokeWidth="0.5" strokeOpacity="0.28" fill="none"/>
+                    {/* Outer solid hex — main frame */}
+                    <polygon points="120,10 208,60 208,180 120,230 32,180 32,60"
+                      stroke="url(#fgA)" strokeWidth="2.5" fill="none"
+                      className="ppv2-ring-a" style={{transformOrigin:'120px 120px'}}/>
+                    {/* Mid dashed hex */}
+                    <polygon points="120,22 198,70 198,170 120,218 42,170 42,70"
+                      stroke={cfg.p} strokeWidth="1" strokeDasharray="7 24"
+                      strokeOpacity="0.60" fill="none"
+                      className="ppv2-ring-b" style={{transformOrigin:'120px 120px'}}/>
+                    {/* Inner thin hex */}
+                    <polygon points="120,38 184,78 184,162 120,202 56,162 56,78"
+                      stroke={cfg.p} strokeWidth="0.6" strokeOpacity="0.32" fill="none"/>
+                    {/* Vertex glow dots at outer hex corners */}
+                    <circle cx="120" cy="10"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    <circle cx="208" cy="60"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    <circle cx="208" cy="180" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    <circle cx="120" cy="230" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    <circle cx="32"  cy="180" r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    <circle cx="32"  cy="60"  r="5" fill={cfg.p} filter="url(#vtxGlow)" opacity="0.90"/>
+                    {/* Inner vertex accent dots */}
+                    <circle cx="120" cy="10"  r="2.5" fill={cfg.t}/>
+                    <circle cx="208" cy="60"  r="2.5" fill={cfg.t}/>
+                    <circle cx="208" cy="180" r="2.5" fill={cfg.t}/>
+                    <circle cx="120" cy="230" r="2.5" fill={cfg.t}/>
+                    <circle cx="32"  cy="180" r="2.5" fill={cfg.t}/>
+                    <circle cx="32"  cy="60"  r="2.5" fill={cfg.t}/>
                   </svg>
 
                   {/* Corner sparks */}
@@ -343,6 +364,11 @@ export default function PlayerProfile() {
                   <div className="ppv2-spark ppv2-spark--tr"/>
                   <div className="ppv2-spark ppv2-spark--bl"/>
                   <div className="ppv2-spark ppv2-spark--br"/>
+
+                  {/* Orbiting energy dots */}
+                  {[1,2,3,4,5,6].map(i => (
+                    <div key={i} className={`ppv2-orbit-dot ppv2-orbit-dot--${i}`}/>
+                  ))}
 
                   {/* ── 3D HEAD — full visibility, no clip ── */}
                   <div className="ppv2-avatar-box">
