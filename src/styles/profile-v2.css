@@ -837,6 +837,49 @@
   .ppv2-card-right { padding:28px 20px 36px; }
   .ppv2-meta-sep { margin:0 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE — disable the most GPU/CPU-intensive
+   infinite animations so phones don't overheat/lag.
+   Kept: head-levitate, ring-1 breathe, emblem-float, crown-rock1
+   Removed: rotating rings, rotating border, sheen sweeps, deco pulses
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  /* Rotating card border — biggest culprit, forces repaint every frame */
+  .ppv2-card-border-rot { animation: none; opacity: 0.12; }
+
+  /* Outer spinning rings */
+  .ppv2-ring--2 { animation: none; }
+  .ppv2-ring--3 { animation: none; }
+
+  /* Emblem ring rotation */
+  .ppv2-emblem-ring-outer { animation: none !important; }
+
+  /* Crown rocks for rank 2 & 3 — keep rank 1 only */
+  .ppv2-crown--2 { animation: none; }
+  .ppv2-crown--3 { animation: none; }
+
+  /* Sheen background-position sweeps */
+  .ppv2-card-sheen     { animation: none; }
+  .ppv2-stat-card-shine { animation: none; }
+  .ppv2-username       { animation: none; background: #fff; -webkit-background-clip: text; }
+
+  /* Deco element scale pulses */
+  .ppv2-deco-diamond { animation: none; }
+  .ppv2-deco-dot     { animation: none; }
+  .ppv2-title-dot    { animation: none; }
+
+  /* Background layers — invisible and expensive on mobile */
+  .ppv2-bg-mesh      { display: none; }
+  .ppv2-bg-grid      { display: none; }
+  .ppv2-bg-scanlines { display: none; }
+
+  /* Accent bar breathe */
+  .ppv2-accent-bar   { animation: none; opacity: 0.7; }
+
+  /* Left panel deco breathe */
+  .ppv2-left-sweep   { animation: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   * { animation:none !important; transition:none !important; }
 }
