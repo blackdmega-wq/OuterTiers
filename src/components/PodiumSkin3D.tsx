@@ -172,8 +172,9 @@ const CREEPER_PX: [number,number][] = [
   [-2,3],[-1,3],[0,3],[1,3],[2,3],
 ];
 
-const FW_W = 220;
-const FW_H = 220; // canvas starts at skin-wrap top (top:0) and extends to card bottom — no overflow above card
+const FW_W = 280;
+const FW_H = 380; // canvas extends FW_ABOVE px above and (FW_H - FW_ABOVE - wrapH) px below the skin-wrap
+const FW_ABOVE = 220; // px above the skin-wrap top the canvas extends (reaches trophy + above skin head zone)
 
 // Preloaded rocket image (shared across all canvas instances)
 let _rocketImg: HTMLImageElement | null = null;
@@ -381,13 +382,18 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
     // X: spread across most of the canvas width for varied positions
     const startX = 12 + Math.random() * (FW_W - 24); // 12..208 px
 
-    // Two-zone vertical spread:
-    //   40% → trophy zone (very top, y=2..18 px) — reaches the golden trophy
-    //   60% → crown/upper skin zone (y=18..72 px)
-    const targetExpY = Math.random() < 0.4
-      ? 2 + Math.random() * 16
-      : 18 + Math.random() * 54;
-    const startY     = FW_H - 5;                 // near canvas bottom = bottom of the gold card
+    // Three-zone vertical spread (canvas extends FW_ABOVE px above the skin-wrap):
+    //   35% → trophy zone      (y=10..70 px)   — above skin-wrap top, at trophy level
+    //   35% → head/crown zone  (y=70..160 px)  — above/at the player head
+    //   30% → body zone        (y=160..240 px) — at upper skin body (still above skin-wrap start)
+    // Each rocket also gets a distinct random X so explosions never stack
+    const zoneRoll = Math.random();
+    const targetExpY = zoneRoll < 0.35
+      ? 10  + Math.random() * 60
+      : zoneRoll < 0.70
+        ? 70  + Math.random() * 90
+        : 160 + Math.random() * 80;
+    const startY     = FW_H - 8;                 // near canvas bottom (below skin-wrap)
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
     const fuse      = dist / speed;               // exact frames to reach target
@@ -578,11 +584,28 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
     if (rank === 1 && fireworkCanvasRef.current) {
-      // Clip fireworks dynamically so they never bleed below the skin-wrap onto the number/pedestal
-      const wrapH = wrap.offsetHeight || 152;
-      fireworkCanvasRef.current.style.clipPath = `inset(0 0 ${Math.max(0, FW_H - wrapH)}px 0)`;
-      const isMobile = window.innerWidth < 768;
-      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
+      const fw = fireworkCanvasRef.current;
+
+      // Use position:fixed so the canvas escapes any overflow:hidden ancestor (e.g. .lb-pod--rank1).
+      // Repositioned on every scroll/resize via getBoundingClientRect so it tracks the podium.
+      const updatePos = () => {
+        const r = wrap.getBoundingClientRect();
+        const inView = r.bottom > 0 && r.top < window.innerHeight;
+        fw.style.display = inView ? 'block' : 'none';
+        fw.style.left    = `${r.left + r.width / 2 - FW_W / 2}px`;
+        fw.style.top     = `${r.top - FW_ABOVE}px`;
+      };
+      updatePos();
+      window.addEventListener('scroll',  updatePos, { passive: true });
+      window.addEventListener('resize',  updatePos, { passive: true });
+
+      const isMobile    = window.innerWidth < 768;
+      const stopFwAnim  = startFireworksCanvas(fw, isMobile);
+      stopFW = () => {
+        stopFwAnim();
+        window.removeEventListener('scroll',  updatePos);
+        window.removeEventListener('resize',  updatePos);
+      };
     }
 
     const isMobile = window.innerWidth < 768;
@@ -757,20 +780,17 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks canvas — clipped to skin-wrap height so it never overlaps the pedestal/number */}
+      {/* Rank 1: Minecraft fireworks canvas — position:fixed escapes overflow:hidden ancestors */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            position: 'fixed',
             width: `${FW_W}px`,
             height: `${FW_H}px`,
             pointerEvents: 'none',
-            zIndex: 50,
-            // clipPath set dynamically in useEffect (adapts to mobile/desktop wrap height)
+            zIndex: 9999,
+            // top/left repositioned dynamically in useEffect via getBoundingClientRect
           }}
           width={FW_W}
           height={FW_H}
