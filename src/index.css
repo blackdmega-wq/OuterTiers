@@ -2326,7 +2326,7 @@ img { display: block; }
   border-top: 1px solid rgba(251,191,36,0.20);
   border-radius: 18px 18px 0 0;
   z-index: 2;
-  overflow: visible; /* allow fireworks above card */
+  overflow: hidden;
   isolation: isolate; /* own stacking context — forces Chrome to clip child z-index layers */
 }
 .lb-pod--rank2 {
