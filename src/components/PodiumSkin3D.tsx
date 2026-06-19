@@ -580,28 +580,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
     if (rank === 1 && fireworkCanvasRef.current) {
-      const fw = fireworkCanvasRef.current;
-
-      // Use position:fixed so the canvas escapes any overflow:hidden ancestor (e.g. .lb-pod--rank1).
-      // Repositioned on every scroll/resize via getBoundingClientRect so it tracks the podium.
-      const updatePos = () => {
-        const r = wrap.getBoundingClientRect();
-        const inView = r.bottom > 0 && r.top < window.innerHeight;
-        fw.style.display = inView ? 'block' : 'none';
-        fw.style.left    = `${r.left + r.width / 2 - FW_W / 2}px`;
-        fw.style.top     = `${r.top - FW_ABOVE}px`;
-      };
-      updatePos();
-      window.addEventListener('scroll',  updatePos, { passive: true });
-      window.addEventListener('resize',  updatePos, { passive: true });
-
-      const isMobile    = window.innerWidth < 768;
-      const stopFwAnim  = startFireworksCanvas(fw, isMobile);
-      stopFW = () => {
-        stopFwAnim();
-        window.removeEventListener('scroll',  updatePos);
-        window.removeEventListener('resize',  updatePos);
-      };
+      // position:absolute with top:-FW_ABOVE lets the canvas extend above the skin-wrap.
+      // overflow:visible on .lb-pod--rank1 (in CSS) ensures it's not clipped.
+      fireworkCanvasRef.current.style.top  = `-${FW_ABOVE}px`;
+      fireworkCanvasRef.current.style.left = `${(width - FW_W) / 2}px`;
+      const isMobile = window.innerWidth < 768;
+      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
     }
 
     const isMobile = window.innerWidth < 768;
@@ -776,17 +760,18 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks canvas — position:fixed escapes overflow:hidden ancestors */}
+      {/* Rank 1: Minecraft fireworks — extends FW_ABOVE px above skin-wrap to reach trophy */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
           style={{
-            position: 'fixed',
+            position: 'absolute',
+            top: `-${FW_ABOVE}px`,
+            left: `${(width - FW_W) / 2}px`,
             width: `${FW_W}px`,
             height: `${FW_H}px`,
             pointerEvents: 'none',
-            zIndex: 9999,
-            // top/left repositioned dynamically in useEffect via getBoundingClientRect
+            zIndex: 50,
           }}
           width={FW_W}
           height={FW_H}
