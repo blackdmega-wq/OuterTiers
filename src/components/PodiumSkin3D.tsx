@@ -172,8 +172,8 @@ const CREEPER_PX: [number,number][] = [
   [-2,3],[-1,3],[0,3],[1,3],[2,3],
 ];
 
-const FW_W = 220; // matches card width
-const FW_H = 400; // tall enough to cover trophy-to-skin-bottom within the card
+const FW_W = 220; // matches card width // matches card width
+const FW_H = 400; // tall enough to cover trophy-to-skin-bottom
 const FW_ABOVE_FALLBACK = 110; // fallback if DOM walk fails (trophy is ~110px above skin-wrap)
 
 // Preloaded rocket image (shared across all canvas instances)
@@ -782,7 +782,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks — top/left set dynamically in useEffect (DOM-measured offset to trophy) */}
+      {/* Rank 1: Minecraft fireworks — covers card-top (trophy) to skin-bottom; top set by useEffect */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
