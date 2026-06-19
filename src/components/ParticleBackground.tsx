@@ -61,16 +61,16 @@ export default function ParticleBackground() {
 
     // ── Mobile: 20 fps is smooth-enough for ambient background particles and
     //    burns ≈30% less GPU time than 28 fps.
-    const TARGET_FPS = reducedMotion ? 15 : compact ? 20 : 28;
+    const TARGET_FPS = reducedMotion ? 12 : compact ? 15 : 28;
     const FRAME_MS   = 1000 / TARGET_FPS;
 
     // ── Particle counts: mobile gets fewer of everything.
     //    Sparks are removed on mobile — their atan2() + stroke call per
     //    particle is disproportionately expensive on A-series GPUs.
-    const DOT_COUNT   = reducedMotion ? 6  : compact ? 9  : 26;
-    const ORB_COUNT   = reducedMotion ? 0  : compact ? 1  : 3;
+    const DOT_COUNT   = reducedMotion ? 4  : compact ? 5  : 26;
+    const ORB_COUNT   = reducedMotion ? 0  : compact ? 0  : 3;
     const SPARK_COUNT = reducedMotion ? 0  : compact ? 0  : 7;  // always 0 on mobile
-    const EMBER_COUNT = reducedMotion ? 2  : compact ? 5  : 14;
+    const EMBER_COUNT = reducedMotion ? 1  : compact ? 2  : 14;
 
     // ── Connection lines: O(n²) distance checks + sqrt() every frame.
     //    On mobile with 9 dots → 36 checks/frame = fine.
