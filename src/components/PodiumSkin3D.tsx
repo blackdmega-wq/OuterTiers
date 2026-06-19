@@ -172,9 +172,9 @@ const CREEPER_PX: [number,number][] = [
   [-2,3],[-1,3],[0,3],[1,3],[2,3],
 ];
 
-const FW_W = 280;
-const FW_H = 380; // canvas extends FW_ABOVE px above and (FW_H - FW_ABOVE - wrapH) px below the skin-wrap
-const FW_ABOVE = 220; // px above the skin-wrap top the canvas extends (reaches trophy + above skin head zone)
+const FW_W = 220; // matches card width
+const FW_H = 400; // tall enough to cover trophy-to-skin-bottom within the card
+const FW_ABOVE_FALLBACK = 110; // fallback if DOM walk fails (trophy is ~110px above skin-wrap)
 
 // Preloaded rocket image (shared across all canvas instances)
 let _rocketImg: HTMLImageElement | null = null;
@@ -359,7 +359,7 @@ function drawMcRocket(dc: CanvasRenderingContext2D, cx: number, cy: number, s: n
   p(-0.5, -21,  1, 2,  96,  4,  4);  // nose tip   (1 px)
 }
 
-function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => void {
+function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean, aboveOffset: number): () => void {
   cv.width  = FW_W;
   cv.height = FW_H;
   const dc = cv.getContext('2d')!;
@@ -382,14 +382,15 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
     // X: spread across most of the canvas width for varied positions
     const startX = 12 + Math.random() * (FW_W - 24); // 12..208 px
 
-    // Two-zone spread — both zones require long flight (min ~200px travel):
-    //   50% → trophy zone  (y=10..80)  — 292-362px travel → reaches golden trophy
-    //   50% → crown zone   (y=80..170) — 202-292px travel → explodes at/above skin head
-    // Distinct random X per rocket so explosions spread horizontally
+    // Two zones, both inside the card:
+    //   50% → trophy zone  — top quarter of canvas (y = 8 .. aboveOffset*0.55)
+    //   50% → crown zone   — second quarter        (y = aboveOffset*0.55 .. aboveOffset*1.0)
+    // aboveOffset = dynamic px from skin-wrap top to card top (measured at runtime)
+    const trophyCeil = Math.max(12, aboveOffset * 0.55);
     const targetExpY = Math.random() < 0.50
-      ? 10  + Math.random() * 70    // trophy level
-      : 80  + Math.random() * 90;   // crown/head level
-    const startY     = FW_H - 8;                 // near canvas bottom (below skin-wrap)
+      ? 8 + Math.random() * (trophyCeil - 8)           // trophy zone
+      : trophyCeil + Math.random() * (aboveOffset * 0.45); // crown zone
+    const startY = FW_H - 8;                            // near canvas bottom (skin foot level)
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.8 + Math.random() * 1.4; // 2.8..4.2 px/frame (faster for satisfying arc)
     const fuse      = dist / speed;               // exact frames to reach target
@@ -580,12 +581,33 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       stopDust = startAuraCanvas(dustCanvasRef.current, width, height);
     }
     if (rank === 1 && fireworkCanvasRef.current) {
-      // position:absolute with top:-FW_ABOVE lets the canvas extend above the skin-wrap.
-      // overflow:visible on .lb-pod--rank1 (in CSS) ensures it's not clipped.
-      fireworkCanvasRef.current.style.top  = `-${FW_ABOVE}px`;
-      fireworkCanvasRef.current.style.left = `${(width - FW_W) / 2}px`;
+      const fw = fireworkCanvasRef.current;
+
+      // Walk up from wrapRef to find the .lb-pod card element
+      // and measure exactly how far above the skin-wrap the card top (trophy) sits.
+      // This makes the canvas start exactly at the card top so rockets can
+      // travel the full height inside the golden frame.
+      let cardEl: HTMLElement | null = wrap.parentElement;
+      while (cardEl && !cardEl.classList.contains('lb-pod')) {
+        cardEl = cardEl.parentElement as HTMLElement | null;
+      }
+
+      let aboveOffset: number;
+      if (cardEl) {
+        const cardRect = cardEl.getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+        aboveOffset = Math.max(60, Math.round(wrapRect.top - cardRect.top) + 6);
+      } else {
+        aboveOffset = FW_ABOVE_FALLBACK;
+      }
+
+      // Position canvas: top = -aboveOffset (extends to card top where trophy is)
+      // left = centered on the skin-wrap
+      fw.style.top  = `-${aboveOffset}px`;
+      fw.style.left = `${(width - FW_W) / 2}px`;
+
       const isMobile = window.innerWidth < 768;
-      stopFW = startFireworksCanvas(fireworkCanvasRef.current, isMobile);
+      stopFW = startFireworksCanvas(fw, isMobile, aboveOffset);
     }
 
     const isMobile = window.innerWidth < 768;
@@ -760,14 +782,12 @@ export default function PodiumSkin3D({ username, rank }: Props) {
         />
       )}
 
-      {/* Rank 1: Minecraft fireworks — extends FW_ABOVE px above skin-wrap to reach trophy */}
+      {/* Rank 1: Minecraft fireworks — top/left set dynamically in useEffect (DOM-measured offset to trophy) */}
       {rank === 1 && (
         <canvas
           ref={fireworkCanvasRef}
           style={{
             position: 'absolute',
-            top: `-${FW_ABOVE}px`,
-            left: `${(width - FW_W) / 2}px`,
             width: `${FW_W}px`,
             height: `${FW_H}px`,
             pointerEvents: 'none',
