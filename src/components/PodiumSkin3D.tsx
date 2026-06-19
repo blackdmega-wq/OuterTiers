@@ -378,11 +378,15 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
     _fwIdx++;
     const [cr,cg,cb] = def.colors[Math.floor(Math.random() * def.colors.length)];
 
-    // X: keep 60px away from each edge so explosion particles stay on-screen
-    const startX = FW_W * 0.28 + Math.random() * FW_W * 0.44; // 61..158 px
+    // X: spread across most of the canvas width for varied positions
+    const startX = 12 + Math.random() * (FW_W - 24); // 12..208 px
 
-    // Canvas top = skin-wrap top; explosions in upper skin/trophy zone, launch from card bottom
-    const targetExpY = 15 + Math.random() * 65;  // 15-80 px from canvas top = upper skin area
+    // Two-zone vertical spread:
+    //   40% → trophy zone (very top, y=2..18 px) — reaches the golden trophy
+    //   60% → crown/upper skin zone (y=18..72 px)
+    const targetExpY = Math.random() < 0.4
+      ? 2 + Math.random() * 16
+      : 18 + Math.random() * 54;
     const startY     = FW_H - 5;                 // near canvas bottom = bottom of the gold card
     const dist      = startY - targetExpY;       // distance to travel upward
     const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
