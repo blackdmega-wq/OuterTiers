@@ -382,20 +382,16 @@ function startFireworksCanvas(cv: HTMLCanvasElement, _isMobile: boolean): () => 
     // X: spread across most of the canvas width for varied positions
     const startX = 12 + Math.random() * (FW_W - 24); // 12..208 px
 
-    // Three-zone vertical spread (canvas extends FW_ABOVE px above the skin-wrap):
-    //   35% → trophy zone      (y=10..70 px)   — above skin-wrap top, at trophy level
-    //   35% → head/crown zone  (y=70..160 px)  — above/at the player head
-    //   30% → body zone        (y=160..240 px) — at upper skin body (still above skin-wrap start)
-    // Each rocket also gets a distinct random X so explosions never stack
-    const zoneRoll = Math.random();
-    const targetExpY = zoneRoll < 0.35
-      ? 10  + Math.random() * 60
-      : zoneRoll < 0.70
-        ? 70  + Math.random() * 90
-        : 160 + Math.random() * 80;
+    // Two-zone spread — both zones require long flight (min ~200px travel):
+    //   50% → trophy zone  (y=10..80)  — 292-362px travel → reaches golden trophy
+    //   50% → crown zone   (y=80..170) — 202-292px travel → explodes at/above skin head
+    // Distinct random X per rocket so explosions spread horizontally
+    const targetExpY = Math.random() < 0.50
+      ? 10  + Math.random() * 70    // trophy level
+      : 80  + Math.random() * 90;   // crown/head level
     const startY     = FW_H - 8;                 // near canvas bottom (below skin-wrap)
     const dist      = startY - targetExpY;       // distance to travel upward
-    const speed     = 2.2 + Math.random() * 1.2; // 2.2..3.4 px/frame (constant, no gravity)
+    const speed     = 2.8 + Math.random() * 1.4; // 2.8..4.2 px/frame (faster for satisfying arc)
     const fuse      = dist / speed;               // exact frames to reach target
 
     rockets.push({
