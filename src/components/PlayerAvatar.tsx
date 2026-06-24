@@ -16,7 +16,7 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
 
   if (mode === 'face3d') {
     const srcs = [
-      `https://crafatar.com/avatars/${username}?size=256&overlay&default=MHF_Steve`,
+      `https://minotar.net/helm/${username}/256`,
       `https://mc-heads.net/avatar/${username}/256`,
       `https://visage.surgeplay.com/face/256/${username}`,
       `https://ui-avatars.com/api/?name=${username}&size=256&background=0d1117&color=60a5fa&bold=true&format=png`,
@@ -43,7 +43,7 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
 
   if (mode === 'body' || mode === 'bust') {
     const srcs = [
-      `https://mc-heads.net/player/${username}`,
+      `https://minotar.net/body/${username}/128`,
       `https://crafatar.com/renders/body/${username}?size=128&overlay&default=MHF_Steve`,
       `https://ui-avatars.com/api/?name=${username}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
     ];
