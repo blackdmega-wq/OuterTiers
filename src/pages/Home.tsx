@@ -7,7 +7,7 @@ import PodiumSkin3D from '../components/PodiumSkin3D';
 import DiscordJoinModal from '../components/DiscordJoinModal';
 import Logo from '../components/Logo';
 import { usePlayers } from '../hooks/usePlayers';
-import { useLiveProfile, useSkinDate } from '../hooks/useMojangProfile';
+import { useLiveProfile } from '../hooks/useMojangProfile';
 import { usePresence } from '../hooks/usePresence';
 
 const GAME_MODE_CATEGORIES = CATEGORIES.filter(c => c.id !== 'overall');
@@ -140,9 +140,8 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
 /* ── Leaderboard row — own component so it can use the useLiveProfile hook ── */
 function LbRow({ player, rank }: { player: Player; rank: number }) {
   const navigate = useNavigate();
-  const live     = useLiveProfile(player.username, player.uuid ?? '');
-  const SKIN_DATE = useSkinDate();
-  const skinId   = live.uuid || player.uuid || live.username;
+  const live    = useLiveProfile(player.username, player.uuid ?? '');
+  const skinId  = live.uuid || player.uuid || live.username;
   const isTop10  = rank <= 10;
   return (
     <div
@@ -151,12 +150,7 @@ function LbRow({ player, rank }: { player: Player; rank: number }) {
       onClick={() => navigate(`/player/${live.username}`)}
     >
       <span className="lb-rank">{rank}</span>
-      <img
-        src={`https://mc-heads.net/avatar/${skinId}/36?d=${SKIN_DATE}`}
-        alt={live.username}
-        className="lb-avatar"
-        loading="lazy"
-      />
+      <PlayerAvatar username={skinId} size={36} className="lb-avatar" />
       <span className="lb-info">
         <span className="lb-name">{live.username}</span>
         <span className="lb-title">{getTitle(player.points)}</span>
