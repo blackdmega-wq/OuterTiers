@@ -87,7 +87,7 @@ function PlayerBustImg({ username, uuid }: { username: string; uuid?: string }) 
         canvas,
         width: 80,
         height: 80,
-        skin: `https://mc-heads.net/skin/${skinId}`,
+        skin: `https://minotar.net/skin/${skinId}`,
       });
       try { viewer.renderer.setClearColor(0x000000, 0); } catch (_) {}
       try {
