@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PlayerAvatarProps {
   username: string;
@@ -10,6 +10,9 @@ interface PlayerAvatarProps {
 export default function PlayerAvatar({ username, size = 32, className = '', mode = 'head' }: PlayerAvatarProps) {
   const [stage, setStage] = useState(0);
   const advance = () => setStage(s => s + 1);
+
+  // Reset to primary source whenever the player identifier changes
+  useEffect(() => { setStage(0); }, [username]);
 
   if (mode === 'face3d') {
     const srcs = [
