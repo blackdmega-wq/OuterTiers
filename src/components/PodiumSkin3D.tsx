@@ -649,7 +649,7 @@ export default function PodiumSkin3D({ username, rank }: Props) {
       canvas.style.cssText = `display:block;background:transparent;position:relative;z-index:1;transform:translateY(${yOff}px);`;
       wrap.appendChild(canvas);
 
-      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://mc-heads.net/skin/${username}` });
+      viewer = new sv3d.SkinViewer({ canvas, width, height, skin:`https://minotar.net/skin/${username}` });
       try { viewer.renderer.setClearColor(0x000000,0); } catch(_){}
       // target (0,0,0) = look at waist → feet appear in lower half of canvas
       try { viewer.controls.target.set(0,0,0); viewer.controls.update(); } catch(_){}
