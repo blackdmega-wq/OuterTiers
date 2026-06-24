@@ -64,8 +64,9 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
   }
 
   const srcs = [
+    `https://minotar.net/helm/${username}/${size}`,
     `https://mc-heads.net/avatar/${username}/${size}`,
-    `https://crafatar.com/avatars/${username}?size=${size}&overlay&default=MHF_Steve`,
+    `https://visage.surgeplay.com/face/${size}/${username}`,
     `https://ui-avatars.com/api/?name=${username}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
   ];
   const src = srcs[Math.min(stage, srcs.length - 1)];
