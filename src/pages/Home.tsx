@@ -141,7 +141,6 @@ function FeedItem({ username, category, tier, region }: FeedEntry) {
 function LbRow({ player, rank }: { player: Player; rank: number }) {
   const navigate = useNavigate();
   const live    = useLiveProfile(player.username, player.uuid ?? '');
-  const skinId  = live.uuid || player.uuid || live.username;
   const isTop10  = rank <= 10;
   return (
     <div
@@ -150,7 +149,7 @@ function LbRow({ player, rank }: { player: Player; rank: number }) {
       onClick={() => navigate(`/player/${live.username}`)}
     >
       <span className="lb-rank">{rank}</span>
-      <PlayerAvatar username={skinId} size={36} className="lb-avatar" />
+      <PlayerAvatar username={live.username} size={36} className="lb-avatar" />
       <span className="lb-info">
         <span className="lb-name">{live.username}</span>
         <span className="lb-title">{getTitle(player.points)}</span>
