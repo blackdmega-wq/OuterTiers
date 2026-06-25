@@ -8,7 +8,8 @@
   },
 
   "aliases": {
-    "_comment": "Maps a player's NEW name → their stored backend username. Fixes player search after rename.",
-    "clawmc": "karajic"
+    "_comment": "Maps a player's NEW/display name → their stored backend username. Fixes /player/<newname> URLs.",
+    "clawmc": "karajic",
+    "gracesaint": "gracesaintt-ali-khl02"
   }
 }
