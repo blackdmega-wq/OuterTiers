@@ -2,24 +2,25 @@ import { useState, useEffect } from 'react';
 
 interface PlayerAvatarProps {
   username: string;
+  uuid?: string;
   size?: number;
   className?: string;
   mode?: 'head' | 'bust' | 'body' | 'face3d';
 }
 
-export default function PlayerAvatar({ username, size = 32, className = '', mode = 'head' }: PlayerAvatarProps) {
+export default function PlayerAvatar({ username, uuid, size = 32, className = '', mode = 'head' }: PlayerAvatarProps) {
+  const skinId = uuid || username;
   const [stage, setStage] = useState(0);
   const advance = () => setStage(s => s + 1);
 
-  // Reset to primary source whenever the player identifier changes
-  useEffect(() => { setStage(0); }, [username]);
+  useEffect(() => { setStage(0); }, [skinId]);
 
   if (mode === 'face3d') {
     const srcs = [
-      `https://minotar.net/helm/${username}/256`,
-      `https://mc-heads.net/avatar/${username}/256`,
-      `https://visage.surgeplay.com/face/256/${username}`,
-      `https://ui-avatars.com/api/?name=${username}&size=256&background=0d1117&color=60a5fa&bold=true&format=png`,
+      `https://minotar.net/helm/${skinId}/256`,
+      `https://mc-heads.net/avatar/${skinId}/256`,
+      `https://visage.surgeplay.com/face/256/${skinId}`,
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=256&background=0d1117&color=60a5fa&bold=true&format=png`,
     ];
     const src = srcs[Math.min(stage, srcs.length - 1)];
     return (
@@ -43,9 +44,9 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
 
   if (mode === 'body' || mode === 'bust') {
     const srcs = [
-      `https://minotar.net/body/${username}/128`,
-      `https://crafatar.com/renders/body/${username}?size=128&overlay&default=MHF_Steve`,
-      `https://ui-avatars.com/api/?name=${username}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
+      `https://minotar.net/body/${skinId}/128`,
+      `https://crafatar.com/renders/body/${skinId}?size=128&overlay&default=MHF_Steve`,
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
     ];
     const src = srcs[Math.min(stage, srcs.length - 1)];
     return (
@@ -64,10 +65,10 @@ export default function PlayerAvatar({ username, size = 32, className = '', mode
   }
 
   const srcs = [
-    `https://minotar.net/helm/${username}/${size}`,
-    `https://mc-heads.net/avatar/${username}/${size}`,
-    `https://visage.surgeplay.com/face/${size}/${username}`,
-    `https://ui-avatars.com/api/?name=${username}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
+    `https://minotar.net/helm/${skinId}/${size}`,
+    `https://mc-heads.net/avatar/${skinId}/${size}`,
+    `https://visage.surgeplay.com/face/${size}/${skinId}`,
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&size=${size}&background=1a1a2d&color=ffffff&bold=true&format=png`,
   ];
   const src = srcs[Math.min(stage, srcs.length - 1)];
 
