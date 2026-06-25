@@ -149,7 +149,7 @@ function LbRow({ player, rank }: { player: Player; rank: number }) {
       onClick={() => navigate(`/player/${encodeURIComponent(player.username)}`)}
     >
       <span className="lb-rank">{rank}</span>
-      <PlayerAvatar username={live.username} size={36} className="lb-avatar" />
+      <PlayerAvatar username={live.username} uuid={live.uuid || player.uuid || undefined} size={36} className="lb-avatar" />
       <span className="lb-info">
         <span className="lb-name">{live.username}</span>
         <span className="lb-title">{getTitle(player.points)}</span>
