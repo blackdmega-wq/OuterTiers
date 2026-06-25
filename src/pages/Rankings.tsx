@@ -175,7 +175,7 @@ function PlayerRow({ player, rank }: { player: Player; rank: number }) {
   }));
 
   return (
-    <Link key={player.id} to={`/player/${live.username}`} className={`ot-ov-row${topCls}`}>
+    <Link key={player.id} to={`/player/${encodeURIComponent(player.username)}`} className={`ot-ov-row${topCls}`}>
 
       {/* ── Avatar — uses live UUID / username for up-to-date skin ── */}
       <div className={`ot-ov-av-ring ${ringCls}`}>
@@ -240,7 +240,7 @@ function TierColRow({
   const skinId = live.uuid || player.uuid || live.username;
 
   return (
-    <Link to={`/player/${live.username}`} className="tier-col-row">
+    <Link to={`/player/${encodeURIComponent(player.username)}`} className="tier-col-row">
       <div className="tc-region-bar" style={{ '--rbar-color': barColor } as React.CSSProperties}>
         <span className="tc-region-text">{player.region || '?'}</span>
       </div>
