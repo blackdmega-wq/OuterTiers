@@ -3,7 +3,8 @@
 
   "overrides": {
     "_comment": "Maps stored backend username → permanent UUID. Fixes renamed players.",
-    "karajic": "730ac220-d39a-400d-ad83-2e3bc2e5b1af"
+    "karajic": "730ac220-d39a-400d-ad83-2e3bc2e5b1af",
+    "gracesaintt-ali-khl02": "41270a1d-2bf8-4994-b47b-d5dab7c69efa"
   },
 
   "aliases": {
