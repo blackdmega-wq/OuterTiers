@@ -146,7 +146,7 @@ function LbRow({ player, rank }: { player: Player; rank: number }) {
     <div
       className={`lb-row${isTop10 ? ' lb-row--top10' : ''}`}
       style={{}}
-      onClick={() => navigate(`/player/${live.username}`)}
+      onClick={() => navigate(`/player/${encodeURIComponent(player.username)}`)}
     >
       <span className="lb-rank">{rank}</span>
       <PlayerAvatar username={live.username} size={36} className="lb-avatar" />
