@@ -1,5 +1,21 @@
 services:
   - type: web
+    name: outertiers-api
+    env: node
+    region: frankfurt
+    buildCommand: cd server && npm install
+    startCommand: cd server && node index.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: WEBSITE_API_SECRET
+        sync: false
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: /api/$1
+
+  - type: web
     name: outertiers
     env: static
     buildCommand: npm ci && npm run build
