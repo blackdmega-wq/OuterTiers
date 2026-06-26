@@ -4,8 +4,8 @@ import { calculatePoints } from '../data/players';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
-const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes — auto-check refresh window
-const AUTO_REFRESH_MS = 3 * 60 * 1000; // re-fetch every 3 minutes automatically
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — auto-check refresh window
+const AUTO_REFRESH_MS = 30 * 60 * 1000; // re-fetch every 30 minutes automatically
 let _cachedPlayers: Player[] | null = null;
 let _cacheTime = 0;
 let _inflight: Promise<Player[]> | null = null;
