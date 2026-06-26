@@ -20,7 +20,13 @@ export function invalidatePlayerCache() {
 function fetchPlayers(): Promise<Player[]> {
   if (_inflight) return _inflight;
   _inflight = fetch(`${API_BASE}/api/players`)
-    .then(r => r.json())
+    .then(async r => {
+      const data = await r.json();
+      if (!r.ok) {
+        throw new Error(data.error || `Server error (${r.status})`);
+      }
+      return data;
+    })
     .then(data => {
       const mapped = (data.players ?? []).map((p: Player) => ({
         ...p,
