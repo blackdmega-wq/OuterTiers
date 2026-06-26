@@ -292,7 +292,7 @@ export default function Rankings() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [slideDir, setSlideDir] = useState<'right' | 'left'>('right');
   const [contentKey, setContentKey] = useState(0);
-  const { players, loading } = usePlayers();
+  const { players, loading, error: playersError } = usePlayers();
 
   /* ── Sliding tab indicator ── */
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -383,6 +383,11 @@ export default function Rankings() {
           <div className="rankings-loading">
             <div className="rankings-loading-spinner" />
             Loading players...
+          </div>
+        ) : playersError ? (
+          <div className="rankings-empty" style={{ padding: '48px 0', textAlign: 'center' }}>
+            <p style={{ marginBottom: 8, fontWeight: 600 }}>Rankings unavailable</p>
+            <p style={{ opacity: 0.6, fontSize: '0.9rem' }}>The server is temporarily down. Check back shortly.</p>
           </div>
         ) : isOverall ? (
           <div
