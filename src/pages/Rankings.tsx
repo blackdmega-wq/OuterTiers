@@ -318,7 +318,7 @@ export default function Rankings() {
 
   const isOverall = category === 'overall';
   const sorted = useMemo(
-    () => [...players].filter(p => p.points > 0).sort((a, b) => b.points - a.points),
+    () => [...players].filter(p => p.points > 0 || !!(p.rawTiers?.current && p.rawTiers.current !== "-")).sort((a, b) => b.points - a.points),
     [players]
   );
   const tierColumns = useMemo(
