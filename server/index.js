@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import pg from 'pg';
+import https from 'node:https';
+import http from 'node:http';
 
 const { Pool } = pg;
 const app = express();
@@ -74,9 +76,119 @@ function checkSecret(req, res) {
   return true;
 }
 
+// ── Mojang UUID sync ──────────────────────────────────────────────────────────
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function fetchJson(url, timeoutMs = 8000) {
+  return new Promise((resolve, reject) => {
+    const lib = url.startsWith('https') ? https : http;
+    const req = lib.get(url, { headers: { 'User-Agent': 'OuterTiers-Server/1.0' } }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
+        catch { resolve({ status: res.statusCode, body: null }); }
+      });
+    });
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('timeout')); });
+    req.on('error', reject);
+  });
+}
+
+async function resolveFromMojang(identifier) {
+  // Primary: playerdb.co
+  try {
+    const r = await fetchJson(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(identifier)}`);
+    if (r.status === 200 && r.body?.data?.player?.username) {
+      return { username: r.body.data.player.username, uuid: r.body.data.player.id ?? '' };
+    }
+  } catch { /* ignore */ }
+
+  // Fallback: Ashcon
+  try {
+    const r = await fetchJson(`https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`);
+    if (r.status === 200 && r.body?.username) {
+      return { username: r.body.username, uuid: r.body.uuid ?? '' };
+    }
+  } catch { /* ignore */ }
+
+  // Fallback: Official Mojang (username only, not UUID-based)
+  const isUuid = /^[0-9a-f-]{32,36}$/i.test(identifier);
+  if (!isUuid) {
+    try {
+      const r = await fetchJson(`https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(identifier)}`);
+      if (r.status === 200 && r.body?.name) {
+        return { username: r.body.name, uuid: r.body.id ?? '' };
+      }
+    } catch { /* ignore */ }
+  }
+
+  return null;
+}
+
+async function runMojangSync() {
+  console.log('[MojangSync] Starting scheduled UUID/name sync...');
+  let updated = 0;
+  let skipped = 0;
+  let failed  = 0;
+
+  try {
+    const { rows } = await pool.query('SELECT id, username, uuid FROM players ORDER BY id ASC');
+    console.log(`[MojangSync] Syncing ${rows.length} players...`);
+
+    for (const player of rows) {
+      try {
+        // Use UUID as identifier if available (survives renames), else use username
+        const identifier = (player.uuid && player.uuid.length > 10) ? player.uuid : player.username;
+        const profile = await resolveFromMojang(identifier);
+
+        if (!profile) { failed++; continue; }
+
+        const nameChanged = profile.username.toLowerCase() !== player.username.toLowerCase();
+        const uuidMissing = !player.uuid || player.uuid.length < 10;
+        const uuidChanged = player.uuid && profile.uuid && player.uuid.replace(/-/g, '') !== profile.uuid.replace(/-/g, '');
+
+        if (nameChanged || uuidMissing || uuidChanged) {
+          await pool.query(
+            'UPDATE players SET username = $1, uuid = $2, updated_at = now() WHERE id = $3',
+            [profile.username, profile.uuid, player.id]
+          );
+          console.log(`[MojangSync] Updated: ${player.username} → ${profile.username} (uuid: ${profile.uuid})`);
+          updated++;
+        } else {
+          skipped++;
+        }
+      } catch (e) {
+        console.error(`[MojangSync] Error for ${player.username}:`, e.message);
+        failed++;
+      }
+      // Be polite to the Mojang/playerdb APIs — 200ms between requests
+      await sleep(200);
+    }
+
+    console.log(`[MojangSync] Done — updated: ${updated}, unchanged: ${skipped}, failed: ${failed}`);
+  } catch (e) {
+    console.error('[MojangSync] Fatal error:', e.message);
+  }
+}
+
+// Run sync on startup (after 30s delay so the server is fully up) and then every 6 hours
+setTimeout(() => runMojangSync(), 30_000);
+setInterval(() => runMojangSync(), 6 * 60 * 60 * 1000);
+
 // ── routes ───────────────────────────────────────────────────────────────────
 
 app.get('/api/healthz', (_req, res) => res.json({ status: 'ok' }));
+
+// Manual trigger for Mojang sync (admin only, secret required)
+app.post('/api/sync-mojang', async (req, res) => {
+  if (!checkSecret(req, res)) return;
+  res.json({ ok: true, message: 'Mojang sync started in background' });
+  runMojangSync().catch(() => {});
+});
 
 app.get('/api/players', async (_req, res) => {
   try {
@@ -106,13 +218,6 @@ app.post('/api/migrate', async (req, res) => {
   if (!Array.isArray(players) || players.length === 0)
     return res.status(400).json({ error: 'players array required' });
 
-  const MODE_FIELDS = {
-    swordTier: 'sword_tier', speedTier: 'speed_tier', potTier: 'pot_tier',
-    nethopTier: 'nethop_tier', ogvanillaTier: 'ogvanilla_tier',
-    vanillaTier: 'vanilla_tier', uhcTier: 'uhc_tier',
-    axeTier: 'axe_tier', maceTier: 'mace_tier', smpTier: 'smp_tier',
-  };
-
   let inserted = 0;
   const client = await pool.connect();
   try {
@@ -121,12 +226,13 @@ app.post('/api/migrate', async (req, res) => {
       if (!p.username || !p.userId || !p.guildId) continue;
       await client.query(`
         INSERT INTO players
-          (user_id, guild_id, username, region, current_tier, peak_tier,
+          (user_id, guild_id, username, uuid, region, current_tier, peak_tier,
            sword_tier, speed_tier, pot_tier, nethop_tier, ogvanilla_tier,
            vanilla_tier, uhc_tier, axe_tier, mace_tier, smp_tier, updated_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,now())
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,now())
         ON CONFLICT (username) DO UPDATE SET
           user_id=EXCLUDED.user_id, guild_id=EXCLUDED.guild_id,
+          uuid=COALESCE(EXCLUDED.uuid, players.uuid),
           region=EXCLUDED.region, current_tier=EXCLUDED.current_tier,
           peak_tier=EXCLUDED.peak_tier, sword_tier=EXCLUDED.sword_tier,
           speed_tier=EXCLUDED.speed_tier, pot_tier=EXCLUDED.pot_tier,
@@ -135,7 +241,7 @@ app.post('/api/migrate', async (req, res) => {
           axe_tier=EXCLUDED.axe_tier, mace_tier=EXCLUDED.mace_tier,
           smp_tier=EXCLUDED.smp_tier, updated_at=now()
       `, [
-        p.userId, p.guildId, p.username,
+        p.userId, p.guildId, p.username, p.uuid ?? null,
         p.region ?? null, p.currentTier ?? null, p.peakTier ?? null,
         p.swordTier ?? null, p.speedTier ?? null, p.potTier ?? null,
         p.nethopTier ?? null, p.ogvanillaTier ?? null, p.vanillaTier ?? null,
