@@ -411,12 +411,26 @@ export default function Rankings() {
                 let cursor = 0;
                 for (const tier of ['T1','T2','T3','T4','T5'] as const) {
                   const col = tierColumns.find(c => c.tier === tier);
-                  const tp = [...(col?.players ?? [])].sort((a, b) => b.points - a.points);
+                  const tp = [...(col?.players ?? [])].sort((a, b) => {
+                  const ra = String((a.rawTiers as any)?.[category] ?? '').toUpperCase();
+                  const rb = String((b.rawTiers as any)?.[category] ?? '').toUpperCase();
+                  const htA = ra.startsWith('HT') ? 0 : 1;
+                  const htB = rb.startsWith('HT') ? 0 : 1;
+                  if (htA !== htB) return htA - htB;
+                  return b.points - a.points;
+                });
                   for (const p of tp) { cursor += 1; positions.set(p.id, cursor); }
                 }
                 return (['T1','T2','T3','T4','T5'] as const).map((tier) => {
                   const col = tierColumns.find(c => c.tier === tier);
-                  const tieredPlayers = [...(col?.players ?? [])].sort((a, b) => b.points - a.points);
+                  const tieredPlayers = [...(col?.players ?? [])].sort((a, b) => {
+                  const ra = String((a.rawTiers as any)?.[category] ?? '').toUpperCase();
+                  const rb = String((b.rawTiers as any)?.[category] ?? '').toUpperCase();
+                  const htA = ra.startsWith('HT') ? 0 : 1;
+                  const htB = rb.startsWith('HT') ? 0 : 1;
+                  if (htA !== htB) return htA - htB;
+                  return b.points - a.points;
+                });
                   const cfg = TIER_CONFIG[tier];
                   const showTrophy = tier === 'T1' || tier === 'T2' || tier === 'T3';
                   return (
