@@ -185,7 +185,7 @@ export default function Home() {
     .sort((a, b) => b.points - a.points)
     .slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
-  const displayCount = useCountUp(players.length, 1100);
+  const displayCount = useCountUp(players.filter(p => p.points > 0).length, 1100);
   const live = !playersLoading;
   const { liveResults, highResults } = useLiveFeed();
   const onlineCount = usePresence();
