@@ -181,7 +181,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { players, loading: playersLoading, error: playersError } = usePlayers();
   const top100 = [...players]
-    .filter(p => p.points > 0)
+    .filter(p => p.points > 0 || !!(p.rawTiers?.current && p.rawTiers.current !== "-"))
     .sort((a, b) => b.points - a.points)
     .slice(0, 100);
   const [showDiscordModal, setShowDiscordModal] = useState(false);
