@@ -144,6 +144,15 @@ app.post('/api/migrate', async (req, res) => {
       inserted++;
     }
     await client.query('COMMIT');
+
+    // Remove players with no mode tiers (not yet tested) — keeps DB clean after sync
+    await pool.query(`
+      DELETE FROM players
+      WHERE sword_tier IS NULL AND speed_tier IS NULL AND pot_tier IS NULL
+        AND nethop_tier IS NULL AND ogvanilla_tier IS NULL AND vanilla_tier IS NULL
+        AND uhc_tier IS NULL AND axe_tier IS NULL AND mace_tier IS NULL AND smp_tier IS NULL
+    `);
+
     res.json({ ok: true, inserted });
   } catch (e) {
     await client.query('ROLLBACK');
