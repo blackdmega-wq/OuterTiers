@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // SPA routing fix for Render static hosting.
+    // Render serves this 404.html for any path that has no matching file.
+    // We save the intended path to sessionStorage and redirect to the root,
+    // where React Router will restore it after the app boots.
+    sessionStorage.setItem('spa_redirect', location.pathname + location.search + location.hash);
+    location.replace('/');
+  </script>
+</head>
+<body></body>
+</html>
