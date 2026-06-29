@@ -128,9 +128,7 @@ async function resolveFromMojang(identifier) {
 
 async function runMojangSync() {
   console.log('[MojangSync] Starting scheduled UUID/name sync...');
-  let updated = 0;
-  let skipped = 0;
-  let failed  = 0;
+  let updated = 0, skipped = 0, failed = 0;
 
   try {
     const { rows } = await pool.query('SELECT id, username, uuid FROM players ORDER BY id ASC');
@@ -140,30 +138,27 @@ async function runMojangSync() {
       try {
         const identifier = (player.uuid && player.uuid.length > 10) ? player.uuid : player.username;
         const profile = await resolveFromMojang(identifier);
-
         if (!profile) { failed++; continue; }
 
         const nameChanged = profile.username.toLowerCase() !== player.username.toLowerCase();
         const uuidMissing = !player.uuid || player.uuid.length < 10;
-        const uuidChanged = player.uuid && profile.uuid && player.uuid.replace(/-/g, '') !== profile.uuid.replace(/-/g, '');
+        const uuidChanged = player.uuid && profile.uuid &&
+          player.uuid.replace(/-/g, '') !== profile.uuid.replace(/-/g, '');
 
         if (nameChanged || uuidMissing || uuidChanged) {
           await pool.query(
             'UPDATE players SET username = $1, uuid = $2, updated_at = now() WHERE id = $3',
             [profile.username, profile.uuid, player.id]
           );
-          console.log(`[MojangSync] Updated: ${player.username} -> ${profile.username} (uuid: ${profile.uuid})`);
+          console.log(`[MojangSync] Updated: ${player.username} -> ${profile.username}`);
           updated++;
-        } else {
-          skipped++;
-        }
+        } else { skipped++; }
       } catch (e) {
         console.error(`[MojangSync] Error for ${player.username}:`, e.message);
         failed++;
       }
       await sleep(200);
     }
-
     console.log(`[MojangSync] Done — updated: ${updated}, unchanged: ${skipped}, failed: ${failed}`);
   } catch (e) {
     console.error('[MojangSync] Fatal error:', e.message);
@@ -229,16 +224,11 @@ app.post('/api/migrate', async (req, res) => {
           region=EXCLUDED.region,
           current_tier=EXCLUDED.current_tier,
           peak_tier=EXCLUDED.peak_tier,
-          sword_tier=EXCLUDED.sword_tier,
-          speed_tier=EXCLUDED.speed_tier,
-          pot_tier=EXCLUDED.pot_tier,
-          nethop_tier=EXCLUDED.nethop_tier,
-          ogvanilla_tier=EXCLUDED.ogvanilla_tier,
-          vanilla_tier=EXCLUDED.vanilla_tier,
-          uhc_tier=EXCLUDED.uhc_tier,
-          axe_tier=EXCLUDED.axe_tier,
-          mace_tier=EXCLUDED.mace_tier,
-          smp_tier=EXCLUDED.smp_tier,
+          sword_tier=EXCLUDED.sword_tier, speed_tier=EXCLUDED.speed_tier,
+          pot_tier=EXCLUDED.pot_tier, nethop_tier=EXCLUDED.nethop_tier,
+          ogvanilla_tier=EXCLUDED.ogvanilla_tier, vanilla_tier=EXCLUDED.vanilla_tier,
+          uhc_tier=EXCLUDED.uhc_tier, axe_tier=EXCLUDED.axe_tier,
+          mace_tier=EXCLUDED.mace_tier, smp_tier=EXCLUDED.smp_tier,
           updated_at=now()
       `, [
         p.userId, p.guildId, p.username, p.uuid ?? null,
@@ -269,12 +259,17 @@ app.post('/api/migrate', async (req, res) => {
 
 // ── Webhook: tier / region update from Discord bot ───────────────────────────
 //
-// KEY FIX: region is now ALWAYS force-overwritten when explicitly provided
-// (was previously COALESCE which could silently keep the old value in edge cases).
-// This guarantees /verify and /setplayerregion immediately update the website.
+// ROOT CAUSE FIX: PostgreSQL TEXT comparisons are case-sensitive.
+// ON CONFLICT (username) only matches exact-case — if the bot sends "PlayerXYZ"
+// but the DB has "playerxyz", the conflict never fires and a duplicate row is
+// inserted instead of updating the existing one.
+//
+// Solution: always do a case-insensitive UPDATE first (LOWER(username) = LOWER($name)).
+// Only if no row matched do we fall back to an INSERT (for truly new players).
 //
 app.post('/api/webhook/tier', async (req, res) => {
   if (!checkSecret(req, res)) return;
+
   const { username, userId, guildId, mode, tier, currentTier, peakTier, region } = req.body ?? {};
   if (!username || !userId || !guildId)
     return res.status(400).json({ error: 'username, userId, guildId required' });
@@ -287,27 +282,48 @@ app.post('/api/webhook/tier', async (req, res) => {
 
   try {
     const modeCol = mode ? MODE_MAP[mode.toLowerCase().replace(/[\s_]+/g, '')] : null;
-    const params  = [userId, guildId, username, region ?? null, currentTier ?? null, peakTier ?? null];
-    if (modeCol) params.push(tier ?? null);
 
-    await pool.query(`
-      INSERT INTO players
-        (user_id, guild_id, username, region, current_tier, peak_tier${modeCol ? ', ' + modeCol : ''}, updated_at)
-      VALUES ($1,$2,$3,$4,$5,$6${modeCol ? ',$7' : ''},now())
-      ON CONFLICT (username) DO UPDATE SET
-        user_id      = EXCLUDED.user_id,
-        guild_id     = EXCLUDED.guild_id,
-        region       = CASE WHEN EXCLUDED.region IS NOT NULL THEN EXCLUDED.region ELSE players.region END,
-        current_tier = COALESCE(EXCLUDED.current_tier, players.current_tier),
-        peak_tier    = COALESCE(EXCLUDED.peak_tier, players.peak_tier)
-        ${modeCol ? `, ${modeCol} = EXCLUDED.${modeCol}` : ''},
+    // ── Step 1: case-insensitive UPDATE on existing player ────────────────
+    let updateSql = `
+      UPDATE players SET
+        user_id      = $1,
+        guild_id     = $2,
+        region       = CASE WHEN $3::text IS NOT NULL THEN $3 ELSE region END,
+        current_tier = COALESCE($4, current_tier),
+        peak_tier    = COALESCE($5, peak_tier)
+        ${modeCol ? `, ${modeCol} = $7` : ''},
         updated_at   = now()
-    `, params);
+      WHERE LOWER(username) = LOWER($6)
+    `;
+    const updateParams = [userId, guildId, region ?? null, currentTier ?? null, peakTier ?? null, username];
+    if (modeCol) updateParams.push(tier ?? null);
 
-    console.log(`[webhook/tier] ${username} region=${region ?? '-'} currentTier=${currentTier ?? '-'} mode=${mode ?? '-'}`);
-    res.json({ ok: true });
+    const { rowCount } = await pool.query(updateSql, updateParams);
+
+    // ── Step 2: INSERT only if no existing player found ───────────────────
+    if (rowCount === 0) {
+      const insertParams = [userId, guildId, username, region ?? null, currentTier ?? null, peakTier ?? null];
+      if (modeCol) insertParams.push(tier ?? null);
+
+      await pool.query(`
+        INSERT INTO players
+          (user_id, guild_id, username, region, current_tier, peak_tier${modeCol ? ', ' + modeCol : ''}, updated_at)
+        VALUES ($1,$2,$3,$4,$5,$6${modeCol ? ',$7' : ''},now())
+        ON CONFLICT (username) DO UPDATE SET
+          user_id      = EXCLUDED.user_id,
+          guild_id     = EXCLUDED.guild_id,
+          region       = CASE WHEN EXCLUDED.region IS NOT NULL THEN EXCLUDED.region ELSE players.region END,
+          current_tier = COALESCE(EXCLUDED.current_tier, players.current_tier),
+          peak_tier    = COALESCE(EXCLUDED.peak_tier, players.peak_tier)
+          ${modeCol ? `, ${modeCol} = EXCLUDED.${modeCol}` : ''},
+          updated_at   = now()
+      `, insertParams);
+    }
+
+    console.log(`[webhook/tier] ${username} region=${region ?? '-'} currentTier=${currentTier ?? '-'} mode=${mode ?? '-'} rowsUpdated=${rowCount}`);
+    res.json({ ok: true, updated: rowCount > 0 });
   } catch (e) {
-    console.error('[webhook/tier] error:', e.message);
+    console.error('[webhook/tier] error:', e.message, e.stack);
     res.status(500).json({ error: e.message });
   }
 });
