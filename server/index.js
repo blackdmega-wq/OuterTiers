@@ -99,7 +99,6 @@ function fetchJson(url, timeoutMs = 8000) {
 }
 
 async function resolveFromMojang(identifier) {
-  // Primary: playerdb.co
   try {
     const r = await fetchJson(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(identifier)}`);
     if (r.status === 200 && r.body?.data?.player?.username) {
@@ -107,7 +106,6 @@ async function resolveFromMojang(identifier) {
     }
   } catch { /* ignore */ }
 
-  // Fallback: Ashcon
   try {
     const r = await fetchJson(`https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(identifier)}`);
     if (r.status === 200 && r.body?.username) {
@@ -115,7 +113,6 @@ async function resolveFromMojang(identifier) {
     }
   } catch { /* ignore */ }
 
-  // Fallback: Official Mojang (username only, not UUID-based)
   const isUuid = /^[0-9a-f-]{32,36}$/i.test(identifier);
   if (!isUuid) {
     try {
@@ -141,7 +138,6 @@ async function runMojangSync() {
 
     for (const player of rows) {
       try {
-        // Use UUID as identifier if available (survives renames), else use username
         const identifier = (player.uuid && player.uuid.length > 10) ? player.uuid : player.username;
         const profile = await resolveFromMojang(identifier);
 
@@ -156,7 +152,7 @@ async function runMojangSync() {
             'UPDATE players SET username = $1, uuid = $2, updated_at = now() WHERE id = $3',
             [profile.username, profile.uuid, player.id]
           );
-          console.log(`[MojangSync] Updated: ${player.username} → ${profile.username} (uuid: ${profile.uuid})`);
+          console.log(`[MojangSync] Updated: ${player.username} -> ${profile.username} (uuid: ${profile.uuid})`);
           updated++;
         } else {
           skipped++;
@@ -165,7 +161,6 @@ async function runMojangSync() {
         console.error(`[MojangSync] Error for ${player.username}:`, e.message);
         failed++;
       }
-      // Be polite to the Mojang/playerdb APIs — 200ms between requests
       await sleep(200);
     }
 
@@ -175,7 +170,6 @@ async function runMojangSync() {
   }
 }
 
-// Run sync on startup (after 30s delay so the server is fully up) and then every 6 hours
 setTimeout(() => runMojangSync(), 30_000);
 setInterval(() => runMojangSync(), 6 * 60 * 60 * 1000);
 
@@ -183,7 +177,6 @@ setInterval(() => runMojangSync(), 6 * 60 * 60 * 1000);
 
 app.get('/api/healthz', (_req, res) => res.json({ status: 'ok' }));
 
-// Manual trigger for Mojang sync (admin only, secret required)
 app.post('/api/sync-mojang', async (req, res) => {
   if (!checkSecret(req, res)) return;
   res.json({ ok: true, message: 'Mojang sync started in background' });
@@ -233,13 +226,20 @@ app.post('/api/migrate', async (req, res) => {
         ON CONFLICT (username) DO UPDATE SET
           user_id=EXCLUDED.user_id, guild_id=EXCLUDED.guild_id,
           uuid=COALESCE(EXCLUDED.uuid, players.uuid),
-          region=EXCLUDED.region, current_tier=EXCLUDED.current_tier,
-          peak_tier=EXCLUDED.peak_tier, sword_tier=EXCLUDED.sword_tier,
-          speed_tier=EXCLUDED.speed_tier, pot_tier=EXCLUDED.pot_tier,
-          nethop_tier=EXCLUDED.nethop_tier, ogvanilla_tier=EXCLUDED.ogvanilla_tier,
-          vanilla_tier=EXCLUDED.vanilla_tier, uhc_tier=EXCLUDED.uhc_tier,
-          axe_tier=EXCLUDED.axe_tier, mace_tier=EXCLUDED.mace_tier,
-          smp_tier=EXCLUDED.smp_tier, updated_at=now()
+          region=EXCLUDED.region,
+          current_tier=EXCLUDED.current_tier,
+          peak_tier=EXCLUDED.peak_tier,
+          sword_tier=EXCLUDED.sword_tier,
+          speed_tier=EXCLUDED.speed_tier,
+          pot_tier=EXCLUDED.pot_tier,
+          nethop_tier=EXCLUDED.nethop_tier,
+          ogvanilla_tier=EXCLUDED.ogvanilla_tier,
+          vanilla_tier=EXCLUDED.vanilla_tier,
+          uhc_tier=EXCLUDED.uhc_tier,
+          axe_tier=EXCLUDED.axe_tier,
+          mace_tier=EXCLUDED.mace_tier,
+          smp_tier=EXCLUDED.smp_tier,
+          updated_at=now()
       `, [
         p.userId, p.guildId, p.username, p.uuid ?? null,
         p.region ?? null, p.currentTier ?? null, p.peakTier ?? null,
@@ -251,7 +251,6 @@ app.post('/api/migrate', async (req, res) => {
     }
     await client.query('COMMIT');
 
-    // Remove players with no mode tiers (not yet tested) — keeps DB clean after sync
     await pool.query(`
       DELETE FROM players
       WHERE sword_tier IS NULL AND speed_tier IS NULL AND pot_tier IS NULL
@@ -268,6 +267,12 @@ app.post('/api/migrate', async (req, res) => {
   }
 });
 
+// ── Webhook: tier / region update from Discord bot ───────────────────────────
+//
+// KEY FIX: region is now ALWAYS force-overwritten when explicitly provided
+// (was previously COALESCE which could silently keep the old value in edge cases).
+// This guarantees /verify and /setplayerregion immediately update the website.
+//
 app.post('/api/webhook/tier', async (req, res) => {
   if (!checkSecret(req, res)) return;
   const { username, userId, guildId, mode, tier, currentTier, peakTier, region } = req.body ?? {};
@@ -282,23 +287,27 @@ app.post('/api/webhook/tier', async (req, res) => {
 
   try {
     const modeCol = mode ? MODE_MAP[mode.toLowerCase().replace(/[\s_]+/g, '')] : null;
-    const extra = modeCol ? `, ${modeCol}=$7` : '';
-    const params = [userId, guildId, username, region ?? null, currentTier ?? null, peakTier ?? null];
+    const params  = [userId, guildId, username, region ?? null, currentTier ?? null, peakTier ?? null];
     if (modeCol) params.push(tier ?? null);
 
     await pool.query(`
-      INSERT INTO players (user_id, guild_id, username, region, current_tier, peak_tier${modeCol ? ', ' + modeCol : ''}, updated_at)
+      INSERT INTO players
+        (user_id, guild_id, username, region, current_tier, peak_tier${modeCol ? ', ' + modeCol : ''}, updated_at)
       VALUES ($1,$2,$3,$4,$5,$6${modeCol ? ',$7' : ''},now())
       ON CONFLICT (username) DO UPDATE SET
-        user_id=EXCLUDED.user_id, guild_id=EXCLUDED.guild_id,
-        region=COALESCE(EXCLUDED.region, players.region),
-        current_tier=COALESCE(EXCLUDED.current_tier, players.current_tier),
-        peak_tier=COALESCE(EXCLUDED.peak_tier, players.peak_tier)
-        ${modeCol ? `, ${modeCol}=EXCLUDED.${modeCol}` : ''},
-        updated_at=now()
+        user_id      = EXCLUDED.user_id,
+        guild_id     = EXCLUDED.guild_id,
+        region       = CASE WHEN EXCLUDED.region IS NOT NULL THEN EXCLUDED.region ELSE players.region END,
+        current_tier = COALESCE(EXCLUDED.current_tier, players.current_tier),
+        peak_tier    = COALESCE(EXCLUDED.peak_tier, players.peak_tier)
+        ${modeCol ? `, ${modeCol} = EXCLUDED.${modeCol}` : ''},
+        updated_at   = now()
     `, params);
+
+    console.log(`[webhook/tier] ${username} region=${region ?? '-'} currentTier=${currentTier ?? '-'} mode=${mode ?? '-'}`);
     res.json({ ok: true });
   } catch (e) {
+    console.error('[webhook/tier] error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
