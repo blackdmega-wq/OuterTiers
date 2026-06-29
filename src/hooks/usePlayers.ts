@@ -4,8 +4,11 @@ import { calculatePoints } from '../data/players';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'https://outertiers-api.onrender.com';
 
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — auto-check refresh window
-const AUTO_REFRESH_MS = 30 * 60 * 1000; // re-fetch every 30 minutes automatically
+// Cache TTL reduced to 60 seconds so region/tier changes appear quickly on the website.
+// Previously this was 30 minutes which caused stale data after bot updates.
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const AUTO_REFRESH_MS = 60 * 1000; // re-fetch every 60 seconds
+
 let _cachedPlayers: Player[] | null = null;
 let _cacheTime = 0;
 let _inflight: Promise<Player[]> | null = null;
@@ -22,9 +25,7 @@ function fetchPlayers(): Promise<Player[]> {
   _inflight = fetch(`${API_BASE}/api/players`)
     .then(async r => {
       const data = await r.json();
-      if (!r.ok) {
-        throw new Error(data.error || `Server error (${r.status})`);
-      }
+      if (!r.ok) throw new Error(data.error || `Server error (${r.status})`);
       return data;
     })
     .then(data => {
@@ -74,7 +75,7 @@ export function usePlayers(): UsePlayersResult {
       .catch(err => { setError(err.message); setLoading(false); });
   }, []);
 
-  // ── AutoCheck: re-fetch every AUTO_REFRESH_MS so name / skin changes appear automatically ──
+  // Re-fetch every AUTO_REFRESH_MS so changes appear automatically
   useEffect(() => {
     const doRefresh = () => {
       invalidatePlayerCache();
@@ -87,7 +88,7 @@ export function usePlayers(): UsePlayersResult {
 
     // Also refresh immediately when the user switches back to this tab
     const handleVisibility = () => {
-      if (!document.hidden && Date.now() - _cacheTime > 30_000) {
+      if (!document.hidden && Date.now() - _cacheTime > 10_000) {
         doRefresh();
       }
     };
@@ -115,20 +116,17 @@ export function usePlayer(username: string | undefined): UsePlayerResult {
       const cached = _cachedPlayers.find(
         p => p.username.toLowerCase() === username.toLowerCase()
       );
-      if (cached) {
-        setPlayer(cached);
-        // Don't return — always fetch individual endpoint for full tierDates
-      }
+      if (cached) setPlayer(cached);
     }
 
-    // Always fetch the individual player endpoint to get complete data (incl. tierDates)
+    // Always fetch the individual player endpoint — no cache, always fresh
     fetch(`${API_BASE}/api/players/${encodeURIComponent(username)}`)
       .then(r => { if (!r.ok) throw new Error('Player not found'); return r.json(); })
       .then(data => {
         const full: Player = { ...data, points: calculatePoints(data.rawTiers) };
         setPlayer(full);
         setLoading(false);
-        // Patch the cache so navigating away and back still shows full data
+        // Patch the list cache with updated data
         if (_cachedPlayers) {
           const idx = _cachedPlayers.findIndex(
             p => p.username.toLowerCase() === username.toLowerCase()
