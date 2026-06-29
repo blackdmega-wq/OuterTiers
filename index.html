@@ -78,6 +78,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script>
+      (function(){
+        var r = sessionStorage.getItem("spa_redirect");
+        if (r) { sessionStorage.removeItem("spa_redirect"); history.replaceState(null, "", r); }
+      })();
+    </script>
   </head>
   <body>
     <div id="root">
