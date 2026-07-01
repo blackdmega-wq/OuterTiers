@@ -400,6 +400,26 @@ app.post('/api/webhook/tier', async (req, res) => {
   }
 });
 
+// ── Player punishments table (auto-create) ────────────────────────────────────
+pool.query(`
+  CREATE TABLE IF NOT EXISTS player_punishments (
+    id            SERIAL PRIMARY KEY,
+    guild_id      TEXT    NOT NULL,
+    user_id       TEXT    NOT NULL,
+    username      TEXT    NOT NULL,
+    moderator_id  TEXT,
+    moderator_name TEXT,
+    type          TEXT    NOT NULL,
+    reason        TEXT,
+    duration_ms   BIGINT,
+    expires_at    BIGINT,
+    active        BOOLEAN NOT NULL DEFAULT true,
+    pardoned_by   TEXT,
+    pardoned_at   BIGINT,
+    created_at    BIGINT  NOT NULL
+  );
+`).catch(e => console.error('[startup] player_punishments table creation failed:', e.message));
+
 // ── Results feed endpoints ────────────────────────────────────────────────────
 
 function buildResult(r) {
@@ -436,6 +456,111 @@ app.get('/api/results/high-tier', async (_req, res) => {
       'SELECT * FROM tier_results WHERE is_high_tier = true ORDER BY created_at DESC LIMIT 50'
     );
     res.json({ results: rows.map(buildResult) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Player history endpoint ───────────────────────────────────────────────────
+
+app.get('/api/players/:username/history', async (req, res) => {
+  try {
+    const { rows: resultRows } = await pool.query(
+      `SELECT id, tier, mode, region, ticket_type, tester_name, tester_id, is_high_tier, created_at
+         FROM tier_results
+        WHERE LOWER(username) = LOWER($1)
+        ORDER BY created_at DESC
+        LIMIT 200`,
+      [req.params.username]
+    );
+
+    const { rows: punishRows } = await pool.query(
+      `SELECT id, type, reason, duration_ms, expires_at, active, pardoned_by, pardoned_at,
+              moderator_id, moderator_name, created_at
+         FROM player_punishments
+        WHERE LOWER(username) = LOWER($1)
+        ORDER BY created_at DESC`,
+      [req.params.username]
+    );
+
+    res.json({
+      testResults: resultRows.map(r => ({
+        id:          r.id,
+        tier:        r.tier,
+        mode:        r.mode ?? null,
+        region:      r.region ?? null,
+        ticketType:  r.ticket_type ?? null,
+        testerName:  r.tester_name ?? null,
+        testerId:    r.tester_id ?? null,
+        isHighTier:  r.is_high_tier,
+        createdAt:   Number(r.created_at),
+      })),
+      punishments: punishRows.map(r => ({
+        id:            r.id,
+        type:          r.type,
+        reason:        r.reason ?? null,
+        durationMs:    r.duration_ms ? Number(r.duration_ms) : null,
+        expiresAt:     r.expires_at  ? Number(r.expires_at)  : null,
+        active:        r.active,
+        pardonedBy:    r.pardoned_by  ?? null,
+        pardonedAt:    r.pardoned_at  ? Number(r.pardoned_at) : null,
+        moderatorId:   r.moderator_id   ?? null,
+        moderatorName: r.moderator_name ?? null,
+        createdAt:     Number(r.created_at),
+      })),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Webhook: punishment from Discord bot ──────────────────────────────────────
+
+app.post('/api/webhook/punishment', async (req, res) => {
+  const { username, userId, guildId, type, reason, durationMs, expiresAt,
+          moderatorId, moderatorName, createdAt } = req.body ?? {};
+  if (!username || !userId || !guildId || !type)
+    return res.status(400).json({ error: 'username, userId, guildId, type required' });
+  try {
+    await pool.query(
+      `INSERT INTO player_punishments
+         (guild_id, user_id, username, moderator_id, moderator_name, type, reason,
+          duration_ms, expires_at, active, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true,$10)`,
+      [guildId, userId, username, moderatorId ?? null, moderatorName ?? null,
+       type, reason ?? null, durationMs ?? null, expiresAt ?? null,
+       createdAt ?? Date.now()]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Webhook: pardon from Discord bot ─────────────────────────────────────────
+
+app.post('/api/webhook/pardon', async (req, res) => {
+  const { username, userId, guildId, pardonedBy, pardonedAt } = req.body ?? {};
+  if (!username || !userId || !guildId)
+    return res.status(400).json({ error: 'username, userId, guildId required' });
+  try {
+    // Mark the most recent active punishment as pardoned
+    await pool.query(
+      `UPDATE player_punishments
+          SET active = false, pardoned_by = $1, pardoned_at = $2
+        WHERE LOWER(username) = LOWER($3)
+          AND guild_id = $4
+          AND active = true
+          AND id = (
+            SELECT id FROM player_punishments
+             WHERE LOWER(username) = LOWER($3)
+               AND guild_id = $4
+               AND active = true
+             ORDER BY created_at DESC LIMIT 1
+          )`,
+      [pardonedBy ?? null, pardonedAt ?? Date.now(), username, guildId]
+    );
+    res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
