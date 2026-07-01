@@ -43,8 +43,12 @@ function modeLabel(mode: string | null): string {
   if (!mode) return 'Overall';
   const MAP: Record<string, string> = {
     sword: 'Sword', speed: 'Speed', pot: 'Pot', nethop: 'NethOP',
-    ogvanilla: 'OG Vanilla', vanilla: 'Vanilla', uhc: 'UHC',
-    axe: 'Axe', mace: 'Mace', smp: 'SMP',
+    ogvanilla: 'OG Vanilla',
+    // 'vanilla' is used by test-ticket results (mapMode("Crystal") → "vanilla")
+    // 'crystal' is used by /givetier results (normalizeMode("Crystal") → "crystal")
+    // Both represent the Crystal gamemode on the website.
+    vanilla: 'Crystal', crystal: 'Crystal',
+    uhc: 'UHC', axe: 'Axe', mace: 'Mace', smp: 'SMP',
   };
   return MAP[mode.toLowerCase()] ?? mode;
 }

@@ -30,5 +30,22 @@ await pool.query(`
   );
 `);
 
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS tier_results (
+    id          SERIAL PRIMARY KEY,
+    guild_id    TEXT    NOT NULL,
+    user_id     TEXT    NOT NULL,
+    username    TEXT    NOT NULL,
+    tester_id   TEXT,
+    tester_name TEXT,
+    tier        TEXT    NOT NULL,
+    mode        TEXT,
+    region      TEXT,
+    ticket_type TEXT,
+    is_high_tier BOOLEAN NOT NULL DEFAULT false,
+    created_at  BIGINT  NOT NULL
+  );
+`);
+
 console.log('Schema applied successfully.');
 await pool.end();

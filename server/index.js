@@ -14,6 +14,27 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
+// High-tier threshold (mirrors the bot's HIGH_TIERS constant)
+const HIGH_TIERS = new Set(['HT3', 'LT2', 'HT2', 'LT1', 'HT1']);
+
+// Ensure tier_results table exists (idempotent — safe to run every startup)
+pool.query(`
+  CREATE TABLE IF NOT EXISTS tier_results (
+    id          SERIAL PRIMARY KEY,
+    guild_id    TEXT    NOT NULL,
+    user_id     TEXT    NOT NULL,
+    username    TEXT    NOT NULL,
+    tester_id   TEXT,
+    tester_name TEXT,
+    tier        TEXT    NOT NULL,
+    mode        TEXT,
+    region      TEXT,
+    ticket_type TEXT,
+    is_high_tier BOOLEAN NOT NULL DEFAULT false,
+    created_at  BIGINT  NOT NULL
+  );
+`).catch(e => console.error('[startup] tier_results table creation failed:', e.message));
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function rawTierToTLevel(raw) {
@@ -176,7 +197,21 @@ app.get('/api/players/:username', async (req, res) => {
       [req.params.username]
     );
     if (!rows.length) return res.status(404).json({ error: 'Player not found' });
-    res.json(buildPlayer(rows[0]));
+
+    // Compute tierDates: for each mode, the earliest result timestamp (seconds)
+    const { rows: dateRows } = await pool.query(
+      `SELECT mode, MIN(created_at) AS first_at
+         FROM tier_results
+        WHERE LOWER(username) = LOWER($1) AND mode IS NOT NULL
+        GROUP BY mode`,
+      [req.params.username]
+    );
+    const tierDates: Record<string, number> = {};
+    for (const r of dateRows) {
+      if (r.mode) tierDates[r.mode] = Math.floor(Number(r.first_at) / 1000);
+    }
+
+    res.json({ ...buildPlayer(rows[0]), tierDates });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -285,8 +320,24 @@ app.post('/api/webhook/tier', async (req, res) => {
       updateParams = [userId, guildId, region ?? null, currentTier ?? null, peakTier ?? null, username];
     }
 
+    // If region is null in the payload, fall back to the player's stored region so
+    // that tier_results rows always carry a region even when the bot couldn't supply one
+    // (e.g. preferred_region was cleared after the player's last test).
+    let resolvedRegion = region ?? null;
+    if (!resolvedRegion) {
+      try {
+        const existing = await pool.query(
+          'SELECT region FROM players WHERE LOWER(username) = LOWER($1) LIMIT 1',
+          [username]
+        );
+        if (existing.rows.length > 0 && existing.rows[0].region) {
+          resolvedRegion = existing.rows[0].region;
+        }
+      } catch { /* ignore — best-effort */ }
+    }
+
     const { rowCount } = await pool.query(updateSql, updateParams);
-    console.log(`[webhook/tier] ${username} region=${region ?? '-'} rowsUpdated=${rowCount}`);
+    console.log(`[webhook/tier] ${username} region=${resolvedRegion ?? '-'} rowsUpdated=${rowCount}`);
 
     // Step 2: INSERT only if player doesn't exist yet
     if (rowCount === 0) {
@@ -319,9 +370,66 @@ app.post('/api/webhook/tier', async (req, res) => {
       console.log(`[webhook/tier] ${username} — new player inserted`);
     }
 
+    // ── Record result in tier_results feed ────────────────────────────────────
+    // Only store results with a tier value (skip region-only updates, etc.)
+    if (tier) {
+      const { testerId = null, testerName = null, ticketType = null } = req.body ?? {};
+      const isHighTier = HIGH_TIERS.has((tier ?? '').toUpperCase());
+      // Use the raw mode received (e.g. "crystal" from givetier, "vanilla" from test
+      // ticket) so the results feed always shows the human-facing mode label.
+      await pool.query(
+        `INSERT INTO tier_results
+           (guild_id, user_id, username, tester_id, tester_name, tier, mode, region, ticket_type, is_high_tier, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [guildId, userId, username, testerId, testerName, tier, mode ?? null,
+         resolvedRegion, ticketType, isHighTier, Date.now()]
+      );
+    }
+
     res.json({ ok: true, updated: rowCount > 0 });
   } catch (e) {
     console.error('[webhook/tier] error:', e.message, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Results feed endpoints ────────────────────────────────────────────────────
+
+function buildResult(r) {
+  return {
+    id:          r.id,
+    guildId:     r.guild_id,
+    userId:      r.user_id,
+    username:    r.username,
+    testerId:    r.tester_id   ?? null,
+    testerName:  r.tester_name ?? null,
+    tier:        r.tier,
+    mode:        r.mode        ?? null,
+    region:      r.region      ?? null,
+    ticketType:  r.ticket_type ?? null,
+    isHighTier:  r.is_high_tier,
+    createdAt:   Number(r.created_at),
+  };
+}
+
+app.get('/api/results/live', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM tier_results ORDER BY created_at DESC LIMIT 50'
+    );
+    res.json({ results: rows.map(buildResult) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/results/high-tier', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM tier_results WHERE is_high_tier = true ORDER BY created_at DESC LIMIT 50'
+    );
+    res.json({ results: rows.map(buildResult) });
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
