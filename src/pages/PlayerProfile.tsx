@@ -6,8 +6,9 @@ import { usePlayer, usePlayers } from '../hooks/usePlayers';
 import { useLiveProfile, resolveAlias } from '../hooks/useMojangProfile';
 import CategoryTierBadge from '../components/CategoryTierBadge';
 import PlayerAvatar from '../components/PlayerAvatar';
-import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Star, Trophy, Globe, Zap, Copy, Check, Shield, Clock, AlertTriangle, ChevronDown, Swords, Ban } from 'lucide-react';
 import '../styles/profile-v2.css';
+import '../styles/profile-history.css';
 
 function formatDate(ts: number | undefined): string | null {
   if (!ts) return null;
@@ -175,6 +176,458 @@ function UuidBadge({ uuid }: { uuid: string }) {
         ? <><Check size={10} style={{color:'#4ade80'}}/><span style={{color:'#4ade80'}}>Copied!</span></>
         : <><Copy size={10}/><span>UUID: {d.slice(0,8)}…{d.slice(-4)}</span></>}
     </button>
+  );
+}
+
+// ── History types ──────────────────────────────────────────────────────────────
+
+interface TestResult {
+  id: number;
+  tier: string;
+  mode: string | null;
+  region: string | null;
+  ticketType: string | null;
+  testerName: string | null;
+  testerId: string | null;
+  isHighTier: boolean;
+  createdAt: number;
+}
+
+interface Punishment {
+  id: number;
+  type: string;
+  reason: string | null;
+  durationMs: number | null;
+  expiresAt: number | null;
+  active: boolean;
+  pardonedBy: string | null;
+  pardonedAt: number | null;
+  moderatorId: string | null;
+  moderatorName: string | null;
+  createdAt: number;
+}
+
+interface PlayerHistory { testResults: TestResult[]; punishments: Punishment[]; }
+
+// ── Mode display map ───────────────────────────────────────────────────────────
+
+const MODE_INFO: Record<string, { label: string; icon: string }> = {
+  vanilla:  { label: 'Crystal',   icon: '/tier_icons/crystal.png' },
+  crystal:  { label: 'Crystal',   icon: '/tier_icons/crystal.png' },
+  ogvanilla:{ label: 'OG Vanilla',icon: '/tier_icons/ogvanilla.png' },
+  sword:    { label: 'Sword',     icon: '/tier_icons/sword.png' },
+  speed:    { label: 'Speed',     icon: '/tier_icons/speed.png' },
+  pot:      { label: 'Pot',       icon: '/tier_icons/pot.png' },
+  nethop:   { label: 'NethOP',    icon: '/tier_icons/nethop.png' },
+  uhc:      { label: 'UHC',       icon: '/tier_icons/uhc.png' },
+  axe:      { label: 'Axe',       icon: '/tier_icons/axe.png' },
+  mace:     { label: 'Mace',      icon: '/tier_icons/mace.png' },
+  smp:      { label: 'SMP',       icon: '/tier_icons/smp.png' },
+};
+
+function getModeInfo(raw: string | null): { label: string; icon: string } {
+  if (!raw) return { label: 'Global', icon: '/tier_icons/overall.png' };
+  return MODE_INFO[raw.toLowerCase()] ?? { label: raw, icon: '/tier_icons/overall.png' };
+}
+
+// Normalise "crystal" → "vanilla" for filter deduplication
+function normFilterMode(raw: string | null): string {
+  if (!raw) return '__global__';
+  const l = raw.toLowerCase();
+  return l === 'crystal' ? 'vanilla' : l;
+}
+
+// ── Tier colour helpers ────────────────────────────────────────────────────────
+
+function tierBarColor(rawTier: string | null | undefined): string {
+  if (!rawTier) return 'rgba(96,165,250,0.70)';
+  const u = rawTier.toUpperCase();
+  if (u === 'HT1' || u === 'LT1') return 'rgba(251,191,36,0.90)';
+  if (u === 'HT2' || u === 'LT2') return 'rgba(203,213,225,0.75)';
+  if (u === 'HT3' || u === 'LT3') return 'rgba(251,146,60,0.85)';
+  if (u === 'HT4' || u === 'LT4') return 'rgba(52,211,153,0.75)';
+  if (u === 'HT5' || u === 'LT5') return 'rgba(164,213,255,0.65)';
+  return 'rgba(96,165,250,0.70)';
+}
+
+function tierTextColor(rawTier: string | null | undefined): string {
+  if (!rawTier) return '#60a5fa';
+  const u = rawTier.toUpperCase();
+  if (u === 'HT1' || u === 'LT1') return '#fbbf24';
+  if (u === 'HT2' || u === 'LT2') return '#cbd5e1';
+  if (u === 'HT3' || u === 'LT3') return '#fb923c';
+  if (u === 'HT4' || u === 'LT4') return '#34d399';
+  if (u === 'HT5' || u === 'LT5') return '#a5d8ff';
+  return '#60a5fa';
+}
+
+// ── Date helpers ───────────────────────────────────────────────────────────────
+
+function formatRelDate(ts: number): string {
+  const diff = Date.now() - ts;
+  const s = Math.floor(diff / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  const mo = Math.floor(d / 30);
+  const y = Math.floor(d / 365);
+  if (y > 0) return `${y}y ago`;
+  if (mo > 0) return `${mo}mo ago`;
+  if (d > 0) return `${d}d ago`;
+  if (h > 0) return `${h}h ago`;
+  if (m > 0) return `${m}m ago`;
+  return 'just now';
+}
+
+function formatDuration(ms: number | null): string | null {
+  if (!ms) return null;
+  const m = Math.round(ms / 60000);
+  if (m < 60) return `${m}m`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.round(h / 24)}d`;
+}
+
+// ── Punishment type config ─────────────────────────────────────────────────────
+
+const PUNISH_CFG: Record<string, { emoji: string; label: string; color: string; bg: string; border: string; orb: string }> = {
+  ban: {
+    emoji: '🔨', label: 'Permanent Ban',
+    color: '#f87171', bg: 'rgba(239,68,68,0.10)',
+    border: 'rgba(239,68,68,0.28)', orb: 'rgba(239,68,68,0.18)',
+  },
+  blacklist: {
+    emoji: '🚫', label: 'Blacklist',
+    color: '#fb923c', bg: 'rgba(251,146,60,0.10)',
+    border: 'rgba(251,146,60,0.28)', orb: 'rgba(251,146,60,0.16)',
+  },
+  timeout: {
+    emoji: '⏳', label: 'Timeout',
+    color: '#fbbf24', bg: 'rgba(251,191,36,0.10)',
+    border: 'rgba(251,191,36,0.26)', orb: 'rgba(251,191,36,0.14)',
+  },
+};
+function getPunishCfg(type: string) {
+  return PUNISH_CFG[type.toLowerCase()] ?? {
+    emoji: '⚠️', label: type, color: '#f87171',
+    bg: 'rgba(248,113,113,0.10)', border: 'rgba(248,113,113,0.28)', orb: 'rgba(248,113,113,0.16)',
+  };
+}
+
+// ── usePlayerHistory hook ─────────────────────────────────────────────────────
+
+const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
+
+function usePlayerHistory(username: string | undefined, enabled: boolean) {
+  const [data, setData] = useState<PlayerHistory | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!username || !enabled) return;
+    setLoading(true); setError(null);
+    fetch(`${API_BASE}/api/players/${encodeURIComponent(username)}/history`)
+      .then(r => r.json())
+      .then(j => { setData(j); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
+  }, [username, enabled]);
+
+  return { data, loading, error };
+}
+
+// ── Inline tier badge (used inside history rows) ──────────────────────────────
+
+function HistoryTierBadge({ rawTier }: { rawTier: string }) {
+  const color = tierTextColor(rawTier);
+  const bar   = tierBarColor(rawTier);
+  return (
+    <span style={{
+      display:'inline-flex', alignItems:'center',
+      padding:'3px 11px', borderRadius:'20px',
+      fontSize:'0.78rem', fontWeight:900, letterSpacing:'0.05em',
+      color,
+      background: bar.replace(/[\d.]+\)$/, '0.10)'),
+      border: `1px solid ${bar.replace(/[\d.]+\)$/, '0.40)')}`,
+      whiteSpace:'nowrap',
+      boxShadow:`0 0 10px ${bar.replace(/[\d.]+\)$/, '0.25)')}`,
+    }}>
+      {rawTier}
+    </span>
+  );
+}
+
+// ── History section component ─────────────────────────────────────────────────
+
+const PAGE_SIZE = 30;
+
+function PlayerHistorySection({ username }: { username: string }) {
+  const [visible, setVisible]   = useState(false);
+  const [activeTab, setTab]     = useState<'results'|'punishments'>('results');
+  const [modeFilter, setMode]   = useState<string>('__all__');
+  const [showCount, setShow]    = useState(PAGE_SIZE);
+  const { data, loading, error } = usePlayerHistory(username, visible);
+
+  // Lazy-load: only fetch once user scrolls to or clicks the section
+  const sectionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (visible) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { rootMargin: '200px' });
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  }, [visible]);
+
+  // Unique modes from results (normalised for dedup)
+  const uniqueModes: string[] = [];
+  if (data) {
+    const seen = new Set<string>();
+    for (const r of data.testResults) {
+      const key = normFilterMode(r.mode);
+      if (!seen.has(key)) { seen.add(key); uniqueModes.push(key); }
+    }
+  }
+
+  const filteredResults = data?.testResults.filter(r =>
+    modeFilter === '__all__' || normFilterMode(r.mode) === modeFilter
+  ) ?? [];
+
+  const visibleResults = filteredResults.slice(0, showCount);
+
+  const punishments = data?.punishments ?? [];
+  const activePunish = punishments.filter(p => p.active).length;
+
+  return (
+    <div className="profile-container ph-section" ref={sectionRef}>
+      {/* ── Header ── */}
+      <div className="ph-head">
+        <div className="ph-head-left">
+          <div className="ph-eyebrow"><Clock size={10}/> Player History</div>
+          <h2 className="ph-title">Activity &amp; Punishment Log</h2>
+        </div>
+
+        <div className="ph-tabs">
+          <button
+            className={`ph-tab${activeTab==='results'?' ph-tab--active':''}`}
+            onClick={() => setTab('results')}
+          >
+            <Swords size={12}/>
+            Test Results
+            {data && <span className="ph-tab-count">{data.testResults.length}</span>}
+          </button>
+          <button
+            className={`ph-tab ph-tab--punish${activeTab==='punishments'?' ph-tab--active':''}`}
+            onClick={() => setTab('punishments')}
+          >
+            <Ban size={12}/>
+            Punishments
+            {activePunish > 0 && <span className="ph-tab-count" style={{background:'rgba(248,113,113,0.22)',color:'#f87171'}}>{activePunish} active</span>}
+            {data && activePunish === 0 && <span className="ph-tab-count">{punishments.length}</span>}
+          </button>
+        </div>
+      </div>
+
+      <div className="ph-divider"/>
+
+      {/* ── Loading / Error ── */}
+      {loading && (
+        <div className="ph-loading">
+          <div className="ph-spinner"/>
+          <span>Loading history…</span>
+        </div>
+      )}
+      {error && !loading && (
+        <div className="ph-empty">
+          <div className="ph-empty-icon"><AlertTriangle size={32}/></div>
+          <p>Could not load history</p>
+        </div>
+      )}
+
+      {/* ══ TEST RESULTS TAB ══ */}
+      {!loading && !error && data && activeTab === 'results' && (
+        <>
+          {/* Mode filter chips */}
+          {uniqueModes.length > 1 && (
+            <div className="ph-filter-row">
+              <button
+                className={`ph-filter-chip${modeFilter==='__all__'?' ph-filter-chip--active':''}`}
+                onClick={() => { setMode('__all__'); setShow(PAGE_SIZE); }}
+              >
+                All <span style={{opacity:0.55,fontWeight:600}}>{data.testResults.length}</span>
+              </button>
+              {uniqueModes.map(key => {
+                const info = getModeInfo(key === '__global__' ? null : key);
+                const count = data.testResults.filter(r => normFilterMode(r.mode) === key).length;
+                return (
+                  <button
+                    key={key}
+                    className={`ph-filter-chip${modeFilter===key?' ph-filter-chip--active':''}`}
+                    onClick={() => { setMode(key); setShow(PAGE_SIZE); }}
+                  >
+                    <img src={info.icon} width={13} height={13} alt="" style={{imageRendering:'pixelated'}}/>
+                    {info.label}
+                    <span style={{opacity:0.55,fontWeight:600}}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Results rows */}
+          {filteredResults.length === 0 ? (
+            <div className="ph-empty">
+              <div className="ph-empty-icon"><Trophy size={30}/></div>
+              <p>No test results{modeFilter !== '__all__' ? ' for this mode' : ''}</p>
+            </div>
+          ) : (
+            <div className="ph-results-list">
+              {visibleResults.map((r, i) => {
+                const info = getModeInfo(r.mode);
+                const bar  = tierBarColor(r.tier);
+                return (
+                  <div
+                    key={r.id}
+                    className="ph-result-row"
+                    style={{'--ph-bar': bar, animationDelay:`${i*22}ms`} as React.CSSProperties}
+                  >
+                    <div className="ph-result-bar"/>
+
+                    <div className="ph-result-icon">
+                      <img src={info.icon} width={26} height={26} alt={info.label} style={{imageRendering:'pixelated'}}/>
+                    </div>
+
+                    <div className="ph-result-info">
+                      <div className="ph-result-mode">
+                        {info.label}
+                        {r.isHighTier && <span className="ph-high-tier-dot" style={{marginLeft:8}}>HT</span>}
+                      </div>
+                      <div className="ph-result-meta">
+                        {r.testerName && (
+                          <span className="ph-result-tester">
+                            <span className="ph-result-tester-label">by</span>
+                            {r.testerName}
+                          </span>
+                        )}
+                        {r.ticketType && (
+                          <span className={`ph-result-type${r.ticketType==='givetier'?' ph-result-type--givetier':' ph-result-type--test'}`}>
+                            {r.ticketType === 'givetier' ? 'Given' : r.ticketType === 'hightier' ? 'High-Tier' : 'Test'}
+                          </span>
+                        )}
+                        {r.region && (
+                          <span style={{fontSize:'0.60rem',color:'#374166',letterSpacing:'0.06em'}}>
+                            {r.region}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="ph-result-tier">
+                      <HistoryTierBadge rawTier={r.tier}/>
+                    </div>
+
+                    <div className="ph-result-date">
+                      {formatRelDate(r.createdAt)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {filteredResults.length > showCount && (
+            <button className="ph-show-more" onClick={() => setShow(c => c + PAGE_SIZE)}>
+              <ChevronDown size={14}/>
+              Show more ({filteredResults.length - showCount} remaining)
+            </button>
+          )}
+        </>
+      )}
+
+      {/* ══ PUNISHMENTS TAB ══ */}
+      {!loading && !error && data && activeTab === 'punishments' && (
+        <>
+          {punishments.length === 0 ? (
+            <div className="ph-empty">
+              <div className="ph-empty-icon"><Shield size={30}/></div>
+              <p>No punishments on record</p>
+            </div>
+          ) : (
+            <div className="ph-punish-list">
+              {punishments.map((p, i) => {
+                const cfg = getPunishCfg(p.type);
+                const dur = formatDuration(p.durationMs);
+                return (
+                  <div
+                    key={p.id}
+                    className="ph-punish-card"
+                    style={{
+                      '--ph-punish-accent': cfg.color,
+                      '--ph-punish-bg':     cfg.bg,
+                      '--ph-punish-border': cfg.border,
+                      '--ph-punish-orb':    cfg.orb,
+                      '--ph-punish-color':  cfg.color,
+                      animationDelay: `${i*30}ms`,
+                    } as React.CSSProperties}
+                  >
+                    <div className="ph-punish-orb"/>
+
+                    <div className="ph-punish-icon-box" style={{
+                      background: cfg.bg,
+                      border: `1px solid ${cfg.border}`,
+                    }}>
+                      {cfg.emoji}
+                    </div>
+
+                    <div className="ph-punish-info">
+                      <div className="ph-punish-type-row">
+                        <span className="ph-punish-type-label" style={{color: cfg.color}}>
+                          {cfg.label}
+                        </span>
+                        <span className={`ph-punish-status${p.active?' ph-punish-status--active':' ph-punish-status--pardoned'}`}>
+                          {p.active ? 'Active' : 'Pardoned'}
+                        </span>
+                        {dur && <span className="ph-punish-duration">{dur}</span>}
+                      </div>
+                      {p.reason && (
+                        <div className="ph-punish-reason" title={p.reason}>
+                          "{p.reason}"
+                        </div>
+                      )}
+                      <div className="ph-punish-meta">
+                        <span className="ph-punish-date">
+                          <Calendar size={9}/>
+                          {new Date(p.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
+                        </span>
+                        {p.moderatorName && (
+                          <span className="ph-punish-by">
+                            <Shield size={9}/>
+                            {p.moderatorName}
+                          </span>
+                        )}
+                        {!p.active && p.pardonedAt && (
+                          <span className="ph-punish-pardon-tag">
+                            <Check size={9}/>
+                            Pardoned {formatRelDate(p.pardonedAt)}
+                            {p.pardonedBy && ` by ${p.pardonedBy}`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="ph-punish-right">
+                      <div className="ph-punish-date-right">{formatRelDate(p.createdAt)}</div>
+                      {p.expiresAt && p.active && (
+                        <div style={{fontSize:'0.60rem',color:'#f59e0b'}}>
+                          expires {formatRelDate(p.expiresAt)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -463,6 +916,9 @@ export default function PlayerProfile() {
           </div>
         )}
       </div>
+
+      {/* ── History section ── */}
+      <PlayerHistorySection username={player.username}/>
     </div>
   );
 }
