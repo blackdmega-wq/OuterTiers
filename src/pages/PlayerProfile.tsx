@@ -183,6 +183,7 @@ function UuidBadge({ uuid }: { uuid: string }) {
 
 interface TestResult {
   id: number;
+  username?: string;
   tier: string;
   mode: string | null;
   region: string | null;
@@ -326,10 +327,51 @@ function usePlayerHistory(username: string | undefined, enabled: boolean) {
   useEffect(() => {
     if (!username || !enabled) return;
     setLoading(true); setError(null);
+
     fetch(`${API_BASE}/api/players/${encodeURIComponent(username)}/history`)
-      .then(r => r.json())
+      .then(async r => {
+        if (!r.ok) throw new Error('not_found');
+        const j = await r.json();
+        if (!Array.isArray(j.testResults)) throw new Error('bad_shape');
+        return j as PlayerHistory;
+      })
       .then(j => { setData(j); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
+      .catch(async () => {
+        // Fallback: fetch the live results feed and filter by username.
+        // This works with the current server until the history endpoint is deployed.
+        try {
+          const [liveRes, htRes] = await Promise.all([
+            fetch(`${API_BASE}/api/results/live`).then(r => r.json()),
+            fetch(`${API_BASE}/api/results/high-tier`).then(r => r.json()),
+          ]);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const live = (liveRes.results ?? []) as any[];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ht   = (htRes.results   ?? []) as any[];
+          const allById = new Map<number, TestResult>();
+          for (const r of [...live, ...ht]) {
+            if (r.username?.toLowerCase() === username!.toLowerCase()) {
+              allById.set(r.id, {
+                id:         r.id,
+                tier:       r.tier,
+                mode:       r.mode       ?? null,
+                region:     r.region     ?? null,
+                ticketType: r.ticketType ?? null,
+                testerName: r.testerName ?? null,
+                testerId:   r.testerId   ?? null,
+                isHighTier: r.isHighTier ?? false,
+                createdAt:  r.createdAt,
+              });
+            }
+          }
+          const testResults = [...allById.values()].sort((a, b) => b.createdAt - a.createdAt);
+          setData({ testResults, punishments: [] });
+          setLoading(false);
+        } catch (e2: unknown) {
+          setError((e2 as Error).message);
+          setLoading(false);
+        }
+      });
   }, [username, enabled]);
 
   return { data, loading, error };
