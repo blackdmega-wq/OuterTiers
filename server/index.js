@@ -249,6 +249,8 @@ app.post('/api/webhook/tier', async (req, res) => {
     sword: 'sword_tier', speed: 'speed_tier', pot: 'pot_tier',
     nethop: 'nethop_tier', ogvanilla: 'ogvanilla_tier', vanilla: 'vanilla_tier',
     uhc: 'uhc_tier', axe: 'axe_tier', mace: 'mace_tier', smp: 'smp_tier',
+    // Crystal mode is stored in the vanilla_tier column (OT's internal naming)
+    crystal: 'vanilla_tier',
   };
 
   try {
