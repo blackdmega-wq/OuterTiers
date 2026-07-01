@@ -208,7 +208,14 @@ app.get('/api/players/:username', async (req, res) => {
     );
     const tierDates: Record<string, number> = {};
     for (const r of dateRows) {
-      if (r.mode) tierDates[r.mode] = Math.floor(Number(r.first_at) / 1000);
+      if (!r.mode) continue;
+      // Normalise "crystal" → "vanilla" so /givetier results (which store mode
+      // as "crystal") and normal test results (which store mode as "vanilla")
+      // both resolve to the same category key used by the frontend (cat.id = "vanilla").
+      const key = r.mode.toLowerCase() === 'crystal' ? 'vanilla' : r.mode;
+      // Keep the earliest date if both "crystal" and "vanilla" rows exist for same player
+      if (!tierDates[key]) tierDates[key] = Math.floor(Number(r.first_at) / 1000);
+      else tierDates[key] = Math.min(tierDates[key], Math.floor(Number(r.first_at) / 1000));
     }
 
     res.json({ ...buildPlayer(rows[0]), tierDates });
