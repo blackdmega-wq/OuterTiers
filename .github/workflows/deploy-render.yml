@@ -6,10 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-frontend:
+    name: Deploy Frontend (Static Site)
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render Deploy
+      - name: Trigger Frontend Render Deploy
         run: |
-          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
-            --fail-with-body
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" --fail-with-body
+
+  deploy-api:
+    name: Deploy API Server
+    runs-on: ubuntu-latest
+    # Only runs if RENDER_API_DEPLOY_HOOK_URL secret is set
+    # To activate: add RENDER_API_DEPLOY_HOOK_URL secret in GitHub repo settings
+    # Get this URL from: Render Dashboard > outertiers-api > Settings > Deploy Hooks
+    if: "${{ secrets.RENDER_API_DEPLOY_HOOK_URL != '' }}"
+    steps:
+      - name: Trigger API Server Render Deploy
+        run: |
+          curl -s -X POST "${{ secrets.RENDER_API_DEPLOY_HOOK_URL }}" --fail-with-body
